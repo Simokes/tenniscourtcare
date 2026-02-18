@@ -3,7 +3,8 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $TerrainsTable extends Terrains with TableInfo<$TerrainsTable, Terrain> {
+class $TerrainsTable extends Terrains
+    with TableInfo<$TerrainsTable, TerrainRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -52,7 +53,7 @@ class $TerrainsTable extends Terrains with TableInfo<$TerrainsTable, Terrain> {
   static const String $name = 'terrains';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Terrain> instance, {
+    Insertable<TerrainRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -82,9 +83,9 @@ class $TerrainsTable extends Terrains with TableInfo<$TerrainsTable, Terrain> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Terrain map(Map<String, dynamic> data, {String? tablePrefix}) {
+  TerrainRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Terrain(
+    return TerrainRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -106,11 +107,11 @@ class $TerrainsTable extends Terrains with TableInfo<$TerrainsTable, Terrain> {
   }
 }
 
-class Terrain extends DataClass implements Insertable<Terrain> {
+class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final int id;
   final String nom;
   final int type;
-  const Terrain({required this.id, required this.nom, required this.type});
+  const TerrainRow({required this.id, required this.nom, required this.type});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -124,12 +125,12 @@ class Terrain extends DataClass implements Insertable<Terrain> {
     return TerrainsCompanion(id: Value(id), nom: Value(nom), type: Value(type));
   }
 
-  factory Terrain.fromJson(
+  factory TerrainRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Terrain(
+    return TerrainRow(
       id: serializer.fromJson<int>(json['id']),
       nom: serializer.fromJson<String>(json['nom']),
       type: serializer.fromJson<int>(json['type']),
@@ -145,10 +146,13 @@ class Terrain extends DataClass implements Insertable<Terrain> {
     };
   }
 
-  Terrain copyWith({int? id, String? nom, int? type}) =>
-      Terrain(id: id ?? this.id, nom: nom ?? this.nom, type: type ?? this.type);
-  Terrain copyWithCompanion(TerrainsCompanion data) {
-    return Terrain(
+  TerrainRow copyWith({int? id, String? nom, int? type}) => TerrainRow(
+    id: id ?? this.id,
+    nom: nom ?? this.nom,
+    type: type ?? this.type,
+  );
+  TerrainRow copyWithCompanion(TerrainsCompanion data) {
+    return TerrainRow(
       id: data.id.present ? data.id.value : this.id,
       nom: data.nom.present ? data.nom.value : this.nom,
       type: data.type.present ? data.type.value : this.type,
@@ -157,7 +161,7 @@ class Terrain extends DataClass implements Insertable<Terrain> {
 
   @override
   String toString() {
-    return (StringBuffer('Terrain(')
+    return (StringBuffer('TerrainRow(')
           ..write('id: $id, ')
           ..write('nom: $nom, ')
           ..write('type: $type')
@@ -170,13 +174,13 @@ class Terrain extends DataClass implements Insertable<Terrain> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Terrain &&
+      (other is TerrainRow &&
           other.id == this.id &&
           other.nom == this.nom &&
           other.type == this.type);
 }
 
-class TerrainsCompanion extends UpdateCompanion<Terrain> {
+class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<int> id;
   final Value<String> nom;
   final Value<int> type;
@@ -191,7 +195,7 @@ class TerrainsCompanion extends UpdateCompanion<Terrain> {
     required int type,
   }) : nom = Value(nom),
        type = Value(type);
-  static Insertable<Terrain> custom({
+  static Insertable<TerrainRow> custom({
     Expression<int>? id,
     Expression<String>? nom,
     Expression<int>? type,
@@ -242,7 +246,7 @@ class TerrainsCompanion extends UpdateCompanion<Terrain> {
 }
 
 class $MaintenancesTable extends Maintenances
-    with TableInfo<$MaintenancesTable, Maintenance> {
+    with TableInfo<$MaintenancesTable, MaintenanceRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -270,7 +274,6 @@ class $MaintenancesTable extends Maintenances
     false,
     type: DriftSqlType.int,
     requiredDuringInsert: true,
-    $customConstraints: 'REFERENCES terrains(id)',
   );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
@@ -278,10 +281,6 @@ class $MaintenancesTable extends Maintenances
     'type',
     aliasedName,
     false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 100,
-    ),
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
@@ -357,7 +356,7 @@ class $MaintenancesTable extends Maintenances
   static const String $name = 'maintenances';
   @override
   VerificationContext validateIntegrity(
-    Insertable<Maintenance> instance, {
+    Insertable<MaintenanceRow> instance, {
     bool isInserting = false,
   }) {
     final context = VerificationContext();
@@ -431,9 +430,9 @@ class $MaintenancesTable extends Maintenances
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Maintenance map(Map<String, dynamic> data, {String? tablePrefix}) {
+  MaintenanceRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Maintenance(
+    return MaintenanceRow(
       id: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}id'],
@@ -475,7 +474,7 @@ class $MaintenancesTable extends Maintenances
   }
 }
 
-class Maintenance extends DataClass implements Insertable<Maintenance> {
+class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final int id;
   final int terrainId;
   final String type;
@@ -484,7 +483,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
   final int sacsMantoUtilises;
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
-  const Maintenance({
+  const MaintenanceRow({
     required this.id,
     required this.terrainId,
     required this.type,
@@ -525,12 +524,12 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
     );
   }
 
-  factory Maintenance.fromJson(
+  factory MaintenanceRow.fromJson(
     Map<String, dynamic> json, {
     ValueSerializer? serializer,
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Maintenance(
+    return MaintenanceRow(
       id: serializer.fromJson<int>(json['id']),
       terrainId: serializer.fromJson<int>(json['terrainId']),
       type: serializer.fromJson<String>(json['type']),
@@ -558,7 +557,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
     };
   }
 
-  Maintenance copyWith({
+  MaintenanceRow copyWith({
     int? id,
     int? terrainId,
     String? type,
@@ -567,7 +566,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
-  }) => Maintenance(
+  }) => MaintenanceRow(
     id: id ?? this.id,
     terrainId: terrainId ?? this.terrainId,
     type: type ?? this.type,
@@ -578,8 +577,8 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
         sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
     sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
   );
-  Maintenance copyWithCompanion(MaintenancesCompanion data) {
-    return Maintenance(
+  MaintenanceRow copyWithCompanion(MaintenancesCompanion data) {
+    return MaintenanceRow(
       id: data.id.present ? data.id.value : this.id,
       terrainId: data.terrainId.present ? data.terrainId.value : this.terrainId,
       type: data.type.present ? data.type.value : this.type,
@@ -601,7 +600,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
 
   @override
   String toString() {
-    return (StringBuffer('Maintenance(')
+    return (StringBuffer('MaintenanceRow(')
           ..write('id: $id, ')
           ..write('terrainId: $terrainId, ')
           ..write('type: $type, ')
@@ -628,7 +627,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Maintenance &&
+      (other is MaintenanceRow &&
           other.id == this.id &&
           other.terrainId == this.terrainId &&
           other.type == this.type &&
@@ -639,7 +638,7 @@ class Maintenance extends DataClass implements Insertable<Maintenance> {
           other.sacsSiliceUtilises == this.sacsSiliceUtilises);
 }
 
-class MaintenancesCompanion extends UpdateCompanion<Maintenance> {
+class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<int> id;
   final Value<int> terrainId;
   final Value<String> type;
@@ -670,7 +669,7 @@ class MaintenancesCompanion extends UpdateCompanion<Maintenance> {
   }) : terrainId = Value(terrainId),
        type = Value(type),
        date = Value(date);
-  static Insertable<Maintenance> custom({
+  static Insertable<MaintenanceRow> custom({
     Expression<int>? id,
     Expression<int>? terrainId,
     Expression<String>? type,
@@ -865,14 +864,17 @@ class $$TerrainsTableTableManager
         RootTableManager<
           _$AppDatabase,
           $TerrainsTable,
-          Terrain,
+          TerrainRow,
           $$TerrainsTableFilterComposer,
           $$TerrainsTableOrderingComposer,
           $$TerrainsTableAnnotationComposer,
           $$TerrainsTableCreateCompanionBuilder,
           $$TerrainsTableUpdateCompanionBuilder,
-          (Terrain, BaseReferences<_$AppDatabase, $TerrainsTable, Terrain>),
-          Terrain,
+          (
+            TerrainRow,
+            BaseReferences<_$AppDatabase, $TerrainsTable, TerrainRow>,
+          ),
+          TerrainRow,
           PrefetchHooks Function()
         > {
   $$TerrainsTableTableManager(_$AppDatabase db, $TerrainsTable table)
@@ -910,14 +912,14 @@ typedef $$TerrainsTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $TerrainsTable,
-      Terrain,
+      TerrainRow,
       $$TerrainsTableFilterComposer,
       $$TerrainsTableOrderingComposer,
       $$TerrainsTableAnnotationComposer,
       $$TerrainsTableCreateCompanionBuilder,
       $$TerrainsTableUpdateCompanionBuilder,
-      (Terrain, BaseReferences<_$AppDatabase, $TerrainsTable, Terrain>),
-      Terrain,
+      (TerrainRow, BaseReferences<_$AppDatabase, $TerrainsTable, TerrainRow>),
+      TerrainRow,
       PrefetchHooks Function()
     >;
 typedef $$MaintenancesTableCreateCompanionBuilder =
@@ -1090,17 +1092,17 @@ class $$MaintenancesTableTableManager
         RootTableManager<
           _$AppDatabase,
           $MaintenancesTable,
-          Maintenance,
+          MaintenanceRow,
           $$MaintenancesTableFilterComposer,
           $$MaintenancesTableOrderingComposer,
           $$MaintenancesTableAnnotationComposer,
           $$MaintenancesTableCreateCompanionBuilder,
           $$MaintenancesTableUpdateCompanionBuilder,
           (
-            Maintenance,
-            BaseReferences<_$AppDatabase, $MaintenancesTable, Maintenance>,
+            MaintenanceRow,
+            BaseReferences<_$AppDatabase, $MaintenancesTable, MaintenanceRow>,
           ),
-          Maintenance,
+          MaintenanceRow,
           PrefetchHooks Function()
         > {
   $$MaintenancesTableTableManager(_$AppDatabase db, $MaintenancesTable table)
@@ -1166,17 +1168,17 @@ typedef $$MaintenancesTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
       $MaintenancesTable,
-      Maintenance,
+      MaintenanceRow,
       $$MaintenancesTableFilterComposer,
       $$MaintenancesTableOrderingComposer,
       $$MaintenancesTableAnnotationComposer,
       $$MaintenancesTableCreateCompanionBuilder,
       $$MaintenancesTableUpdateCompanionBuilder,
       (
-        Maintenance,
-        BaseReferences<_$AppDatabase, $MaintenancesTable, Maintenance>,
+        MaintenanceRow,
+        BaseReferences<_$AppDatabase, $MaintenancesTable, MaintenanceRow>,
       ),
-      Maintenance,
+      MaintenanceRow,
       PrefetchHooks Function()
     >;
 

@@ -3,14 +3,17 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
-import 'package:sqlite3/sqlite3.dart';
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
-import '../../domain/entities/terrain.dart';
-import '../../domain/entities/maintenance.dart';
-import '../../utils/date_utils.dart';
+
+import '../../domain/entities/terrain.dart' as dom;
+import '../../domain/entities/maintenance.dart' as domm;
+import '../../utils/date_utils.dart'
+    as cc; // éviter collision avec Flutter DateUtils
+
+import '../mappers/terrain_mapper.dart'; // contient row.toDomain() & domain.toCompanion()
 
 part 'app_database.g.dart';
 
@@ -22,99 +25,97 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   @override
-  MigrationStrategy get migration {
-    return MigrationStrategy(
-      onCreate: (Migrator m) async {
-        await m.createAll();
-      },
-      onUpgrade: (Migrator m, int from, int to) async {
-        // Migrations futures ici
-      },
-    );
-  }
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async => m.createAll(),
+    onUpgrade: (m, from, to) async {
+      // migrations futures
+    },
+  );
 
   // ========== TERRAINS ==========
 
-  Future<List<Terrain>> getAllTerrains() async {
-    final rows = await (select(terrains)).get();
-    return rows.map((row) => _terrainFromRow(row)).toList();
+  /// Récupérer tous les terrains -> type domaine
+  Future<List<dom.Terrain>> getAllTerrains() async {
+    final rows = await select(terrains).get(); // List<TerrainRow>
+    return rows.map((r) => r.toDomain()).toList(); // List<dom.Terrain>
   }
 
-  Future<Terrain?> getTerrainById(int id) async {
-    final row = await (select(terrains)..where((t) => t.id.equals(id)))
-        .getSingleOrNull();
-    return row != null ? _terrainFromRow(row) : null;
+  /// Récupérer un terrain par id -> type domaine
+  Future<dom.Terrain?> getTerrainById(int id) async {
+    final row = await (select(
+      terrains,
+    )..where((t) => t.id.equals(id))).getSingleOrNull(); // TerrainRow?
+    return row?.toDomain(); // dom.Terrain?
   }
 
-  Future<int> insertTerrain(Terrain terrain) {
-    return into(terrains).insert(TerrainsCompanion.insert(
-      nom: terrain.nom,
-      type: terrain.type.index,
-    ));
+  /// INSERT (retourne l'id auto-incrémenté)
+  Future<int> insertTerrain(dom.Terrain terrain) {
+    // on n’envoie pas l’id (autoIncrement)
+    final companion = terrain.toCompanion(includeId: false);
+    return into(terrains).insert(companion);
   }
 
-  Future<bool> updateTerrain(Terrain terrain) {
-    return update(terrains).replace(TerrainsRow(
-      id: terrain.id,
-      nom: terrain.nom,
-      type: terrain.type.index,
-    ));
-  }
-
-  Future<bool> deleteTerrain(int id) {
-    return delete(terrains).delete(TerrainsRow(
-      id: id,
-      nom: '',
-      type: 0,
-    ));
-  }
-
-  Terrain _terrainFromRow(TerrainsRow row) {
-    return Terrain(
-      id: row.id,
-      nom: row.nom,
-      type: TerrainType.values[row.type],
+  /// UPDATE ciblé par id (WHERE + write)
+  /// write(...) -> Future<int> (nb de lignes affectées)
+  Future<int> updateTerrain(dom.Terrain terrain) {
+    return (update(terrains)..where((t) => t.id.equals(terrain.id))).write(
+      terrain.toCompanion(includeId: false),
     );
+  }
+
+  /// DELETE par id
+  /// go() -> Future<int> (nb de lignes supprimées)
+  Future<int> deleteTerrain(int id) {
+    return (delete(terrains)..where((t) => t.id.equals(id))).go();
   }
 
   // ========== MAINTENANCES ==========
 
-  Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
-    final rows = await (select(maintenances)
-          ..where((m) => m.terrainId.equals(terrainId))
-          ..orderBy([(m) => OrderingTerm.desc(m.date)]))
-        .get();
-    return rows.map((row) => _maintenanceFromRow(row)).toList();
+  Future<List<domm.Maintenance>> getMaintenancesForTerrain(
+    int terrainId,
+  ) async {
+    final rows =
+        await (select(maintenances)
+              ..where((m) => m.terrainId.equals(terrainId))
+              ..orderBy([(m) => OrderingTerm.desc(m.date)]))
+            .get(); // List<MaintenanceRow>
+    return rows.map(_maintenanceFromRow).toList();
   }
 
-  Future<Maintenance?> getMaintenanceById(int id) async {
-    final row = await (select(maintenances)..where((m) => m.id.equals(id)))
-        .getSingleOrNull();
+  Future<domm.Maintenance?> getMaintenanceById(int id) async {
+    final row = await (select(
+      maintenances,
+    )..where((m) => m.id.equals(id))).getSingleOrNull(); // MaintenanceRow?
     return row != null ? _maintenanceFromRow(row) : null;
   }
 
-  Future<int> insertMaintenance(Maintenance maintenance) {
-    return into(maintenances).insert(MaintenancesCompanion.insert(
-      terrainId: maintenance.terrainId,
-      type: maintenance.type,
-      commentaire: Value(maintenance.commentaire),
-      date: maintenance.date,
-      sacsMantoUtilises: maintenance.sacsMantoUtilises,
-      sacsSottomantoUtilises: maintenance.sacsSottomantoUtilises,
-      sacsSiliceUtilises: maintenance.sacsSiliceUtilises,
-    ));
-  }
+Future<int> insertMaintenance(domm.Maintenance m) {
+  return into(maintenances).insert(
+    MaintenancesCompanion.insert(
+      terrainId: m.terrainId,                       // int brut (obligatoire)
+      type: m.type,                                 // String brut (obligatoire)
+      date: m.date,                                 // int brut (obligatoire)
+      commentaire: Value(m.commentaire),            // Value<String?> (nullable)
+      sacsMantoUtilises: Value(m.sacsMantoUtilises),        // Value<int> si colonne a un default
+      sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
+      sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
+    ),
+  );
+}
 
-  Future<bool> updateMaintenance(MaintenancesCompanion companion) {
+  /// write(...) -> Future<int>
+  Future<int> updateMaintenance(MaintenancesCompanion companion) {
     return update(maintenances).write(companion);
   }
 
-  Future<bool> deleteMaintenance(int id) {
+  /// go() -> Future<int>
+  Future<int> deleteMaintenance(int id) {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
   }
 
-  Maintenance _maintenanceFromRow(MaintenancesRow row) {
-    return Maintenance(
+  /// Mapping DB -> Domaine (row Maintenance -> entity)
+  domm.Maintenance _maintenanceFromRow(MaintenanceRow row) {
+    return domm.Maintenance(
       id: row.id,
       terrainId: row.terrainId,
       type: row.type,
@@ -128,13 +129,13 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== WATCHERS & AGRÉGATIONS ==========
 
-  /// Watcher pour les totaux de sacs avec filtres optionnels
+  /// Totaux de sacs, avec filtres optionnels
   Stream<({int manto, int sottomanto, int silice})> watchSacsTotals({
     int? terrainId,
     int? start,
     int? end,
   }) {
-    var query = selectOnly(maintenances)
+    final query = selectOnly(maintenances)
       ..addColumns([
         maintenances.sacsMantoUtilises.sum(),
         maintenances.sacsSottomantoUtilises.sum(),
@@ -144,11 +145,9 @@ class AppDatabase extends _$AppDatabase {
     if (terrainId != null) {
       query.where(maintenances.terrainId.equals(terrainId));
     }
-
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
@@ -162,14 +161,13 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Watcher pour les totaux de sacs pour plusieurs terrains
-  Stream<({int manto, int sottomanto, int silice})>
-      watchSacsTotalsAllTerrains({
+  /// Totaux de sacs pour plusieurs terrains
+  Stream<({int manto, int sottomanto, int silice})> watchSacsTotalsAllTerrains({
     required Set<int> terrainIds,
     int? start,
     int? end,
   }) {
-    var query = selectOnly(maintenances)
+    final query = selectOnly(maintenances)
       ..addColumns([
         maintenances.sacsMantoUtilises.sum(),
         maintenances.sacsSottomantoUtilises.sum(),
@@ -180,7 +178,6 @@ class AppDatabase extends _$AppDatabase {
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
@@ -194,46 +191,10 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Watcher pour les totaux mensuels par terrain
-  Stream<({int manto, int sottomanto, int silice})>
-      watchMonthlyTotalsByTerrain({
-    required int terrainId,
-    required DateTime anyDay,
-  }) {
-    final start = DateUtils.startOfMonth(anyDay);
-    final end = DateUtils.endOfMonth(anyDay);
-
-    return watchSacsTotals(
-      terrainId: terrainId,
-      start: start,
-      end: end,
-    );
-  }
-
-  /// Watcher pour les totaux mensuels tous terrains
-  Stream<({int manto, int sottomanto, int silice})>
-      watchMonthlyTotalsAllTerrains({
-    required Set<int> terrainIds,
-    required DateTime anyDay,
-  }) {
-    final start = DateUtils.startOfMonth(anyDay);
-    final end = DateUtils.endOfMonth(anyDay);
-
-    return watchSacsTotalsAllTerrains(
-      terrainIds: terrainIds,
-      start: start,
-      end: end,
-    );
-  }
-
-  /// Watcher pour les séries journalières (par jour)
+  /// Séries journalières (par jour)
   Stream<List<({int date, int manto, int sottomanto, int silice})>>
-      watchDailySeries({
-    required Set<int> terrainIds,
-    int? start,
-    int? end,
-  }) {
-    var query = selectOnly(maintenances)
+  watchDailySeries({required Set<int> terrainIds, int? start, int? end}) {
+    final query = selectOnly(maintenances)
       ..addColumns([
         maintenances.date,
         maintenances.sacsMantoUtilises.sum(),
@@ -247,7 +208,6 @@ class AppDatabase extends _$AppDatabase {
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
@@ -264,21 +224,11 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Watcher pour les séries hebdomadaires (par semaine)
+  /// Séries hebdomadaires (groupement côté Dart)
   Stream<List<({int weekStart, int manto, int sottomanto, int silice})>>
-      watchWeeklySeries({
-    required Set<int> terrainIds,
-    int? start,
-    int? end,
-  }) {
-    // Pour simplifier, on groupe par semaine en utilisant date_trunc équivalent
-    // En SQLite, on utilise strftime pour extraire l'année et le numéro de semaine
-    var query = selectOnly(maintenances)
+  watchWeeklySeries({required Set<int> terrainIds, int? start, int? end}) {
+    final query = selectOnly(maintenances)
       ..addColumns([
-        // On calcule le début de semaine pour chaque date
-        // SQLite: strftime('%Y-%W', datetime(date/1000, 'unixepoch'))
-        // Mais on veut l'epoch ms du début de semaine, donc on fait un GROUP BY approximatif
-        // Pour l'instant, on groupe par date et on agrège manuellement côté Dart
         maintenances.date,
         maintenances.sacsMantoUtilises.sum(),
         maintenances.sacsSottomantoUtilises.sum(),
@@ -290,42 +240,50 @@ class AppDatabase extends _$AppDatabase {
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
 
     return query.watch().map((rows) {
-      // Grouper par semaine côté Dart
       final Map<int, ({int manto, int sottomanto, int silice})> weeklyMap = {};
       for (final row in rows) {
         final dateMs = row.read(maintenances.date)!;
         final date = DateTime.fromMillisecondsSinceEpoch(dateMs);
-        final weekStart = DateUtils.startOfWeek(date);
+        final weekStart = cc.DateUtils.startOfWeek(date);
 
-        final existing = weeklyMap[weekStart] ?? (manto: 0, sottomanto: 0, silice: 0);
+        final existing =
+            weeklyMap[weekStart] ?? (manto: 0, sottomanto: 0, silice: 0);
         weeklyMap[weekStart] = (
-          manto: existing.manto + (row.read(maintenances.sacsMantoUtilises.sum()) ?? 0),
-          sottomanto: existing.sottomanto + (row.read(maintenances.sacsSottomantoUtilises.sum()) ?? 0),
-          silice: existing.silice + (row.read(maintenances.sacsSiliceUtilises.sum()) ?? 0),
+          manto:
+              existing.manto +
+              (row.read(maintenances.sacsMantoUtilises.sum()) ?? 0),
+          sottomanto:
+              existing.sottomanto +
+              (row.read(maintenances.sacsSottomantoUtilises.sum()) ?? 0),
+          silice:
+              existing.silice +
+              (row.read(maintenances.sacsSiliceUtilises.sum()) ?? 0),
         );
       }
 
       return weeklyMap.entries
-          .map((e) => (weekStart: e.key, manto: e.value.manto, sottomanto: e.value.sottomanto, silice: e.value.silice))
+          .map(
+            (e) => (
+              weekStart: e.key,
+              manto: e.value.manto,
+              sottomanto: e.value.sottomanto,
+              silice: e.value.silice,
+            ),
+          )
           .toList()
         ..sort((a, b) => a.weekStart.compareTo(b.weekStart));
     });
   }
 
-  /// Watcher pour les séries mensuelles (par mois)
+  /// Séries mensuelles (groupement côté Dart)
   Stream<List<({int monthStart, int manto, int sottomanto, int silice})>>
-      watchMonthlySeries({
-    required Set<int> terrainIds,
-    int? start,
-    int? end,
-  }) {
-    var query = selectOnly(maintenances)
+  watchMonthlySeries({required Set<int> terrainIds, int? start, int? end}) {
+    final query = selectOnly(maintenances)
       ..addColumns([
         maintenances.date,
         maintenances.sacsMantoUtilises.sum(),
@@ -338,56 +296,90 @@ class AppDatabase extends _$AppDatabase {
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
 
     return query.watch().map((rows) {
-      // Grouper par mois côté Dart
       final Map<int, ({int manto, int sottomanto, int silice})> monthlyMap = {};
       for (final row in rows) {
         final dateMs = row.read(maintenances.date)!;
         final date = DateTime.fromMillisecondsSinceEpoch(dateMs);
-        final monthStart = DateUtils.startOfMonth(date);
+        final monthStart = cc.DateUtils.startOfMonth(date);
 
-        final existing = monthlyMap[monthStart] ?? (manto: 0, sottomanto: 0, silice: 0);
+        final existing =
+            monthlyMap[monthStart] ?? (manto: 0, sottomanto: 0, silice: 0);
         monthlyMap[monthStart] = (
-          manto: existing.manto + (row.read(maintenances.sacsMantoUtilises.sum()) ?? 0),
-          sottomanto: existing.sottomanto + (row.read(maintenances.sacsSottomantoUtilises.sum()) ?? 0),
-          silice: existing.silice + (row.read(maintenances.sacsSiliceUtilises.sum()) ?? 0),
+          manto:
+              existing.manto +
+              (row.read(maintenances.sacsMantoUtilises.sum()) ?? 0),
+          sottomanto:
+              existing.sottomanto +
+              (row.read(maintenances.sacsSottomantoUtilises.sum()) ?? 0),
+          silice:
+              existing.silice +
+              (row.read(maintenances.sacsSiliceUtilises.sum()) ?? 0),
         );
       }
 
       return monthlyMap.entries
-          .map((e) => (monthStart: e.key, manto: e.value.manto, sottomanto: e.value.sottomanto, silice: e.value.silice))
+          .map(
+            (e) => (
+              monthStart: e.key,
+              manto: e.value.manto,
+              sottomanto: e.value.sottomanto,
+              silice: e.value.silice,
+            ),
+          )
           .toList()
         ..sort((a, b) => a.monthStart.compareTo(b.monthStart));
     });
   }
 
-  /// Watcher pour les séries journalières de sacs pour plusieurs terrains
+  /// Délégation pour les séries journalières de sacs (multi-terrains)
   Stream<List<({int date, int manto, int sottomanto, int silice})>>
-      watchDailySacsSeriesForTerrains({
+  watchDailySacsSeriesForTerrains({
     required Set<int> terrainIds,
     int? start,
     int? end,
   }) {
-    return watchDailySeries(
+    return watchDailySeries(terrainIds: terrainIds, start: start, end: end);
+  }
+
+  /// Totaux mensuels pour **un** terrain donné
+  Stream<({int manto, int sottomanto, int silice})>
+  watchMonthlyTotalsByTerrain({
+    required int terrainId,
+    required DateTime anyDay,
+  }) {
+    final start = cc.DateUtils.startOfMonth(anyDay);
+    final end = cc.DateUtils.endOfMonth(anyDay);
+    return watchSacsTotals(terrainId: terrainId, start: start, end: end);
+  }
+
+  /// Totaux mensuels pour **plusieurs** terrains
+  Stream<({int manto, int sottomanto, int silice})>
+  watchMonthlyTotalsAllTerrains({
+    required Set<int> terrainIds,
+    required DateTime anyDay,
+  }) {
+    final start = cc.DateUtils.startOfMonth(anyDay);
+    final end = cc.DateUtils.endOfMonth(anyDay);
+    return watchSacsTotalsAllTerrains(
       terrainIds: terrainIds,
       start: start,
       end: end,
     );
   }
 
-  /// Watcher pour les comptes de types de maintenance par jour
+  /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
-      watchDailyMaintenanceTypeCounts({
+  watchDailyMaintenanceTypeCounts({
     required Set<int> terrainIds,
     int? start,
     int? end,
   }) {
-    var query = selectOnly(maintenances)
+    final query = selectOnly(maintenances)
       ..addColumns([
         maintenances.date,
         maintenances.type,
@@ -395,47 +387,50 @@ class AppDatabase extends _$AppDatabase {
       ])
       ..where(maintenances.terrainId.isIn(terrainIds))
       ..groupBy([maintenances.date, maintenances.type])
-      ..orderBy([OrderingTerm.asc(maintenances.date), OrderingTerm.asc(maintenances.type)]);
+      ..orderBy([
+        OrderingTerm.asc(maintenances.date),
+        OrderingTerm.asc(maintenances.type),
+      ]);
 
     if (start != null) {
       query.where(maintenances.date.isBiggerOrEqualValue(start));
     }
-
     if (end != null) {
       query.where(maintenances.date.isSmallerOrEqualValue(end));
     }
 
     return query.watch().map((rows) {
-      return rows.map((row) {
-        return (
-          date: row.read(maintenances.date)!,
-          type: row.read(maintenances.type)!,
-          count: row.read(maintenances.id.count()) ?? 0,
-        );
-      }).toList();
+      return rows
+          .map(
+            (row) => (
+              date: row.read(maintenances.date)!,
+              type: row.read(maintenances.type)!,
+              count: row.read(maintenances.id.count()) ?? 0,
+            ),
+          )
+          .toList();
     });
   }
 
   /// Compte le nombre de maintenances pour un terrain
   Future<int> getMaintenanceCount(int terrainId) async {
-    final result = await (selectOnly(maintenances)
-          ..addColumns([maintenances.id.count()])
-          ..where(maintenances.terrainId.equals(terrainId)))
-        .getSingle();
+    final result =
+        await (selectOnly(maintenances)
+              ..addColumns([maintenances.id.count()])
+              ..where(maintenances.terrainId.equals(terrainId)))
+            .getSingle();
     return result.read(maintenances.id.count()) ?? 0;
   }
 }
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    // Initialiser sqlite3_flutter_libs pour mobile
+    // sqlite3_flutter_libs pour Android/iOS
     if (Platform.isAndroid || Platform.isIOS) {
       await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
     }
-
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'court_care.db'));
-
     return NativeDatabase.createInBackground(file);
   });
 }
