@@ -9,10 +9,7 @@ import '../../utils/date_utils.dart';
 class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   final Terrain terrain;
 
-  const TerrainMaintenanceHistoryScreen({
-    super.key,
-    required this.terrain,
-  });
+  const TerrainMaintenanceHistoryScreen({super.key, required this.terrain});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,28 +18,22 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
     );
     final now = DateTime.now();
     final todayTotalsAsync = ref.watch(
-      sacsTotalsProvider(
-        (
-          terrainId: terrain.id,
-          start: DateUtils.startOfDay(now),
-          end: DateUtils.endOfDay(now),
-        ),
-      ),
+      sacsTotalsProvider((
+        terrainId: terrain.id,
+        start: DateUtils.startOfDay(now),
+        end: DateUtils.endOfDay(now),
+      )),
     );
     final weekTotalsAsync = ref.watch(
-      sacsTotalsProvider(
-        (
-          terrainId: terrain.id,
-          start: DateUtils.startOfWeek(now),
-          end: DateUtils.endOfWeek(now),
-        ),
-      ),
+      sacsTotalsProvider((
+        terrainId: terrain.id,
+        start: DateUtils.startOfWeek(now),
+        end: DateUtils.endOfWeek(now),
+      )),
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(terrain.nom),
-      ),
+      appBar: AppBar(title: Text(terrain.nom)),
       body: Column(
         children: [
           // Cartes Aujourd'hui + Cette semaine
@@ -125,9 +116,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${date.day}/${date.month}/${date.year}',
-                          ),
+                          Text('${date.day}/${date.month}/${date.year}'),
                           if (maintenance.commentaire != null)
                             Text(maintenance.commentaire!),
                           Text(
@@ -154,12 +143,8 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                   },
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (error, stack) => Center(
-                child: Text('Erreur: $error'),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(child: Text('Erreur: $error')),
             ),
           ),
         ],

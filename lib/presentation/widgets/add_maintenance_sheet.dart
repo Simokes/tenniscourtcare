@@ -66,13 +66,13 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
 
     try {
       if (widget.maintenance != null) {
-        await ref.read(maintenanceNotifierProvider.notifier).updateMaintenance(
-              maintenance,
-            );
+        await ref
+            .read(maintenanceNotifierProvider.notifier)
+            .updateMaintenance(maintenance);
       } else {
-        await ref.read(maintenanceNotifierProvider.notifier).addMaintenance(
-              maintenance,
-            );
+        await ref
+            .read(maintenanceNotifierProvider.notifier)
+            .addMaintenance(maintenance);
       }
 
       if (mounted) {
@@ -90,10 +90,7 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -178,9 +175,7 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                         labelText: 'Date *',
                         border: OutlineInputBorder(),
                       ),
-                      child: Text(
-                        '${_date.day}/${_date.month}/${_date.year}',
-                      ),
+                      child: Text('${_date.day}/${_date.month}/${_date.year}'),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -214,8 +209,7 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                         }
                         return null;
                       },
-                      onSaved: (value) =>
-                          _sacsManto = int.parse(value ?? '0'),
+                      onSaved: (value) => _sacsManto = int.parse(value ?? '0'),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
@@ -242,9 +236,9 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                     const SizedBox(height: 8),
                     Text(
                       'Note: La silice n\'est pas autorisée pour les terrains en terre battue',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     ),
                   ] else if (isSynthetique) ...[
                     TextFormField(
@@ -264,16 +258,15 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                         }
                         return null;
                       },
-                      onSaved: (value) =>
-                          _sacsSilice = int.parse(value ?? '0'),
+                      onSaved: (value) => _sacsSilice = int.parse(value ?? '0'),
                     ),
                     // Masquer manto et sottomanto pour synthétique
                     const SizedBox(height: 8),
                     Text(
                       'Note: Manto et Sottomanto ne sont pas autorisés pour les terrains synthétiques',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     ),
                   ] else if (isDur) ...[
                     // Pour les terrains durs : aucun matériau autorisé
@@ -281,9 +274,9 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                     Text(
                       'Note: Les terrains durs ne peuvent pas utiliser de matériaux (manto, sottomanto ou silice).\n'
                       'Les types de maintenance suivants sont interdits : Recharge, Compactage, Décompactage, Travail de ligne.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                     ),
                   ],
                   const SizedBox(height: 24),

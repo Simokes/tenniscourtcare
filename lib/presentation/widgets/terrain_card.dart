@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart' hide DateUtils;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
-import '../providers/maintenance_provider.dart';
 import '../providers/stats_providers.dart';
 import '../screens/terrain_maintenance_history_screen.dart';
 import '../widgets/add_maintenance_sheet.dart';
@@ -10,21 +9,16 @@ import '../../utils/date_utils.dart';
 class TerrainCard extends ConsumerWidget {
   final Terrain terrain;
 
-  const TerrainCard({
-    super.key,
-    required this.terrain,
-  });
+  const TerrainCard({super.key, required this.terrain});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final maintenancesDuJourAsync = ref.watch(
-      sacsTotalsProvider(
-        (
-          terrainId: terrain.id,
-          start: DateUtils.startOfDay(DateTime.now()),
-          end: DateUtils.endOfDay(DateTime.now()),
-        ),
-      ),
+      sacsTotalsProvider((
+        terrainId: terrain.id,
+        start: DateUtils.startOfDay(DateTime.now()),
+        end: DateUtils.endOfDay(DateTime.now()),
+      )),
     );
 
     return Card(
@@ -34,9 +28,7 @@ class TerrainCard extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => TerrainMaintenanceHistoryScreen(
-                terrain: terrain,
-              ),
+              builder: (_) => TerrainMaintenanceHistoryScreen(terrain: terrain),
             ),
           );
         },

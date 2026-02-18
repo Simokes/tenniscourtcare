@@ -28,5 +28,5 @@ class SelectedTerrainsNotifier extends StateNotifier<Set<int>> {
 
 final selectedTerrainsProvider =
     StateNotifierProvider<SelectedTerrainsNotifier, Set<int>>((ref) {
-  return SelectedTerrainsNotifier();
-});
+      return SelectedTerrainsNotifier();
+    });

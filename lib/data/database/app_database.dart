@@ -89,19 +89,21 @@ class AppDatabase extends _$AppDatabase {
     return row != null ? _maintenanceFromRow(row) : null;
   }
 
-Future<int> insertMaintenance(domm.Maintenance m) {
-  return into(maintenances).insert(
-    MaintenancesCompanion.insert(
-      terrainId: m.terrainId,                       // int brut (obligatoire)
-      type: m.type,                                 // String brut (obligatoire)
-      date: m.date,                                 // int brut (obligatoire)
-      commentaire: Value(m.commentaire),            // Value<String?> (nullable)
-      sacsMantoUtilises: Value(m.sacsMantoUtilises),        // Value<int> si colonne a un default
-      sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
-      sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
-    ),
-  );
-}
+  Future<int> insertMaintenance(domm.Maintenance m) {
+    return into(maintenances).insert(
+      MaintenancesCompanion.insert(
+        terrainId: m.terrainId, // int brut (obligatoire)
+        type: m.type, // String brut (obligatoire)
+        date: m.date, // int brut (obligatoire)
+        commentaire: Value(m.commentaire), // Value<String?> (nullable)
+        sacsMantoUtilises: Value(
+          m.sacsMantoUtilises,
+        ), // Value<int> si colonne a un default
+        sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
+        sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
+      ),
+    );
+  }
 
   /// write(...) -> Future<int>
   Future<int> updateMaintenance(MaintenancesCompanion companion) {

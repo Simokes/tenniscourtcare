@@ -9,8 +9,7 @@ final terrainsProvider = FutureProvider<List<Terrain>>((ref) {
 });
 
 /// Provider pour un terrain spécifique
-final terrainProvider =
-    FutureProvider.family<Terrain?, int>((ref, terrainId) {
+final terrainProvider = FutureProvider.family<Terrain?, int>((ref, terrainId) {
   final database = ref.watch(databaseProvider);
   return database.getTerrainById(terrainId);
 });

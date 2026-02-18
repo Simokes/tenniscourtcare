@@ -1,23 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../utils/date_utils.dart';
 
-enum PeriodType {
-  day,
-  week,
-  month,
-  custom,
-}
+enum PeriodType { day, week, month, custom }
 
 class StatsPeriod {
   final PeriodType type;
   final DateTime? customStart;
   final DateTime? customEnd;
 
-  const StatsPeriod({
-    required this.type,
-    this.customStart,
-    this.customEnd,
-  });
+  const StatsPeriod({required this.type, this.customStart, this.customEnd});
 
   /// Retourne les bornes (start, end) en epoch ms
   ({int start, int end}) get bounds {
@@ -25,10 +16,7 @@ class StatsPeriod {
 
     switch (type) {
       case PeriodType.day:
-        return (
-          start: DateUtils.startOfDay(now),
-          end: DateUtils.endOfDay(now),
-        );
+        return (start: DateUtils.startOfDay(now), end: DateUtils.endOfDay(now));
       case PeriodType.week:
         return (
           start: DateUtils.startOfWeek(now),
@@ -81,5 +69,5 @@ class StatsPeriodNotifier extends StateNotifier<StatsPeriod> {
 
 final statsPeriodProvider =
     StateNotifierProvider<StatsPeriodNotifier, StatsPeriod>((ref) {
-  return StatsPeriodNotifier();
-});
+      return StatsPeriodNotifier();
+    });

@@ -20,17 +20,9 @@ class Terrain {
   final String nom;
   final TerrainType type;
 
-  const Terrain({
-    required this.id,
-    required this.nom,
-    required this.type,
-  });
+  const Terrain({required this.id, required this.nom, required this.type});
 
-  Terrain copyWith({
-    int? id,
-    String? nom,
-    TerrainType? type,
-  }) {
+  Terrain copyWith({int? id, String? nom, TerrainType? type}) {
     return Terrain(
       id: id ?? this.id,
       nom: nom ?? this.nom,

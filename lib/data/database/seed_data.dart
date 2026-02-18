@@ -36,11 +36,7 @@ Future<void> seedDevData(AppDatabase database) async {
   // 3 terrains durs
   for (int i = 1; i <= 3; i++) {
     await database.insertTerrain(
-      Terrain(
-        id: 0,
-        nom: 'Court Dur $i',
-        type: TerrainType.dur,
-      ),
+      Terrain(id: 0, nom: 'Court Dur $i', type: TerrainType.dur),
     );
   }
 }

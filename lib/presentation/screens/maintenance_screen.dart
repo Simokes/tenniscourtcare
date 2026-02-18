@@ -12,9 +12,7 @@ class MaintenanceScreen extends ConsumerWidget {
     final terrainsAsync = ref.watch(terrainsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Maintenances'),
-      ),
+      appBar: AppBar(title: const Text('Maintenances')),
       body: terrainsAsync.when(
         data: (terrains) {
           if (terrains.isEmpty) {
@@ -48,9 +46,7 @@ class MaintenanceScreen extends ConsumerWidget {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      builder: (_) => AddMaintenanceSheet(
-                        terrain: terrain,
-                      ),
+                      builder: (_) => AddMaintenanceSheet(terrain: terrain),
                     );
                   },
                 ),
@@ -58,9 +54,8 @@ class MaintenanceScreen extends ConsumerWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => TerrainMaintenanceHistoryScreen(
-                        terrain: terrain,
-                      ),
+                      builder: (_) =>
+                          TerrainMaintenanceHistoryScreen(terrain: terrain),
                     ),
                   );
                 },
@@ -69,9 +64,7 @@ class MaintenanceScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Erreur: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Erreur: $error')),
       ),
     );
   }

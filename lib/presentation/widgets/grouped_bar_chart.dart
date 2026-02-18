@@ -5,11 +5,7 @@ class GroupedBarChart extends StatelessWidget {
   final List<({int date, int manto, int sottomanto, int silice})> data;
   final bool stacked;
 
-  const GroupedBarChart({
-    super.key,
-    required this.data,
-    this.stacked = false,
-  });
+  const GroupedBarChart({super.key, required this.data, this.stacked = false});
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +14,7 @@ class GroupedBarChart extends StatelessWidget {
     }
 
     return CustomPaint(
-      painter: _GroupedBarChartPainter(
-        data: data,
-        stacked: stacked,
-      ),
+      painter: _GroupedBarChartPainter(data: data, stacked: stacked),
       child: const SizedBox.expand(),
     );
   }
@@ -31,10 +24,7 @@ class _GroupedBarChartPainter extends CustomPainter {
   final List<({int date, int manto, int sottomanto, int silice})> data;
   final bool stacked;
 
-  _GroupedBarChartPainter({
-    required this.data,
-    required this.stacked,
-  });
+  _GroupedBarChartPainter({required this.data, required this.stacked});
 
   static const double _padding = 40.0;
   static const double _barGroupSpacing = 20.0;
@@ -53,13 +43,17 @@ class _GroupedBarChartPainter extends CustomPainter {
     final chartHeight = size.height - 2 * _padding;
 
     // Calculer les valeurs max pour l'échelle
-    final maxValue = (stacked
-        ? data.map((d) => d.manto + d.sottomanto + d.silice).reduce(math.max)
-        : [
-            data.map((d) => d.manto).reduce(math.max),
-            data.map((d) => d.sottomanto).reduce(math.max),
-            data.map((d) => d.silice).reduce(math.max),
-          ].reduce(math.max)).toDouble();
+    final maxValue =
+        (stacked
+                ? data
+                      .map((d) => d.manto + d.sottomanto + d.silice)
+                      .reduce(math.max)
+                : [
+                    data.map((d) => d.manto).reduce(math.max),
+                    data.map((d) => d.sottomanto).reduce(math.max),
+                    data.map((d) => d.silice).reduce(math.max),
+                  ].reduce(math.max))
+            .toDouble();
 
     final scaleY = chartHeight / (maxValue * 1.1); // 10% de marge en haut
 
@@ -77,7 +71,8 @@ class _GroupedBarChartPainter extends CustomPainter {
     // Dessiner les barres
     for (int i = 0; i < data.length; i++) {
       final item = data[i];
-      final x = _padding +
+      final x =
+          _padding +
           (i * (barGroupWidth + _barGroupSpacing)) +
           (barGroupWidth / 2);
 
@@ -154,10 +149,7 @@ class _GroupedBarChartPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: dateLabel,
-          style: const TextStyle(
-            fontSize: 10,
-            color: Colors.black87,
-          ),
+          style: const TextStyle(fontSize: 10, color: Colors.black87),
         ),
         textDirection: TextDirection.ltr,
       );
@@ -172,7 +164,12 @@ class _GroupedBarChartPainter extends CustomPainter {
     _drawLegend(canvas, size);
   }
 
-  void _drawAxes(Canvas canvas, Size size, double chartWidth, double chartHeight) {
+  void _drawAxes(
+    Canvas canvas,
+    Size size,
+    double chartWidth,
+    double chartHeight,
+  ) {
     final paint = Paint()
       ..color = Colors.black87
       ..strokeWidth = 2;
@@ -262,10 +259,7 @@ class _GroupedBarChartPainter extends CustomPainter {
     for (final (label, color) in legendItems) {
       // Carré de couleur
       final paint = Paint()..color = color;
-      canvas.drawRect(
-        Rect.fromLTWH(x, y, 12, 12),
-        paint,
-      );
+      canvas.drawRect(Rect.fromLTWH(x, y, 12, 12), paint);
 
       // Label
       final textPainter = TextPainter(

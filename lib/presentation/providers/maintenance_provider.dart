@@ -9,13 +9,15 @@ import 'terrain_provider.dart';
 /// Provider pour les maintenances d'un terrain
 final maintenancesByTerrainProvider =
     FutureProvider.family<List<Maintenance>, int>((ref, terrainId) {
-  final database = ref.watch(databaseProvider);
-  return database.getMaintenancesForTerrain(terrainId);
-});
+      final database = ref.watch(databaseProvider);
+      return database.getMaintenancesForTerrain(terrainId);
+    });
 
 /// Provider pour le nombre de maintenances d'un terrain
-final maintenanceCountProvider =
-    FutureProvider.family<int, int>((ref, terrainId) {
+final maintenanceCountProvider = FutureProvider.family<int, int>((
+  ref,
+  terrainId,
+) {
   final database = ref.watch(databaseProvider);
   return database.getMaintenanceCount(terrainId);
 });
@@ -180,5 +182,5 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
 
 final maintenanceNotifierProvider =
     StateNotifierProvider<MaintenanceNotifier, AsyncValue<void>>((ref) {
-  return MaintenanceNotifier(ref);
-});
+      return MaintenanceNotifier(ref);
+    });

@@ -35,7 +35,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
               sacksSeriesAsync.whenData((data) async {
                 await CsvExport.exportSacksSeries(
                   data: data,
-                  filename: 'sacks_series_${DateTime.now().millisecondsSinceEpoch}',
+                  filename:
+                      'sacks_series_${DateTime.now().millisecondsSinceEpoch}',
                   context: context,
                 );
               });
@@ -67,9 +68,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     type: PeriodType.day,
                     currentType: period.type,
                     onTap: () {
-                      ref.read(statsPeriodProvider.notifier).setPeriod(
-                            PeriodType.day,
-                          );
+                      ref
+                          .read(statsPeriodProvider.notifier)
+                          .setPeriod(PeriodType.day);
                     },
                   ),
                   _PeriodButton(
@@ -77,9 +78,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     type: PeriodType.week,
                     currentType: period.type,
                     onTap: () {
-                      ref.read(statsPeriodProvider.notifier).setPeriod(
-                            PeriodType.week,
-                          );
+                      ref
+                          .read(statsPeriodProvider.notifier)
+                          .setPeriod(PeriodType.week);
                     },
                   ),
                   _PeriodButton(
@@ -87,9 +88,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     type: PeriodType.month,
                     currentType: period.type,
                     onTap: () {
-                      ref.read(statsPeriodProvider.notifier).setPeriod(
-                            PeriodType.month,
-                          );
+                      ref
+                          .read(statsPeriodProvider.notifier)
+                          .setPeriod(PeriodType.month);
                     },
                   ),
                   _PeriodButton(
@@ -103,10 +104,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                         lastDate: DateTime.now(),
                       );
                       if (dates != null) {
-                        ref.read(statsPeriodProvider.notifier).setCustomPeriod(
-                              dates.start,
-                              dates.end,
-                            );
+                        ref
+                            .read(statsPeriodProvider.notifier)
+                            .setCustomPeriod(dates.start, dates.end);
                       }
                     },
                   ),
@@ -284,9 +284,7 @@ class _PeriodButton extends StatelessWidget {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected
-                ? Theme.of(context).colorScheme.onPrimary
-                : null,
+            color: isSelected ? Theme.of(context).colorScheme.onPrimary : null,
           ),
         ),
       ),

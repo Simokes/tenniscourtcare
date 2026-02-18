@@ -13,9 +13,10 @@ extension TerrainRowX on db.TerrainRow {
 
 // Domaine -> Companion (INSERT/UPDATE)
 extension TerrainDomainX on dom.Terrain {
-  db.TerrainsCompanion toCompanion({bool includeId = true}) => db.TerrainsCompanion(
-    id: includeId ? Value(id) : const Value.absent(),
-    nom: Value(nom),
-    type: Value(type.index),
-  );
+  db.TerrainsCompanion toCompanion({bool includeId = true}) =>
+      db.TerrainsCompanion(
+        id: includeId ? Value(id) : const Value.absent(),
+        nom: Value(nom),
+        type: Value(type.index),
+      );
 }
