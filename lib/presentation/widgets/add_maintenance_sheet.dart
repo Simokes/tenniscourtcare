@@ -5,6 +5,10 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/entities/maintenance.dart';
 import '../providers/maintenance_provider.dart';
+import '../../domain/entities/weather_snapshot.dart';
+import '../../domain/services/weather_rules.dart';
+import '../providers/weather_providers.dart';
+import '../widgets/weather_badge.dart';
 
 class AddMaintenanceSheet extends StatefulWidget {
   final Terrain terrain;
@@ -29,6 +33,10 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
   late int _sacsManto;
   late int _sacsSottomanto;
   late int _sacsSilice;
+  WeatherSnapshot? _weather;
+  double? _precip24h;
+  bool? _frozen;
+  bool? _unplayable;
 
   final _dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -52,6 +60,34 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     }
   }
 
+  Future<void> _loadWeather(WidgetRef ref) async {
+    final lat = widget.terrain.latitude;
+    final lon = widget.terrain.longitude;
+
+    if (lat == null || lon == null) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Coordonnées du terrain manquantes')),
+      );
+      return;
+    }
+
+    final computed = await ref.read(
+      weatherForTerrainProvider((
+        lat: lat,
+        lon: lon,
+        type: widget.terrain.type,
+      )).future,
+    );
+
+    setState(() {
+      _weather = computed.context.snapshot;
+      _precip24h = computed.context.precipitationLast24h;
+      _frozen = computed.frozen;
+      _unplayable = computed.unplayable;
+    });
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -71,7 +107,11 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     if (isDur) {
       // liste simple (insensible à la casse)
       const interdits = <String>{
-        'recharge', 'compactage', 'décompactage', 'decompactage', 'travail de ligne',
+        'recharge',
+        'compactage',
+        'décompactage',
+        'decompactage',
+        'travail de ligne',
       };
       final v = value.toLowerCase().trim();
       if (interdits.contains(v)) {
@@ -97,11 +137,16 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
       id: widget.maintenance?.id,
       terrainId: widget.terrain.id,
       type: _type.trim(),
-      commentaire: (_commentaire?.trim().isEmpty ?? true) ? null : _commentaire!.trim(),
+      commentaire: (_commentaire?.trim().isEmpty ?? true)
+          ? null
+          : _commentaire!.trim(),
       date: _date.millisecondsSinceEpoch,
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
       sacsSiliceUtilises: _sacsSilice,
+      weather: _weather, // ← snapshot météo (si présent)
+      terrainGele: _frozen, // ← drapeau gel
+      terrainImpraticable: _unplayable, // ← drapeau impraticable
     );
 
     try {
@@ -117,10 +162,7 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erreur: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
       );
     }
   }
@@ -158,31 +200,34 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                     const SizedBox(height: 16),
 
                     // TYPE (texte libre pour l’instant ; cf. commentaire Dropdown plus bas)
-
-                  DropdownButtonFormField<String>(
-                    value: _type.isEmpty ? null : _type,
-                    decoration: const InputDecoration(
-                      labelText: 'Type de maintenance *',
-                      border: OutlineInputBorder(),
+                    DropdownButtonFormField<String>(
+                      value: _type.isEmpty ? null : _type,
+                      decoration: const InputDecoration(
+                        labelText: 'Type de maintenance *',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: types
+                          .map(
+                            (t) => DropdownMenuItem(value: t, child: Text(t)),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => _type = value ?? '');
+                      },
+                      validator: (value) => (value == null || value.isEmpty)
+                          ? 'Le type est requis'
+                          : null,
+                      onSaved: (value) => _type = value!,
                     ),
-                    items: types
-                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() => _type = value ?? '');
-                    },
-                    validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Le type est requis' : null,
-                    onSaved: (value) => _type = value!,
-                  ),
 
-
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     // DATE (readOnly + picker)
                     TextFormField(
                       readOnly: true,
-                      controller: TextEditingController(text: _dateFormat.format(_date)),
+                      controller: TextEditingController(
+                        text: _dateFormat.format(_date),
+                      ),
                       decoration: const InputDecoration(
                         labelText: 'Date *',
                         border: OutlineInputBorder(),
@@ -206,6 +251,64 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
 
                     const SizedBox(height: 16),
 
+                    // ... juste après le champ "Commentaire"
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Météo au moment de la maintenance',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () => _loadWeather(ref),
+                          icon: const Icon(Icons.cloud_sync),
+                          label: const Text('Récupérer'),
+                        ),
+                      ],
+                    ),
+
+                    if (_weather != null) ...[
+                      const SizedBox(height: 8),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              WeatherBadge(
+                                frozen: _frozen ?? false,
+                                unplayable: _unplayable ?? false,
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                runSpacing: 6,
+                                children: [
+                                  _Info(
+                                    'Température',
+                                    '${_weather!.temperature.toStringAsFixed(1)} °C',
+                                  ),
+                                  _Info('Humidité', '${_weather!.humidity}%'),
+                                  _Info(
+                                    'Vent',
+                                    '${_weather!.windSpeed.toStringAsFixed(1)} km/h',
+                                  ),
+                                  _Info(
+                                    'Pluie (instant)',
+                                    '${_weather!.precipitation.toStringAsFixed(2)} mm',
+                                  ),
+                                  if (_precip24h != null)
+                                    _Info(
+                                      'Pluie 24h',
+                                      '${_precip24h!.toStringAsFixed(2)} mm',
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     // MATÉRIAUX SELON LE TYPE DE TERRAIN
                     if (isTerreBattue) ...[
                       TextFormField(
@@ -214,8 +317,13 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                           labelText: 'Sacs Manto utilisés *',
                           border: OutlineInputBorder(),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          signed: false,
+                          decimal: false,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: _validateRequiredInt,
                         onSaved: (v) => _sacsManto = int.tryParse(v ?? '') ?? 0,
                         textInputAction: TextInputAction.next,
@@ -227,16 +335,24 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                           labelText: 'Sacs Sottomanto utilisés *',
                           border: OutlineInputBorder(),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          signed: false,
+                          decimal: false,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: _validateRequiredInt,
-                        onSaved: (v) => _sacsSottomanto = int.tryParse(v ?? '') ?? 0,
+                        onSaved: (v) =>
+                            _sacsSottomanto = int.tryParse(v ?? '') ?? 0,
                         textInputAction: TextInputAction.done,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Note: la silice n’est pas autorisée pour les terrains en terre battue',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ] else if (isSynthetique) ...[
                       TextFormField(
@@ -245,23 +361,33 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                           labelText: 'Sacs Silice utilisés *',
                           border: OutlineInputBorder(),
                         ),
-                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          signed: false,
+                          decimal: false,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
                         validator: _validateRequiredInt,
-                        onSaved: (v) => _sacsSilice = int.tryParse(v ?? '') ?? 0,
+                        onSaved: (v) =>
+                            _sacsSilice = int.tryParse(v ?? '') ?? 0,
                         textInputAction: TextInputAction.done,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         'Note: manto et sottomanto ne sont pas autorisés pour les terrains synthétiques',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ] else if (isDur) ...[
                       const SizedBox(height: 8),
                       Text(
                         'Note: sur terrain dur, aucun matériau (manto, sottomanto, silice) n’est autorisé.\n'
                         'Types interdits: Recharge, Compactage, Décompactage, Travail de ligne.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ],
 
@@ -310,12 +436,27 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
           'Réparation couture',
         ];
       case TerrainType.dur:
-        return [
-          'Nettoyage',
-          'Balayage',
-          'Démoussage',
-          'Peinture',
-        ];
+        return ['Nettoyage', 'Balayage', 'Démoussage', 'Peinture'];
     }
+  }
+}
+
+class _Info extends StatelessWidget {
+  final String k;
+  final String v;
+  const _Info(this.k, this.v);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('$k: ', style: const TextStyle(fontWeight: FontWeight.w600)),
+          Text(v),
+        ],
+      ),
+    );
   }
 }

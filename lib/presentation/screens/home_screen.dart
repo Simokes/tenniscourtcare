@@ -5,7 +5,7 @@ import '../providers/stats_providers.dart';
 import '../widgets/terrain_card.dart';
 import 'maintenance_screen.dart';
 import 'stats_screen.dart';
-
+import 'weather_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -20,19 +20,49 @@ class HomeScreen extends ConsumerWidget {
       monthlyTotalsAllTerrainsProvider(monthKey),
     );
 
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Court Care'),
         actions: [
+          // Dans AppBar actions:
+          IconButton(
+            icon: const Icon(Icons.wb_sunny_outlined),
+            onPressed: () {
+              // Exemple : prend le premier terrain avec coordonnées
+              final terrains = ref
+                  .read(terrainsProvider)
+                  .maybeWhen(data: (list) => list, orElse: () => const []);
+              final t = terrains.firstWhere(
+                (e) => e.latitude != null && e.longitude != null,
+                orElse: () => terrains.isNotEmpty ? terrains.first : null,
+              );
+              if (t == null || t.latitude == null || t.longitude == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Aucun terrain avec coordonnées'),
+                  ),
+                );
+                return;
+              }
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => WeatherScreen(
+                    titre: 'Météo - ${t.nom}',
+                    latitude: t.latitude!,
+                    longitude: t.longitude!,
+                    terrainType: t.type,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const StatsScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const StatsScreen()),
               );
             },
           ),
@@ -78,25 +108,18 @@ class HomeScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              _TotalItem(
-                                label: 'Manto',
-                                value: totals.manto,
-                              ),
+                              _TotalItem(label: 'Manto', value: totals.manto),
                               _TotalItem(
                                 label: 'Sottomanto',
                                 value: totals.sottomanto,
                               ),
-                              _TotalItem(
-                                label: 'Silice',
-                                value: totals.silice,
-                              ),
+                              _TotalItem(label: 'Silice', value: totals.silice),
                             ],
                           ),
                         ],
                       ),
-                      loading: () => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Text('Erreur: $error'),
                     ),
                   ),
@@ -116,17 +139,13 @@ class HomeScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Erreur: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Erreur: $error')),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => const MaintenanceScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const MaintenanceScreen()),
           );
         },
         child: const Icon(Icons.add),
@@ -139,23 +158,14 @@ class _TotalItem extends StatelessWidget {
   final String label;
   final int value;
 
-  const _TotalItem({
-    required this.label,
-    required this.value,
-  });
+  const _TotalItem({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          '$value',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text('$value', style: Theme.of(context).textTheme.headlineSmall),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

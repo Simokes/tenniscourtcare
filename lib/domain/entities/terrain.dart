@@ -1,3 +1,5 @@
+// lib/domain/entities/terrain.dart
+
 enum TerrainType {
   terreBattue,
   synthetique,
@@ -20,13 +22,31 @@ class Terrain {
   final String nom;
   final TerrainType type;
 
-  const Terrain({required this.id, required this.nom, required this.type});
+  /// Coordonnées GPS facultatives (pour la météo)
+  final double? latitude;
+  final double? longitude;
 
-  Terrain copyWith({int? id, String? nom, TerrainType? type}) {
+  const Terrain({
+    required this.id,
+    required this.nom,
+    required this.type,
+    this.latitude,
+    this.longitude,
+  });
+
+  Terrain copyWith({
+    int? id,
+    String? nom,
+    TerrainType? type,
+    double? latitude,
+    double? longitude,
+  }) {
     return Terrain(
       id: id ?? this.id,
       nom: nom ?? this.nom,
       type: type ?? this.type,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
@@ -37,8 +57,19 @@ class Terrain {
           runtimeType == other.runtimeType &&
           id == other.id &&
           nom == other.nom &&
-          type == other.type;
+          type == other.type &&
+          latitude == other.latitude &&
+          longitude == other.longitude;
 
   @override
-  int get hashCode => id.hashCode ^ nom.hashCode ^ type.hashCode;
+  int get hashCode =>
+      id.hashCode ^
+      nom.hashCode ^
+      type.hashCode ^
+      latitude.hashCode ^
+      longitude.hashCode;
+
+  @override
+  String toString() =>
+      'Terrain(id: $id, nom: $nom, type: $type, lat: $latitude, lon: $longitude)';
 }
