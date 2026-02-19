@@ -130,6 +130,7 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     final isTerreBattue = widget.terrain.type == TerrainType.terreBattue;
     final isSynthetique = widget.terrain.type == TerrainType.synthetique;
     final isDur = widget.terrain.type == TerrainType.dur;
+    final types = allowedTypesFor(widget.terrain.type);
 
     return Consumer(
       builder: (context, ref, _) {
@@ -157,32 +158,26 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
                     const SizedBox(height: 16),
 
                     // TYPE (texte libre pour l’instant ; cf. commentaire Dropdown plus bas)
-                    TextFormField(
-                      initialValue: _type,
-                      decoration: const InputDecoration(
-                        labelText: 'Type de maintenance *',
-                        border: OutlineInputBorder(),
-                      ),
-                      textInputAction: TextInputAction.next,
-                      validator: (v) => _validateType(v, isDur: isDur),
-                      onSaved: (v) => _type = v!.trim(),
-                    ),
-                    // Exemple pour passer à un Dropdown :
-                    // DropdownButtonFormField<String>(
-                    //   value: _type.isEmpty ? null : _type,
-                    //   items: _allowedTypesFor(widget.terrain.type)
-                    //       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                    //       .toList(),
-                    //   decoration: const InputDecoration(
-                    //     labelText: 'Type de maintenance *',
-                    //     border: OutlineInputBorder(),
-                    //   ),
-                    //   onChanged: (v) => setState(() => _type = v ?? ''),
-                    //   validator: (v) => (v == null || v.isEmpty) ? 'Le type est requis' : null,
-                    //   onSaved: (v) => _type = v ?? '',
-                    // ),
 
-                    const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _type.isEmpty ? null : _type,
+                    decoration: const InputDecoration(
+                      labelText: 'Type de maintenance *',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: types
+                        .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => _type = value ?? '');
+                    },
+                    validator: (value) =>
+                    (value == null || value.isEmpty) ? 'Le type est requis' : null,
+                    onSaved: (value) => _type = value!,
+                  ),
+
+
+                  const SizedBox(height: 16),
 
                     // DATE (readOnly + picker)
                     TextFormField(
@@ -296,15 +291,31 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     );
   }
 
-  // Exemple si tu veux des types autorisés par terrain (pour Dropdown/autocomplete)
-  // List<String> _allowedTypesFor(TerrainType t) {
-  //   switch (t) {
-  //     case TerrainType.terreBattue:
-  //       return ['Arrosage', 'Brossage', 'Décompactage', 'Recharge', 'Travail de ligne', 'Nivelage'];
-  //     case TerrainType.synthetique:
-  //       return ['Brossage', 'Répartition silice', 'Aspiration', 'Réparation couture'];
-  //     case TerrainType.dur:
-  //       return ['Nettoyage', 'Balayage', 'Démoussage', 'Peinture (si applicable)'];
-  //   }
-  // }
+  List<String> allowedTypesFor(TerrainType t) {
+    switch (t) {
+      case TerrainType.terreBattue:
+        return [
+          'Arrosage',
+          'Brossage',
+          'Décompactage',
+          'Recharge',
+          'Travail de ligne',
+          'Nivelage',
+        ];
+      case TerrainType.synthetique:
+        return [
+          'Brossage',
+          'Répartition silice',
+          'Aspiration',
+          'Réparation couture',
+        ];
+      case TerrainType.dur:
+        return [
+          'Nettoyage',
+          'Balayage',
+          'Démoussage',
+          'Peinture',
+        ];
+    }
+  }
 }

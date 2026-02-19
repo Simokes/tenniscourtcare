@@ -13,10 +13,13 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final terrainsAsync = ref.watch(terrainsProvider);
-    final now = DateTime.now();
+
+    final monthKey = DateTime(DateTime.now().year, DateTime.now().month);
+
     final monthlyTotalsAsync = ref.watch(
-      monthlyTotalsAllTerrainsProvider(now),
+      monthlyTotalsAllTerrainsProvider(monthKey),
     );
+
 
     return Scaffold(
       appBar: AppBar(
