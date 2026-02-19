@@ -55,16 +55,16 @@ class AppDatabase extends _$AppDatabase {
     return into(terrains).insert(companion);
   }
 
-  /// UPDATE ciblé par id (WHERE + write)
-  /// write(...) -> Future<int> (nb de lignes affectées)
+  // UPDATE ciblé par id (WHERE + write)
+  // write(...) -> Future<int> (nb de lignes affectées)
   Future<int> updateTerrain(dom.Terrain terrain) {
     return (update(terrains)..where((t) => t.id.equals(terrain.id))).write(
       terrain.toCompanion(includeId: false),
     );
   }
 
-  /// DELETE par id
-  /// go() -> Future<int> (nb de lignes supprimées)
+  // DELETE par id
+  // go() -> Future<int> (nb de lignes supprimées)
   Future<int> deleteTerrain(int id) {
     return (delete(terrains)..where((t) => t.id.equals(id))).go();
   }
@@ -105,12 +105,12 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  /// write(...) -> Future<int>
+  // write(...) -> Future<int>
   Future<int> updateMaintenance(MaintenancesCompanion companion) {
     return update(maintenances).write(companion);
   }
 
-  /// go() -> Future<int>
+  // go() -> Future<int>
   Future<int> deleteMaintenance(int id) {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
   }

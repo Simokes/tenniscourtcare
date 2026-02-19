@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/entities/maintenance.dart';
 import '../providers/maintenance_provider.dart';
@@ -20,6 +22,7 @@ class AddMaintenanceSheet extends StatefulWidget {
 
 class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
   final _formKey = GlobalKey<FormState>();
+
   late String _type;
   String? _commentaire;
   late DateTime _date;
@@ -27,16 +30,19 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
   late int _sacsSottomanto;
   late int _sacsSilice;
 
+  final _dateFormat = DateFormat('dd/MM/yyyy');
+
   @override
   void initState() {
     super.initState();
-    if (widget.maintenance != null) {
-      _type = widget.maintenance!.type;
-      _commentaire = widget.maintenance!.commentaire;
-      _date = DateTime.fromMillisecondsSinceEpoch(widget.maintenance!.date);
-      _sacsManto = widget.maintenance!.sacsMantoUtilises;
-      _sacsSottomanto = widget.maintenance!.sacsSottomantoUtilises;
-      _sacsSilice = widget.maintenance!.sacsSiliceUtilises;
+    final m = widget.maintenance;
+    if (m != null) {
+      _type = m.type;
+      _commentaire = m.commentaire;
+      _date = DateTime.fromMillisecondsSinceEpoch(m.date);
+      _sacsManto = m.sacsMantoUtilises;
+      _sacsSottomanto = m.sacsSottomantoUtilises;
+      _sacsSilice = m.sacsSiliceUtilises;
     } else {
       _type = '';
       _date = DateTime.now();
@@ -46,18 +52,52 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     }
   }
 
-  Future<void> _save(WidgetRef ref) async {
-    if (!_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      return;
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _date = picked);
     }
+  }
+
+  String? _validateType(String? value, {required bool isDur}) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Le type est requis';
+    }
+    if (isDur) {
+      // liste simple (insensible à la casse)
+      const interdits = <String>{
+        'recharge', 'compactage', 'décompactage', 'decompactage', 'travail de ligne',
+      };
+      final v = value.toLowerCase().trim();
+      if (interdits.contains(v)) {
+        return 'Type non autorisé pour terrains durs';
+      }
+    }
+    return null;
+  }
+
+  String? _validateRequiredInt(String? value) {
+    if (value == null || value.isEmpty) return 'Requis';
+    final n = int.tryParse(value);
+    if (n == null || n < 0) return 'Nombre valide requis';
+    return null;
+  }
+
+  Future<void> _save(WidgetRef ref) async {
+    // ⛔️ Corrige le bug : ne PAS save si invalide
+    if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
     final maintenance = Maintenance(
       id: widget.maintenance?.id,
       terrainId: widget.terrain.id,
-      type: _type,
-      commentaire: _commentaire?.isEmpty ?? true ? null : _commentaire,
+      type: _type.trim(),
+      commentaire: (_commentaire?.trim().isEmpty ?? true) ? null : _commentaire!.trim(),
       date: _date.millisecondsSinceEpoch,
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
@@ -65,34 +105,23 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
     );
 
     try {
+      final notifier = ref.read(maintenanceNotifierProvider.notifier);
       if (widget.maintenance != null) {
-        await ref
-            .read(maintenanceNotifierProvider.notifier)
-            .updateMaintenance(maintenance);
+        await notifier.updateMaintenance(maintenance);
       } else {
-        await ref
-            .read(maintenanceNotifierProvider.notifier)
-            .addMaintenance(maintenance);
+        await notifier.addMaintenance(maintenance);
       }
 
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              widget.maintenance != null
-                  ? 'Maintenance mise à jour'
-                  : 'Maintenance ajoutée',
-            ),
-          ),
-        );
-      }
+      // 👉 renvoyer un succès au parent ; la snackbar sera affichée côté parent
+      if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erreur: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -104,198 +133,161 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
 
     return Consumer(
       builder: (context, ref, _) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.maintenance != null
-                        ? 'Modifier la maintenance'
-                        : 'Nouvelle maintenance',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  // Type de maintenance
-                  TextFormField(
-                    initialValue: _type,
-                    decoration: const InputDecoration(
-                      labelText: 'Type de maintenance *',
-                      border: OutlineInputBorder(),
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Form(
+              key: _formKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.maintenance != null
+                          ? 'Modifier la maintenance'
+                          : 'Nouvelle maintenance',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Le type est requis';
-                      }
-                      // Validation pour terrains durs
-                      if (isDur) {
-                        const typesInterdits = [
-                          'Recharge',
-                          'recharge',
-                          'Compactage',
-                          'compactage',
-                          'Décompactage',
-                          'décompactage',
-                          'Travail de ligne',
-                          'travail de ligne',
-                        ];
-                        if (typesInterdits.contains(value)) {
-                          return 'Ce type de maintenance n\'est pas autorisé pour les terrains durs';
-                        }
-                      }
-                      return null;
-                    },
-                    onSaved: (value) => _type = value!,
-                  ),
-                  const SizedBox(height: 16),
-                  // Date
-                  InkWell(
-                    onTap: () async {
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: _date,
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) {
-                        setState(() {
-                          _date = picked;
-                        });
-                      }
-                    },
-                    child: InputDecorator(
+                    const SizedBox(height: 16),
+
+                    // TYPE (texte libre pour l’instant ; cf. commentaire Dropdown plus bas)
+                    TextFormField(
+                      initialValue: _type,
+                      decoration: const InputDecoration(
+                        labelText: 'Type de maintenance *',
+                        border: OutlineInputBorder(),
+                      ),
+                      textInputAction: TextInputAction.next,
+                      validator: (v) => _validateType(v, isDur: isDur),
+                      onSaved: (v) => _type = v!.trim(),
+                    ),
+                    // Exemple pour passer à un Dropdown :
+                    // DropdownButtonFormField<String>(
+                    //   value: _type.isEmpty ? null : _type,
+                    //   items: _allowedTypesFor(widget.terrain.type)
+                    //       .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    //       .toList(),
+                    //   decoration: const InputDecoration(
+                    //     labelText: 'Type de maintenance *',
+                    //     border: OutlineInputBorder(),
+                    //   ),
+                    //   onChanged: (v) => setState(() => _type = v ?? ''),
+                    //   validator: (v) => (v == null || v.isEmpty) ? 'Le type est requis' : null,
+                    //   onSaved: (v) => _type = v ?? '',
+                    // ),
+
+                    const SizedBox(height: 16),
+
+                    // DATE (readOnly + picker)
+                    TextFormField(
+                      readOnly: true,
+                      controller: TextEditingController(text: _dateFormat.format(_date)),
                       decoration: const InputDecoration(
                         labelText: 'Date *',
                         border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.calendar_today),
                       ),
-                      child: Text('${_date.day}/${_date.month}/${_date.year}'),
+                      onTap: _pickDate,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Commentaire
-                  TextFormField(
-                    initialValue: _commentaire,
-                    decoration: const InputDecoration(
-                      labelText: 'Commentaire (optionnel)',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 3,
-                    onSaved: (value) => _commentaire = value,
-                  ),
-                  const SizedBox(height: 16),
-                  // Matériaux selon le type de terrain
-                  if (isTerreBattue) ...[
-                    TextFormField(
-                      initialValue: _sacsManto.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Sacs Manto utilisés *',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Requis';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null || intValue < 0) {
-                          return 'Nombre valide requis';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _sacsManto = int.parse(value ?? '0'),
-                    ),
+
                     const SizedBox(height: 16),
+
+                    // COMMENTAIRE
                     TextFormField(
-                      initialValue: _sacsSottomanto.toString(),
+                      initialValue: _commentaire,
                       decoration: const InputDecoration(
-                        labelText: 'Sacs Sottomanto utilisés *',
+                        labelText: 'Commentaire (optionnel)',
                         border: OutlineInputBorder(),
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Requis';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null || intValue < 0) {
-                          return 'Nombre valide requis';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) =>
-                          _sacsSottomanto = int.parse(value ?? '0'),
+                      maxLines: 3,
+                      onSaved: (v) => _commentaire = v?.trim(),
                     ),
-                    // Masquer silice pour terre battue
-                    const SizedBox(height: 8),
-                    Text(
-                      'Note: La silice n\'est pas autorisée pour les terrains en terre battue',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                    ),
-                  ] else if (isSynthetique) ...[
-                    TextFormField(
-                      initialValue: _sacsSilice.toString(),
-                      decoration: const InputDecoration(
-                        labelText: 'Sacs Silice utilisés *',
-                        border: OutlineInputBorder(),
+
+                    const SizedBox(height: 16),
+
+                    // MATÉRIAUX SELON LE TYPE DE TERRAIN
+                    if (isTerreBattue) ...[
+                      TextFormField(
+                        initialValue: _sacsManto.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Sacs Manto utilisés *',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: _validateRequiredInt,
+                        onSaved: (v) => _sacsManto = int.tryParse(v ?? '') ?? 0,
+                        textInputAction: TextInputAction.next,
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Requis';
-                        }
-                        final intValue = int.tryParse(value);
-                        if (intValue == null || intValue < 0) {
-                          return 'Nombre valide requis';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) => _sacsSilice = int.parse(value ?? '0'),
-                    ),
-                    // Masquer manto et sottomanto pour synthétique
-                    const SizedBox(height: 8),
-                    Text(
-                      'Note: Manto et Sottomanto ne sont pas autorisés pour les terrains synthétiques',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                    ),
-                  ] else if (isDur) ...[
-                    // Pour les terrains durs : aucun matériau autorisé
-                    const SizedBox(height: 8),
-                    Text(
-                      'Note: Les terrains durs ne peuvent pas utiliser de matériaux (manto, sottomanto ou silice).\n'
-                      'Les types de maintenance suivants sont interdits : Recharge, Compactage, Décompactage, Travail de ligne.',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.grey),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  // Boutons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Annuler'),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        initialValue: _sacsSottomanto.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Sacs Sottomanto utilisés *',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: _validateRequiredInt,
+                        onSaved: (v) => _sacsSottomanto = int.tryParse(v ?? '') ?? 0,
+                        textInputAction: TextInputAction.done,
                       ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () => _save(ref),
-                        child: const Text('Enregistrer'),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Note: la silice n’est pas autorisée pour les terrains en terre battue',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      ),
+                    ] else if (isSynthetique) ...[
+                      TextFormField(
+                        initialValue: _sacsSilice.toString(),
+                        decoration: const InputDecoration(
+                          labelText: 'Sacs Silice utilisés *',
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                        validator: _validateRequiredInt,
+                        onSaved: (v) => _sacsSilice = int.tryParse(v ?? '') ?? 0,
+                        textInputAction: TextInputAction.done,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Note: manto et sottomanto ne sont pas autorisés pour les terrains synthétiques',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                      ),
+                    ] else if (isDur) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Note: sur terrain dur, aucun matériau (manto, sottomanto, silice) n’est autorisé.\n'
+                        'Types interdits: Recharge, Compactage, Décompactage, Travail de ligne.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
                       ),
                     ],
-                  ),
-                ],
+
+                    const SizedBox(height: 24),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('Annuler'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () => _save(ref),
+                          child: const Text('Enregistrer'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -303,4 +295,16 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
       },
     );
   }
+
+  // Exemple si tu veux des types autorisés par terrain (pour Dropdown/autocomplete)
+  // List<String> _allowedTypesFor(TerrainType t) {
+  //   switch (t) {
+  //     case TerrainType.terreBattue:
+  //       return ['Arrosage', 'Brossage', 'Décompactage', 'Recharge', 'Travail de ligne', 'Nivelage'];
+  //     case TerrainType.synthetique:
+  //       return ['Brossage', 'Répartition silice', 'Aspiration', 'Réparation couture'];
+  //     case TerrainType.dur:
+  //       return ['Nettoyage', 'Balayage', 'Démoussage', 'Peinture (si applicable)'];
+  //   }
+  // }
 }
