@@ -7,8 +7,9 @@ import '../../domain/entities/maintenance.dart';
 import '../providers/maintenance_provider.dart';
 import '../../domain/entities/weather_snapshot.dart';
 import '../../domain/services/weather_rules.dart';
-import '../providers/weather_providers.dart';
+import '../providers/weather_for_club_provider.dart';
 import '../widgets/weather_badge.dart';
+import '../providers/app_settings_provider.dart';
 
 class AddMaintenanceSheet extends StatefulWidget {
   final Terrain terrain;
@@ -61,24 +62,18 @@ class _AddMaintenanceSheetState extends State<AddMaintenanceSheet> {
   }
 
   Future<void> _loadWeather(WidgetRef ref) async {
-    final lat = widget.terrain.latitude;
-    final lon = widget.terrain.longitude;
-
-    if (lat == null || lon == null) {
+    // Lit la coordonnée globale
+    final clubLoc = ref.read(appSettingsProvider).value;
+    if (clubLoc == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Coordonnées du terrain manquantes')),
+        const SnackBar(content: Text('Définis d’abord les coordonnées du club dans Paramètres')),
       );
       return;
     }
 
-    final computed = await ref.read(
-      weatherForTerrainProvider((
-        lat: lat,
-        lon: lon,
-        type: widget.terrain.type,
-      )).future,
-    );
+    // Utilise le provider météo "club" avec le type du terrain courant
+    final computed = await ref.read(weatherForClubProvider(widget.terrain.type).future);
 
     setState(() {
       _weather = computed.context.snapshot;

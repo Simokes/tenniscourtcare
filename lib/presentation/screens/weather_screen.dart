@@ -2,28 +2,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
-import '../providers/weather_providers.dart';
+import '../providers/weather_for_club_provider.dart';
 import '../widgets/weather_badge.dart';
 
 class WeatherScreen extends ConsumerWidget {
   final String titre;
-  final double latitude;
-  final double longitude;
   final TerrainType terrainType;
 
   const WeatherScreen({
     super.key,
     required this.titre,
-    required this.latitude,
-    required this.longitude,
     required this.terrainType,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(
-      weatherForTerrainProvider((lat: latitude, lon: longitude, type: terrainType)),
-    );
+    final async = ref.watch(weatherForClubProvider(terrainType));
 
     return Scaffold(
       appBar: AppBar(title: Text(titre)),

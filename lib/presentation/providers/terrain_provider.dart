@@ -13,3 +13,16 @@ final terrainProvider = FutureProvider.family<Terrain?, int>((ref, terrainId) {
   final database = ref.watch(databaseProvider);
   return database.getTerrainById(terrainId);
 });
+/// Action d’update : écrit via la base, puis invalide les caches de lecture
+final updateTerrainProvider = Provider<Future<void> Function(Terrain)>((ref) {
+  return (Terrain updated) async {
+    final db = ref.read(databaseProvider);
+
+    await db.updateTerrain(updated); // <-- appelle ta méthode DB existante
+
+    // Ré-invalide la liste de tous les terrains
+    ref.invalidate(terrainsProvider);
+    // Ré-invalide aussi le terrain individuel correspondant
+    ref.invalidate(terrainProvider(updated.id));
+  };
+});

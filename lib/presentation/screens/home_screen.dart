@@ -6,9 +6,40 @@ import '../widgets/terrain_card.dart';
 import 'maintenance_screen.dart';
 import 'stats_screen.dart';
 import 'weather_screen.dart';
+import '../../domain/entities/terrain.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  /// Ouvre l'écran météo en utilisant la coordonnée "club" (globale).
+  /// On prend juste le type du premier terrain (ou de celui que tu voudras).
+  void _openWeatherForFirstTerrainWithCoords(BuildContext context, WidgetRef ref) {
+    final terrains = ref.read(terrainsProvider).maybeWhen(
+      data: (list) => list,
+      orElse: () => const <Terrain>[],
+    );
+
+    if (terrains.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Aucun terrain disponible')),
+      );
+      return;
+    }
+
+    // On prend un terrain pour connaître son type (la météo se base sur la coordonnée du club)
+    final Terrain picked = terrains.first;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WeatherScreen(
+          titre: 'Météo du club',
+          terrainType: picked.type, // ✅ fix: t.type -> picked.type
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,38 +55,9 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Court Care'),
         actions: [
-          // Dans AppBar actions:
           IconButton(
             icon: const Icon(Icons.wb_sunny_outlined),
-            onPressed: () {
-              // Exemple : prend le premier terrain avec coordonnées
-              final terrains = ref
-                  .read(terrainsProvider)
-                  .maybeWhen(data: (list) => list, orElse: () => const []);
-              final t = terrains.firstWhere(
-                (e) => e.latitude != null && e.longitude != null,
-                orElse: () => terrains.isNotEmpty ? terrains.first : null,
-              );
-              if (t == null || t.latitude == null || t.longitude == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Aucun terrain avec coordonnées'),
-                  ),
-                );
-                return;
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => WeatherScreen(
-                    titre: 'Météo - ${t.nom}',
-                    latitude: t.latitude!,
-                    longitude: t.longitude!,
-                    terrainType: t.type,
-                  ),
-                ),
-              );
-            },
+            onPressed: () => _openWeatherForFirstTerrainWithCoords(context, ref),
           ),
           IconButton(
             icon: const Icon(Icons.bar_chart),
@@ -63,6 +65,16 @@ class HomeScreen extends ConsumerWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const StatsScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Paramètres',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
           ),
@@ -109,17 +121,13 @@ class HomeScreen extends ConsumerWidget {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _TotalItem(label: 'Manto', value: totals.manto),
-                              _TotalItem(
-                                label: 'Sottomanto',
-                                value: totals.sottomanto,
-                              ),
+                              _TotalItem(label: 'Sottomanto', value: totals.sottomanto),
                               _TotalItem(label: 'Silice', value: totals.silice),
                             ],
                           ),
                         ],
                       ),
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
+                      loading: () => const Center(child: CircularProgressIndicator()),
                       error: (error, stack) => Text('Erreur: $error'),
                     ),
                   ),
