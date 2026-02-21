@@ -1278,6 +1278,517 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
   }
 }
 
+class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UsersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _passwordHashMeta = const VerificationMeta(
+    'passwordHash',
+  );
+  @override
+  late final GeneratedColumn<String> passwordHash = GeneratedColumn<String>(
+    'password_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<Role, String> role =
+      GeneratedColumn<String>(
+        'role',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<Role>($UsersTable.$converterrole);
+  static const VerificationMeta _lastLoginAtMeta = const VerificationMeta(
+    'lastLoginAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastLoginAt = GeneratedColumn<DateTime>(
+    'last_login_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _avatarUrlMeta = const VerificationMeta(
+    'avatarUrl',
+  );
+  @override
+  late final GeneratedColumn<String> avatarUrl = GeneratedColumn<String>(
+    'avatar_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    email,
+    name,
+    passwordHash,
+    role,
+    lastLoginAt,
+    avatarUrl,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'users';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('password_hash')) {
+      context.handle(
+        _passwordHashMeta,
+        passwordHash.isAcceptableOrUnknown(
+          data['password_hash']!,
+          _passwordHashMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_passwordHashMeta);
+    }
+    if (data.containsKey('last_login_at')) {
+      context.handle(
+        _lastLoginAtMeta,
+        lastLoginAt.isAcceptableOrUnknown(
+          data['last_login_at']!,
+          _lastLoginAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('avatar_url')) {
+      context.handle(
+        _avatarUrlMeta,
+        avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      passwordHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}password_hash'],
+      )!,
+      role: $UsersTable.$converterrole.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}role'],
+        )!,
+      ),
+      lastLoginAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_login_at'],
+      ),
+      avatarUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}avatar_url'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $UsersTable createAlias(String alias) {
+    return $UsersTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<Role, String, String> $converterrole =
+      const EnumNameConverter<Role>(Role.values);
+}
+
+class UserRow extends DataClass implements Insertable<UserRow> {
+  final int id;
+  final String email;
+  final String name;
+  final String passwordHash;
+  final Role role;
+  final DateTime? lastLoginAt;
+  final String? avatarUrl;
+  final DateTime createdAt;
+  const UserRow({
+    required this.id,
+    required this.email,
+    required this.name,
+    required this.passwordHash,
+    required this.role,
+    this.lastLoginAt,
+    this.avatarUrl,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['email'] = Variable<String>(email);
+    map['name'] = Variable<String>(name);
+    map['password_hash'] = Variable<String>(passwordHash);
+    {
+      map['role'] = Variable<String>($UsersTable.$converterrole.toSql(role));
+    }
+    if (!nullToAbsent || lastLoginAt != null) {
+      map['last_login_at'] = Variable<DateTime>(lastLoginAt);
+    }
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String>(avatarUrl);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      id: Value(id),
+      email: Value(email),
+      name: Value(name),
+      passwordHash: Value(passwordHash),
+      role: Value(role),
+      lastLoginAt: lastLoginAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastLoginAt),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory UserRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserRow(
+      id: serializer.fromJson<int>(json['id']),
+      email: serializer.fromJson<String>(json['email']),
+      name: serializer.fromJson<String>(json['name']),
+      passwordHash: serializer.fromJson<String>(json['passwordHash']),
+      role: $UsersTable.$converterrole.fromJson(
+        serializer.fromJson<String>(json['role']),
+      ),
+      lastLoginAt: serializer.fromJson<DateTime?>(json['lastLoginAt']),
+      avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'email': serializer.toJson<String>(email),
+      'name': serializer.toJson<String>(name),
+      'passwordHash': serializer.toJson<String>(passwordHash),
+      'role': serializer.toJson<String>(
+        $UsersTable.$converterrole.toJson(role),
+      ),
+      'lastLoginAt': serializer.toJson<DateTime?>(lastLoginAt),
+      'avatarUrl': serializer.toJson<String?>(avatarUrl),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  UserRow copyWith({
+    int? id,
+    String? email,
+    String? name,
+    String? passwordHash,
+    Role? role,
+    Value<DateTime?> lastLoginAt = const Value.absent(),
+    Value<String?> avatarUrl = const Value.absent(),
+    DateTime? createdAt,
+  }) => UserRow(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    name: name ?? this.name,
+    passwordHash: passwordHash ?? this.passwordHash,
+    role: role ?? this.role,
+    lastLoginAt: lastLoginAt.present ? lastLoginAt.value : this.lastLoginAt,
+    avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  UserRow copyWithCompanion(UsersCompanion data) {
+    return UserRow(
+      id: data.id.present ? data.id.value : this.id,
+      email: data.email.present ? data.email.value : this.email,
+      name: data.name.present ? data.name.value : this.name,
+      passwordHash: data.passwordHash.present
+          ? data.passwordHash.value
+          : this.passwordHash,
+      role: data.role.present ? data.role.value : this.role,
+      lastLoginAt: data.lastLoginAt.present
+          ? data.lastLoginAt.value
+          : this.lastLoginAt,
+      avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserRow(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('name: $name, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('role: $role, ')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    email,
+    name,
+    passwordHash,
+    role,
+    lastLoginAt,
+    avatarUrl,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserRow &&
+          other.id == this.id &&
+          other.email == this.email &&
+          other.name == this.name &&
+          other.passwordHash == this.passwordHash &&
+          other.role == this.role &&
+          other.lastLoginAt == this.lastLoginAt &&
+          other.avatarUrl == this.avatarUrl &&
+          other.createdAt == this.createdAt);
+}
+
+class UsersCompanion extends UpdateCompanion<UserRow> {
+  final Value<int> id;
+  final Value<String> email;
+  final Value<String> name;
+  final Value<String> passwordHash;
+  final Value<Role> role;
+  final Value<DateTime?> lastLoginAt;
+  final Value<String?> avatarUrl;
+  final Value<DateTime> createdAt;
+  const UsersCompanion({
+    this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.name = const Value.absent(),
+    this.passwordHash = const Value.absent(),
+    this.role = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  UsersCompanion.insert({
+    this.id = const Value.absent(),
+    required String email,
+    required String name,
+    required String passwordHash,
+    required Role role,
+    this.lastLoginAt = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : email = Value(email),
+       name = Value(name),
+       passwordHash = Value(passwordHash),
+       role = Value(role);
+  static Insertable<UserRow> custom({
+    Expression<int>? id,
+    Expression<String>? email,
+    Expression<String>? name,
+    Expression<String>? passwordHash,
+    Expression<String>? role,
+    Expression<DateTime>? lastLoginAt,
+    Expression<String>? avatarUrl,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (email != null) 'email': email,
+      if (name != null) 'name': name,
+      if (passwordHash != null) 'password_hash': passwordHash,
+      if (role != null) 'role': role,
+      if (lastLoginAt != null) 'last_login_at': lastLoginAt,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  UsersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? email,
+    Value<String>? name,
+    Value<String>? passwordHash,
+    Value<Role>? role,
+    Value<DateTime?>? lastLoginAt,
+    Value<String?>? avatarUrl,
+    Value<DateTime>? createdAt,
+  }) {
+    return UsersCompanion(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      passwordHash: passwordHash ?? this.passwordHash,
+      role: role ?? this.role,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (passwordHash.present) {
+      map['password_hash'] = Variable<String>(passwordHash.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(
+        $UsersTable.$converterrole.toSql(role.value),
+      );
+    }
+    if (lastLoginAt.present) {
+      map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
+    }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String>(avatarUrl.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsersCompanion(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('name: $name, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('role: $role, ')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -1285,6 +1796,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $TerrainsTable terrains = $TerrainsTable(this);
   late final $MaintenancesTable maintenances = $MaintenancesTable(this);
   late final $StockItemsTable stockItems = $StockItemsTable(this);
+  late final $UsersTable users = $UsersTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1293,6 +1805,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     terrains,
     maintenances,
     stockItems,
+    users,
   ];
 }
 
@@ -1953,6 +2466,255 @@ typedef $$StockItemsTableProcessedTableManager =
       StockItemRow,
       PrefetchHooks Function()
     >;
+typedef $$UsersTableCreateCompanionBuilder =
+    UsersCompanion Function({
+      Value<int> id,
+      required String email,
+      required String name,
+      required String passwordHash,
+      required Role role,
+      Value<DateTime?> lastLoginAt,
+      Value<String?> avatarUrl,
+      Value<DateTime> createdAt,
+    });
+typedef $$UsersTableUpdateCompanionBuilder =
+    UsersCompanion Function({
+      Value<int> id,
+      Value<String> email,
+      Value<String> name,
+      Value<String> passwordHash,
+      Value<Role> role,
+      Value<DateTime?> lastLoginAt,
+      Value<String?> avatarUrl,
+      Value<DateTime> createdAt,
+    });
+
+class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
+  $$UsersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Role, Role, String> get role =>
+      $composableBuilder(
+        column: $table.role,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get avatarUrl => $composableBuilder(
+    column: $table.avatarUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UsersTableOrderingComposer
+    extends Composer<_$AppDatabase, $UsersTable> {
+  $$UsersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get avatarUrl => $composableBuilder(
+    column: $table.avatarUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UsersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UsersTable> {
+  $$UsersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Role, String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get avatarUrl =>
+      $composableBuilder(column: $table.avatarUrl, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$UsersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UsersTable,
+          UserRow,
+          $$UsersTableFilterComposer,
+          $$UsersTableOrderingComposer,
+          $$UsersTableAnnotationComposer,
+          $$UsersTableCreateCompanionBuilder,
+          $$UsersTableUpdateCompanionBuilder,
+          (UserRow, BaseReferences<_$AppDatabase, $UsersTable, UserRow>),
+          UserRow,
+          PrefetchHooks Function()
+        > {
+  $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UsersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UsersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UsersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> passwordHash = const Value.absent(),
+                Value<Role> role = const Value.absent(),
+                Value<DateTime?> lastLoginAt = const Value.absent(),
+                Value<String?> avatarUrl = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => UsersCompanion(
+                id: id,
+                email: email,
+                name: name,
+                passwordHash: passwordHash,
+                role: role,
+                lastLoginAt: lastLoginAt,
+                avatarUrl: avatarUrl,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String email,
+                required String name,
+                required String passwordHash,
+                required Role role,
+                Value<DateTime?> lastLoginAt = const Value.absent(),
+                Value<String?> avatarUrl = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => UsersCompanion.insert(
+                id: id,
+                email: email,
+                name: name,
+                passwordHash: passwordHash,
+                role: role,
+                lastLoginAt: lastLoginAt,
+                avatarUrl: avatarUrl,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UsersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UsersTable,
+      UserRow,
+      $$UsersTableFilterComposer,
+      $$UsersTableOrderingComposer,
+      $$UsersTableAnnotationComposer,
+      $$UsersTableCreateCompanionBuilder,
+      $$UsersTableUpdateCompanionBuilder,
+      (UserRow, BaseReferences<_$AppDatabase, $UsersTable, UserRow>),
+      UserRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1963,4 +2725,6 @@ class $AppDatabaseManager {
       $$MaintenancesTableTableManager(_db, _db.maintenances);
   $$StockItemsTableTableManager get stockItems =>
       $$StockItemsTableTableManager(_db, _db.stockItems);
+  $$UsersTableTableManager get users =>
+      $$UsersTableTableManager(_db, _db.users);
 }

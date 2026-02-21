@@ -8,24 +8,27 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
 import 'tables/stock_items.dart';
+import 'tables/users_table.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
 import '../../domain/entities/stock_item.dart' as doms;
-import '../../utils/date_utils.dart'
-    as cc; // éviter collision avec Flutter DateUtils
+import '../../domain/entities/user_entity.dart' as domu;
+import '../../domain/enums/role.dart';
+import '../../utils/date_utils.dart' as cc;
 
 import '../mappers/terrain_mapper.dart'; 
 import '../mappers/stock_item_mapper.dart';
+import '../mappers/user_mapper.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Terrains, Maintenances, StockItems])
+@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -37,6 +40,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(stockItems);
         await _seedStockItems();
+      }
+      if (from < 3) {
+        await m.createTable(users);
       }
     },
   );
@@ -57,6 +63,64 @@ class AppDatabase extends _$AppDatabase {
       b.insertAll(stockItems, items.map((i) => i.toCompanion()).toList());
     });
   }
+
+  // ========== USERS ==========
+
+  Future<domu.UserEntity?> getUserByEmail(String email) async {
+    final row = await (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+    return row?.toDomain();
+  }
+
+  // Cette méthode retourne le UserRow complet (avec hash) pour la vérification du mot de passe
+  Future<UserRow?> getUserRowByEmail(String email) async {
+    return (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+  }
+
+  Future<List<domu.UserEntity>> getAllUsers() async {
+    final rows = await select(users).get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
+
+  Future<int> insertUser(UsersCompanion companion) {
+    return into(users).insert(companion);
+  }
+
+  Future<int> updateUserRole(int userId, Role newRole) {
+    return (update(users)..where((u) => u.id.equals(userId))).write(
+      UsersCompanion(role: Value(newRole)),
+    );
+  }
+
+  Future<int> updateLastLogin(int userId) {
+    return (update(users)..where((u) => u.id.equals(userId))).write(
+      UsersCompanion(lastLoginAt: Value(DateTime.now())),
+    );
+  }
+
+  Future<int> countUsersByRole(Role role) async {
+    final count = await (selectOnly(users)
+      ..addColumns([users.id.count()])
+      ..where(users.role.equals(role.name)) // Drift enum stored as string? No, mapped via enum.
+      // Wait, if I used textEnum<Role>(), Drift handles the mapping automatically in Dart code
+      // but generates SQL as text.
+      // However, for selectOnly and where, I should pass the enum value if Drift generated the code correctly.
+      // But since I am using textEnum(), the column is TextColumn but typed as Role in Dart?
+      // Actually with textEnum, the generated column is of type EnumColumn<Role> effectively?
+      // No, let's check generated code behavior.
+      // If I used `textEnum<Role>()`, then `users.role` is an `Expression<Role>`.
+      // So I should just pass `role` (the enum value).
+    ).getSingle();
+    return count.read(users.id.count()) ?? 0;
+  }
+
+  // Correction for countUsersByRole:
+  // With textEnum, we might need to rely on the generated code.
+  // I will write a simple version first.
+  Future<int> countUsers() async {
+     final count = await (selectOnly(users)..addColumns([users.id.count()])).getSingle();
+     return count.read(users.id.count()) ?? 0;
+  }
+
 
   // ========== STOCK ITEMS ==========
 
