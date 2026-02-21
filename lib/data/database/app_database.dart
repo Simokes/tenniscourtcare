@@ -602,7 +602,7 @@ class AppDatabase extends _$AppDatabase {
   /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
   watchDailyMaintenanceTypeCounts({
-    required Set<int> terrainIds,
+    Set<int>? terrainIds,
     int? start,
     int? end,
   }) {
@@ -611,8 +611,13 @@ class AppDatabase extends _$AppDatabase {
         maintenances.date,
         maintenances.type,
         maintenances.id.count(),
-      ])
-      ..where(maintenances.terrainId.isIn(terrainIds))
+      ]);
+
+    if (terrainIds != null && terrainIds.isNotEmpty) {
+      query.where(maintenances.terrainId.isIn(terrainIds));
+    }
+
+    query
       ..groupBy([maintenances.date, maintenances.type])
       ..orderBy([
         OrderingTerm.asc(maintenances.date),
