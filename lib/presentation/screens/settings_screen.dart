@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/database_provider.dart';
+import '../../data/database/seed_data.dart';
+import 'court_management_screen.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -74,6 +77,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _latCtrl.text = '';
     _lonCtrl.text = '';
     _seededFromSettings = false;
+  }
+
+  Future<void> _seedData() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Générer les données de test'),
+        content: const Text(
+          'Cela va ajouter des terrains par défaut (6 terres battues, 2 synthétiques, 3 durs) si aucun terrain n\'existe.\n'
+          'Continuer ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Générer'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final database = ref.read(databaseProvider);
+    await seedDevData(database);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Données générées (si la base était vide)')),
+    );
   }
 
   @override
@@ -156,6 +192,33 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onPressed: _delete,
                     icon: const Icon(Icons.delete),
                     label: const Text('Supprimer la coordonnée'),
+                  ),
+                  const SizedBox(height: 32),
+                  const Divider(),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Gestion des données',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    leading: const Icon(Icons.stadium),
+                    title: const Text('Gérer les terrains'),
+                    subtitle: const Text('Ajouter, modifier ou supprimer des courts'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CourtManagementScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.science),
+                    title: const Text('Générer les données de test (Seed)'),
+                    subtitle: const Text('Ajoute des terrains par défaut'),
+                    onTap: _seedData,
                   ),
                 ],
               ),
