@@ -105,10 +105,12 @@ class AppDatabase extends _$AppDatabase {
         );
       }
 
-      // 2. On déduit les stocks (quel que soit le type de maintenance)
-      checkAndDec('Manto', m.sacsMantoUtilises);
-      checkAndDec('Sottomanto', m.sacsSottomantoUtilises);
-      checkAndDec('Silice', m.sacsSiliceUtilises);
+      // 2. Si c'est une recharge, on déduit les stocks
+      if (m.type.toLowerCase().contains('recharge')) {
+        checkAndDec('Manto', m.sacsMantoUtilises);
+        checkAndDec('Sottomanto', m.sacsSottomantoUtilises);
+        checkAndDec('Silice', m.sacsSiliceUtilises);
+      }
 
       // 3. Insérer la maintenance
       await into(maintenances).insert(
@@ -120,131 +122,6 @@ class AppDatabase extends _$AppDatabase {
           sacsMantoUtilises: Value(m.sacsMantoUtilises),
           sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
           sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
-        ),
-      );
-    });
-  }
-
-  Future<void> deleteMaintenanceWithStockRestoration(int maintenanceId) async {
-    return transaction(() async {
-      // 1. Récupérer la maintenance à supprimer
-      final maintenance = await (select(maintenances)
-            ..where((m) => m.id.equals(maintenanceId)))
-          .getSingleOrNull();
-
-      if (maintenance == null) {
-        throw Exception("Maintenance introuvable");
-      }
-
-      // 2. Récupérer les items de stock
-      final stockList = await select(stockItems).get();
-
-      void restoreStock(String name, int used) {
-        if (used <= 0) return;
-        final itemRow = stockList.firstWhere(
-          (i) => i.name.toLowerCase() == name.toLowerCase(),
-          orElse: () =>
-              throw Exception("Article de stock '$name' introuvable."),
-        );
-
-        // Ré-incrémenter le stock
-        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
-          StockItemsCompanion(
-            quantity: Value(itemRow.quantity + used),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
-      }
-
-      // 3. Restaurer les stocks
-      restoreStock('Manto', maintenance.sacsMantoUtilises);
-      restoreStock('Sottomanto', maintenance.sacsSottomantoUtilises);
-      restoreStock('Silice', maintenance.sacsSiliceUtilises);
-
-      // 4. Supprimer la maintenance
-      await (delete(maintenances)..where((m) => m.id.equals(maintenanceId)))
-          .go();
-    });
-  }
-
-  Future<void> updateMaintenanceWithStockAdjustment(
-    domm.Maintenance newMaintenance,
-  ) async {
-    if (newMaintenance.id == null) {
-      throw Exception('ID de maintenance requis pour la mise à jour');
-    }
-
-    return transaction(() async {
-      // 1. Récupérer l'ancienne maintenance
-      final oldMaintenance = await (select(maintenances)
-            ..where((m) => m.id.equals(newMaintenance.id!)))
-          .getSingleOrNull();
-
-      if (oldMaintenance == null) {
-        throw Exception("Maintenance originale introuvable");
-      }
-
-      // 2. Récupérer les items de stock
-      final stockList = await select(stockItems).get();
-
-      void adjustStock(String name, int oldUsed, int newUsed) {
-        final diff = newUsed - oldUsed;
-        if (diff == 0) return;
-
-        final itemRow = stockList.firstWhere(
-          (i) => i.name.toLowerCase() == name.toLowerCase(),
-          orElse: () =>
-              throw Exception("Article de stock '$name' introuvable."),
-        );
-
-        if (diff > 0) {
-          // On consomme plus -> vérifier si stock suffisant
-          if (itemRow.quantity < diff) {
-            throw Exception(
-              "Stock insuffisant pour $name (dispo: ${itemRow.quantity}, requis en plus: $diff).",
-            );
-          }
-        }
-
-        // Mise à jour du stock (diff peut être positif ou négatif)
-        // Si diff > 0, on consomme (quantité - diff)
-        // Si diff < 0, on rend (quantité - diff) car diff est négatif -> quantité + abs(diff)
-        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
-          StockItemsCompanion(
-            quantity: Value(itemRow.quantity - diff),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
-      }
-
-      // 3. Ajuster les stocks
-      adjustStock(
-        'Manto',
-        oldMaintenance.sacsMantoUtilises,
-        newMaintenance.sacsMantoUtilises,
-      );
-      adjustStock(
-        'Sottomanto',
-        oldMaintenance.sacsSottomantoUtilises,
-        newMaintenance.sacsSottomantoUtilises,
-      );
-      adjustStock(
-        'Silice',
-        oldMaintenance.sacsSiliceUtilises,
-        newMaintenance.sacsSiliceUtilises,
-      );
-
-      // 4. Mettre à jour la maintenance
-      await update(maintenances).replace(
-        MaintenancesCompanion(
-          id: Value(newMaintenance.id!),
-          terrainId: Value(newMaintenance.terrainId),
-          type: Value(newMaintenance.type),
-          date: Value(newMaintenance.date),
-          commentaire: Value(newMaintenance.commentaire),
-          sacsMantoUtilises: Value(newMaintenance.sacsMantoUtilises),
-          sacsSottomantoUtilises: Value(newMaintenance.sacsSottomantoUtilises),
-          sacsSiliceUtilises: Value(newMaintenance.sacsSiliceUtilises),
         ),
       );
     });

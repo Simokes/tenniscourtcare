@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 
 void main() {
   group('MaintenanceNotifier - Validation métier', () {
@@ -23,14 +22,6 @@ void main() {
           databaseProvider.overrideWithValue(database),
         ],
       );
-
-      // Initialiser le stock pour éviter les erreurs "Stock insuffisant"
-      // On récupère les items seedés (Manto est probablement ID 1, etc.)
-      // Pour faire propre, on cherche par nom
-      final items = await database.watchAllStockItems().first;
-      for (final item in items) {
-        await database.updateStockItem(item.copyWith(quantity: 100));
-      }
 
       // Créer des terrains de test
       terrainTerreBattueId = await database.insertTerrain(
@@ -59,7 +50,7 @@ void main() {
     });
 
     tearDown(() async {
-      container.dispose();
+      await container.dispose();
       await database.close();
     });
 
