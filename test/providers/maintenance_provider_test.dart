@@ -6,14 +6,12 @@ import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 
 void main() {
   group('MaintenanceNotifier - Validation métier', () {
     late ProviderContainer container;
     late AppDatabase database;
     late int terrainTerreBattueId;
-    late int terrainSynthetiqueId;
     late int terrainDurId;
 
     setUp(() async {
@@ -41,7 +39,8 @@ void main() {
         ),
       );
 
-      terrainSynthetiqueId = await database.insertTerrain(
+      // Synthétique non utilisé dans ces tests spécifiques
+      await database.insertTerrain(
         Terrain(
           id: 0,
           nom: 'Synthétique',

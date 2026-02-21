@@ -4,10 +4,7 @@ import 'package:drift/native.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/stats_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/stats_period_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/selected_terrains_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 
 void main() {
   group('Stats Providers - Stabilité des clés', () {
