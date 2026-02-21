@@ -78,6 +78,14 @@ class AppDatabase extends _$AppDatabase {
     return (delete(stockItems)..where((t) => t.id.equals(id))).go();
   }
 
+  Future<void> updateStockItemOrder(List<StockItemsCompanion> items) async {
+    await batch((batch) {
+      for (final item in items) {
+        batch.replace(stockItems, item);
+      }
+    });
+  }
+
   // ========== MAINTENANCES AVEC STOCK ==========
 
   Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m) async {
@@ -290,29 +298,6 @@ class AppDatabase extends _$AppDatabase {
               ..orderBy([(m) => OrderingTerm.desc(m.date)]))
             .get();
     return rows.map(_maintenanceFromRow).toList();
-  }
-
-  Future<domm.Maintenance?> getLastMajorMaintenance(int terrainId) async {
-    const majorTypes = [
-      'Recharge',
-      'Décompactage',
-      'Répartition silice',
-      'Peinture',
-      'Rénovation',
-      'Travail de ligne',
-    ];
-
-    final row =
-        await (select(maintenances)
-              ..where(
-                (m) =>
-                    m.terrainId.equals(terrainId) & m.type.isIn(majorTypes),
-              )
-              ..orderBy([(m) => OrderingTerm.desc(m.date)])
-              ..limit(1))
-            .getSingleOrNull();
-
-    return row != null ? _maintenanceFromRow(row) : null;
   }
 
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
@@ -602,7 +587,7 @@ class AppDatabase extends _$AppDatabase {
   /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
   watchDailyMaintenanceTypeCounts({
-    Set<int>? terrainIds,
+    required Set<int> terrainIds,
     int? start,
     int? end,
   }) {
@@ -611,13 +596,8 @@ class AppDatabase extends _$AppDatabase {
         maintenances.date,
         maintenances.type,
         maintenances.id.count(),
-      ]);
-
-    if (terrainIds != null && terrainIds.isNotEmpty) {
-      query.where(maintenances.terrainId.isIn(terrainIds));
-    }
-
-    query
+      ])
+      ..where(maintenances.terrainId.isIn(terrainIds))
       ..groupBy([maintenances.date, maintenances.type])
       ..orderBy([
         OrderingTerm.asc(maintenances.date),

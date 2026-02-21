@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/stock_item.dart';
+import '../../data/mappers/stock_item_mapper.dart';
 import 'database_provider.dart';
 
 enum StockFilter { all, fixed, custom, lowStock }
@@ -54,6 +55,15 @@ class StockNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> deleteItem(int id) async {
     await _ref.read(databaseProvider).deleteStockItem(id);
+  }
+
+  Future<void> reorderItems(List<StockItem> items) async {
+    // Re-index sortOrder
+    final updatedItems = items.asMap().entries.map((e) {
+      return e.value.copyWith(sortOrder: e.key).toCompanion();
+    }).toList();
+
+    await _ref.read(databaseProvider).updateStockItemOrder(updatedItems);
   }
 }
 
