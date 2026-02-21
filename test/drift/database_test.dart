@@ -4,7 +4,7 @@ import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/utils/date_utils.dart';
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 
 void main() {
   late AppDatabase database;
