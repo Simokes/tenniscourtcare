@@ -5,6 +5,7 @@ import '../../domain/entities/terrain.dart';
 import '../../data/database/app_database.dart' as db;
 import 'database_provider.dart';
 import 'terrain_provider.dart';
+import 'stock_provider.dart'; // Pour invalider les stocks
 
 /// Provider pour les maintenances d'un terrain
 final maintenancesByTerrainProvider =
@@ -23,7 +24,7 @@ final maintenanceCountProvider = FutureProvider.family<int, int>((
 });
 
 /// Notifier pour gérer les opérations CRUD sur les maintenances
-/// Contient toute la logique métier de validation
+/// Contient toute la logique métier de validation et liaison stock
 class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref _ref;
 
@@ -43,7 +44,7 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     'travail de ligne',
   ];
 
-  /// Valide les règles métier avant insertion/update
+  /// Valide les règles métier de base
   Future<void> _validateMaintenance(
     Maintenance maintenance,
     Terrain terrain,
@@ -69,17 +70,15 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
 
     // Règle métier : Dur → Aucun matériau autorisé + certains types interdits
     if (terrain.type == TerrainType.dur) {
-      // Interdire tous les matériaux
       if (maintenance.sacsMantoUtilises > 0 ||
           maintenance.sacsSottomantoUtilises > 0 ||
           maintenance.sacsSiliceUtilises > 0) {
         throw Exception(
-          'Un terrain dur ne peut pas utiliser de matériaux (manto, sottomanto ou silice)',
+          'Un terrain dur ne peut pas utiliser de matériaux',
         );
       }
 
-      // Interdire certains types de maintenance
-      if (_maintenanceTypesInterditsDur.contains(maintenance.type)) {
+      if (_maintenanceTypesInterditsDur.contains(maintenance.type.toLowerCase())) {
         throw Exception(
           'Le type de maintenance "${maintenance.type}" n\'est pas autorisé pour les terrains durs',
         );
@@ -87,27 +86,25 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  /// Ajoute une nouvelle maintenance
+  /// Ajoute une nouvelle maintenance avec vérification de stock
   Future<void> addMaintenance(Maintenance maintenance) async {
     state = const AsyncValue.loading();
 
     try {
-      // Récupérer le terrain pour validation
       final terrain = await _database.getTerrainById(maintenance.terrainId);
-      if (terrain == null) {
-        throw Exception('Terrain introuvable');
-      }
+      if (terrain == null) throw Exception('Terrain introuvable');
 
-      // Valider les règles métier
+      // 1. Validations métier classiques
       await _validateMaintenance(maintenance, terrain);
 
-      // Insérer en base
-      await _database.insertMaintenance(maintenance);
+      // 2. Insertion transactionnelle avec déduction de stock
+      await _database.insertMaintenanceWithStockCheck(maintenance);
 
-      // Invalider les providers concernés pour mise à jour réactive
+      // 3. Invalidation des caches pour rafraîchir l'UI
       _ref.invalidate(maintenancesByTerrainProvider(maintenance.terrainId));
       _ref.invalidate(maintenanceCountProvider(maintenance.terrainId));
       _ref.invalidate(terrainsProvider);
+      _ref.invalidate(stockItemsProvider); // 👈 Important : rafraîchir les stocks
 
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
@@ -117,6 +114,9 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   /// Met à jour une maintenance existante
+  /// Note: Pour l'instant, la mise à jour ne gère pas le "rollback" de stock 
+  /// (si on change les quantités d'une ancienne maintenance). 
+  /// C'est une implémentation simplifiée.
   Future<void> updateMaintenance(Maintenance maintenance) async {
     if (maintenance.id == null) {
       throw Exception('ID de maintenance requis pour la mise à jour');
@@ -125,16 +125,11 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
 
     try {
-      // Récupérer le terrain pour validation
       final terrain = await _database.getTerrainById(maintenance.terrainId);
-      if (terrain == null) {
-        throw Exception('Terrain introuvable');
-      }
+      if (terrain == null) throw Exception('Terrain introuvable');
 
-      // Valider les règles métier
       await _validateMaintenance(maintenance, terrain);
 
-      // Mettre à jour en base
       await _database.updateMaintenance(
         db.MaintenancesCompanion(
           id: Value(maintenance.id!),
@@ -148,11 +143,10 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
         ),
       );
 
-      // Invalider les providers concernés
       _ref.invalidate(maintenancesByTerrainProvider(maintenance.terrainId));
       _ref.invalidate(maintenanceCountProvider(maintenance.terrainId));
       _ref.invalidate(terrainsProvider);
-
+      
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
@@ -167,7 +161,6 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       await _database.deleteMaintenance(maintenanceId);
 
-      // Invalider les providers concernés
       _ref.invalidate(maintenancesByTerrainProvider(terrainId));
       _ref.invalidate(maintenanceCountProvider(terrainId));
       _ref.invalidate(terrainsProvider);

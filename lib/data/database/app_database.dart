@@ -7,7 +7,7 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
-import 'tables/stock_items.dart'; // Nouvelle table
+import 'tables/stock_items.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -16,7 +16,7 @@ import '../../utils/date_utils.dart'
     as cc; // éviter collision avec Flutter DateUtils
 
 import '../mappers/terrain_mapper.dart'; 
-import '../mappers/stock_item_mapper.dart'; // Nouveau mapper
+import '../mappers/stock_item_mapper.dart';
 
 part 'app_database.g.dart';
 
@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 2; // Incrémenté pour la nouvelle table
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,14 +44,13 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _seedStockItems() async {
     final now = DateTime.now();
     final items = [
-      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
-      doms.StockItem(name: 'SottoManto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
-      doms.StockItem(name: 'Scilice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
+      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now),
+      doms.StockItem(name: 'Sottomanto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 5, updatedAt: now),
+      doms.StockItem(name: 'Silice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now),
+      doms.StockItem(name: 'Balles', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 24, updatedAt: now),
       doms.StockItem(name: 'Filets', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 1, updatedAt: now),
-      doms.StockItem(name: 'Raclettes', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 10, updatedAt: now),
-      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now),
-      doms.StockItem(name: 'Sacs poubelle', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 50, updatedAt: now),
       doms.StockItem(name: 'Peinture', quantity: 0, unit: 'L', isCustom: false, minThreshold: 5, updatedAt: now),
+      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now),
     ];
     
     await batch((b) {
@@ -77,6 +76,55 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> deleteStockItem(int id) {
     return (delete(stockItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  // ========== MAINTENANCES AVEC STOCK ==========
+
+  Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m) async {
+    return transaction(() async {
+      // 1. Récupérer les items de stock
+      final stockList = await select(stockItems).get();
+      
+      void checkAndDec(String name, int used) {
+        if (used <= 0) return;
+        final itemRow = stockList.firstWhere(
+          (i) => i.name.toLowerCase() == name.toLowerCase(),
+          orElse: () => throw Exception("Article de stock '$name' introuvable."),
+        );
+        
+        if (itemRow.quantity < used) {
+          throw Exception("Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).");
+        }
+        
+        // Mise à jour de la quantité en base
+        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
+          StockItemsCompanion(
+            quantity: Value(itemRow.quantity - used),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
+      }
+
+      // 2. Si c'est une recharge, on déduit les stocks
+      if (m.type.toLowerCase().contains('recharge')) {
+        checkAndDec('Manto', m.sacsMantoUtilises);
+        checkAndDec('Sottomanto', m.sacsSottomantoUtilises);
+        checkAndDec('Silice', m.sacsSiliceUtilises);
+      }
+
+      // 3. Insérer la maintenance
+      await into(maintenances).insert(
+        MaintenancesCompanion.insert(
+          terrainId: m.terrainId,
+          type: m.type,
+          date: m.date,
+          commentaire: Value(m.commentaire),
+          sacsMantoUtilises: Value(m.sacsMantoUtilises),
+          sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
+          sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
+        ),
+      );
+    });
   }
 
   // ========== TERRAINS ==========
@@ -107,8 +155,6 @@ class AppDatabase extends _$AppDatabase {
   Future<int> deleteTerrain(int id) {
     return (delete(terrains)..where((t) => t.id.equals(id))).go();
   }
-
-
 
   // ========== MAINTENANCES ==========
 
@@ -259,6 +305,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Séries hebdomadaires (groupement côté Dart)
   Stream<List<({int weekStart, int manto, int sottomanto, int silice})>>
   watchWeeklySeries({required Set<int> terrainIds, int? start, int? end}) {
     final query = selectOnly(maintenances)
@@ -314,6 +361,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Séries mensuelles (groupement côté Dart)
   Stream<List<({int monthStart, int manto, int sottomanto, int silice})>>
   watchMonthlySeries({required Set<int> terrainIds, int? start, int? end}) {
     final query = selectOnly(maintenances)
@@ -369,6 +417,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Délégation pour les séries journalières de sacs (multi-terrains)
   Stream<List<({int date, int manto, int sottomanto, int silice})>>
   watchDailySacsSeriesForTerrains({
     required Set<int> terrainIds,
@@ -378,6 +427,7 @@ class AppDatabase extends _$AppDatabase {
     return watchDailySeries(terrainIds: terrainIds, start: start, end: end);
   }
 
+  /// Totaux mensuels pour **un** terrain donné
   Stream<({int manto, int sottomanto, int silice})>
   watchMonthlyTotalsByTerrain({
     required int terrainId,
@@ -388,6 +438,7 @@ class AppDatabase extends _$AppDatabase {
     return watchSacsTotals(terrainId: terrainId, start: start, end: end);
   }
 
+  /// Totaux mensuels pour **plusieurs** terrains
   Stream<({int manto, int sottomanto, int silice})>
   watchMonthlyTotalsAllTerrains({
     required Set<int> terrainIds,
@@ -402,6 +453,7 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
   watchDailyMaintenanceTypeCounts({
     required Set<int> terrainIds,

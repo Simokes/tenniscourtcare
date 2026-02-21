@@ -6,7 +6,7 @@ meta:
   repository_conventions:
     architecture: "Layers: data (database, mappers), domain (entities), infrastructure (weather), presentation (providers/screens/widgets/utils), main.dart"
     state_management: "Pattern Provider (ChangeNotifier/Provider ou Riverpod-like via dossier presentation/providers)"
-    persistence: "SQLite/Drift-like via lib/data/database/* (tables, app_database.dart, seed_data.dart)"
+    persistence: "SQLite/Drift-like via lib/data/database/* (tables, app_database.dart)"
     networking: "Uniquement via infrastructure/weather/weather_service.dart"
     exports: "CSV via lib/presentation/utils/csv_export*.dart"
     charts: "Bar chart/grouped chart via widgets/grouped_bar_chart.dart"
@@ -52,7 +52,6 @@ ground_truth_context:
   observed_files:
     - lib/data/database/tables/*
     - lib/data/database/app_database.dart
-    - lib/data/database/seed_data.dart
     - lib/data/mappers/terrain_mapper.dart
     - lib/domain/entities/{maintenance.dart,terrain.dart,weather_snapshot.dart}
     - lib/infrastructure/weather/weather_service.dart
@@ -116,7 +115,6 @@ tasks_playbook:
       - "Domain: étendre terrain.dart (nouveau champ, valeurs par défaut)."
       - "DB: créer migration dans tables + app_database.dart."
       - "Mapper: terrain_mapper.dart mis à jour."
-      - "Seed: seed_data.dart ajusté."
       - "Providers: terrain_provider.dart & dépendants (sélection, stats)."
       - "UI: screens/widgets impactés (affichage/édition)."
       - "Exports: csv_export*.dart pour inclure le champ."

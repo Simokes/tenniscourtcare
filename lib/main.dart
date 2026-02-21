@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/screens/home_screen.dart';
-import 'presentation/providers/seed_provider.dart';
+
 
 Future<void> main() async {
   // ✅ S'assure que les canaux plateforme (plugins) sont prêts
@@ -22,9 +22,7 @@ class CourtCareApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Initialiser les données de seed en mode debug (si ce provider déclenche des I/O,
-    // c'est désormais sûr puisque le binding est initialisé).
-    ref.watch(seedDataProvider);
+
 
     return MaterialApp(
       title: 'Court Care',
