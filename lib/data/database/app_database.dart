@@ -292,6 +292,29 @@ class AppDatabase extends _$AppDatabase {
     return rows.map(_maintenanceFromRow).toList();
   }
 
+  Future<domm.Maintenance?> getLastMajorMaintenance(int terrainId) async {
+    const majorTypes = [
+      'Recharge',
+      'Décompactage',
+      'Répartition silice',
+      'Peinture',
+      'Rénovation',
+      'Travail de ligne',
+    ];
+
+    final row =
+        await (select(maintenances)
+              ..where(
+                (m) =>
+                    m.terrainId.equals(terrainId) & m.type.isIn(majorTypes),
+              )
+              ..orderBy([(m) => OrderingTerm.desc(m.date)])
+              ..limit(1))
+            .getSingleOrNull();
+
+    return row != null ? _maintenanceFromRow(row) : null;
+  }
+
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
     final row = await (select(
       maintenances,

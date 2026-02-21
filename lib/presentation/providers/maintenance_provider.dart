@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart';
 import '../../domain/entities/maintenance.dart';
 import '../../domain/entities/terrain.dart';
 import '../../data/database/app_database.dart' as db;
@@ -22,6 +21,13 @@ final maintenanceCountProvider = FutureProvider.family<int, int>((
   final database = ref.watch(databaseProvider);
   return database.getMaintenanceCount(terrainId);
 });
+
+/// Provider pour la dernière maintenance majeure (Recharge, Gros travaux)
+final lastMajorMaintenanceProvider =
+    FutureProvider.family<Maintenance?, int>((ref, terrainId) {
+      final database = ref.watch(databaseProvider);
+      return database.getLastMajorMaintenance(terrainId);
+    });
 
 /// Notifier pour gérer les opérations CRUD sur les maintenances
 /// Contient toute la logique métier de validation et liaison stock
@@ -102,6 +108,7 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
 
       // 3. Invalidation des caches pour rafraîchir l'UI
       _ref.invalidate(maintenancesByTerrainProvider(maintenance.terrainId));
+      _ref.invalidate(lastMajorMaintenanceProvider(maintenance.terrainId));
       _ref.invalidate(maintenanceCountProvider(maintenance.terrainId));
       _ref.invalidate(terrainsProvider);
       _ref.invalidate(stockItemsProvider); // 👈 Important : rafraîchir les stocks
@@ -151,6 +158,7 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
       await _database.deleteMaintenanceWithStockRestoration(maintenanceId);
 
       _ref.invalidate(maintenancesByTerrainProvider(terrainId));
+      _ref.invalidate(lastMajorMaintenanceProvider(terrainId));
       _ref.invalidate(maintenanceCountProvider(terrainId));
       _ref.invalidate(terrainsProvider);
       _ref.invalidate(stockItemsProvider); // Rafraîchir les stocks
