@@ -33,7 +33,7 @@ void main() {
     });
 
     tearDown(() async {
-      await container.dispose();
+      container.dispose();
       await database.close();
     });
 
@@ -77,7 +77,7 @@ void main() {
     });
 
     tearDown(() async {
-      await container.dispose();
+      container.dispose();
       await database.close();
     });
 

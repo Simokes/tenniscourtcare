@@ -113,10 +113,7 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  /// Met à jour une maintenance existante
-  /// Note: Pour l'instant, la mise à jour ne gère pas le "rollback" de stock 
-  /// (si on change les quantités d'une ancienne maintenance). 
-  /// C'est une implémentation simplifiée.
+  /// Met à jour une maintenance existante avec ajustement automatique du stock
   Future<void> updateMaintenance(Maintenance maintenance) async {
     if (maintenance.id == null) {
       throw Exception('ID de maintenance requis pour la mise à jour');
@@ -130,23 +127,14 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
 
       await _validateMaintenance(maintenance, terrain);
 
-      await _database.updateMaintenance(
-        db.MaintenancesCompanion(
-          id: Value(maintenance.id!),
-          terrainId: Value(maintenance.terrainId),
-          type: Value(maintenance.type),
-          commentaire: Value(maintenance.commentaire),
-          date: Value(maintenance.date),
-          sacsMantoUtilises: Value(maintenance.sacsMantoUtilises),
-          sacsSottomantoUtilises: Value(maintenance.sacsSottomantoUtilises),
-          sacsSiliceUtilises: Value(maintenance.sacsSiliceUtilises),
-        ),
-      );
+      // Mise à jour avec ajustement intelligent du stock
+      await _database.updateMaintenanceWithStockAdjustment(maintenance);
 
       _ref.invalidate(maintenancesByTerrainProvider(maintenance.terrainId));
       _ref.invalidate(maintenanceCountProvider(maintenance.terrainId));
       _ref.invalidate(terrainsProvider);
-      
+      _ref.invalidate(stockItemsProvider); // Rafraîchir les stocks
+
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
@@ -154,16 +142,18 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  /// Supprime une maintenance
+  /// Supprime une maintenance avec restauration du stock
   Future<void> deleteMaintenance(int maintenanceId, int terrainId) async {
     state = const AsyncValue.loading();
 
     try {
-      await _database.deleteMaintenance(maintenanceId);
+      // Suppression avec restauration des quantités au stock
+      await _database.deleteMaintenanceWithStockRestoration(maintenanceId);
 
       _ref.invalidate(maintenancesByTerrainProvider(terrainId));
       _ref.invalidate(maintenanceCountProvider(terrainId));
       _ref.invalidate(terrainsProvider);
+      _ref.invalidate(stockItemsProvider); // Rafraîchir les stocks
 
       state = const AsyncValue.data(null);
     } catch (e, stackTrace) {
