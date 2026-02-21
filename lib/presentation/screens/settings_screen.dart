@@ -1,188 +1,182 @@
-// lib/presentation/screens/settings_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_settings_provider.dart';
-import 'terrains_management_screen.dart'; // 👈 Importer le nouvel écran
+import '../widgets/settings_components.dart';
+import 'edit_coords_page.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _latCtrl;
-  late final TextEditingController _lonCtrl;
-  bool _seededFromSettings = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _latCtrl = TextEditingController();
-    _lonCtrl = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _latCtrl.dispose();
-    _lonCtrl.dispose();
-    super.dispose();
-  }
-
-  String? _validateLat(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Latitude requise';
-    final d = double.tryParse(v.replaceAll(',', '.'));
-    if (d == null) return 'Nombre invalide';
-    if (d < -90 || d > 90) return 'Doit être entre -90 et 90';
-    return null;
-  }
-
-  String? _validateLon(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Longitude requise';
-    final d = double.tryParse(v.replaceAll(',', '.'));
-    if (d == null) return 'Nombre invalide';
-    if (d < -180 || d > 180) return 'Doit être entre -180 et 180';
-    return null;
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final lat = double.parse(_latCtrl.text.replaceAll(',', '.'));
-    final lon = double.parse(_lonCtrl.text.replaceAll(',', '.'));
-
-    await ref
-        .read(appSettingsProvider.notifier)
-        .setClubLocation(ClubLocation(latitude: lat, longitude: lon));
-
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Coordonnées enregistrées')),
-    );
-  }
-
-  Future<void> _delete() async {
-    await ref.read(appSettingsProvider.notifier).setClubLocation(null);
-
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Coordonnées supprimées')),
-    );
-
-    _latCtrl.text = '';
-    _lonCtrl.text = '';
-    _seededFromSettings = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = ref.watch(appSettingsProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(appSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Paramètres'),
-      ),
-      body: settings.when(
-        data: (loc) {
-          if (loc != null && !_seededFromSettings) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!mounted) return;
-              _latCtrl.text = loc.latitude.toStringAsFixed(6);
-              _lonCtrl.text = loc.longitude.toStringAsFixed(6);
-              _seededFromSettings = true;
-            });
-          }
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: ListView(
+      backgroundColor: Colors.grey.shade100,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            pinned: true,
+            expandedHeight: 120,
+            title: const Text(
+              'Paramètres',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blueGrey.shade800,
+                      Colors.blueGrey.shade500,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          SliverList(
+            delegate: SliverChildListDelegate([
+              const SizedBox(height: 16),
+
+              SettingsSection(
+                title: 'Configuration du Club',
                 children: [
-                  Text(
-                    'Coordonnées du club',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _latCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Latitude *',
-                      hintText: 'Ex: 43.552847',
-                      border: OutlineInputBorder(),
+                  settingsAsync.when(
+                    data: (coords) {
+                      final hasCoords = coords != null;
+                      return SettingsTile(
+                        icon: Icons.location_on,
+                        title: 'Coordonnées GPS',
+                        subtitle: hasCoords
+                            ? '${coords.latitude.toStringAsFixed(4)}, ${coords.longitude.toStringAsFixed(4)}'
+                            : 'Non définies',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const EditCoordsPage(),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: CircularProgressIndicator()),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      signed: true, decimal: true,
+                    error: (e, _) => Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text('Erreur: $e'),
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[-0-9\.,]')),
-                    ],
-                    validator: _validateLat,
                   ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _lonCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Longitude *',
-                      hintText: 'Ex: 7.017369',
-                      border: OutlineInputBorder(),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              SettingsSection(
+                title: 'Application',
+                children: [
+                  SettingsTile(
+                    icon: Icons.dark_mode,
+                    title: 'Mode sombre',
+                    subtitle: 'À venir',
+                    trailing: Switch(
+                      value: false,
+                      onChanged: (v) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Fonctionnalité bientôt disponible')),
+                        );
+                      },
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      signed: true, decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[-0-9\.,]')),
-                    ],
-                    validator: _validateLon,
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _delete,
-                          child: const Text('Supprimer'),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: FilledButton(
-                          onPressed: _save,
-                          child: const Text('Enregistrer'),
-                        ),
-                      ),
-                    ],
+                  const Divider(height: 1, indent: 56),
+                  SettingsTile(
+                    icon: Icons.notifications,
+                    title: 'Notifications',
+                    subtitle: 'Alertes météo et stock',
+                    trailing: Switch(value: true, onChanged: (v) {}),
                   ),
-                  const Divider(height: 48),
-                  // 🟢 NOUVELLE SECTION
-                  Text(
-                    'Données de l\'application',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  ListTile(
-                    leading: const Icon(Icons.layers_outlined),
-                    title: const Text('Gérer les terrains'),
-                    subtitle: const Text('Ajouter, modifier ou supprimer des terrains'),
-                    trailing: const Icon(Icons.chevron_right),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              SettingsSection(
+                title: 'Données',
+                children: [
+                  SettingsTile(
+                    icon: Icons.file_download,
+                    title: 'Exporter les données',
+                    subtitle: 'Format CSV',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const TerrainsManagementScreen(),
+                      // Trigger export action from here if needed, or link to Stats screen
+                       ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Allez dans l\'écran Statistiques pour exporter')),
+                        );
+                    },
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  SettingsTile(
+                    icon: Icons.delete_forever,
+                    title: 'Réinitialiser',
+                    subtitle: 'Effacer toutes les données',
+                    iconColor: Colors.red,
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Attention'),
+                          content: const Text('Voulez-vous vraiment tout effacer ? Cette action est irréversible.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Annuler'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                // TODO: Implement full reset
+                                Navigator.pop(ctx);
+                              },
+                              child: const Text('Effacer', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
                         ),
                       );
                     },
                   ),
                 ],
               ),
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Erreur: $e')),
+
+              const SizedBox(height: 40),
+
+              Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.sports_tennis,
+                      size: 48,
+                      color: Colors.grey.withValues(alpha: 0.2),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Tennis Court Care v1.0.0',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+            ]),
+          ),
+        ],
       ),
     );
   }

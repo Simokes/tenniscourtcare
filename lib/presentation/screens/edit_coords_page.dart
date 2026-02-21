@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/terrain.dart';
-import '../providers/terrain_provider.dart';
+import '../providers/app_settings_provider.dart';
 
 class EditCoordsPage extends ConsumerStatefulWidget {
-  final Terrain terrain;
-  const EditCoordsPage({super.key, required this.terrain});
+  const EditCoordsPage({super.key});
 
   @override
   ConsumerState<EditCoordsPage> createState() => _EditCoordsPageState();
@@ -21,8 +19,9 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
   @override
   void initState() {
     super.initState();
-    _latCtrl = TextEditingController(text: widget.terrain.latitude?.toStringAsFixed(6) ?? '');
-    _lonCtrl = TextEditingController(text: widget.terrain.longitude?.toStringAsFixed(6) ?? '');
+    final current = ref.read(appSettingsProvider).value;
+    _latCtrl = TextEditingController(text: current?.latitude.toStringAsFixed(6) ?? '');
+    _lonCtrl = TextEditingController(text: current?.longitude.toStringAsFixed(6) ?? '');
   }
 
   @override
@@ -54,10 +53,8 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
     final lat = double.parse(_latCtrl.text.replaceAll(',', '.'));
     final lon = double.parse(_lonCtrl.text.replaceAll(',', '.'));
 
-    final updated = widget.terrain.copyWith(latitude: lat, longitude: lon);
-
     try {
-      await ref.read(updateTerrainProvider)(updated);
+      await ref.read(appSettingsProvider.notifier).setCoordinates(lat, lon);
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
@@ -72,7 +69,7 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Coordonnées - ${widget.terrain.nom}'),
+        title: const Text('Coordonnées du Club'),
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
@@ -87,7 +84,10 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
           key: _formKey,
           child: ListView(
             children: [
-              Text('Type : ${widget.terrain.type.displayName}'),
+              Text(
+                'Définissez les coordonnées GPS du club pour obtenir la météo précise.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _latCtrl,
