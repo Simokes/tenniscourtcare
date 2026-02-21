@@ -7,67 +7,108 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
+import 'tables/stock_items.dart'; // Nouvelle table
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
+import '../../domain/entities/stock_item.dart' as doms;
 import '../../utils/date_utils.dart'
     as cc; // éviter collision avec Flutter DateUtils
 
-import '../mappers/terrain_mapper.dart'; // contient row.toDomain() & domain.toCompanion()
+import '../mappers/terrain_mapper.dart'; 
+import '../mappers/stock_item_mapper.dart'; // Nouveau mapper
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Terrains, Maintenances])
+@DriftDatabase(tables: [Terrains, Maintenances, StockItems])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2; // Incrémenté pour la nouvelle table
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) async => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      await _seedStockItems();
+    },
     onUpgrade: (m, from, to) async {
-      // migrations futures
+      if (from < 2) {
+        await m.createTable(stockItems);
+        await _seedStockItems();
+      }
     },
   );
 
-  // ========== TERRAINS ==========
-
-  /// Récupérer tous les terrains -> type domaine
-  Future<List<dom.Terrain>> getAllTerrains() async {
-    final rows = await select(terrains).get(); // List<TerrainRow>
-    return rows.map((r) => r.toDomain()).toList(); // List<dom.Terrain>
+  Future<void> _seedStockItems() async {
+    final now = DateTime.now();
+    final items = [
+      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
+      doms.StockItem(name: 'SottoManto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
+      doms.StockItem(name: 'Scilice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 24, updatedAt: now),
+      doms.StockItem(name: 'Filets', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 1, updatedAt: now),
+      doms.StockItem(name: 'Raclettes', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 10, updatedAt: now),
+      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now),
+      doms.StockItem(name: 'Sacs poubelle', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 50, updatedAt: now),
+      doms.StockItem(name: 'Peinture', quantity: 0, unit: 'L', isCustom: false, minThreshold: 5, updatedAt: now),
+    ];
+    
+    await batch((b) {
+      b.insertAll(stockItems, items.map((i) => i.toCompanion()).toList());
+    });
   }
 
-  /// Récupérer un terrain par id -> type domaine
+  // ========== STOCK ITEMS ==========
+
+  Stream<List<doms.StockItem>> watchAllStockItems() {
+    return (select(stockItems)..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .watch()
+        .map((rows) => rows.map((r) => r.toDomain()).toList());
+  }
+
+  Future<int> insertStockItem(doms.StockItem item) {
+    return into(stockItems).insert(item.toCompanion());
+  }
+
+  Future<bool> updateStockItem(doms.StockItem item) {
+    return update(stockItems).replace(item.toCompanion());
+  }
+
+  Future<int> deleteStockItem(int id) {
+    return (delete(stockItems)..where((t) => t.id.equals(id))).go();
+  }
+
+  // ========== TERRAINS ==========
+
+  Future<List<dom.Terrain>> getAllTerrains() async {
+    final rows = await select(terrains).get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
+
   Future<dom.Terrain?> getTerrainById(int id) async {
     final row = await (select(
       terrains,
-    )..where((t) => t.id.equals(id))).getSingleOrNull(); // TerrainRow?
-    return row?.toDomain(); // dom.Terrain?
+    )..where((t) => t.id.equals(id))).getSingleOrNull();
+    return row?.toDomain();
   }
 
-  /// INSERT (retourne l'id auto-incrémenté)
   Future<int> insertTerrain(dom.Terrain terrain) {
-    // on n’envoie pas l’id (autoIncrement)
     final companion = terrain.toCompanion(includeId: false);
     return into(terrains).insert(companion);
   }
 
-  // UPDATE ciblé par id (WHERE + write)
-  // write(...) -> Future<int> (nb de lignes affectées)
   Future<int> updateTerrain(dom.Terrain terrain) {
     return (update(terrains)..where((t) => t.id.equals(terrain.id))).write(
       terrain.toCompanion(includeId: false),
     );
   }
 
-  // DELETE par id
-  // go() -> Future<int> (nb de lignes supprimées)
   Future<int> deleteTerrain(int id) {
     return (delete(terrains)..where((t) => t.id.equals(id))).go();
   }
+
+
 
   // ========== MAINTENANCES ==========
 
@@ -78,44 +119,39 @@ class AppDatabase extends _$AppDatabase {
         await (select(maintenances)
               ..where((m) => m.terrainId.equals(terrainId))
               ..orderBy([(m) => OrderingTerm.desc(m.date)]))
-            .get(); // List<MaintenanceRow>
+            .get();
     return rows.map(_maintenanceFromRow).toList();
   }
 
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
     final row = await (select(
       maintenances,
-    )..where((m) => m.id.equals(id))).getSingleOrNull(); // MaintenanceRow?
+    )..where((m) => m.id.equals(id))).getSingleOrNull();
     return row != null ? _maintenanceFromRow(row) : null;
   }
 
   Future<int> insertMaintenance(domm.Maintenance m) {
     return into(maintenances).insert(
       MaintenancesCompanion.insert(
-        terrainId: m.terrainId, // int brut (obligatoire)
-        type: m.type, // String brut (obligatoire)
-        date: m.date, // int brut (obligatoire)
-        commentaire: Value(m.commentaire), // Value<String?> (nullable)
-        sacsMantoUtilises: Value(
-          m.sacsMantoUtilises,
-        ), // Value<int> si colonne a un default
+        terrainId: m.terrainId,
+        type: m.type,
+        date: m.date,
+        commentaire: Value(m.commentaire),
+        sacsMantoUtilises: Value(m.sacsMantoUtilises),
         sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
         sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
       ),
     );
   }
 
-  // write(...) -> Future<int>
   Future<int> updateMaintenance(MaintenancesCompanion companion) {
     return update(maintenances).write(companion);
   }
 
-  // go() -> Future<int>
   Future<int> deleteMaintenance(int id) {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
   }
 
-  /// Mapping DB -> Domaine (row Maintenance -> entity)
   domm.Maintenance _maintenanceFromRow(MaintenanceRow row) {
     return domm.Maintenance(
       id: row.id,
@@ -131,7 +167,6 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== WATCHERS & AGRÉGATIONS ==========
 
-  /// Totaux de sacs, avec filtres optionnels
   Stream<({int manto, int sottomanto, int silice})> watchSacsTotals({
     int? terrainId,
     int? start,
@@ -163,7 +198,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Totaux de sacs pour plusieurs terrains
   Stream<({int manto, int sottomanto, int silice})> watchSacsTotalsAllTerrains({
     required Set<int> terrainIds,
     int? start,
@@ -193,7 +227,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Séries journalières (par jour)
   Stream<List<({int date, int manto, int sottomanto, int silice})>>
   watchDailySeries({required Set<int> terrainIds, int? start, int? end}) {
     final query = selectOnly(maintenances)
@@ -226,7 +259,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Séries hebdomadaires (groupement côté Dart)
   Stream<List<({int weekStart, int manto, int sottomanto, int silice})>>
   watchWeeklySeries({required Set<int> terrainIds, int? start, int? end}) {
     final query = selectOnly(maintenances)
@@ -282,7 +314,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Séries mensuelles (groupement côté Dart)
   Stream<List<({int monthStart, int manto, int sottomanto, int silice})>>
   watchMonthlySeries({required Set<int> terrainIds, int? start, int? end}) {
     final query = selectOnly(maintenances)
@@ -338,7 +369,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Délégation pour les séries journalières de sacs (multi-terrains)
   Stream<List<({int date, int manto, int sottomanto, int silice})>>
   watchDailySacsSeriesForTerrains({
     required Set<int> terrainIds,
@@ -348,7 +378,6 @@ class AppDatabase extends _$AppDatabase {
     return watchDailySeries(terrainIds: terrainIds, start: start, end: end);
   }
 
-  /// Totaux mensuels pour **un** terrain donné
   Stream<({int manto, int sottomanto, int silice})>
   watchMonthlyTotalsByTerrain({
     required int terrainId,
@@ -359,7 +388,6 @@ class AppDatabase extends _$AppDatabase {
     return watchSacsTotals(terrainId: terrainId, start: start, end: end);
   }
 
-  /// Totaux mensuels pour **plusieurs** terrains
   Stream<({int manto, int sottomanto, int silice})>
   watchMonthlyTotalsAllTerrains({
     required Set<int> terrainIds,
@@ -374,7 +402,6 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
   watchDailyMaintenanceTypeCounts({
     required Set<int> terrainIds,
@@ -414,7 +441,6 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Compte le nombre de maintenances pour un terrain
   Future<int> getMaintenanceCount(int terrainId) async {
     final result =
         await (selectOnly(maintenances)
@@ -427,7 +453,6 @@ class AppDatabase extends _$AppDatabase {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    // sqlite3_flutter_libs pour Android/iOS
     if (Platform.isAndroid || Platform.isIOS) {
       await applyWorkaroundToOpenSqlite3OnOldAndroidVersions();
     }

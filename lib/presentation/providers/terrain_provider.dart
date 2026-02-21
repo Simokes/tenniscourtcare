@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import 'database_provider.dart';
 
+
 /// Provider pour la liste de tous les terrains
 final terrainsProvider = FutureProvider<List<Terrain>>((ref) {
   final database = ref.watch(databaseProvider);
@@ -24,5 +25,22 @@ final updateTerrainProvider = Provider<Future<void> Function(Terrain)>((ref) {
     ref.invalidate(terrainsProvider);
     // Ré-invalide aussi le terrain individuel correspondant
     ref.invalidate(terrainProvider(updated.id));
+  };
+});
+
+/// Action d'ajout : Convertit les Strings du formulaire en objet Terrain
+final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>((ref) {
+  return (String name, TerrainType type) async {
+    final db = ref.read(databaseProvider);
+
+    // On crée l'objet Terrain avec le bon type (TerrainType)
+    final newTerrain = Terrain(
+      id: 0,
+      nom: name,
+      type: type, // Utilise l'énumération ici
+    );
+
+    await db.insertTerrain(newTerrain);
+    ref.invalidate(terrainsProvider);
   };
 });

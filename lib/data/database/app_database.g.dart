@@ -764,17 +764,536 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   }
 }
 
+class $StockItemsTable extends StockItems
+    with TableInfo<$StockItemsTable, StockItemRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StockItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<int> quantity = GeneratedColumn<int>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _commentMeta = const VerificationMeta(
+    'comment',
+  );
+  @override
+  late final GeneratedColumn<String> comment = GeneratedColumn<String>(
+    'comment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isCustomMeta = const VerificationMeta(
+    'isCustom',
+  );
+  @override
+  late final GeneratedColumn<bool> isCustom = GeneratedColumn<bool>(
+    'is_custom',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_custom" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _minThresholdMeta = const VerificationMeta(
+    'minThreshold',
+  );
+  @override
+  late final GeneratedColumn<int> minThreshold = GeneratedColumn<int>(
+    'min_threshold',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    quantity,
+    unit,
+    comment,
+    isCustom,
+    minThreshold,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stock_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StockItemRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('comment')) {
+      context.handle(
+        _commentMeta,
+        comment.isAcceptableOrUnknown(data['comment']!, _commentMeta),
+      );
+    }
+    if (data.containsKey('is_custom')) {
+      context.handle(
+        _isCustomMeta,
+        isCustom.isAcceptableOrUnknown(data['is_custom']!, _isCustomMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_isCustomMeta);
+    }
+    if (data.containsKey('min_threshold')) {
+      context.handle(
+        _minThresholdMeta,
+        minThreshold.isAcceptableOrUnknown(
+          data['min_threshold']!,
+          _minThresholdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StockItemRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StockItemRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      comment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}comment'],
+      ),
+      isCustom: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_custom'],
+      )!,
+      minThreshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}min_threshold'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StockItemsTable createAlias(String alias) {
+    return $StockItemsTable(attachedDatabase, alias);
+  }
+}
+
+class StockItemRow extends DataClass implements Insertable<StockItemRow> {
+  final int id;
+  final String name;
+  final int quantity;
+  final String unit;
+  final String? comment;
+  final bool isCustom;
+  final int? minThreshold;
+  final DateTime updatedAt;
+  const StockItemRow({
+    required this.id,
+    required this.name,
+    required this.quantity,
+    required this.unit,
+    this.comment,
+    required this.isCustom,
+    this.minThreshold,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['quantity'] = Variable<int>(quantity);
+    map['unit'] = Variable<String>(unit);
+    if (!nullToAbsent || comment != null) {
+      map['comment'] = Variable<String>(comment);
+    }
+    map['is_custom'] = Variable<bool>(isCustom);
+    if (!nullToAbsent || minThreshold != null) {
+      map['min_threshold'] = Variable<int>(minThreshold);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  StockItemsCompanion toCompanion(bool nullToAbsent) {
+    return StockItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      quantity: Value(quantity),
+      unit: Value(unit),
+      comment: comment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(comment),
+      isCustom: Value(isCustom),
+      minThreshold: minThreshold == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minThreshold),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory StockItemRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StockItemRow(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      quantity: serializer.fromJson<int>(json['quantity']),
+      unit: serializer.fromJson<String>(json['unit']),
+      comment: serializer.fromJson<String?>(json['comment']),
+      isCustom: serializer.fromJson<bool>(json['isCustom']),
+      minThreshold: serializer.fromJson<int?>(json['minThreshold']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'quantity': serializer.toJson<int>(quantity),
+      'unit': serializer.toJson<String>(unit),
+      'comment': serializer.toJson<String?>(comment),
+      'isCustom': serializer.toJson<bool>(isCustom),
+      'minThreshold': serializer.toJson<int?>(minThreshold),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  StockItemRow copyWith({
+    int? id,
+    String? name,
+    int? quantity,
+    String? unit,
+    Value<String?> comment = const Value.absent(),
+    bool? isCustom,
+    Value<int?> minThreshold = const Value.absent(),
+    DateTime? updatedAt,
+  }) => StockItemRow(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    quantity: quantity ?? this.quantity,
+    unit: unit ?? this.unit,
+    comment: comment.present ? comment.value : this.comment,
+    isCustom: isCustom ?? this.isCustom,
+    minThreshold: minThreshold.present ? minThreshold.value : this.minThreshold,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  StockItemRow copyWithCompanion(StockItemsCompanion data) {
+    return StockItemRow(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      comment: data.comment.present ? data.comment.value : this.comment,
+      isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
+      minThreshold: data.minThreshold.present
+          ? data.minThreshold.value
+          : this.minThreshold,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockItemRow(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('comment: $comment, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('minThreshold: $minThreshold, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    quantity,
+    unit,
+    comment,
+    isCustom,
+    minThreshold,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StockItemRow &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.comment == this.comment &&
+          other.isCustom == this.isCustom &&
+          other.minThreshold == this.minThreshold &&
+          other.updatedAt == this.updatedAt);
+}
+
+class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> quantity;
+  final Value<String> unit;
+  final Value<String?> comment;
+  final Value<bool> isCustom;
+  final Value<int?> minThreshold;
+  final Value<DateTime> updatedAt;
+  const StockItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.comment = const Value.absent(),
+    this.isCustom = const Value.absent(),
+    this.minThreshold = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  StockItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.quantity = const Value.absent(),
+    required String unit,
+    this.comment = const Value.absent(),
+    required bool isCustom,
+    this.minThreshold = const Value.absent(),
+    required DateTime updatedAt,
+  }) : name = Value(name),
+       unit = Value(unit),
+       isCustom = Value(isCustom),
+       updatedAt = Value(updatedAt);
+  static Insertable<StockItemRow> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? quantity,
+    Expression<String>? unit,
+    Expression<String>? comment,
+    Expression<bool>? isCustom,
+    Expression<int>? minThreshold,
+    Expression<DateTime>? updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (comment != null) 'comment': comment,
+      if (isCustom != null) 'is_custom': isCustom,
+      if (minThreshold != null) 'min_threshold': minThreshold,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
+  StockItemsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? quantity,
+    Value<String>? unit,
+    Value<String?>? comment,
+    Value<bool>? isCustom,
+    Value<int?>? minThreshold,
+    Value<DateTime>? updatedAt,
+  }) {
+    return StockItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      comment: comment ?? this.comment,
+      isCustom: isCustom ?? this.isCustom,
+      minThreshold: minThreshold ?? this.minThreshold,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<int>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (comment.present) {
+      map['comment'] = Variable<String>(comment.value);
+    }
+    if (isCustom.present) {
+      map['is_custom'] = Variable<bool>(isCustom.value);
+    }
+    if (minThreshold.present) {
+      map['min_threshold'] = Variable<int>(minThreshold.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('comment: $comment, ')
+          ..write('isCustom: $isCustom, ')
+          ..write('minThreshold: $minThreshold, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TerrainsTable terrains = $TerrainsTable(this);
   late final $MaintenancesTable maintenances = $MaintenancesTable(this);
+  late final $StockItemsTable stockItems = $StockItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [terrains, maintenances];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    terrains,
+    maintenances,
+    stockItems,
+  ];
 }
 
 typedef $$TerrainsTableCreateCompanionBuilder =
@@ -1181,6 +1700,259 @@ typedef $$MaintenancesTableProcessedTableManager =
       MaintenanceRow,
       PrefetchHooks Function()
     >;
+typedef $$StockItemsTableCreateCompanionBuilder =
+    StockItemsCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int> quantity,
+      required String unit,
+      Value<String?> comment,
+      required bool isCustom,
+      Value<int?> minThreshold,
+      required DateTime updatedAt,
+    });
+typedef $$StockItemsTableUpdateCompanionBuilder =
+    StockItemsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> quantity,
+      Value<String> unit,
+      Value<String?> comment,
+      Value<bool> isCustom,
+      Value<int?> minThreshold,
+      Value<DateTime> updatedAt,
+    });
+
+class $$StockItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $StockItemsTable> {
+  $$StockItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minThreshold => $composableBuilder(
+    column: $table.minThreshold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StockItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StockItemsTable> {
+  $$StockItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get comment => $composableBuilder(
+    column: $table.comment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCustom => $composableBuilder(
+    column: $table.isCustom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minThreshold => $composableBuilder(
+    column: $table.minThreshold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StockItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StockItemsTable> {
+  $$StockItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get comment =>
+      $composableBuilder(column: $table.comment, builder: (column) => column);
+
+  GeneratedColumn<bool> get isCustom =>
+      $composableBuilder(column: $table.isCustom, builder: (column) => column);
+
+  GeneratedColumn<int> get minThreshold => $composableBuilder(
+    column: $table.minThreshold,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$StockItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StockItemsTable,
+          StockItemRow,
+          $$StockItemsTableFilterComposer,
+          $$StockItemsTableOrderingComposer,
+          $$StockItemsTableAnnotationComposer,
+          $$StockItemsTableCreateCompanionBuilder,
+          $$StockItemsTableUpdateCompanionBuilder,
+          (
+            StockItemRow,
+            BaseReferences<_$AppDatabase, $StockItemsTable, StockItemRow>,
+          ),
+          StockItemRow,
+          PrefetchHooks Function()
+        > {
+  $$StockItemsTableTableManager(_$AppDatabase db, $StockItemsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StockItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StockItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StockItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String?> comment = const Value.absent(),
+                Value<bool> isCustom = const Value.absent(),
+                Value<int?> minThreshold = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+              }) => StockItemsCompanion(
+                id: id,
+                name: name,
+                quantity: quantity,
+                unit: unit,
+                comment: comment,
+                isCustom: isCustom,
+                minThreshold: minThreshold,
+                updatedAt: updatedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<int> quantity = const Value.absent(),
+                required String unit,
+                Value<String?> comment = const Value.absent(),
+                required bool isCustom,
+                Value<int?> minThreshold = const Value.absent(),
+                required DateTime updatedAt,
+              }) => StockItemsCompanion.insert(
+                id: id,
+                name: name,
+                quantity: quantity,
+                unit: unit,
+                comment: comment,
+                isCustom: isCustom,
+                minThreshold: minThreshold,
+                updatedAt: updatedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StockItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StockItemsTable,
+      StockItemRow,
+      $$StockItemsTableFilterComposer,
+      $$StockItemsTableOrderingComposer,
+      $$StockItemsTableAnnotationComposer,
+      $$StockItemsTableCreateCompanionBuilder,
+      $$StockItemsTableUpdateCompanionBuilder,
+      (
+        StockItemRow,
+        BaseReferences<_$AppDatabase, $StockItemsTable, StockItemRow>,
+      ),
+      StockItemRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1189,4 +1961,6 @@ class $AppDatabaseManager {
       $$TerrainsTableTableManager(_db, _db.terrains);
   $$MaintenancesTableTableManager get maintenances =>
       $$MaintenancesTableTableManager(_db, _db.maintenances);
+  $$StockItemsTableTableManager get stockItems =>
+      $$StockItemsTableTableManager(_db, _db.stockItems);
 }

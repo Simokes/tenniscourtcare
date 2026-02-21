@@ -8,12 +8,14 @@ import 'stats_screen.dart';
 import 'weather_screen.dart';
 import '../../domain/entities/terrain.dart';
 import 'settings_screen.dart';
+import 'stock_screen.dart';
+import '../screens/add_terrain_screen.dart';
+
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   /// Ouvre l'écran météo en utilisant la coordonnée "club" (globale).
-  /// On prend juste le type du premier terrain (ou de celui que tu voudras).
   void _openWeatherForFirstTerrainWithCoords(BuildContext context, WidgetRef ref) {
     final terrains = ref.read(terrainsProvider).maybeWhen(
       data: (list) => list,
@@ -22,12 +24,11 @@ class HomeScreen extends ConsumerWidget {
 
     if (terrains.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aucun terrain disponible')),
+        const SnackBar(content: Text('Aucun terrain disponible pour la météo')),
       );
       return;
     }
 
-    // On prend un terrain pour connaître son type (la météo se base sur la coordonnée du club)
     final Terrain picked = terrains.first;
 
     Navigator.push(
@@ -35,7 +36,7 @@ class HomeScreen extends ConsumerWidget {
       MaterialPageRoute(
         builder: (_) => WeatherScreen(
           titre: 'Météo du club',
-          terrainType: picked.type, // ✅ fix: t.type -> picked.type
+          terrainType: picked.type,
         ),
       ),
     );
@@ -44,9 +45,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final terrainsAsync = ref.watch(terrainsProvider);
-
     final monthKey = DateTime(DateTime.now().year, DateTime.now().month);
-
     final monthlyTotalsAsync = ref.watch(
       monthlyTotalsAllTerrainsProvider(monthKey),
     );
@@ -54,31 +53,87 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Court Care'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.wb_sunny_outlined),
-            onPressed: () => _openWeatherForFirstTerrainWithCoords(context, ref),
-          ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StatsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Paramètres',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.sports_tennis,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Court Care',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: const Text('Gestion du Stock'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StockScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.wb_sunny_outlined),
+              title: const Text('Météo du club'),
+              onTap: () {
+                Navigator.pop(context);
+                _openWeatherForFirstTerrainWithCoords(context, ref);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.bar_chart),
+              title: const Text('Statistiques'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StatsScreen()),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Paramètres'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                );
+              },
+            ),
+            const Spacer(),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'v1.0.0',
+                style: TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ),
+          ],
+        ),
       ),
       body: terrainsAsync.when(
         data: (terrains) {
@@ -90,9 +145,12 @@ class HomeScreen extends ConsumerWidget {
                   const Text('Aucun terrain enregistré'),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      // TODO: Ajouter un terrain
-                    },
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AddTerrainScreen()),
+                        );
+                      },
                     child: const Text('Ajouter un terrain'),
                   ),
                 ],
@@ -102,7 +160,6 @@ class HomeScreen extends ConsumerWidget {
 
           return Column(
             children: [
-              // Carte des totaux du mois
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Card(
@@ -133,7 +190,6 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              // Liste des terrains
               Expanded(
                 child: ListView.builder(
                   itemCount: terrains.length,

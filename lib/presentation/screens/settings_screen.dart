@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_settings_provider.dart';
+import 'terrains_management_screen.dart'; // 👈 Importer le nouvel écran
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -83,24 +84,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramètres'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _save,
-            tooltip: 'Enregistrer',
-          ),
-        ],
       ),
       body: settings.when(
         data: (loc) {
-          // Seed des champs une seule fois quand les données arrivent
           if (loc != null && !_seededFromSettings) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
               _latCtrl.text = loc.latitude.toStringAsFixed(6);
               _lonCtrl.text = loc.longitude.toStringAsFixed(6);
               _seededFromSettings = true;
-              setState(() {}); // si tu veux re-peindre, sinon pas indispensable
             });
           }
           return Padding(
@@ -110,7 +102,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: ListView(
                 children: [
                   Text(
-                    'Coordonnées du club (utilisées pour tous les terrains)',
+                    'Coordonnées du club',
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
@@ -118,7 +110,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: _latCtrl,
                     decoration: const InputDecoration(
                       labelText: 'Latitude *',
-                      hintText: 'Ex: 43.552847 (Cannes)',
+                      hintText: 'Ex: 43.552847',
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -134,7 +126,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     controller: _lonCtrl,
                     decoration: const InputDecoration(
                       labelText: 'Longitude *',
-                      hintText: 'Ex: 7.017369 (Cannes)',
+                      hintText: 'Ex: 7.017369',
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
@@ -145,17 +137,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                     validator: _validateLon,
                   ),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: _save,
-                    icon: const Icon(Icons.check),
-                    label: const Text('Enregistrer'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _delete,
+                          child: const Text('Supprimer'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: _save,
+                          child: const Text('Enregistrer'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  OutlinedButton.icon(
-                    onPressed: _delete,
-                    icon: const Icon(Icons.delete),
-                    label: const Text('Supprimer la coordonnée'),
+                  const Divider(height: 48),
+                  // 🟢 NOUVELLE SECTION
+                  Text(
+                    'Données de l\'application',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  ListTile(
+                    leading: const Icon(Icons.layers_outlined),
+                    title: const Text('Gérer les terrains'),
+                    subtitle: const Text('Ajouter, modifier ou supprimer des terrains'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const TerrainsManagementScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

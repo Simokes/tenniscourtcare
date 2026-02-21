@@ -17,7 +17,7 @@ final _terrainIdsProvider = Provider<Set<int>>((ref) {
   return terrainsAsync.when(
     data: (terrains) => terrains.map((t) => t.id).toSet(),
     loading: () => <int>{}, // <- Set<int> vide
-    error: (_, __) => <int>{}, // <- Set<int> vide
+    error: (_, _) => <int>{}, // <- Set<int> vide
   );
 });
 
