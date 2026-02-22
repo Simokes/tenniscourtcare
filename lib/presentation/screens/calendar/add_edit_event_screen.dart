@@ -6,6 +6,7 @@ import '../../providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../widgets/premium/premium_card.dart';
 import '../../widgets/premium/premium_text_form_field.dart';
+import '../../widgets/premium/premium_button.dart';
 
 class AddEditEventScreen extends ConsumerStatefulWidget {
   final AppEvent? eventToEdit;
@@ -360,20 +361,11 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
 
               const SizedBox(height: 32),
               SizedBox(
-                height: 56,
-                child: ElevatedButton(
+                width: double.infinity,
+                child: PremiumButton(
+                  label: 'ENREGISTRER',
                   onPressed: _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
-                  ),
-                  child: const Text(
-                    'ENREGISTRER',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
-                  ),
+                  icon: Icons.check,
                 ),
               ),
               const SizedBox(height: 32),
