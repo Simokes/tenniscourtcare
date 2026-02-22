@@ -9,6 +9,7 @@ import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
 import 'tables/stock_items.dart';
 import 'tables/users_table.dart';
+import 'tables/events_table.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -23,12 +24,12 @@ import '../mappers/user_mapper.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users])
+@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users, Events])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,6 +48,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.addColumn(stockItems, stockItems.category);
         await m.addColumn(stockItems, stockItems.sortOrder);
+      }
+      if (from < 5) {
+        await m.createTable(events);
       }
     },
   );
@@ -376,6 +380,14 @@ class AppDatabase extends _$AppDatabase {
               ..orderBy([(m) => OrderingTerm.desc(m.date)]))
             .get();
     return rows.map(_maintenanceFromRow).toList();
+  }
+
+  Stream<List<domm.Maintenance>> watchMaintenancesInRange(int start, int end) {
+    return (select(maintenances)
+          ..where((m) => m.date.isBetweenValues(start, end))
+          ..orderBy([(m) => OrderingTerm.asc(m.date)]))
+        .watch()
+        .map((rows) => rows.map(_maintenanceFromRow).toList());
   }
 
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
