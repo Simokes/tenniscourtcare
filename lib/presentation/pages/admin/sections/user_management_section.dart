@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/user_providers.dart';
 import '../../../../domain/enums/role.dart';
-import '../../widgets/premium/premium_card.dart';
+import '../../../widgets/premium/premium_card.dart';
 
 class UserManagementSection extends ConsumerWidget {
   const UserManagementSection({super.key});

@@ -1,72 +1,73 @@
-# CourtCare 🎾
+# Court Care 🎾
 
-**CourtCare** est une application mobile Flutter conçue pour simplifier la gestion et le suivi de la maintenance des courts de tennis. Elle permet aux responsables de clubs de suivre précisément l'utilisation des matériaux (manto, sottomanto, silice) et d'anticiper les besoins de maintenance en fonction de la météo.
+**Court Care** est une application Flutter moderne conçue pour simplifier la gestion et le suivi de la maintenance des courts de tennis. Elle permet aux responsables de clubs de suivre précisément l'utilisation des matériaux, d'analyser les statistiques de maintenance et d'anticiper les besoins en fonction de la météo.
 
 ## 🏗️ Architecture
-L'application suit une architecture en couches stricte pour garantir la maintenabilité et la testabilité :
-- **Domain** : Entités métiers immutables et logique pure.
-- **Data** : Persistance locale avec **Drift (SQLite)** et mappers pour la conversion Domaine/DB.
-- **Infrastructure** : Services externes (API Météo).
-- **Presentation** : État géré par **Riverpod (v2)** et interface utilisateur réactive.
+L'application suit une architecture en couches (Clean Architecture simplifiée) pour garantir la maintenabilité et la testabilité :
+- **Domain** : Entités métier (Terrain, Maintenance, StockItem) et logique pure.
+- **Data** : Persistance locale avec **Drift (SQLite)**, mappers et implémentations de repositories.
+- **Infrastructure** : Services externes (API Météo via Open-Meteo).
+- **Presentation** : Interface utilisateur réactive avec **Riverpod** pour la gestion d'état et **GoRouter** pour la navigation.
+- **Utils** : Utilitaires pour les dates, l'export CSV, etc.
 
-## 🚀 Fonctionnalités Actuelles
+## 🚀 Fonctionnalités Clés
 
-### 📊 Tableau de Bord (Home)
-- Vue d'ensemble des terrains du club.
-- Résumé des consommations de matériaux pour le mois en cours.
-- Navigation centralisée via un menu latéral (Drawer).
+### 📊 Tableau de Bord & Statistiques
+- Vue d'ensemble de l'activité du club.
+- Graphiques détaillés (via `fl_chart`) sur l'utilisation des sacs (Manto, Sottomanto, Silice) et les types de maintenance.
+- Filtres par période (jour, semaine, mois) et par terrain.
 
 ### 🛠️ Gestion des Maintenances
-- Enregistrement des opérations (Arrosage, Brossage, Recharge, etc.).
-- **Règles métier intelligentes** : Validation automatique des matériaux selon le type de surface (Terre battue, Synthétique, Dur).
-- Historique complet par terrain.
+- Enregistrement précis des opérations (Arrosage, Brossage, Recharge, etc.).
+- **Liaison intelligente avec le Stock** : L'ajout d'une "Recharge" déduit automatiquement les sacs du stock avec validation de disponibilité.
+- Historique complet et filtrable par court.
 
 ### 📦 Gestion du Stock
-- Suivi du matériel fixe et des consommables personnalisés.
-- Ajustement rapide des quantités (±1 / ±5).
-- **Alertes Stock Bas** : Indicateurs visuels basés sur des seuils minimums configurables.
-- Recherche et filtrage dynamique.
+- Suivi en temps réel des consommables (Manto, Sottomanto, Silice) et du matériel.
+- Alertes visuelles de stock bas basées sur des seuils configurables.
+- Ajustements rapides (+1/-1, +5/-5).
 
-### 🌦️ Intégration Météo
-- Récupération en temps réel des conditions météo (température, humidité, précipitations).
-- Heuristiques métier pour déterminer si un terrain est gelé ou impraticable.
-- Enregistrement d'un "snapshot" météo lors de chaque maintenance.
+### 🌦️ Météo & Heuristiques
+- Intégration de la météo locale pour chaque club (coordonnées GPS configurables).
+- Indicateurs métier : terrain gelé ou impraticable basés sur les précipitations et la température.
+- Snapshot météo enregistré avec chaque maintenance.
 
-### ⚙️ Configuration & Export
-- Paramétrage des coordonnées GPS du club pour une météo précise.
-- Gestion complète du parc de terrains (Ajout/Modification/Suppression).
-- **Export CSV** : Exportation des données de maintenance pour analyse externe.
+### 🔐 Sécurité & Paramètres
+- Système d'authentification sécurisé.
+- Configuration des coordonnées du club.
+- Gestion du parc de terrains (ajout, modification, suppression).
 
 ## 🛠️ Stack Technique
 - **Framework** : Flutter
-- **Gestion d'état** : Riverpod
+- **État** : Riverpod (StateNotifier, Stream/FutureProvider)
 - **Base de données** : Drift (SQLite)
-- **Localisation** : Intl
-- **API Météo** : Open-Meteo
+- **Navigation** : GoRouter
+- **Graphiques** : fl_chart
+- **Design** : Material 3, Google Fonts (Inter)
 
-## 📅 Roadmap & Futures Implémentations
+## 📅 Roadmap & Évolutions
 
-### 🟢 Court Terme (Prochaines étapes)
-- [ ] **Historique des Stocks** : Journal des entrées/sorties pour une traçabilité totale.
-- [ ] **Photos de maintenance** : Possibilité de joindre des photos avant/après chaque opération.
-- [ ] **Rapports PDF** : Génération de rapports mensuels formatés pour les réunions de comité.
+### 🟢 En cours / Finalisé
+- [x] Refonte de l'interface avec Material 3 et Drawer.
+- [x] Liaison atomique Maintenance ↔ Stock.
+- [x] Statistiques avancées et graphiques.
+- [x] Gestion multicritère des terrains.
 
-### 🟡 Moyen Terme
-- [ ] **Notifications Push** : Rappels automatiques pour les tâches récurrentes (ex: brossage hebdomadaire).
-- [ ] **Mode Multi-Clubs** : Gestion de plusieurs sites pour les groupements de clubs.
-- [ ] **Calcul des coûts** : Estimation financière des maintenances basée sur le prix unitaire des consommables.
+### 🟡 Prochainement
+- [ ] **Historique des mouvements de stock** : Journal détaillé des entrées/sorties.
+- [ ] **Rapports PDF** : Génération de bilans mensuels pour le comité.
+- [ ] **Photos** : Possibilité d'attacher des photos aux maintenances.
 
-### 🔴 Long Terme
-- [ ] **Synchronisation Cloud** : Sauvegarde et partage des données entre plusieurs membres de l'équipe.
-- [ ] **Analyses prédictives** : Suggestion de maintenance basée sur les prévisions météo à 7 jours.
+### 🔴 Futur
+- [ ] **Sync Cloud** : Sauvegarde et synchronisation multi-appareils.
+- [ ] **IA Prédictive** : Suggestions de maintenance basées sur les prévisions météo.
 
 ## 📥 Installation
 
-1. Assurez-vous d'avoir Flutter installé sur votre machine.
-2. Clonez le dépôt.
-3. Exécutez `flutter pub get`.
-4. Lancez le générateur de code : `flutter pub run build_runner build`.
-5. Lancez l'application : `flutter run`.
+1. Cloner le projet : `git clone https://github.com/Simokes/tenniscourtcare.git`
+2. Installer les dépendances : `flutter pub get`
+3. Générer le code Drift/Riverpod : `flutter pub run build_runner build --delete-conflicting-outputs`
+4. Lancer l'application : `flutter run`
 
 ---
-*Développé avec ❤️ pour les passionnés de tennis.*
+*Développé avec passion pour l'entretien des terrains de tennis.*

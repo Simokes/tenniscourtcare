@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/router/app_router.dart';
-import 'presentation/screens/home_screen.dart';
+
 
 
 Future<void> main() async {
@@ -41,8 +41,12 @@ class CourtCareApp extends ConsumerWidget {
         textTheme: GoogleFonts.interTextTheme(
           Theme.of(context).textTheme,
         ),
-        cardTheme: const CardTheme(
-          surfaceTintColor: Colors.transparent,
+        cardTheme: CardThemeData( // 👈 Le 'const' a été retiré
+        surfaceTintColor: Colors.transparent,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
       routerConfig: router,
