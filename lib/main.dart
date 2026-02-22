@@ -3,10 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/router/app_router.dart';
+import 'presentation/screens/home_screen.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialisation des locales pour intl (fr_FR)
   await initializeDateFormatting('fr_FR', null);
+
+  // Si tu as d'autres initialisations async (ex: SharedPreferences.getInstance(),
+  // Firebase.initializeApp(), etc.), fais-les ici AVANT runApp().
 
   runApp(
     const ProviderScope(

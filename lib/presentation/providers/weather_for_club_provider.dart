@@ -11,7 +11,8 @@ class WeatherComputed {
   final WeatherContext context;
   final bool frozen;
   final bool unplayable;
-  WeatherComputed({required this.context, required this.frozen, required this.unplayable});
+  final String? reason;
+  WeatherComputed({required this.context, required this.frozen, required this.unplayable, this.reason});
 }
 
 /// Météo pour le club (coordonnée globale), en fonction d’un type de terrain

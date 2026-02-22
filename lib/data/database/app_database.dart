@@ -142,6 +142,14 @@ class AppDatabase extends _$AppDatabase {
     return (delete(stockItems)..where((t) => t.id.equals(id))).go();
   }
 
+  Future<void> updateStockItemOrder(List<StockItemsCompanion> items) async {
+    await batch((batch) {
+      for (final item in items) {
+        batch.replace(stockItems, item);
+      }
+    });
+  }
+
   // ========== MAINTENANCES AVEC STOCK ==========
 
   Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m) async {
@@ -312,6 +320,16 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
     });
+  }
+
+  Future<domm.Maintenance?> getLastMajorMaintenance(int terrainId) async {
+    return (select(maintenances)
+          ..where((m) => m.terrainId.equals(terrainId))
+          ..where((m) => m.type.like('%Recharge%') | m.type.like('%Travaux%'))
+          ..orderBy([(m) => OrderingTerm.desc(m.date)])
+          ..limit(1))
+        .map(_maintenanceFromRow)
+        .getSingleOrNull();
   }
 
   // ========== TERRAINS ==========

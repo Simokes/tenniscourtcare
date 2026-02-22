@@ -11,6 +11,8 @@ class StockItem {
   final bool isCustom;
   final int? minThreshold;
   final DateTime updatedAt;
+  final String? category;
+  final int sortOrder;
 
   const StockItem({
     this.id,
@@ -21,6 +23,8 @@ class StockItem {
     required this.isCustom,
     this.minThreshold,
     required this.updatedAt,
+    this.category,
+    this.sortOrder = 0,
   });
 
   bool get isLowOnStock => minThreshold != null && quantity <= minThreshold!;
@@ -34,6 +38,8 @@ class StockItem {
     bool? isCustom,
     int? minThreshold,
     DateTime? updatedAt,
+    String? category,
+    int? sortOrder,
   }) {
     return StockItem(
       id: id ?? this.id,
@@ -44,6 +50,8 @@ class StockItem {
       isCustom: isCustom ?? this.isCustom,
       minThreshold: minThreshold ?? this.minThreshold,
       updatedAt: updatedAt ?? this.updatedAt,
+      category: category ?? this.category,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 

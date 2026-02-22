@@ -12,6 +12,8 @@ extension StockItemRowMapper on StockItemRow {
         isCustom: isCustom,
         minThreshold: minThreshold,
         updatedAt: updatedAt,
+        category: category,
+        sortOrder: sortOrder,
       );
 }
 
@@ -25,5 +27,7 @@ extension StockItemDomainMapper on domain.StockItem {
         isCustom: Value(isCustom),
         minThreshold: Value(minThreshold),
         updatedAt: Value(updatedAt),
+        category: Value(category),
+        sortOrder: Value(sortOrder),
       );
 }

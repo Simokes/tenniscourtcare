@@ -13,79 +13,165 @@ class StockItemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isLow = item.isLowOnStock;
     final timeAgo = _formatUpdatedAt(item.updatedAt);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: isLow ? 4 : 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isLow ? BorderSide(color: theme.colorScheme.error, width: 2) : BorderSide.none,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: isLow ? Border.all(color: colorScheme.error.withValues(alpha: 0.5), width: 1) : null,
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () {
+             // Show edit on tap or menu? Let's do menu on long press or icon
+             showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => AddEditStockItemSheet(item: item),
+            );
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isLow ? colorScheme.errorContainer : colorScheme.primaryContainer,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getIconForName(item.name),
+                        color: isLow ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(item.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                          if (isLow) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: theme.colorScheme.error, borderRadius: BorderRadius.circular(4)),
-                              child: Text('BAS', style: theme.textTheme.labelSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  item.name,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (isLow) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: colorScheme.error,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'BAS',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: colorScheme.onError,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          if (item.comment != null && item.comment!.isNotEmpty)
+                            Text(
+                              item.comment!,
+                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
+                          Text(
+                            'Màj $timeAgo',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.grey.shade400,
+                              fontSize: 10,
+                            ),
+                          ),
                         ],
                       ),
-                      if (item.comment != null && item.comment!.isNotEmpty)
-                        Text(item.comment!, style: theme.textTheme.bodySmall, maxLines: 1, overflow: TextOverflow.ellipsis),
-                      Text('MAJ $timeAgo', style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey)),
-                    ],
-                  ),
+                    ),
+                    _buildQuantityControl(ref, colorScheme, item),
+                  ],
                 ),
-                _buildQuantityControl(ref, theme),
-                _buildPopupMenu(context, ref),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildQuantityControl(WidgetRef ref, ThemeData theme) {
+  Widget _buildQuantityControl(WidgetRef ref, ColorScheme colorScheme, StockItem item) {
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(8),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: const Icon(Icons.remove_circle_outline, size: 20),
+            icon: const Icon(Icons.remove, size: 18),
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(),
+            color: colorScheme.onSurfaceVariant,
             onPressed: () => ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -1),
           ),
-          Padding(
+          Container(
+            constraints: const BoxConstraints(minWidth: 40),
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('${item.quantity}', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: item.isLowOnStock ? theme.colorScheme.error : null)),
-                Text(item.unit, style: theme.textTheme.labelSmall),
+                Text(
+                  '${item.quantity}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  item.unit,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.add_circle_outline, size: 20),
+            icon: const Icon(Icons.add, size: 18),
+            padding: const EdgeInsets.all(8),
+            constraints: const BoxConstraints(),
+            color: colorScheme.primary,
             onPressed: () => ref.read(stockNotifierProvider.notifier).adjustQuantity(item, 1),
           ),
         ],
@@ -93,45 +179,16 @@ class StockItemTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildPopupMenu(BuildContext context, WidgetRef ref) {
-    return PopupMenuButton<String>(
-      onSelected: (value) async {
-        if (value == 'edit') {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) => AddEditStockItemSheet(item: item),
-          );
-        } else if (value == 'delete') {
-          final confirm = await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Supprimer ?'),
-              content: Text('Voulez-vous vraiment supprimer "${item.name}" ?'),
-              actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-                TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Supprimer', style: TextStyle(color: Colors.red))),
-              ],
-            ),
-          );
-          if (confirm == true) {
-            ref.read(stockNotifierProvider.notifier).deleteItem(item.id!);
-          }
-        } else if (value == 'add5') {
-          ref.read(stockNotifierProvider.notifier).adjustQuantity(item, 5);
-        } else if (value == 'sub5') {
-          ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -5);
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(value: 'add5', child: Text('+5')),
-        const PopupMenuItem(value: 'sub5', child: Text('-5')),
-        const PopupMenuDivider(),
-        const PopupMenuItem(value: 'edit', child: Text('Modifier')),
-        if (item.isCustom)
-          const PopupMenuItem(value: 'delete', child: Text('Supprimer', style: TextStyle(color: Colors.red))),
-      ],
-    );
+  IconData _getIconForName(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('ball')) return Icons.sports_baseball;
+    if (lower.contains('filet')) return Icons.grid_4x4;
+    if (lower.contains('peint')) return Icons.format_paint;
+    if (lower.contains('balai') || lower.contains('bross')) return Icons.brush;
+    if (lower.contains('manto') || lower.contains('sotto')) return Icons.layers;
+    if (lower.contains('silice')) return Icons.grain;
+    if (lower.contains('eau') || lower.contains('arros')) return Icons.water_drop;
+    return Icons.inventory_2;
   }
 
   String _formatUpdatedAt(DateTime dt) {
@@ -140,6 +197,6 @@ class StockItemTile extends ConsumerWidget {
     if (diff.inMinutes < 1) return 'à l\'instant';
     if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes}m';
     if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
-    return DateFormat('dd/MM HH:mm').format(dt);
+    return DateFormat('dd/MM').format(dt);
   }
 }
