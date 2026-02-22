@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../providers/event_providers.dart';
 import '../../providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
+import '../../widgets/premium/premium_card.dart';
+import '../../widgets/premium/premium_text_form_field.dart';
 
 class AddEditEventScreen extends ConsumerStatefulWidget {
   final AppEvent? eventToEdit;
@@ -74,6 +76,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
 
     if (date == null) return;
+    if (!mounted) return;
 
     final time = await showTimePicker(
       context: context,
@@ -81,6 +84,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
 
     if (time == null) return;
+    if (!mounted) return;
 
     final newDateTime = DateTime(
       date.year,
@@ -93,7 +97,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     setState(() {
       if (isStart) {
         _startTime = newDateTime;
-        // Ensure end is after start
+        // Ensure end is after start if needed, but let's be flexible or enforce duration.
+        // Enforcing end > start:
         if (_endTime.isBefore(_startTime)) {
           _endTime = _startTime.add(const Duration(hours: 1));
         }
@@ -180,134 +185,234 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('EEE d MMM yyyy HH:mm', 'fr_FR');
+    final dateFormat = DateFormat('EEE d MMM yyyy', 'fr_FR');
+    final timeFormat = DateFormat('HH:mm', 'fr_FR');
     final terrainsAsync = ref.watch(terrainsProvider);
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(widget.eventToEdit == null ? 'Nouvel Événement' : 'Modifier l\'Événement'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           if (widget.eventToEdit != null)
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: _delete,
             ),
         ],
       ),
       body: Form(
         key: _formKey,
-        child: ListView(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Titre',
-                border: OutlineInputBorder(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Details Section
+              PremiumCard(
+                child: Column(
+                  children: [
+                    PremiumTextFormField(
+                      label: 'Titre',
+                      hint: 'Tournoi, Match, Réunion...',
+                      controller: _titleController,
+                      validator: (v) => v == null || v.isEmpty ? 'Requis' : null,
+                    ),
+                    const SizedBox(height: 16),
+                    PremiumTextFormField(
+                      label: 'Description',
+                      hint: 'Détails supplémentaires...',
+                      controller: _descController,
+                      maxLines: 3,
+                    ),
+                  ],
+                ),
               ),
-              validator: (v) => v == null || v.isEmpty ? 'Requis' : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+
+              // Timing Section
+              PremiumCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Horaires',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(child: _buildDateTimeTile('Début', _startTime, dateFormat, timeFormat, () => _pickDateTime(true))),
+                        const SizedBox(width: 12),
+                        Icon(Icons.arrow_forward, color: Colors.grey.shade400),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildDateTimeTile('Fin', _endTime, dateFormat, timeFormat, () => _pickDateTime(false))),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-            // Date Times
-            ListTile(
-              title: const Text('Début'),
-              subtitle: Text(dateFormat.format(_startTime)),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () => _pickDateTime(true),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey.shade300)),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              title: const Text('Fin'),
-              subtitle: Text(dateFormat.format(_endTime)),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: () => _pickDateTime(false),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.grey.shade300)),
-            ),
-
-            const SizedBox(height: 24),
-            const Text('Couleur', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _availableColors.map((color) {
-                  // ignore: deprecated_member_use
-                  final isSelected = _selectedColor == color.value;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InkWell(
-                      // ignore: deprecated_member_use
-                      onTap: () => setState(() => _selectedColor = color.value),
-                      customBorder: const CircleBorder(),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: isSelected ? Border.all(color: Colors.black, width: 3) : null,
-                        ),
-                        child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+              // Options Section (Color & Terrains)
+              PremiumCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Couleur',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _availableColors.map((color) {
+                          // ignore: deprecated_member_use
+                          final isSelected = _selectedColor == color.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: InkWell(
+                              // ignore: deprecated_member_use
+                              onTap: () => setState(() => _selectedColor = color.value),
+                              customBorder: const CircleBorder(),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: isSelected ? 48 : 36,
+                                height: isSelected ? 48 : 36,
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  shape: BoxShape.circle,
+                                  border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+                                  boxShadow: isSelected ? [
+                                    BoxShadow(
+                                      color: color.withValues(alpha: 0.4),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    )
+                                  ] : null,
+                                ),
+                                child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-            const Text('Terrains concernés', style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            terrainsAsync.when(
-              data: (terrains) {
-                if (terrains.isEmpty) return const Text('Aucun terrain configuré.');
-                return Wrap(
-                  spacing: 8,
-                  children: terrains.map((terrain) {
-                    final isSelected = _selectedTerrainIds.contains(terrain.id);
-                    return FilterChip(
-                      label: Text(terrain.nom),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTerrainIds.add(terrain.id);
-                          } else {
-                            _selectedTerrainIds.remove(terrain.id);
-                          }
-                        });
+                    const SizedBox(height: 24),
+                    Text(
+                      'Terrains concernés',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    terrainsAsync.when(
+                      data: (terrains) {
+                        if (terrains.isEmpty) return const Text('Aucun terrain configuré.', style: TextStyle(color: Colors.grey));
+                        return Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: terrains.map((terrain) {
+                            final isSelected = _selectedTerrainIds.contains(terrain.id);
+                            return FilterChip(
+                              label: Text(terrain.nom),
+                              selected: isSelected,
+                              selectedColor: Theme.of(context).colorScheme.primaryContainer,
+                              checkmarkColor: Theme.of(context).colorScheme.primary,
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedTerrainIds.add(terrain.id);
+                                  } else {
+                                    _selectedTerrainIds.remove(terrain.id);
+                                  }
+                                });
+                              },
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side: BorderSide(
+                                  color: isSelected
+                                    ? Colors.transparent
+                                    : Colors.grey.shade300,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
                       },
-                    );
-                  }).toList(),
-                );
-              },
-              loading: () => const LinearProgressIndicator(),
-              error: (err, _) => Text('Erreur: $err'),
-            ),
-
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _save,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  foregroundColor: Colors.white,
+                      loading: () => const LinearProgressIndicator(),
+                      error: (err, _) => Text('Erreur: $err'),
+                    ),
+                  ],
                 ),
-                child: const Text('ENREGISTRER'),
               ),
+
+              const SizedBox(height: 32),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _save,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shadowColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                  ),
+                  child: const Text(
+                    'ENREGISTRER',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateTimeTile(
+    String label,
+    DateTime dateTime,
+    DateFormat dateFormat,
+    DateFormat timeFormat,
+    VoidCallback onTap
+  ) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            const SizedBox(height: 4),
+            Text(
+              timeFormat.format(dateTime),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(
+              dateFormat.format(dateTime),
+              style: TextStyle(color: Colors.grey.shade800, fontSize: 12),
             ),
           ],
         ),

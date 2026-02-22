@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/event_providers.dart';
 import '../../screens/calendar/calendar_screen.dart';
+import '../../widgets/premium/premium_card.dart';
 
 class UpcomingEventsList extends ConsumerWidget {
   const UpcomingEventsList({super.key});
@@ -21,7 +22,7 @@ class UpcomingEventsList extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -39,6 +40,10 @@ class UpcomingEventsList extends ConsumerWidget {
                     MaterialPageRoute(builder: (context) => const CalendarScreen()),
                   );
                 },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 child: const Text('Voir tout'),
               ),
             ],
@@ -46,21 +51,19 @@ class UpcomingEventsList extends ConsumerWidget {
         ),
         itemsAsync.when(
           data: (items) {
-            // Filter out past events (if provider returns range based, it might include today's past events depending on time)
-            // But we requested start of today, so that's fine.
-            // Take top 3
             final upcoming = items.take(3).toList();
 
             if (upcoming.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Card(
+                child: PremiumCard(
+                  color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
                       child: Text(
                         'Aucun événement prévu prochainement.',
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                       ),
                     ),
                   ),
@@ -78,7 +81,7 @@ class UpcomingEventsList extends ConsumerWidget {
           )),
           error: (err, stack) => Center(child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text('Erreur: $err'),
+            child: Text('Erreur: $err', style: TextStyle(color: Colors.red)),
           )),
         ),
       ],
@@ -94,38 +97,84 @@ class _EventItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM HH:mm', 'fr_FR');
+    final isMaintenance = item.type == CalendarItemType.maintenance;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 0,
-      color: Colors.white,
-      child: ListTile(
-        leading: Container(
-          width: 4,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            color: item.color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        title: Text(
-          item.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(
-          '${dateFormat.format(item.startTime)} • ${item.location ?? "Non spécifié"}',
-          style: const TextStyle(fontSize: 12),
-        ),
-        trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      child: PremiumCard(
+        padding: EdgeInsets.zero,
         onTap: () {
-          // Navigate to Calendar focused on this day
-          // For now, just open CalendarScreen
+          // Navigate to Calendar
            Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const CalendarScreen()),
           );
         },
+        child: IntrinsicHeight(
+          child: Row(
+            children: [
+              Container(
+                width: 6,
+                decoration: BoxDecoration(
+                  color: item.color,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    bottomLeft: Radius.circular(16),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (isMaintenance)
+                            const Icon(Icons.build_circle, size: 16, color: Colors.orange),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(Icons.access_time, size: 14, color: Colors.grey.shade500),
+                          const SizedBox(width: 4),
+                          Text(
+                            dateFormat.format(item.startTime),
+                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                          ),
+                          if (item.location != null) ...[
+                            const SizedBox(width: 12),
+                            Icon(Icons.location_on, size: 14, color: Colors.grey.shade500),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                item.location!,
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right, size: 20, color: Colors.grey.shade400),
+              const SizedBox(width: 12),
+            ],
+          ),
+        ),
       ),
     );
   }
