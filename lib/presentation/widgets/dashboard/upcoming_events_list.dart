@@ -4,6 +4,9 @@ import 'package:intl/intl.dart';
 import '../../providers/event_providers.dart';
 import '../../screens/calendar/calendar_screen.dart';
 import '../../widgets/premium/premium_card.dart';
+import '../../screens/calendar/add_edit_event_screen.dart';
+import '../../widgets/add_maintenance_sheet.dart';
+import '../../providers/terrain_provider.dart';
 
 class UpcomingEventsList extends ConsumerWidget {
   const UpcomingEventsList({super.key});
@@ -89,13 +92,13 @@ class UpcomingEventsList extends ConsumerWidget {
   }
 }
 
-class _EventItem extends StatelessWidget {
+class _EventItem extends ConsumerWidget {
   final CalendarItem item;
 
   const _EventItem({required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('dd MMM HH:mm', 'fr_FR');
     final isMaintenance = item.type == CalendarItemType.maintenance;
 
@@ -103,12 +106,32 @@ class _EventItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: PremiumCard(
         padding: EdgeInsets.zero,
-        onTap: () {
-          // Navigate to Calendar
-           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CalendarScreen()),
-          );
+        onTap: () async {
+          if (isMaintenance) {
+            // Edit Maintenance
+             if (item.terrainId != null) {
+              final terrain = await ref.read(terrainProvider(item.terrainId!).future);
+              if (terrain != null && context.mounted) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddMaintenanceSheet(
+                    terrain: terrain,
+                    maintenance: item.originalObject,
+                  ),
+                );
+              }
+            }
+          } else {
+            // Edit Event
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject),
+              ),
+            );
+          }
         },
         child: IntrinsicHeight(
           child: Row(
