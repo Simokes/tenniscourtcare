@@ -11,6 +11,7 @@ import 'settings_screen.dart';
 import 'stock_screen.dart';
 import 'terrain_maintenance_history_screen.dart';
 import 'add_terrain_screen.dart';
+import '../widgets/dashboard/upcoming_events_list.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -196,6 +197,11 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+
+          // New Section: Upcoming Events
+          const SliverToBoxAdapter(
+            child: UpcomingEventsList(),
           ),
 
           // 3. Section Title: Terrains
