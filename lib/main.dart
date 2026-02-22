@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'core/router/app_router.dart';
 import 'presentation/screens/home_screen.dart';
 
 
 Future<void> main() async {
-  // ✅ S'assure que les canaux plateforme (plugins) sont prêts
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialisation des locales pour intl (fr_FR)
@@ -26,15 +27,25 @@ class CourtCareApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(goRouterProvider);
 
-
-    return MaterialApp(
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Court Care',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2E7D32), // Premium Green
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        textTheme: GoogleFonts.interTextTheme(
+          Theme.of(context).textTheme,
+        ),
+        cardTheme: const CardTheme(
+          surfaceTintColor: Colors.transparent,
+        ),
       ),
-      home: const HomeScreen(),
+      routerConfig: router,
     );
   }
 }
