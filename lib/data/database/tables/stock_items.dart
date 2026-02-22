@@ -10,4 +10,6 @@ class StockItems extends Table {
   BoolColumn get isCustom => boolean()();
   IntColumn get minThreshold => integer().nullable()();
   DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get category => text().nullable()();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 }

@@ -59,7 +59,9 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<ClubLocation?>> {
       rethrow;
     }
   }
-
+  Future<void> setCoordinates(double lat, double lon) async {
+    await setClubLocation(ClubLocation(latitude: lat, longitude: lon));
+  }
   Future<void> refresh() => _load();
 }
 

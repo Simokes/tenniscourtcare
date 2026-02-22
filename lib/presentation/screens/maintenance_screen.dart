@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/terrain_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
+import '../widgets/terrain_card.dart';
 import 'terrain_maintenance_history_screen.dart';
 
 class MaintenanceScreen extends ConsumerWidget {
@@ -12,74 +13,90 @@ class MaintenanceScreen extends ConsumerWidget {
     final terrainsAsync = ref.watch(terrainsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Maintenances'), // TODO(i18n): S.maintenancesTitle
-      ),
-      body: terrainsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => _ErrorView(
-          message: 'Erreur: $error', // TODO(i18n): S.errorPrefix(error)
-          onRetry: () => ref.refresh(terrainsProvider),
-        ),
-        data: (terrains) {
-          if (terrains.isEmpty) {
-            return _EmptyState(
-              onAddCourt: () {
-                // TODO: Naviguer vers l'écran d'ajout de terrain
-              },
-            );
-          }
-
-          return ListView.separated(
-            itemCount: terrains.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final terrain = terrains[index];
-              return ListTile(
-                leading: _TerrainTypeIcon(typeName: terrain.type.displayName),
-                title: Text(
-                  terrain.nom,
-                  style: Theme.of(context).textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
+      body: CustomScrollView(
+        slivers: [
+          const SliverAppBar(
+            title: Text('Maintenances'), // TODO(i18n): S.maintenancesTitle
+            floating: true,
+            snap: true,
+            expandedHeight: 120,
+            flexibleSpace: FlexibleSpaceBar(
+              background: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFFE0E0E0), // Light grey or theme color
+                      Colors.white,
+                    ],
+                  ),
                 ),
-                subtitle: Text(
-                  terrain.type.displayName, // TODO(i18n) si besoin
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-
-                trailing: IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () async {
-                    final success = await showModalBottomSheet<bool>(
-                      context: context,
-                      useSafeArea: true,
-                      isScrollControlled: true,
-                      showDragHandle: true,
-                      builder: (_) => AddMaintenanceSheet(terrain: terrain),
-                    );
-
-                    if (success == true && context.mounted) {
+              ),
+            ),
+          ),
+          terrainsAsync.when(
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (error, stack) => SliverFillRemaining(
+              child: _ErrorView(
+                message: 'Erreur: $error',
+                onRetry: () => ref.refresh(terrainsProvider),
+              ),
+            ),
+            data: (terrains) {
+              if (terrains.isEmpty) {
+                return SliverFillRemaining(
+                  child: _EmptyState(
+                    onAddCourt: () {
+                      // Navigate to add court screen if implemented
+                      // For now show a message
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Maintenance ajoutée')),
+                        const SnackBar(content: Text('Fonctionnalité non implémentée')),
                       );
-                      // Optionnel: invalider/refresh un provider d'historique si tu en as un :
-                      // ref.invalidate(maintenancesByTerrainProvider(terrain.id));
-                    }
-                  },
-                ),
+                    },
+                  ),
+                );
+              }
 
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          TerrainMaintenanceHistoryScreen(terrain: terrain),
-                    ),
-                  );
-                },
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final terrain = terrains[index];
+                    return TerrainCard(
+                      terrain: terrain,
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                TerrainMaintenanceHistoryScreen(terrain: terrain),
+                          ),
+                        );
+                      },
+                      onAddMaintenance: () async {
+                        final success = await showModalBottomSheet<bool>(
+                          context: context,
+                          useSafeArea: true,
+                          isScrollControlled: true,
+                          showDragHandle: true,
+                          builder: (_) => AddMaintenanceSheet(terrain: terrain),
+                        );
+
+                        if (success == true && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Maintenance ajoutée')),
+                          );
+                        }
+                      },
+                    );
+                  },
+                  childCount: terrains.length,
+                ),
               );
             },
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -97,18 +114,21 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.sports_tennis, size: 48, color: Colors.grey),
-            const SizedBox(height: 12),
+            const Icon(Icons.sports_tennis, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
-              'Aucun terrain enregistré', // TODO(i18n): S.noCourts
-              style: Theme.of(context).textTheme.titleMedium,
+              'Aucun terrain enregistré',
+              style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onAddCourt,
               icon: const Icon(Icons.add),
-              label: const Text('Ajouter un terrain'), // TODO(i18n): S.addCourt
+              label: const Text('Ajouter un terrain'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
             ),
           ],
         ),
@@ -141,33 +161,11 @@ class _ErrorView extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Réessayer'), // TODO(i18n): S.retry
+              label: const Text('Réessayer'),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-class _TerrainTypeIcon extends StatelessWidget {
-  const _TerrainTypeIcon({required this.typeName});
-  final String typeName;
-
-  @override
-  Widget build(BuildContext context) {
-    // Simpliste : mappe des mots-clés -> icônes
-    final lower = typeName.toLowerCase();
-    IconData icon;
-    if (lower.contains('gazon')) {
-      icon = Icons.grass;
-    } else if (lower.contains('terre')) {
-      icon = Icons.landscape;
-    } else if (lower.contains('dur')) {
-      icon = Icons.sports_tennis; // placeholder
-    } else {
-      icon = Icons.sports_tennis;
-    }
-    return Icon(icon, color: Theme.of(context).colorScheme.primary);
   }
 }

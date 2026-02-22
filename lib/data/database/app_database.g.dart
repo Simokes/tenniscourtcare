@@ -868,6 +868,29 @@ class $StockItemsTable extends StockItems
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -878,6 +901,8 @@ class $StockItemsTable extends StockItems
     isCustom,
     minThreshold,
     updatedAt,
+    category,
+    sortOrder,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -947,6 +972,18 @@ class $StockItemsTable extends StockItems
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     return context;
   }
 
@@ -988,6 +1025,14 @@ class $StockItemsTable extends StockItems
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
     );
   }
 
@@ -1006,6 +1051,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
   final bool isCustom;
   final int? minThreshold;
   final DateTime updatedAt;
+  final String? category;
+  final int sortOrder;
   const StockItemRow({
     required this.id,
     required this.name,
@@ -1015,6 +1062,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     required this.isCustom,
     this.minThreshold,
     required this.updatedAt,
+    this.category,
+    required this.sortOrder,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1031,6 +1080,10 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       map['min_threshold'] = Variable<int>(minThreshold);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
     return map;
   }
 
@@ -1048,6 +1101,10 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ? const Value.absent()
           : Value(minThreshold),
       updatedAt: Value(updatedAt),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      sortOrder: Value(sortOrder),
     );
   }
 
@@ -1065,6 +1122,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       isCustom: serializer.fromJson<bool>(json['isCustom']),
       minThreshold: serializer.fromJson<int?>(json['minThreshold']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      category: serializer.fromJson<String?>(json['category']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
     );
   }
   @override
@@ -1079,6 +1138,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       'isCustom': serializer.toJson<bool>(isCustom),
       'minThreshold': serializer.toJson<int?>(minThreshold),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'category': serializer.toJson<String?>(category),
+      'sortOrder': serializer.toJson<int>(sortOrder),
     };
   }
 
@@ -1091,6 +1152,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     bool? isCustom,
     Value<int?> minThreshold = const Value.absent(),
     DateTime? updatedAt,
+    Value<String?> category = const Value.absent(),
+    int? sortOrder,
   }) => StockItemRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1100,6 +1163,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     isCustom: isCustom ?? this.isCustom,
     minThreshold: minThreshold.present ? minThreshold.value : this.minThreshold,
     updatedAt: updatedAt ?? this.updatedAt,
+    category: category.present ? category.value : this.category,
+    sortOrder: sortOrder ?? this.sortOrder,
   );
   StockItemRow copyWithCompanion(StockItemsCompanion data) {
     return StockItemRow(
@@ -1113,6 +1178,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ? data.minThreshold.value
           : this.minThreshold,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      category: data.category.present ? data.category.value : this.category,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
     );
   }
 
@@ -1126,7 +1193,9 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ..write('comment: $comment, ')
           ..write('isCustom: $isCustom, ')
           ..write('minThreshold: $minThreshold, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('category: $category, ')
+          ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
   }
@@ -1141,6 +1210,8 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     isCustom,
     minThreshold,
     updatedAt,
+    category,
+    sortOrder,
   );
   @override
   bool operator ==(Object other) =>
@@ -1153,7 +1224,9 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           other.comment == this.comment &&
           other.isCustom == this.isCustom &&
           other.minThreshold == this.minThreshold &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.category == this.category &&
+          other.sortOrder == this.sortOrder);
 }
 
 class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
@@ -1165,6 +1238,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
   final Value<bool> isCustom;
   final Value<int?> minThreshold;
   final Value<DateTime> updatedAt;
+  final Value<String?> category;
+  final Value<int> sortOrder;
   const StockItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1174,6 +1249,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.isCustom = const Value.absent(),
     this.minThreshold = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.category = const Value.absent(),
+    this.sortOrder = const Value.absent(),
   });
   StockItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -1184,6 +1261,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     required bool isCustom,
     this.minThreshold = const Value.absent(),
     required DateTime updatedAt,
+    this.category = const Value.absent(),
+    this.sortOrder = const Value.absent(),
   }) : name = Value(name),
        unit = Value(unit),
        isCustom = Value(isCustom),
@@ -1197,6 +1276,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Expression<bool>? isCustom,
     Expression<int>? minThreshold,
     Expression<DateTime>? updatedAt,
+    Expression<String>? category,
+    Expression<int>? sortOrder,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1207,6 +1288,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       if (isCustom != null) 'is_custom': isCustom,
       if (minThreshold != null) 'min_threshold': minThreshold,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (category != null) 'category': category,
+      if (sortOrder != null) 'sort_order': sortOrder,
     });
   }
 
@@ -1219,6 +1302,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Value<bool>? isCustom,
     Value<int?>? minThreshold,
     Value<DateTime>? updatedAt,
+    Value<String?>? category,
+    Value<int>? sortOrder,
   }) {
     return StockItemsCompanion(
       id: id ?? this.id,
@@ -1229,6 +1314,8 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       isCustom: isCustom ?? this.isCustom,
       minThreshold: minThreshold ?? this.minThreshold,
       updatedAt: updatedAt ?? this.updatedAt,
+      category: category ?? this.category,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
@@ -1259,6 +1346,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     return map;
   }
 
@@ -1272,7 +1365,9 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
           ..write('comment: $comment, ')
           ..write('isCustom: $isCustom, ')
           ..write('minThreshold: $minThreshold, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('category: $category, ')
+          ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
   }
@@ -1710,6 +1805,8 @@ typedef $$StockItemsTableCreateCompanionBuilder =
       required bool isCustom,
       Value<int?> minThreshold,
       required DateTime updatedAt,
+      Value<String?> category,
+      Value<int> sortOrder,
     });
 typedef $$StockItemsTableUpdateCompanionBuilder =
     StockItemsCompanion Function({
@@ -1721,6 +1818,8 @@ typedef $$StockItemsTableUpdateCompanionBuilder =
       Value<bool> isCustom,
       Value<int?> minThreshold,
       Value<DateTime> updatedAt,
+      Value<String?> category,
+      Value<int> sortOrder,
     });
 
 class $$StockItemsTableFilterComposer
@@ -1769,6 +1868,16 @@ class $$StockItemsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1821,6 +1930,16 @@ class $$StockItemsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StockItemsTableAnnotationComposer
@@ -1857,6 +1976,12 @@ class $$StockItemsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 }
 
 class $$StockItemsTableTableManager
@@ -1898,6 +2023,8 @@ class $$StockItemsTableTableManager
                 Value<bool> isCustom = const Value.absent(),
                 Value<int?> minThreshold = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> category = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
               }) => StockItemsCompanion(
                 id: id,
                 name: name,
@@ -1907,6 +2034,8 @@ class $$StockItemsTableTableManager
                 isCustom: isCustom,
                 minThreshold: minThreshold,
                 updatedAt: updatedAt,
+                category: category,
+                sortOrder: sortOrder,
               ),
           createCompanionCallback:
               ({
@@ -1918,6 +2047,8 @@ class $$StockItemsTableTableManager
                 required bool isCustom,
                 Value<int?> minThreshold = const Value.absent(),
                 required DateTime updatedAt,
+                Value<String?> category = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
               }) => StockItemsCompanion.insert(
                 id: id,
                 name: name,
@@ -1927,6 +2058,8 @@ class $$StockItemsTableTableManager
                 isCustom: isCustom,
                 minThreshold: minThreshold,
                 updatedAt: updatedAt,
+                category: category,
+                sortOrder: sortOrder,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
