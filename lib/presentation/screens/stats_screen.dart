@@ -8,6 +8,8 @@ import '../widgets/stats/maintenance_distribution_chart.dart';
 import '../widgets/stats/sacks_line_chart.dart';
 import '../widgets/stats/summary_grid.dart';
 import '../../utils/csv_export.dart';
+import '../providers/report_provider.dart';
+import '../../infrastructure/services/share_report_service.dart';
 
 class StatsScreen extends ConsumerWidget {
   const StatsScreen({super.key});
@@ -33,6 +35,22 @@ class StatsScreen extends ConsumerWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () async {
+                  try {
+                    final report = await ref.read(reportProvider.future);
+                    await ShareReportService.share(report);
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erreur: $e')),
+                      );
+                    }
+                  }
+                },
+                tooltip: 'Partager le bilan',
+              ),
               IconButton(
                 icon: const Icon(Icons.download),
                 onPressed: () async {

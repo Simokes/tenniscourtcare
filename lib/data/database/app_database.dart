@@ -407,6 +407,21 @@ class AppDatabase extends _$AppDatabase {
         .map((rows) => rows.map(_maintenanceFromRow).toList());
   }
 
+  Future<List<domm.Maintenance>> getMaintenancesInPeriod(
+    DateTime start,
+    DateTime end,
+  ) async {
+    final startMs = start.millisecondsSinceEpoch;
+    final endMs = end.millisecondsSinceEpoch;
+
+    final rows =
+        await (select(maintenances)
+              ..where((m) => m.date.isBetweenValues(startMs, endMs))
+              ..orderBy([(m) => OrderingTerm.asc(m.date)]))
+            .get();
+    return rows.map(_maintenanceFromRow).toList();
+  }
+
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
     final row = await (select(
       maintenances,
