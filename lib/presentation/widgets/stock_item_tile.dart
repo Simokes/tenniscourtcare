@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/stock_item.dart';
@@ -143,28 +144,31 @@ class StockItemTile extends ConsumerWidget {
             color: colorScheme.onSurfaceVariant,
             onPressed: () => ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -1),
           ),
-          Container(
-            constraints: const BoxConstraints(minWidth: 40),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${item.quantity}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+          GestureDetector(
+            onTap: () => _showQuantityDialog(context, ref, item),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 40),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${item.quantity}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                Text(
-                  item.unit,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: colorScheme.onSurfaceVariant,
+                  Text(
+                    item.unit,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           IconButton(
@@ -198,5 +202,58 @@ class StockItemTile extends ConsumerWidget {
     if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes}m';
     if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
     return DateFormat('dd/MM').format(dt);
+  }
+
+  void _showQuantityDialog(BuildContext context, WidgetRef ref, StockItem item) {
+    final controller = TextEditingController(text: item.quantity.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifier la quantité'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'Quantité (${item.unit})',
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (val) {
+            final newValue = int.tryParse(val);
+            if (newValue != null && newValue >= 0) {
+              ref.read(stockNotifierProvider.notifier).updateItem(
+                    item.copyWith(
+                      quantity: newValue,
+                      updatedAt: DateTime.now(),
+                    ),
+                  );
+            }
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final newValue = int.tryParse(controller.text);
+              if (newValue != null && newValue >= 0) {
+                ref.read(stockNotifierProvider.notifier).updateItem(
+                      item.copyWith(
+                        quantity: newValue,
+                        updatedAt: DateTime.now(),
+                      ),
+                    );
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Valider'),
+          ),
+        ],
+      ),
+    );
   }
 }
