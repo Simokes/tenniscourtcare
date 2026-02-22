@@ -340,6 +340,23 @@ class AppDatabase extends _$AppDatabase {
         .getSingleOrNull();
   }
 
+  Future<domm.Maintenance?> getLastMaintenanceForTerrain(
+    int terrainId, {
+    String? type,
+  }) async {
+    final query = select(maintenances)
+      ..where((m) => m.terrainId.equals(terrainId))
+      ..orderBy([(m) => OrderingTerm.desc(m.date)])
+      ..limit(1);
+
+    if (type != null) {
+      query.where((m) => m.type.equals(type));
+    }
+
+    final row = await query.getSingleOrNull();
+    return row != null ? _maintenanceFromRow(row) : null;
+  }
+
   // ========== TERRAINS ==========
 
   Future<List<dom.Terrain>> getAllTerrains() async {

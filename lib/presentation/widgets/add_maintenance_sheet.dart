@@ -13,6 +13,8 @@ import 'weather_card.dart';
 import 'premium/premium_card.dart';
 import 'premium/premium_button.dart';
 import 'premium/premium_text_form_field.dart';
+import '../providers/refill_recommendation_provider.dart';
+import 'maintenance/refill_recommendation_card.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain terrain;
@@ -318,6 +320,20 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         ],
 
                         if (isTerreBattue) ...[
+                          // SMART REFILL RECOMMENDATION
+                          if (_type == 'Recharge')
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: ref.watch(refillRecommendationProvider(widget.terrain.id)).when(
+                                data: (recommendation) => RefillRecommendationCard(recommendation: recommendation),
+                                loading: () => const Center(child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                )),
+                                error: (err, stack) => const SizedBox.shrink(), // Silent error for cleaner UI
+                              ),
+                            ),
+
                           QuantitySelector(
                             label: 'Manto',
                             value: _sacsManto,
