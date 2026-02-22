@@ -12,9 +12,11 @@ import 'quantity_selector.dart';
 import 'weather_card.dart';
 import 'premium/premium_card.dart';
 import 'premium/premium_button.dart';
+import 'dart:io';
 import 'premium/premium_text_form_field.dart';
 import '../providers/refill_recommendation_provider.dart';
 import 'maintenance/refill_recommendation_card.dart';
+import '../../infrastructure/services/image_picker_service.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain terrain;
@@ -39,12 +41,14 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   late int _sacsManto;
   late int _sacsSottomanto;
   late int _sacsSilice;
+  String? _imagePath;
   WeatherSnapshot? _weather;
   double? _precip24h;
   bool? _frozen;
   bool? _unplayable;
 
   final _dateFormat = DateFormat('dd MMM yyyy', 'fr_FR');
+  final _imagePickerService = ImagePickerService();
 
   @override
   void initState() {
@@ -57,6 +61,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _sacsManto = m.sacsMantoUtilises;
       _sacsSottomanto = m.sacsSottomantoUtilises;
       _sacsSilice = m.sacsSiliceUtilises;
+      _imagePath = m.imagePath;
       _weather = m.weather;
       _frozen = m.terrainGele;
       _unplayable = m.terrainImpraticable;
@@ -66,6 +71,23 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _sacsManto = 0;
       _sacsSottomanto = 0;
       _sacsSilice = 0;
+    }
+  }
+
+  Future<void> _pickImage(bool fromCamera) async {
+    try {
+      final path = fromCamera
+          ? await _imagePickerService.pickImageFromCamera()
+          : await _imagePickerService.pickImageFromGallery();
+
+      if (path != null) {
+        setState(() => _imagePath = path);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la sélection de l\'image: $e')),
+      );
     }
   }
 
@@ -145,6 +167,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
       sacsSiliceUtilises: _sacsSilice,
+      imagePath: _imagePath,
       weather: _weather,
       terrainGele: _frozen,
       terrainImpraticable: _unplayable,
@@ -373,6 +396,71 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                 ),
                               ],
                             ),
+                          ),
+
+                        const SizedBox(height: 24),
+
+                        // Photo de preuve
+                        Text(
+                          'Photo de preuve',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_imagePath != null)
+                          Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(_imagePath!),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => setState(() => _imagePath = null),
+                                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                style: IconButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _pickImage(true),
+                                  icon: const Icon(Icons.camera_alt),
+                                  label: const Text('Caméra'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _pickImage(false),
+                                  icon: const Icon(Icons.photo_library),
+                                  label: const Text('Galerie'),
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
 
                         const SizedBox(height: 24),
