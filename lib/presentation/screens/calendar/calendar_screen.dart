@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../providers/event_providers.dart';
 import 'add_edit_event_screen.dart';
 import '../../widgets/premium/premium_card.dart';
+import '../../widgets/add_maintenance_sheet.dart';
+import '../../providers/terrain_provider.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -223,13 +225,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 }
 
-class _CalendarItemCard extends StatelessWidget {
+class _CalendarItemCard extends ConsumerWidget {
   final CalendarItem item;
 
   const _CalendarItemCard({required this.item});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('HH:mm');
     final duration = item.endTime.difference(item.startTime);
     final isLongEvent = duration.inHours >= 24;
@@ -237,7 +239,7 @@ class _CalendarItemCard extends StatelessWidget {
 
     return PremiumCard(
       padding: EdgeInsets.zero,
-      onTap: () {
+      onTap: () async {
          if (!isMaintenance) {
            Navigator.push(
               context,
@@ -245,6 +247,22 @@ class _CalendarItemCard extends StatelessWidget {
                 builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject),
               ),
             );
+         } else {
+            // Fetch terrain and open maintenance sheet
+            if (item.terrainId != null) {
+              final terrain = await ref.read(terrainProvider(item.terrainId!).future);
+              if (terrain != null && context.mounted) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddMaintenanceSheet(
+                    terrain: terrain,
+                    maintenance: item.originalObject,
+                  ),
+                );
+              }
+            }
          }
       },
       child: IntrinsicHeight(

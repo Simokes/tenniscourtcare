@@ -40,6 +40,7 @@ class CalendarItem {
   final CalendarItemType type;
   final dynamic originalObject;
   final String? location; // E.g., "Terrain 1, Terrain 2"
+  final int? terrainId; // New field for maintenance
 
   const CalendarItem({
     required this.id,
@@ -51,6 +52,7 @@ class CalendarItem {
     required this.type,
     required this.originalObject,
     this.location,
+    this.terrainId,
   });
 }
 
@@ -119,6 +121,7 @@ final calendarItemsProvider = Provider.family<AsyncValue<List<CalendarItem>>, Da
       type: CalendarItemType.maintenance,
       originalObject: maintenance,
       location: terrainName,
+      terrainId: maintenance.terrainId,
     ));
   }
 

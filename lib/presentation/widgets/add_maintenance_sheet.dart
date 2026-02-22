@@ -10,6 +10,9 @@ import '../providers/app_settings_provider.dart';
 import 'maintenance_type_selector.dart';
 import 'quantity_selector.dart';
 import 'weather_card.dart';
+import 'premium/premium_card.dart';
+import 'premium/premium_button.dart';
+import 'premium/premium_text_form_field.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain terrain;
@@ -27,9 +30,9 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
 
 class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   final _formKey = GlobalKey<FormState>();
+  final _commentController = TextEditingController();
 
   late String _type;
-  String? _commentaire;
   late DateTime _date;
   late int _sacsManto;
   late int _sacsSottomanto;
@@ -47,7 +50,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     final m = widget.maintenance;
     if (m != null) {
       _type = m.type;
-      _commentaire = m.commentaire;
+      _commentController.text = m.commentaire ?? '';
       _date = DateTime.fromMillisecondsSinceEpoch(m.date);
       _sacsManto = m.sacsMantoUtilises;
       _sacsSottomanto = m.sacsSottomantoUtilises;
@@ -62,6 +65,12 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _sacsSottomanto = 0;
       _sacsSilice = 0;
     }
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadWeather() async {
@@ -100,7 +109,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: Theme.of(context).colorScheme.primary, // Calendar header color
+              primary: Theme.of(context).colorScheme.primary,
             ),
           ),
           child: child!,
@@ -115,7 +124,6 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Custom validation for Type Selector since it's not a FormField
     if (_type.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez sélectionner un type de maintenance')),
@@ -123,13 +131,14 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       return;
     }
 
+    // Save form fields not needed for standard widgets, but good practice
     _formKey.currentState!.save();
 
     final maintenance = Maintenance(
       id: widget.maintenance?.id,
       terrainId: widget.terrain.id,
       type: _type.trim(),
-      commentaire: (_commentaire?.trim().isEmpty ?? true) ? null : _commentaire!.trim(),
+      commentaire: _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
       date: _date.millisecondsSinceEpoch,
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
@@ -240,45 +249,44 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         const SizedBox(height: 24),
 
                         // Date Picker Row
-                        InkWell(
-                          onTap: _pickDate,
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.calendar_month, color: Colors.blueGrey),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Date de l\'intervention',
-                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                            color: Colors.grey.shade600,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      _dateFormat.format(_date),
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                    ),
-                                  ],
-                                ),
-                                const Spacer(),
-                                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                              ],
+                        PremiumCard(
+                           padding: const EdgeInsets.all(4),
+                           child: InkWell(
+                            onTap: _pickDate,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.calendar_month, color: Colors.blueGrey),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Date de l\'intervention',
+                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                              color: Colors.grey.shade600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        _dateFormat.format(_date),
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                ],
+                              ),
                             ),
                           ),
                         ),
 
                         const SizedBox(height: 24),
 
-                        // Weather Section (Custom Widget)
+                        // Weather Section
                         if (_weather == null)
                           WeatherCard(
                             weather: null,
@@ -354,40 +362,24 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         const SizedBox(height: 24),
 
                         // Commentaire
-                        TextFormField(
-                          initialValue: _commentaire,
-                          decoration: InputDecoration(
-                            labelText: 'Notes & Commentaires',
-                            alignLabelWithHint: true,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey.shade50,
-                          ),
-                          maxLines: 4,
-                          onSaved: (v) => _commentaire = v?.trim(),
+                        PremiumTextFormField(
+                          label: 'Notes & Commentaires',
+                          controller: _commentController,
+                          hint: 'Ajouter un commentaire...',
                         ),
-
-                        const SizedBox(height: 32),
-
-                        // Action Button
-                        FilledButton(
-                          onPressed: _save,
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: const Text(
-                            'Enregistrer',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
                       ],
                     ),
+                  ),
+                ),
+              ),
+
+               Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PremiumButton(
+                    label: 'Enregistrer',
+                    onPressed: _save,
                   ),
                 ),
               ),
