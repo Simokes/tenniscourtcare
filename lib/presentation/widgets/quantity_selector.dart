@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class QuantitySelector extends StatelessWidget {
   final String label;
@@ -58,12 +59,15 @@ class QuantitySelector extends StatelessWidget {
                   icon: Icons.remove,
                   onPressed: value > 0 ? () => onChanged(value - 1) : null,
                 ),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '$value',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                GestureDetector(
+                  onTap: () => _showEditDialog(context),
+                  child: SizedBox(
+                    width: 40,
+                    child: Text(
+                      '$value',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
                   ),
                 ),
                 _IconButton(
@@ -72,6 +76,49 @@ class QuantitySelector extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context) {
+    final controller = TextEditingController(text: value.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifier la quantité'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Quantité',
+            border: OutlineInputBorder(),
+          ),
+          onSubmitted: (val) {
+            final newValue = int.tryParse(val);
+            if (newValue != null && newValue >= 0) {
+              onChanged(newValue);
+            }
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final newValue = int.tryParse(controller.text);
+              if (newValue != null && newValue >= 0) {
+                onChanged(newValue);
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Valider'),
           ),
         ],
       ),

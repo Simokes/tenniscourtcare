@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_settings_provider.dart';
+import '../providers/auth_providers.dart';
 import '../widgets/settings_components.dart';
 import 'edit_coords_page.dart';
 
@@ -114,7 +115,6 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Exporter les données',
                     subtitle: 'Format CSV',
                     onTap: () {
-                      // Trigger export action from here if needed, or link to Stats screen
                        ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Allez dans l\'écran Statistiques pour exporter')),
                         );
@@ -139,10 +139,47 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                             TextButton(
                               onPressed: () {
-                                // TODO: Implement full reset
                                 Navigator.pop(ctx);
                               },
                               child: const Text('Effacer', style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              SettingsSection(
+                title: 'Compte',
+                children: [
+                  SettingsTile(
+                    icon: Icons.logout,
+                    title: 'Déconnexion',
+                    subtitle: 'Quitter la session actuelle',
+                    iconColor: Colors.orange.shade800,
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Déconnexion'),
+                          content: const Text('Voulez-vous vraiment vous déconnecter ?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Annuler'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(ctx);
+                                ref.read(authStateProvider.notifier).signOut();
+                                // La navigation vers Login est normalement gérée par le router (GoRouter)
+                                // qui écoute isAuthenticatedProvider.
+                              },
+                              child: const Text('Se déconnecter'),
                             ),
                           ],
                         ),

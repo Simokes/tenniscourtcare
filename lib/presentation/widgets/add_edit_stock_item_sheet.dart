@@ -163,6 +163,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                           selectedCategory: _category,
                           categories: categories,
                           onSelected: (val) => setState(() => _category = val),
+                          enabled: widget.item == null || widget.item!.isCustom,
                         ),
 
                         const SizedBox(height: 24),

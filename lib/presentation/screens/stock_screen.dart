@@ -65,7 +65,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                       child: Icon(
                         Icons.inventory_2,
                         size: 150,
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: Colors.white.withAlpha(40),
                       ),
                     ),
                   ],
@@ -81,7 +81,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                         height: 48,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Colors.white.withAlpha(50),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Text(
@@ -152,6 +152,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             data: (items) {
               if (items.isEmpty) {
                 return SliverFillRemaining(
+                  hasScrollBody: false,
                   child: Center(
                     child: Text(
                       'Aucun article trouvé',
@@ -162,7 +163,6 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               }
 
               // Group items
-              // Use category field if present, else fallback to categorizer
               final Map<String, List<StockItem>> groups = {};
               for (var item in items) {
                 final cat = item.category ?? StockCategorizer.getCategory(item);
@@ -185,36 +185,20 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 if (!order.contains(key)) order.add(key);
               }
 
-              if (_isReorderMode) {
-                // Flatten list for ReorderableList, but keep headers as non-draggable items?
-                // ReorderableListView in Sliver is tricky.
-                // Alternative: Single SliverList where each item is draggable?
-                // Or just show a non-sliver ReorderableListView for the whole body content?
-                // Let's use a simpler approach: Show groups, allow reorder WITHIN groups.
+              final activeCategories = order.where((k) => groups.containsKey(k)).toList();
 
+              if (_isReorderMode) {
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final key = order.where((k) => groups.containsKey(k)).toList()[index];
+                      if (index >= activeCategories.length) return null;
+                      final key = activeCategories[index];
                       final groupItems = groups[key]!;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _StockGroupHeader(title: key),
-                          // Use a ReorderableListView inside a constrained box or just custom drag targets?
-                          // Standard ReorderableListView needs to scroll.
-                          // Let's try visual reordering: just list them with a drag handle icon visually
-                          // but since we can't easily implement drag-drop across slivers without complex lib,
-                          // we might fallback to just showing the list.
-                          // Actually, "reorder groups" + "reorder items in groups" is best done
-                          // by just listing everything.
-                          // Let's use ReorderableListView.builder for the whole list? No, grouped.
-
-                          // Pragmatic solution for "Reorder Mode":
-                          // Render a generic list where items can be moved.
-                          // If moved to a new position, we calculate new sortOrder.
-
                           ReorderableListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -224,13 +208,12 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                               final item = groupItems.removeAt(oldIndex);
                               groupItems.insert(newIndex, item);
 
-                              // Update DB logic
                               ref.read(stockNotifierProvider.notifier).reorderItems(groupItems);
                             },
                             itemBuilder: (context, i) {
                               final item = groupItems[i];
                               return Card(
-                                key: ValueKey(item.id),
+                                key: ValueKey('reorder_${item.id ?? i}'),
                                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 child: ListTile(
                                   leading: const Icon(Icons.drag_handle),
@@ -244,7 +227,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                         ],
                       );
                     },
-                    childCount: order.where((k) => groups.containsKey(k)).length,
+                    childCount: activeCategories.length,
                   ),
                 );
               }
@@ -252,27 +235,24 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final keys = order.where((k) => groups.containsKey(k)).toList();
-                    if (index >= keys.length) return null;
-
-                    final key = keys[index];
+                    if (index >= activeCategories.length) return null;
+                    final key = activeCategories[index];
                     final groupItems = groups[key]!;
 
                     return Column(
                       children: [
-                        // Let's use the 'sticky header' style manually:
                         _StockGroupHeader(title: key),
                         ...groupItems.map((item) => StockItemTile(item: item)),
                         const SizedBox(height: 16),
                       ],
                     );
                   },
-                  childCount: order.where((k) => groups.containsKey(k)).length,
+                  childCount: activeCategories.length,
                 ),
               );
             },
-            loading: () => const SliverFillRemaining(child: Center(child: CircularProgressIndicator())),
-            error: (e, s) => SliverFillRemaining(child: Center(child: Text('Erreur: $e'))),
+            loading: () => const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator())),
+            error: (e, s) => SliverFillRemaining(hasScrollBody: false, child: Center(child: Text('Erreur: $e'))),
           ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 80)),

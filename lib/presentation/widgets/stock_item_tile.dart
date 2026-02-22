@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/stock_item.dart';
@@ -14,120 +15,114 @@ class StockItemTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    // Logic extracted to local variables for clarity
     final isLow = item.isLowOnStock;
     final timeAgo = _formatUpdatedAt(item.updatedAt);
+    final iconData = _getIconForName(item.name);
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-        border: isLow ? Border.all(color: colorScheme.error.withValues(alpha: 0.5), width: 1) : null,
+        side: BorderSide(
+          // Use error color if low, otherwise a subtle border for definition
+          color: isLow
+              ? colorScheme.error.withValues(alpha: 0.5)
+              : colorScheme.outlineVariant.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
-      child: Material(
-        color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _openEditSheet(context),
         borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: () {
-             // Show edit on tap or menu? Let's do menu on long press or icon
-             showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => AddEditStockItemSheet(item: item),
-            );
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isLow ? colorScheme.errorContainer : colorScheme.primaryContainer,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _getIconForName(item.name),
-                        color: isLow ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  item.name,
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (isLow) ...[
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme.error,
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    'BAS',
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: colorScheme.onError,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          if (item.comment != null && item.comment!.isNotEmpty)
-                            Text(
-                              item.comment!,
-                              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          Text(
-                            'Màj $timeAgo',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.grey.shade400,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    _buildQuantityControl(ref, colorScheme, item),
-                  ],
-                ),
-              ],
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              _buildLeadingIcon(colorScheme, iconData, isLow),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildItemDetails(theme, colorScheme, isLow, timeAgo),
+              ),
+              _buildQuantityControl(context, ref, colorScheme),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildQuantityControl(WidgetRef ref, ColorScheme colorScheme, StockItem item) {
+  Widget _buildLeadingIcon(ColorScheme colorScheme, IconData icon, bool isLow) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: isLow ? colorScheme.errorContainer : colorScheme.primaryContainer,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(
+        icon,
+        color: isLow ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer,
+        size: 20,
+      ),
+    );
+  }
+
+  Widget _buildItemDetails(ThemeData theme, ColorScheme colorScheme, bool isLow, String timeAgo) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: Text(
+                item.name,
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isLow) _buildLowStockBadge(theme, colorScheme),
+          ],
+        ),
+        if (item.comment?.isNotEmpty ?? false)
+          Text(
+            item.comment!,
+            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        Text(
+          'Màj $timeAgo',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.disabledColor,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLowStockBadge(ThemeData theme, ColorScheme colorScheme) {
+    return Container(
+      margin: const EdgeInsets.only(left: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: colorScheme.error,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        'BAS',
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: colorScheme.onError,
+          fontWeight: FontWeight.bold,
+          fontSize: 10,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantityControl(BuildContext context, WidgetRef ref, ColorScheme colorScheme) {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -136,46 +131,68 @@ class StockItemTile extends ConsumerWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            icon: const Icon(Icons.remove, size: 18),
-            padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(),
+          _quantityButton(
+            icon: Icons.remove,
             color: colorScheme.onSurfaceVariant,
-            onPressed: () => ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -1),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -1);
+            },
           ),
-          Container(
-            constraints: const BoxConstraints(minWidth: 40),
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${item.quantity}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+          InkWell(
+            onTap: () => _showQuantityDialog(context, ref),
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 44),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              child: Column(
+                children: [
+                  Text(
+                    '${item.quantity}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                Text(
-                  item.unit,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: colorScheme.onSurfaceVariant,
+                  Text(
+                    item.unit,
+                    style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.add, size: 18),
-            padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(),
+          _quantityButton(
+            icon: Icons.add,
             color: colorScheme.primary,
-            onPressed: () => ref.read(stockNotifierProvider.notifier).adjustQuantity(item, 1),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              ref.read(stockNotifierProvider.notifier).adjustQuantity(item, 1);
+            },
           ),
         ],
       ),
+    );
+  }
+
+  Widget _quantityButton({required IconData icon, required Color color, required VoidCallback onPressed}) {
+    return IconButton(
+      icon: Icon(icon, size: 18),
+      padding: const EdgeInsets.all(8),
+      constraints: const BoxConstraints(),
+      color: color,
+      onPressed: onPressed,
+    );
+  }
+
+  // --- Helper Methods ---
+
+  void _openEditSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => AddEditStockItemSheet(item: item),
     );
   }
 
@@ -194,9 +211,53 @@ class StockItemTile extends ConsumerWidget {
   String _formatUpdatedAt(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return 'à l\'instant';
+    if (diff.inMinutes < 1) return "à l'instant";
     if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes}m';
     if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
     return DateFormat('dd/MM').format(dt);
+  }
+
+  void _showQuantityDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController(text: item.quantity.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modifier la quantité'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          autofocus: true,
+          decoration: InputDecoration(
+            labelText: 'Quantité (${item.unit})',
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (val) => _handleDialogSubmit(context, ref, val),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => _handleDialogSubmit(context, ref, controller.text),
+            child: const Text('Valider'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleDialogSubmit(BuildContext context, WidgetRef ref, String value) {
+    final newValue = int.tryParse(value);
+    if (newValue != null && newValue >= 0) {
+      ref.read(stockNotifierProvider.notifier).updateItem(
+        item.copyWith(
+          quantity: newValue,
+          updatedAt: DateTime.now(),
+        ),
+      );
+    }
+    Navigator.pop(context);
   }
 }
