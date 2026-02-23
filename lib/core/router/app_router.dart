@@ -6,6 +6,7 @@ import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
 import '../../presentation/pages/error/access_denied_page.dart';
 import '../../presentation/screens/home_screen.dart'; // Existing screen
+import '../../presentation/screens/stock_history_screen.dart';
 import '../../domain/enums/role.dart';
 import 'go_router_refresh_stream.dart';
 
@@ -75,6 +76,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) => const HomeScreen(),
+        routes: [
+           GoRoute(
+            path: 'stock-history',
+            builder: (context, state) => const StockHistoryScreen(),
+          ),
+        ],
       ),
     ],
   );

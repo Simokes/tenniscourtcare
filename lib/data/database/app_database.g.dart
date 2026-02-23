@@ -2391,6 +2391,585 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
   }
 }
 
+class $StockMovementsTable extends StockMovements
+    with TableInfo<$StockMovementsTable, StockMovement> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StockMovementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _stockItemIdMeta = const VerificationMeta(
+    'stockItemId',
+  );
+  @override
+  late final GeneratedColumn<int> stockItemId = GeneratedColumn<int>(
+    'stock_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES stock_items (id)',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
+  );
+  static const VerificationMeta _previousQuantityMeta = const VerificationMeta(
+    'previousQuantity',
+  );
+  @override
+  late final GeneratedColumn<int> previousQuantity = GeneratedColumn<int>(
+    'previous_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _newQuantityMeta = const VerificationMeta(
+    'newQuantity',
+  );
+  @override
+  late final GeneratedColumn<int> newQuantity = GeneratedColumn<int>(
+    'new_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityChangeMeta = const VerificationMeta(
+    'quantityChange',
+  );
+  @override
+  late final GeneratedColumn<int> quantityChange = GeneratedColumn<int>(
+    'quantity_change',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    stockItemId,
+    userId,
+    previousQuantity,
+    newQuantity,
+    quantityChange,
+    reason,
+    description,
+    occurredAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'stock_movements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StockMovement> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('stock_item_id')) {
+      context.handle(
+        _stockItemIdMeta,
+        stockItemId.isAcceptableOrUnknown(
+          data['stock_item_id']!,
+          _stockItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stockItemIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    }
+    if (data.containsKey('previous_quantity')) {
+      context.handle(
+        _previousQuantityMeta,
+        previousQuantity.isAcceptableOrUnknown(
+          data['previous_quantity']!,
+          _previousQuantityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_previousQuantityMeta);
+    }
+    if (data.containsKey('new_quantity')) {
+      context.handle(
+        _newQuantityMeta,
+        newQuantity.isAcceptableOrUnknown(
+          data['new_quantity']!,
+          _newQuantityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_newQuantityMeta);
+    }
+    if (data.containsKey('quantity_change')) {
+      context.handle(
+        _quantityChangeMeta,
+        quantityChange.isAcceptableOrUnknown(
+          data['quantity_change']!,
+          _quantityChangeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityChangeMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  StockMovement map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StockMovement(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      stockItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stock_item_id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      ),
+      previousQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}previous_quantity'],
+      )!,
+      newQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}new_quantity'],
+      )!,
+      quantityChange: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity_change'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StockMovementsTable createAlias(String alias) {
+    return $StockMovementsTable(attachedDatabase, alias);
+  }
+}
+
+class StockMovement extends DataClass implements Insertable<StockMovement> {
+  final int id;
+  final int stockItemId;
+  final int? userId;
+  final int previousQuantity;
+  final int newQuantity;
+  final int quantityChange;
+  final String reason;
+  final String? description;
+  final DateTime occurredAt;
+  const StockMovement({
+    required this.id,
+    required this.stockItemId,
+    this.userId,
+    required this.previousQuantity,
+    required this.newQuantity,
+    required this.quantityChange,
+    required this.reason,
+    this.description,
+    required this.occurredAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['stock_item_id'] = Variable<int>(stockItemId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<int>(userId);
+    }
+    map['previous_quantity'] = Variable<int>(previousQuantity);
+    map['new_quantity'] = Variable<int>(newQuantity);
+    map['quantity_change'] = Variable<int>(quantityChange);
+    map['reason'] = Variable<String>(reason);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    return map;
+  }
+
+  StockMovementsCompanion toCompanion(bool nullToAbsent) {
+    return StockMovementsCompanion(
+      id: Value(id),
+      stockItemId: Value(stockItemId),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+      previousQuantity: Value(previousQuantity),
+      newQuantity: Value(newQuantity),
+      quantityChange: Value(quantityChange),
+      reason: Value(reason),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      occurredAt: Value(occurredAt),
+    );
+  }
+
+  factory StockMovement.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StockMovement(
+      id: serializer.fromJson<int>(json['id']),
+      stockItemId: serializer.fromJson<int>(json['stockItemId']),
+      userId: serializer.fromJson<int?>(json['userId']),
+      previousQuantity: serializer.fromJson<int>(json['previousQuantity']),
+      newQuantity: serializer.fromJson<int>(json['newQuantity']),
+      quantityChange: serializer.fromJson<int>(json['quantityChange']),
+      reason: serializer.fromJson<String>(json['reason']),
+      description: serializer.fromJson<String?>(json['description']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'stockItemId': serializer.toJson<int>(stockItemId),
+      'userId': serializer.toJson<int?>(userId),
+      'previousQuantity': serializer.toJson<int>(previousQuantity),
+      'newQuantity': serializer.toJson<int>(newQuantity),
+      'quantityChange': serializer.toJson<int>(quantityChange),
+      'reason': serializer.toJson<String>(reason),
+      'description': serializer.toJson<String?>(description),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+    };
+  }
+
+  StockMovement copyWith({
+    int? id,
+    int? stockItemId,
+    Value<int?> userId = const Value.absent(),
+    int? previousQuantity,
+    int? newQuantity,
+    int? quantityChange,
+    String? reason,
+    Value<String?> description = const Value.absent(),
+    DateTime? occurredAt,
+  }) => StockMovement(
+    id: id ?? this.id,
+    stockItemId: stockItemId ?? this.stockItemId,
+    userId: userId.present ? userId.value : this.userId,
+    previousQuantity: previousQuantity ?? this.previousQuantity,
+    newQuantity: newQuantity ?? this.newQuantity,
+    quantityChange: quantityChange ?? this.quantityChange,
+    reason: reason ?? this.reason,
+    description: description.present ? description.value : this.description,
+    occurredAt: occurredAt ?? this.occurredAt,
+  );
+  StockMovement copyWithCompanion(StockMovementsCompanion data) {
+    return StockMovement(
+      id: data.id.present ? data.id.value : this.id,
+      stockItemId: data.stockItemId.present
+          ? data.stockItemId.value
+          : this.stockItemId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      previousQuantity: data.previousQuantity.present
+          ? data.previousQuantity.value
+          : this.previousQuantity,
+      newQuantity: data.newQuantity.present
+          ? data.newQuantity.value
+          : this.newQuantity,
+      quantityChange: data.quantityChange.present
+          ? data.quantityChange.value
+          : this.quantityChange,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockMovement(')
+          ..write('id: $id, ')
+          ..write('stockItemId: $stockItemId, ')
+          ..write('userId: $userId, ')
+          ..write('previousQuantity: $previousQuantity, ')
+          ..write('newQuantity: $newQuantity, ')
+          ..write('quantityChange: $quantityChange, ')
+          ..write('reason: $reason, ')
+          ..write('description: $description, ')
+          ..write('occurredAt: $occurredAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    stockItemId,
+    userId,
+    previousQuantity,
+    newQuantity,
+    quantityChange,
+    reason,
+    description,
+    occurredAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StockMovement &&
+          other.id == this.id &&
+          other.stockItemId == this.stockItemId &&
+          other.userId == this.userId &&
+          other.previousQuantity == this.previousQuantity &&
+          other.newQuantity == this.newQuantity &&
+          other.quantityChange == this.quantityChange &&
+          other.reason == this.reason &&
+          other.description == this.description &&
+          other.occurredAt == this.occurredAt);
+}
+
+class StockMovementsCompanion extends UpdateCompanion<StockMovement> {
+  final Value<int> id;
+  final Value<int> stockItemId;
+  final Value<int?> userId;
+  final Value<int> previousQuantity;
+  final Value<int> newQuantity;
+  final Value<int> quantityChange;
+  final Value<String> reason;
+  final Value<String?> description;
+  final Value<DateTime> occurredAt;
+  const StockMovementsCompanion({
+    this.id = const Value.absent(),
+    this.stockItemId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.previousQuantity = const Value.absent(),
+    this.newQuantity = const Value.absent(),
+    this.quantityChange = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.description = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+  });
+  StockMovementsCompanion.insert({
+    this.id = const Value.absent(),
+    required int stockItemId,
+    this.userId = const Value.absent(),
+    required int previousQuantity,
+    required int newQuantity,
+    required int quantityChange,
+    required String reason,
+    this.description = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+  }) : stockItemId = Value(stockItemId),
+       previousQuantity = Value(previousQuantity),
+       newQuantity = Value(newQuantity),
+       quantityChange = Value(quantityChange),
+       reason = Value(reason);
+  static Insertable<StockMovement> custom({
+    Expression<int>? id,
+    Expression<int>? stockItemId,
+    Expression<int>? userId,
+    Expression<int>? previousQuantity,
+    Expression<int>? newQuantity,
+    Expression<int>? quantityChange,
+    Expression<String>? reason,
+    Expression<String>? description,
+    Expression<DateTime>? occurredAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (stockItemId != null) 'stock_item_id': stockItemId,
+      if (userId != null) 'user_id': userId,
+      if (previousQuantity != null) 'previous_quantity': previousQuantity,
+      if (newQuantity != null) 'new_quantity': newQuantity,
+      if (quantityChange != null) 'quantity_change': quantityChange,
+      if (reason != null) 'reason': reason,
+      if (description != null) 'description': description,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+    });
+  }
+
+  StockMovementsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? stockItemId,
+    Value<int?>? userId,
+    Value<int>? previousQuantity,
+    Value<int>? newQuantity,
+    Value<int>? quantityChange,
+    Value<String>? reason,
+    Value<String?>? description,
+    Value<DateTime>? occurredAt,
+  }) {
+    return StockMovementsCompanion(
+      id: id ?? this.id,
+      stockItemId: stockItemId ?? this.stockItemId,
+      userId: userId ?? this.userId,
+      previousQuantity: previousQuantity ?? this.previousQuantity,
+      newQuantity: newQuantity ?? this.newQuantity,
+      quantityChange: quantityChange ?? this.quantityChange,
+      reason: reason ?? this.reason,
+      description: description ?? this.description,
+      occurredAt: occurredAt ?? this.occurredAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (stockItemId.present) {
+      map['stock_item_id'] = Variable<int>(stockItemId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (previousQuantity.present) {
+      map['previous_quantity'] = Variable<int>(previousQuantity.value);
+    }
+    if (newQuantity.present) {
+      map['new_quantity'] = Variable<int>(newQuantity.value);
+    }
+    if (quantityChange.present) {
+      map['quantity_change'] = Variable<int>(quantityChange.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StockMovementsCompanion(')
+          ..write('id: $id, ')
+          ..write('stockItemId: $stockItemId, ')
+          ..write('userId: $userId, ')
+          ..write('previousQuantity: $previousQuantity, ')
+          ..write('newQuantity: $newQuantity, ')
+          ..write('quantityChange: $quantityChange, ')
+          ..write('reason: $reason, ')
+          ..write('description: $description, ')
+          ..write('occurredAt: $occurredAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -2400,6 +2979,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StockItemsTable stockItems = $StockItemsTable(this);
   late final $UsersTable users = $UsersTable(this);
   late final $EventsTable events = $EventsTable(this);
+  late final $StockMovementsTable stockMovements = $StockMovementsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2410,6 +2990,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     stockItems,
     users,
     events,
+    stockMovements,
   ];
 }
 
@@ -2863,6 +3444,32 @@ typedef $$StockItemsTableUpdateCompanionBuilder =
       Value<int> sortOrder,
     });
 
+final class $$StockItemsTableReferences
+    extends BaseReferences<_$AppDatabase, $StockItemsTable, StockItemRow> {
+  $$StockItemsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$StockMovementsTable, List<StockMovement>>
+  _stockMovementsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.stockMovements,
+    aliasName: $_aliasNameGenerator(
+      db.stockItems.id,
+      db.stockMovements.stockItemId,
+    ),
+  );
+
+  $$StockMovementsTableProcessedTableManager get stockMovementsRefs {
+    final manager = $$StockMovementsTableTableManager(
+      $_db,
+      $_db.stockMovements,
+    ).filter((f) => f.stockItemId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_stockMovementsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$StockItemsTableFilterComposer
     extends Composer<_$AppDatabase, $StockItemsTable> {
   $$StockItemsTableFilterComposer({
@@ -2921,6 +3528,31 @@ class $$StockItemsTableFilterComposer
     column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> stockMovementsRefs(
+    Expression<bool> Function($$StockMovementsTableFilterComposer f) f,
+  ) {
+    final $$StockMovementsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.stockMovements,
+      getReferencedColumn: (t) => t.stockItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockMovementsTableFilterComposer(
+            $db: $db,
+            $table: $db.stockMovements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StockItemsTableOrderingComposer
@@ -3023,6 +3655,31 @@ class $$StockItemsTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  Expression<T> stockMovementsRefs<T extends Object>(
+    Expression<T> Function($$StockMovementsTableAnnotationComposer a) f,
+  ) {
+    final $$StockMovementsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.stockMovements,
+      getReferencedColumn: (t) => t.stockItemId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockMovementsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stockMovements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StockItemsTableTableManager
@@ -3036,12 +3693,9 @@ class $$StockItemsTableTableManager
           $$StockItemsTableAnnotationComposer,
           $$StockItemsTableCreateCompanionBuilder,
           $$StockItemsTableUpdateCompanionBuilder,
-          (
-            StockItemRow,
-            BaseReferences<_$AppDatabase, $StockItemsTable, StockItemRow>,
-          ),
+          (StockItemRow, $$StockItemsTableReferences),
           StockItemRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool stockMovementsRefs})
         > {
   $$StockItemsTableTableManager(_$AppDatabase db, $StockItemsTable table)
     : super(
@@ -3103,9 +3757,47 @@ class $$StockItemsTableTableManager
                 sortOrder: sortOrder,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$StockItemsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({stockMovementsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (stockMovementsRefs) db.stockMovements,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (stockMovementsRefs)
+                    await $_getPrefetchedData<
+                      StockItemRow,
+                      $StockItemsTable,
+                      StockMovement
+                    >(
+                      currentTable: table,
+                      referencedTable: $$StockItemsTableReferences
+                          ._stockMovementsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$StockItemsTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).stockMovementsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.stockItemId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -3120,12 +3812,9 @@ typedef $$StockItemsTableProcessedTableManager =
       $$StockItemsTableAnnotationComposer,
       $$StockItemsTableCreateCompanionBuilder,
       $$StockItemsTableUpdateCompanionBuilder,
-      (
-        StockItemRow,
-        BaseReferences<_$AppDatabase, $StockItemsTable, StockItemRow>,
-      ),
+      (StockItemRow, $$StockItemsTableReferences),
       StockItemRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool stockMovementsRefs})
     >;
 typedef $$UsersTableCreateCompanionBuilder =
     UsersCompanion Function({
@@ -3149,6 +3838,29 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<String?> avatarUrl,
       Value<DateTime> createdAt,
     });
+
+final class $$UsersTableReferences
+    extends BaseReferences<_$AppDatabase, $UsersTable, UserRow> {
+  $$UsersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$StockMovementsTable, List<StockMovement>>
+  _stockMovementsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.stockMovements,
+    aliasName: $_aliasNameGenerator(db.users.id, db.stockMovements.userId),
+  );
+
+  $$StockMovementsTableProcessedTableManager get stockMovementsRefs {
+    final manager = $$StockMovementsTableTableManager(
+      $_db,
+      $_db.stockMovements,
+    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_stockMovementsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
   $$UsersTableFilterComposer({
@@ -3198,6 +3910,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> stockMovementsRefs(
+    Expression<bool> Function($$StockMovementsTableFilterComposer f) f,
+  ) {
+    final $$StockMovementsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.stockMovements,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockMovementsTableFilterComposer(
+            $db: $db,
+            $table: $db.stockMovements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableOrderingComposer
@@ -3286,6 +4023,31 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> stockMovementsRefs<T extends Object>(
+    Expression<T> Function($$StockMovementsTableAnnotationComposer a) f,
+  ) {
+    final $$StockMovementsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.stockMovements,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockMovementsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stockMovements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -3299,9 +4061,9 @@ class $$UsersTableTableManager
           $$UsersTableAnnotationComposer,
           $$UsersTableCreateCompanionBuilder,
           $$UsersTableUpdateCompanionBuilder,
-          (UserRow, BaseReferences<_$AppDatabase, $UsersTable, UserRow>),
+          (UserRow, $$UsersTableReferences),
           UserRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool stockMovementsRefs})
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -3355,9 +4117,42 @@ class $$UsersTableTableManager
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) =>
+                    (e.readTable(table), $$UsersTableReferences(db, table, e)),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({stockMovementsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (stockMovementsRefs) db.stockMovements,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (stockMovementsRefs)
+                    await $_getPrefetchedData<
+                      UserRow,
+                      $UsersTable,
+                      StockMovement
+                    >(
+                      currentTable: table,
+                      referencedTable: $$UsersTableReferences
+                          ._stockMovementsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$UsersTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).stockMovementsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.userId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -3372,9 +4167,9 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableAnnotationComposer,
       $$UsersTableCreateCompanionBuilder,
       $$UsersTableUpdateCompanionBuilder,
-      (UserRow, BaseReferences<_$AppDatabase, $UsersTable, UserRow>),
+      (UserRow, $$UsersTableReferences),
       UserRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool stockMovementsRefs})
     >;
 typedef $$EventsTableCreateCompanionBuilder =
     EventsCompanion Function({
@@ -3608,6 +4403,500 @@ typedef $$EventsTableProcessedTableManager =
       EventRow,
       PrefetchHooks Function()
     >;
+typedef $$StockMovementsTableCreateCompanionBuilder =
+    StockMovementsCompanion Function({
+      Value<int> id,
+      required int stockItemId,
+      Value<int?> userId,
+      required int previousQuantity,
+      required int newQuantity,
+      required int quantityChange,
+      required String reason,
+      Value<String?> description,
+      Value<DateTime> occurredAt,
+    });
+typedef $$StockMovementsTableUpdateCompanionBuilder =
+    StockMovementsCompanion Function({
+      Value<int> id,
+      Value<int> stockItemId,
+      Value<int?> userId,
+      Value<int> previousQuantity,
+      Value<int> newQuantity,
+      Value<int> quantityChange,
+      Value<String> reason,
+      Value<String?> description,
+      Value<DateTime> occurredAt,
+    });
+
+final class $$StockMovementsTableReferences
+    extends BaseReferences<_$AppDatabase, $StockMovementsTable, StockMovement> {
+  $$StockMovementsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $StockItemsTable _stockItemIdTable(_$AppDatabase db) =>
+      db.stockItems.createAlias(
+        $_aliasNameGenerator(db.stockMovements.stockItemId, db.stockItems.id),
+      );
+
+  $$StockItemsTableProcessedTableManager get stockItemId {
+    final $_column = $_itemColumn<int>('stock_item_id')!;
+
+    final manager = $$StockItemsTableTableManager(
+      $_db,
+      $_db.stockItems,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_stockItemIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.stockMovements.userId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager? get userId {
+    final $_column = $_itemColumn<int>('user_id');
+    if ($_column == null) return null;
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$StockMovementsTableFilterComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get previousQuantity => $composableBuilder(
+    column: $table.previousQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get newQuantity => $composableBuilder(
+    column: $table.newQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantityChange => $composableBuilder(
+    column: $table.quantityChange,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$StockItemsTableFilterComposer get stockItemId {
+    final $$StockItemsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stockItemId,
+      referencedTable: $db.stockItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockItemsTableFilterComposer(
+            $db: $db,
+            $table: $db.stockItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StockMovementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get previousQuantity => $composableBuilder(
+    column: $table.previousQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get newQuantity => $composableBuilder(
+    column: $table.newQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantityChange => $composableBuilder(
+    column: $table.quantityChange,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$StockItemsTableOrderingComposer get stockItemId {
+    final $$StockItemsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stockItemId,
+      referencedTable: $db.stockItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockItemsTableOrderingComposer(
+            $db: $db,
+            $table: $db.stockItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StockMovementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StockMovementsTable> {
+  $$StockMovementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get previousQuantity => $composableBuilder(
+    column: $table.previousQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get newQuantity => $composableBuilder(
+    column: $table.newQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get quantityChange => $composableBuilder(
+    column: $table.quantityChange,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  $$StockItemsTableAnnotationComposer get stockItemId {
+    final $$StockItemsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.stockItemId,
+      referencedTable: $db.stockItems,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StockItemsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.stockItems,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$StockMovementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StockMovementsTable,
+          StockMovement,
+          $$StockMovementsTableFilterComposer,
+          $$StockMovementsTableOrderingComposer,
+          $$StockMovementsTableAnnotationComposer,
+          $$StockMovementsTableCreateCompanionBuilder,
+          $$StockMovementsTableUpdateCompanionBuilder,
+          (StockMovement, $$StockMovementsTableReferences),
+          StockMovement,
+          PrefetchHooks Function({bool stockItemId, bool userId})
+        > {
+  $$StockMovementsTableTableManager(
+    _$AppDatabase db,
+    $StockMovementsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StockMovementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StockMovementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StockMovementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> stockItemId = const Value.absent(),
+                Value<int?> userId = const Value.absent(),
+                Value<int> previousQuantity = const Value.absent(),
+                Value<int> newQuantity = const Value.absent(),
+                Value<int> quantityChange = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+              }) => StockMovementsCompanion(
+                id: id,
+                stockItemId: stockItemId,
+                userId: userId,
+                previousQuantity: previousQuantity,
+                newQuantity: newQuantity,
+                quantityChange: quantityChange,
+                reason: reason,
+                description: description,
+                occurredAt: occurredAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int stockItemId,
+                Value<int?> userId = const Value.absent(),
+                required int previousQuantity,
+                required int newQuantity,
+                required int quantityChange,
+                required String reason,
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+              }) => StockMovementsCompanion.insert(
+                id: id,
+                stockItemId: stockItemId,
+                userId: userId,
+                previousQuantity: previousQuantity,
+                newQuantity: newQuantity,
+                quantityChange: quantityChange,
+                reason: reason,
+                description: description,
+                occurredAt: occurredAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$StockMovementsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({stockItemId = false, userId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (stockItemId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.stockItemId,
+                                referencedTable: $$StockMovementsTableReferences
+                                    ._stockItemIdTable(db),
+                                referencedColumn:
+                                    $$StockMovementsTableReferences
+                                        ._stockItemIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (userId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userId,
+                                referencedTable: $$StockMovementsTableReferences
+                                    ._userIdTable(db),
+                                referencedColumn:
+                                    $$StockMovementsTableReferences
+                                        ._userIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$StockMovementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StockMovementsTable,
+      StockMovement,
+      $$StockMovementsTableFilterComposer,
+      $$StockMovementsTableOrderingComposer,
+      $$StockMovementsTableAnnotationComposer,
+      $$StockMovementsTableCreateCompanionBuilder,
+      $$StockMovementsTableUpdateCompanionBuilder,
+      (StockMovement, $$StockMovementsTableReferences),
+      StockMovement,
+      PrefetchHooks Function({bool stockItemId, bool userId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3622,4 +4911,6 @@ class $AppDatabaseManager {
       $$UsersTableTableManager(_db, _db.users);
   $$EventsTableTableManager get events =>
       $$EventsTableTableManager(_db, _db.events);
+  $$StockMovementsTableTableManager get stockMovements =>
+      $$StockMovementsTableTableManager(_db, _db.stockMovements);
 }
