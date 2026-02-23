@@ -5,6 +5,8 @@ import '../../domain/entities/terrain.dart';
 import '../providers/dashboard_providers.dart';
 import '../providers/terrain_provider.dart';
 import '../providers/global_stock_alert_provider.dart';
+import '../providers/terrain_health_provider.dart';
+import '../widgets/terrain_health_gauge.dart';
 import 'maintenance_screen.dart';
 import 'stats_screen.dart';
 import 'weather_screen.dart';
@@ -377,7 +379,7 @@ class _StatCard extends StatelessWidget {
                       ),
                     ),
                     loading: () => const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
-                    error: (_, __) => const Icon(Icons.error_outline, size: 16),
+                    error: (error, stack) => const Icon(Icons.error_outline, size: 16),
                   ),
                 ],
               ),
@@ -485,7 +487,30 @@ class _DashboardTerrainItem extends StatelessWidget {
           terrain.nom,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(terrain.type.displayName),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(terrain.type.displayName),
+            const SizedBox(height: 6),
+            Consumer(
+              builder: (context, ref, _) {
+                final healthAsync = ref.watch(terrainHealthProvider(terrain.id));
+                return healthAsync.when(
+                  data: (state) => TerrainHealthGauge(
+                    score: state.score,
+                    warningMessage: state.warningMessage,
+                  ),
+                  loading: () => const SizedBox(
+                    height: 6,
+                    width: 100,
+                    child: LinearProgressIndicator(color: Colors.grey),
+                  ),
+                  error: (error, stack) => const SizedBox.shrink(),
+                );
+              },
+            ),
+          ],
+        ),
         trailing: const Icon(Icons.chevron_right, color: Colors.grey),
       ),
     );
