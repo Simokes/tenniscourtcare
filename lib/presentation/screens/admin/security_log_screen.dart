@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/admin_providers.dart';
-import '../../data/database/app_database.dart'; // Pour AuditLog
+import '../../../data/database/app_database.dart'; // Pour AuditLog
 import '../../widgets/premium/premium_card.dart';
 
 class SecurityLogScreen extends ConsumerWidget {
