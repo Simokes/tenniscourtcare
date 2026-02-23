@@ -7,6 +7,7 @@ import '../widgets/stats/stats_period_selector.dart';
 import '../widgets/stats/maintenance_distribution_chart.dart';
 import '../widgets/stats/sacks_line_chart.dart';
 import '../widgets/stats/summary_grid.dart';
+import '../widgets/stats/season_comparison_card.dart';
 import '../../utils/csv_export.dart';
 import '../providers/report_provider.dart';
 import '../../infrastructure/services/share_report_service.dart';
@@ -137,6 +138,11 @@ class StatsScreen extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+
+          // Yearly Comparison
+          const SliverToBoxAdapter(
+            child: SeasonComparisonCard(),
           ),
 
           // Distribution Chart

@@ -666,6 +666,30 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Totaux annuels globaux (tous terrains confondus)
+  Stream<({int manto, int sottomanto, int silice})> watchYearlySacksTotal(
+    int year,
+  ) {
+    final start = DateTime(year, 1, 1).millisecondsSinceEpoch;
+    final end = DateTime(year, 12, 31, 23, 59, 59, 999).millisecondsSinceEpoch;
+
+    final query = selectOnly(maintenances)
+      ..addColumns([
+        maintenances.sacsMantoUtilises.sum(),
+        maintenances.sacsSottomantoUtilises.sum(),
+        maintenances.sacsSiliceUtilises.sum(),
+      ])
+      ..where(maintenances.date.isBetweenValues(start, end));
+
+    return query.watchSingle().map((row) {
+      return (
+        manto: row.read(maintenances.sacsMantoUtilises.sum()) ?? 0,
+        sottomanto: row.read(maintenances.sacsSottomantoUtilises.sum()) ?? 0,
+        silice: row.read(maintenances.sacsSiliceUtilises.sum()) ?? 0,
+      );
+    });
+  }
+
   /// Comptage des types de maintenance par jour
   Stream<List<({int date, String type, int count})>>
   watchDailyMaintenanceTypeCounts({
