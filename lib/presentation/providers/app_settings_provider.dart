@@ -85,13 +85,8 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
       if (loc == null) {
         await prefs.remove(_kLat);
         await prefs.remove(_kLon);
-        state = AsyncValue.data(currentSettings.copyWith(location: null)); // Force update with null location but keep theme
-         // Wait, copyWith(location: null) needs special handling if null isn't allowed by copyWith signature or if it defaults to keeping old value?
-         // My copyWith implementation: location: location ?? this.location. So passing null keeps old value.
-         // I need a way to clear location.
-         // Let's modify copyWith or handle it here by constructing new object.
-          state = AsyncValue.data(AppSettings(location: null, themeMode: currentSettings.themeMode));
-
+        // Create new settings with null location, preserving current theme
+        state = AsyncValue.data(AppSettings(location: null, themeMode: currentSettings.themeMode));
       } else {
         await prefs.setDouble(_kLat, loc.latitude);
         await prefs.setDouble(_kLon, loc.longitude);

@@ -11,6 +11,12 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(appSettingsProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Premium Gradient logic
+    final gradientColors = isDark
+        ? [const Color(0xFF1A1A1A), const Color(0xFF2C2C2C)]
+        : [Colors.blueGrey.shade800, Colors.blueGrey.shade500];
 
     return Scaffold(
       // backgroundColor is handled by Theme
@@ -27,10 +33,7 @@ class SettingsScreen extends ConsumerWidget {
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.blueGrey.shade800,
-                      Colors.blueGrey.shade500,
-                    ],
+                    colors: gradientColors,
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -158,7 +161,7 @@ class SettingsScreen extends ConsumerWidget {
                     icon: Icons.logout,
                     title: 'Déconnexion',
                     subtitle: 'Quitter la session actuelle',
-                    iconColor: Colors.orange.shade800,
+                    iconColor: isDark ? Colors.orange.shade300 : Colors.orange.shade800,
                     onTap: () {
                       showDialog(
                         context: context,
@@ -193,13 +196,13 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       Icons.sports_tennis,
                       size: 48,
-                      color: Colors.grey.withValues(alpha: 0.2),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Tennis Court Care v1.0.0',
                       style: TextStyle(
-                        color: Colors.grey.shade500,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                         fontSize: 12,
                       ),
                     ),

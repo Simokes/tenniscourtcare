@@ -53,7 +53,7 @@ class SeasonComparisonCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -177,7 +177,7 @@ class SeasonComparisonCard extends ConsumerWidget {
                   drawVerticalLine: false,
                   horizontalInterval: maxY / 5,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: Theme.of(context).dividerColor.withOpacity(0.1),
                     strokeWidth: 1,
                   ),
                 ),
