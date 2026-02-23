@@ -11,6 +11,8 @@ import 'tables/stock_items.dart';
 import 'tables/users_table.dart';
 import 'tables/events_table.dart';
 import 'tables/stock_movements.dart';
+import 'tables/audit_logs.dart';
+import 'tables/login_attempts.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -26,12 +28,21 @@ import '../mappers/maintenance_mapper.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users, Events, StockMovements])
+@DriftDatabase(tables: [
+  Terrains,
+  Maintenances,
+  StockItems,
+  Users,
+  Events,
+  StockMovements,
+  AuditLogs,
+  LoginAttempts
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -63,6 +74,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 8) {
         await m.createTable(stockMovements);
+      }
+      if (from < 9) {
+        await m.createTable(auditLogs);
+        await m.createTable(loginAttempts);
       }
     },
   );
@@ -120,27 +135,37 @@ class AppDatabase extends _$AppDatabase {
   Future<int> countUsersByRole(Role role) async {
     final count = await (selectOnly(users)
       ..addColumns([users.id.count()])
-      ..where(users.role.equals(role.name)) // Drift enum stored as string? No, mapped via enum.
-      // Wait, if I used textEnum<Role>(), Drift handles the mapping automatically in Dart code
-      // but generates SQL as text.
-      // However, for selectOnly and where, I should pass the enum value if Drift generated the code correctly.
-      // But since I am using textEnum(), the column is TextColumn but typed as Role in Dart?
-      // Actually with textEnum, the generated column is of type EnumColumn<Role> effectively?
-      // No, let's check generated code behavior.
-      // If I used `textEnum<Role>()`, then `users.role` is an `Expression<Role>`.
-      // So I should just pass `role` (the enum value).
+      ..where(users.role.equals(role.name))
     ).getSingle();
     return count.read(users.id.count()) ?? 0;
   }
 
-  // Correction for countUsersByRole:
-  // With textEnum, we might need to rely on the generated code.
-  // I will write a simple version first.
   Future<int> countUsers() async {
      final count = await (selectOnly(users)..addColumns([users.id.count()])).getSingle();
      return count.read(users.id.count()) ?? 0;
   }
 
+  // ========== AUDIT & SECURITY ==========
+
+  Future<int> insertAuditLog(AuditLogsCompanion log) {
+    return into(auditLogs).insert(log);
+  }
+
+  Future<int> insertLoginAttempt(LoginAttemptsCompanion attempt) {
+    return into(loginAttempts).insert(attempt);
+  }
+
+  // Clean up old attempts (helper for rate limiter)
+  Future<void> cleanOldLoginAttempts(DateTime cutoff) async {
+    await (delete(loginAttempts)..where((a) => a.timestamp.isSmallerThanValue(cutoff))).go();
+  }
+
+  Future<List<LoginAttempt>> getRecentLoginAttempts(String email, DateTime since) async {
+    return (select(loginAttempts)
+      ..where((a) => a.email.equals(email) & a.timestamp.isBiggerOrEqualValue(since))
+      ..orderBy([(a) => OrderingTerm.desc(a.timestamp)])
+    ).get();
+  }
 
   // ========== STOCK ITEMS ==========
 

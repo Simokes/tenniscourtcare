@@ -2970,6 +2970,859 @@ class StockMovementsCompanion extends UpdateCompanion<StockMovement> {
   }
 }
 
+class $AuditLogsTable extends AuditLogs
+    with TableInfo<$AuditLogsTable, AuditLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AuditLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  @override
+  late final GeneratedColumn<String> action = GeneratedColumn<String>(
+    'action',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ipAddressMeta = const VerificationMeta(
+    'ipAddress',
+  );
+  @override
+  late final GeneratedColumn<String> ipAddress = GeneratedColumn<String>(
+    'ip_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deviceInfoMeta = const VerificationMeta(
+    'deviceInfo',
+  );
+  @override
+  late final GeneratedColumn<String> deviceInfo = GeneratedColumn<String>(
+    'device_info',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
+  @override
+  late final GeneratedColumn<String> details = GeneratedColumn<String>(
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    action,
+    email,
+    ipAddress,
+    deviceInfo,
+    timestamp,
+    details,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'audit_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AuditLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    }
+    if (data.containsKey('action')) {
+      context.handle(
+        _actionMeta,
+        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actionMeta);
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('ip_address')) {
+      context.handle(
+        _ipAddressMeta,
+        ipAddress.isAcceptableOrUnknown(data['ip_address']!, _ipAddressMeta),
+      );
+    }
+    if (data.containsKey('device_info')) {
+      context.handle(
+        _deviceInfoMeta,
+        deviceInfo.isAcceptableOrUnknown(data['device_info']!, _deviceInfoMeta),
+      );
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    if (data.containsKey('details')) {
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AuditLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AuditLog(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      ),
+      action: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}action'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      ipAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ip_address'],
+      ),
+      deviceInfo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_info'],
+      ),
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+    );
+  }
+
+  @override
+  $AuditLogsTable createAlias(String alias) {
+    return $AuditLogsTable(attachedDatabase, alias);
+  }
+}
+
+class AuditLog extends DataClass implements Insertable<AuditLog> {
+  final int id;
+  final int? userId;
+  final String action;
+  final String? email;
+  final String? ipAddress;
+  final String? deviceInfo;
+  final DateTime timestamp;
+  final String? details;
+  const AuditLog({
+    required this.id,
+    this.userId,
+    required this.action,
+    this.email,
+    this.ipAddress,
+    this.deviceInfo,
+    required this.timestamp,
+    this.details,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<int>(userId);
+    }
+    map['action'] = Variable<String>(action);
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || ipAddress != null) {
+      map['ip_address'] = Variable<String>(ipAddress);
+    }
+    if (!nullToAbsent || deviceInfo != null) {
+      map['device_info'] = Variable<String>(deviceInfo);
+    }
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    if (!nullToAbsent || details != null) {
+      map['details'] = Variable<String>(details);
+    }
+    return map;
+  }
+
+  AuditLogsCompanion toCompanion(bool nullToAbsent) {
+    return AuditLogsCompanion(
+      id: Value(id),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+      action: Value(action),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      ipAddress: ipAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ipAddress),
+      deviceInfo: deviceInfo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceInfo),
+      timestamp: Value(timestamp),
+      details: details == null && nullToAbsent
+          ? const Value.absent()
+          : Value(details),
+    );
+  }
+
+  factory AuditLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AuditLog(
+      id: serializer.fromJson<int>(json['id']),
+      userId: serializer.fromJson<int?>(json['userId']),
+      action: serializer.fromJson<String>(json['action']),
+      email: serializer.fromJson<String?>(json['email']),
+      ipAddress: serializer.fromJson<String?>(json['ipAddress']),
+      deviceInfo: serializer.fromJson<String?>(json['deviceInfo']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      details: serializer.fromJson<String?>(json['details']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'userId': serializer.toJson<int?>(userId),
+      'action': serializer.toJson<String>(action),
+      'email': serializer.toJson<String?>(email),
+      'ipAddress': serializer.toJson<String?>(ipAddress),
+      'deviceInfo': serializer.toJson<String?>(deviceInfo),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'details': serializer.toJson<String?>(details),
+    };
+  }
+
+  AuditLog copyWith({
+    int? id,
+    Value<int?> userId = const Value.absent(),
+    String? action,
+    Value<String?> email = const Value.absent(),
+    Value<String?> ipAddress = const Value.absent(),
+    Value<String?> deviceInfo = const Value.absent(),
+    DateTime? timestamp,
+    Value<String?> details = const Value.absent(),
+  }) => AuditLog(
+    id: id ?? this.id,
+    userId: userId.present ? userId.value : this.userId,
+    action: action ?? this.action,
+    email: email.present ? email.value : this.email,
+    ipAddress: ipAddress.present ? ipAddress.value : this.ipAddress,
+    deviceInfo: deviceInfo.present ? deviceInfo.value : this.deviceInfo,
+    timestamp: timestamp ?? this.timestamp,
+    details: details.present ? details.value : this.details,
+  );
+  AuditLog copyWithCompanion(AuditLogsCompanion data) {
+    return AuditLog(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      action: data.action.present ? data.action.value : this.action,
+      email: data.email.present ? data.email.value : this.email,
+      ipAddress: data.ipAddress.present ? data.ipAddress.value : this.ipAddress,
+      deviceInfo: data.deviceInfo.present
+          ? data.deviceInfo.value
+          : this.deviceInfo,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      details: data.details.present ? data.details.value : this.details,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AuditLog(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('action: $action, ')
+          ..write('email: $email, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('deviceInfo: $deviceInfo, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('details: $details')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    action,
+    email,
+    ipAddress,
+    deviceInfo,
+    timestamp,
+    details,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AuditLog &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.action == this.action &&
+          other.email == this.email &&
+          other.ipAddress == this.ipAddress &&
+          other.deviceInfo == this.deviceInfo &&
+          other.timestamp == this.timestamp &&
+          other.details == this.details);
+}
+
+class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
+  final Value<int> id;
+  final Value<int?> userId;
+  final Value<String> action;
+  final Value<String?> email;
+  final Value<String?> ipAddress;
+  final Value<String?> deviceInfo;
+  final Value<DateTime> timestamp;
+  final Value<String?> details;
+  const AuditLogsCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.action = const Value.absent(),
+    this.email = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+    this.deviceInfo = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.details = const Value.absent(),
+  });
+  AuditLogsCompanion.insert({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    required String action,
+    this.email = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+    this.deviceInfo = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.details = const Value.absent(),
+  }) : action = Value(action);
+  static Insertable<AuditLog> custom({
+    Expression<int>? id,
+    Expression<int>? userId,
+    Expression<String>? action,
+    Expression<String>? email,
+    Expression<String>? ipAddress,
+    Expression<String>? deviceInfo,
+    Expression<DateTime>? timestamp,
+    Expression<String>? details,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (action != null) 'action': action,
+      if (email != null) 'email': email,
+      if (ipAddress != null) 'ip_address': ipAddress,
+      if (deviceInfo != null) 'device_info': deviceInfo,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (details != null) 'details': details,
+    });
+  }
+
+  AuditLogsCompanion copyWith({
+    Value<int>? id,
+    Value<int?>? userId,
+    Value<String>? action,
+    Value<String?>? email,
+    Value<String?>? ipAddress,
+    Value<String?>? deviceInfo,
+    Value<DateTime>? timestamp,
+    Value<String?>? details,
+  }) {
+    return AuditLogsCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      action: action ?? this.action,
+      email: email ?? this.email,
+      ipAddress: ipAddress ?? this.ipAddress,
+      deviceInfo: deviceInfo ?? this.deviceInfo,
+      timestamp: timestamp ?? this.timestamp,
+      details: details ?? this.details,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (ipAddress.present) {
+      map['ip_address'] = Variable<String>(ipAddress.value);
+    }
+    if (deviceInfo.present) {
+      map['device_info'] = Variable<String>(deviceInfo.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (details.present) {
+      map['details'] = Variable<String>(details.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AuditLogsCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('action: $action, ')
+          ..write('email: $email, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('deviceInfo: $deviceInfo, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('details: $details')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LoginAttemptsTable extends LoginAttempts
+    with TableInfo<$LoginAttemptsTable, LoginAttempt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LoginAttemptsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
+  );
+  @override
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _successMeta = const VerificationMeta(
+    'success',
+  );
+  @override
+  late final GeneratedColumn<bool> success = GeneratedColumn<bool>(
+    'success',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("success" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _ipAddressMeta = const VerificationMeta(
+    'ipAddress',
+  );
+  @override
+  late final GeneratedColumn<String> ipAddress = GeneratedColumn<String>(
+    'ip_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    email,
+    timestamp,
+    success,
+    ipAddress,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'login_attempts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LoginAttempt> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
+      );
+    }
+    if (data.containsKey('success')) {
+      context.handle(
+        _successMeta,
+        success.isAcceptableOrUnknown(data['success']!, _successMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_successMeta);
+    }
+    if (data.containsKey('ip_address')) {
+      context.handle(
+        _ipAddressMeta,
+        ipAddress.isAcceptableOrUnknown(data['ip_address']!, _ipAddressMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LoginAttempt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LoginAttempt(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      timestamp: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}timestamp'],
+      )!,
+      success: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}success'],
+      )!,
+      ipAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ip_address'],
+      ),
+    );
+  }
+
+  @override
+  $LoginAttemptsTable createAlias(String alias) {
+    return $LoginAttemptsTable(attachedDatabase, alias);
+  }
+}
+
+class LoginAttempt extends DataClass implements Insertable<LoginAttempt> {
+  final int id;
+  final String email;
+  final DateTime timestamp;
+  final bool success;
+  final String? ipAddress;
+  const LoginAttempt({
+    required this.id,
+    required this.email,
+    required this.timestamp,
+    required this.success,
+    this.ipAddress,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['email'] = Variable<String>(email);
+    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['success'] = Variable<bool>(success);
+    if (!nullToAbsent || ipAddress != null) {
+      map['ip_address'] = Variable<String>(ipAddress);
+    }
+    return map;
+  }
+
+  LoginAttemptsCompanion toCompanion(bool nullToAbsent) {
+    return LoginAttemptsCompanion(
+      id: Value(id),
+      email: Value(email),
+      timestamp: Value(timestamp),
+      success: Value(success),
+      ipAddress: ipAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ipAddress),
+    );
+  }
+
+  factory LoginAttempt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LoginAttempt(
+      id: serializer.fromJson<int>(json['id']),
+      email: serializer.fromJson<String>(json['email']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      success: serializer.fromJson<bool>(json['success']),
+      ipAddress: serializer.fromJson<String?>(json['ipAddress']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'email': serializer.toJson<String>(email),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'success': serializer.toJson<bool>(success),
+      'ipAddress': serializer.toJson<String?>(ipAddress),
+    };
+  }
+
+  LoginAttempt copyWith({
+    int? id,
+    String? email,
+    DateTime? timestamp,
+    bool? success,
+    Value<String?> ipAddress = const Value.absent(),
+  }) => LoginAttempt(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    timestamp: timestamp ?? this.timestamp,
+    success: success ?? this.success,
+    ipAddress: ipAddress.present ? ipAddress.value : this.ipAddress,
+  );
+  LoginAttempt copyWithCompanion(LoginAttemptsCompanion data) {
+    return LoginAttempt(
+      id: data.id.present ? data.id.value : this.id,
+      email: data.email.present ? data.email.value : this.email,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      success: data.success.present ? data.success.value : this.success,
+      ipAddress: data.ipAddress.present ? data.ipAddress.value : this.ipAddress,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LoginAttempt(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('success: $success, ')
+          ..write('ipAddress: $ipAddress')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, email, timestamp, success, ipAddress);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LoginAttempt &&
+          other.id == this.id &&
+          other.email == this.email &&
+          other.timestamp == this.timestamp &&
+          other.success == this.success &&
+          other.ipAddress == this.ipAddress);
+}
+
+class LoginAttemptsCompanion extends UpdateCompanion<LoginAttempt> {
+  final Value<int> id;
+  final Value<String> email;
+  final Value<DateTime> timestamp;
+  final Value<bool> success;
+  final Value<String?> ipAddress;
+  const LoginAttemptsCompanion({
+    this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.success = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+  });
+  LoginAttemptsCompanion.insert({
+    this.id = const Value.absent(),
+    required String email,
+    this.timestamp = const Value.absent(),
+    required bool success,
+    this.ipAddress = const Value.absent(),
+  }) : email = Value(email),
+       success = Value(success);
+  static Insertable<LoginAttempt> custom({
+    Expression<int>? id,
+    Expression<String>? email,
+    Expression<DateTime>? timestamp,
+    Expression<bool>? success,
+    Expression<String>? ipAddress,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (email != null) 'email': email,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (success != null) 'success': success,
+      if (ipAddress != null) 'ip_address': ipAddress,
+    });
+  }
+
+  LoginAttemptsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? email,
+    Value<DateTime>? timestamp,
+    Value<bool>? success,
+    Value<String?>? ipAddress,
+  }) {
+    return LoginAttemptsCompanion(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      timestamp: timestamp ?? this.timestamp,
+      success: success ?? this.success,
+      ipAddress: ipAddress ?? this.ipAddress,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    }
+    if (success.present) {
+      map['success'] = Variable<bool>(success.value);
+    }
+    if (ipAddress.present) {
+      map['ip_address'] = Variable<String>(ipAddress.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LoginAttemptsCompanion(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('success: $success, ')
+          ..write('ipAddress: $ipAddress')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -2980,6 +3833,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $UsersTable users = $UsersTable(this);
   late final $EventsTable events = $EventsTable(this);
   late final $StockMovementsTable stockMovements = $StockMovementsTable(this);
+  late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
+  late final $LoginAttemptsTable loginAttempts = $LoginAttemptsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2991,6 +3846,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     users,
     events,
     stockMovements,
+    auditLogs,
+    loginAttempts,
   ];
 }
 
@@ -4897,6 +5754,447 @@ typedef $$StockMovementsTableProcessedTableManager =
       StockMovement,
       PrefetchHooks Function({bool stockItemId, bool userId})
     >;
+typedef $$AuditLogsTableCreateCompanionBuilder =
+    AuditLogsCompanion Function({
+      Value<int> id,
+      Value<int?> userId,
+      required String action,
+      Value<String?> email,
+      Value<String?> ipAddress,
+      Value<String?> deviceInfo,
+      Value<DateTime> timestamp,
+      Value<String?> details,
+    });
+typedef $$AuditLogsTableUpdateCompanionBuilder =
+    AuditLogsCompanion Function({
+      Value<int> id,
+      Value<int?> userId,
+      Value<String> action,
+      Value<String?> email,
+      Value<String?> ipAddress,
+      Value<String?> deviceInfo,
+      Value<DateTime> timestamp,
+      Value<String?> details,
+    });
+
+class $$AuditLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $AuditLogsTable> {
+  $$AuditLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AuditLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $AuditLogsTable> {
+  $$AuditLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get action => $composableBuilder(
+    column: $table.action,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AuditLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AuditLogsTable> {
+  $$AuditLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get action =>
+      $composableBuilder(column: $table.action, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get ipAddress =>
+      $composableBuilder(column: $table.ipAddress, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<String> get details =>
+      $composableBuilder(column: $table.details, builder: (column) => column);
+}
+
+class $$AuditLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AuditLogsTable,
+          AuditLog,
+          $$AuditLogsTableFilterComposer,
+          $$AuditLogsTableOrderingComposer,
+          $$AuditLogsTableAnnotationComposer,
+          $$AuditLogsTableCreateCompanionBuilder,
+          $$AuditLogsTableUpdateCompanionBuilder,
+          (AuditLog, BaseReferences<_$AppDatabase, $AuditLogsTable, AuditLog>),
+          AuditLog,
+          PrefetchHooks Function()
+        > {
+  $$AuditLogsTableTableManager(_$AppDatabase db, $AuditLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AuditLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AuditLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AuditLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> userId = const Value.absent(),
+                Value<String> action = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> ipAddress = const Value.absent(),
+                Value<String?> deviceInfo = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+              }) => AuditLogsCompanion(
+                id: id,
+                userId: userId,
+                action: action,
+                email: email,
+                ipAddress: ipAddress,
+                deviceInfo: deviceInfo,
+                timestamp: timestamp,
+                details: details,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int?> userId = const Value.absent(),
+                required String action,
+                Value<String?> email = const Value.absent(),
+                Value<String?> ipAddress = const Value.absent(),
+                Value<String?> deviceInfo = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+              }) => AuditLogsCompanion.insert(
+                id: id,
+                userId: userId,
+                action: action,
+                email: email,
+                ipAddress: ipAddress,
+                deviceInfo: deviceInfo,
+                timestamp: timestamp,
+                details: details,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AuditLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AuditLogsTable,
+      AuditLog,
+      $$AuditLogsTableFilterComposer,
+      $$AuditLogsTableOrderingComposer,
+      $$AuditLogsTableAnnotationComposer,
+      $$AuditLogsTableCreateCompanionBuilder,
+      $$AuditLogsTableUpdateCompanionBuilder,
+      (AuditLog, BaseReferences<_$AppDatabase, $AuditLogsTable, AuditLog>),
+      AuditLog,
+      PrefetchHooks Function()
+    >;
+typedef $$LoginAttemptsTableCreateCompanionBuilder =
+    LoginAttemptsCompanion Function({
+      Value<int> id,
+      required String email,
+      Value<DateTime> timestamp,
+      required bool success,
+      Value<String?> ipAddress,
+    });
+typedef $$LoginAttemptsTableUpdateCompanionBuilder =
+    LoginAttemptsCompanion Function({
+      Value<int> id,
+      Value<String> email,
+      Value<DateTime> timestamp,
+      Value<bool> success,
+      Value<String?> ipAddress,
+    });
+
+class $$LoginAttemptsTableFilterComposer
+    extends Composer<_$AppDatabase, $LoginAttemptsTable> {
+  $$LoginAttemptsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get success => $composableBuilder(
+    column: $table.success,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LoginAttemptsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LoginAttemptsTable> {
+  $$LoginAttemptsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get success => $composableBuilder(
+    column: $table.success,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LoginAttemptsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LoginAttemptsTable> {
+  $$LoginAttemptsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+
+  GeneratedColumn<bool> get success =>
+      $composableBuilder(column: $table.success, builder: (column) => column);
+
+  GeneratedColumn<String> get ipAddress =>
+      $composableBuilder(column: $table.ipAddress, builder: (column) => column);
+}
+
+class $$LoginAttemptsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LoginAttemptsTable,
+          LoginAttempt,
+          $$LoginAttemptsTableFilterComposer,
+          $$LoginAttemptsTableOrderingComposer,
+          $$LoginAttemptsTableAnnotationComposer,
+          $$LoginAttemptsTableCreateCompanionBuilder,
+          $$LoginAttemptsTableUpdateCompanionBuilder,
+          (
+            LoginAttempt,
+            BaseReferences<_$AppDatabase, $LoginAttemptsTable, LoginAttempt>,
+          ),
+          LoginAttempt,
+          PrefetchHooks Function()
+        > {
+  $$LoginAttemptsTableTableManager(_$AppDatabase db, $LoginAttemptsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LoginAttemptsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LoginAttemptsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LoginAttemptsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
+                Value<bool> success = const Value.absent(),
+                Value<String?> ipAddress = const Value.absent(),
+              }) => LoginAttemptsCompanion(
+                id: id,
+                email: email,
+                timestamp: timestamp,
+                success: success,
+                ipAddress: ipAddress,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String email,
+                Value<DateTime> timestamp = const Value.absent(),
+                required bool success,
+                Value<String?> ipAddress = const Value.absent(),
+              }) => LoginAttemptsCompanion.insert(
+                id: id,
+                email: email,
+                timestamp: timestamp,
+                success: success,
+                ipAddress: ipAddress,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LoginAttemptsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LoginAttemptsTable,
+      LoginAttempt,
+      $$LoginAttemptsTableFilterComposer,
+      $$LoginAttemptsTableOrderingComposer,
+      $$LoginAttemptsTableAnnotationComposer,
+      $$LoginAttemptsTableCreateCompanionBuilder,
+      $$LoginAttemptsTableUpdateCompanionBuilder,
+      (
+        LoginAttempt,
+        BaseReferences<_$AppDatabase, $LoginAttemptsTable, LoginAttempt>,
+      ),
+      LoginAttempt,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4913,4 +6211,8 @@ class $AppDatabaseManager {
       $$EventsTableTableManager(_db, _db.events);
   $$StockMovementsTableTableManager get stockMovements =>
       $$StockMovementsTableTableManager(_db, _db.stockMovements);
+  $$AuditLogsTableTableManager get auditLogs =>
+      $$AuditLogsTableTableManager(_db, _db.auditLogs);
+  $$LoginAttemptsTableTableManager get loginAttempts =>
+      $$LoginAttemptsTableTableManager(_db, _db.loginAttempts);
 }
