@@ -181,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
         );
         
         if (itemRow.quantity < used) {
-          throw Exception("Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).");
+          throw Exception('Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).');
         }
         
         // Mise à jour de la quantité en base
@@ -211,7 +211,7 @@ class AppDatabase extends _$AppDatabase {
           .getSingleOrNull();
 
       if (maintenance == null) {
-        throw Exception("Maintenance introuvable");
+        throw Exception('Maintenance introuvable');
       }
 
       // 2. Récupérer les items de stock
@@ -259,7 +259,7 @@ class AppDatabase extends _$AppDatabase {
           .getSingleOrNull();
 
       if (oldMaintenance == null) {
-        throw Exception("Maintenance originale introuvable");
+        throw Exception('Maintenance originale introuvable');
       }
 
       // 2. Récupérer les items de stock
@@ -279,7 +279,7 @@ class AppDatabase extends _$AppDatabase {
           // On consomme plus -> vérifier si stock suffisant
           if (itemRow.quantity < diff) {
             throw Exception(
-              "Stock insuffisant pour $name (dispo: ${itemRow.quantity}, requis en plus: $diff).",
+              'Stock insuffisant pour $name (dispo: ${itemRow.quantity}, requis en plus: $diff).',
             );
           }
         }

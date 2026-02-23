@@ -147,7 +147,7 @@ class _TerrainDialogState extends State<_TerrainDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<TerrainType>(
-                value: _type,
+                initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Surface'),
                 items: TerrainType.values
                     .map((t) => DropdownMenuItem(

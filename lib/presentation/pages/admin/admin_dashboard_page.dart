@@ -40,10 +40,10 @@ class AdminDashboardPage extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Stats Row
-            Row(
+            const Row(
               children: [
                 Expanded(child: _StatCard(title: 'Courts', value: '4', icon: Icons.sports_tennis)),
-                const SizedBox(width: 16),
+                SizedBox(width: 16),
                 Expanded(child: _StatCard(title: 'Interventions', value: '12', icon: Icons.handyman)),
                 // Assuming we fetch these numbers from a provider later
               ],

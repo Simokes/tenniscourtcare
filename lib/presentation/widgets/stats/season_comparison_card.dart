@@ -85,7 +85,7 @@ class SeasonComparisonCard extends ConsumerWidget {
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) => Colors.blueGrey.withValues(alpha: 0.8),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      String yearLabel = rodIndex == 0 ? '${state.yearN - 1}' : '${state.yearN}';
+                      final String yearLabel = rodIndex == 0 ? '${state.yearN - 1}' : '${state.yearN}';
                       String material = '';
                       switch (groupIndex) {
                         case 0: material = 'Manto'; break;

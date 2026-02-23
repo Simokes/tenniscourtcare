@@ -19,7 +19,7 @@ void main() {
 
   group('Terrains', () {
     test('insert et get terrain', () async {
-      final terrain = Terrain(
+      final terrain = const Terrain(
         id: 0,
         nom: 'Court 1',
         type: TerrainType.terreBattue,
@@ -36,10 +36,10 @@ void main() {
 
     test('getAllTerrains retourne tous les terrains', () async {
       await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
       );
       await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 2', type: TerrainType.synthetique),
+        const Terrain(id: 0, nom: 'Court 2', type: TerrainType.synthetique),
       );
 
       final terrains = await database.getAllTerrains();
@@ -52,7 +52,7 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
       );
     });
 
@@ -140,10 +140,10 @@ void main() {
 
     setUp(() async {
       terrainTerreBattueId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Terre battue', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Terre battue', type: TerrainType.terreBattue),
       );
       terrainSynthetiqueId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Synthétique', type: TerrainType.synthetique),
+        const Terrain(id: 0, nom: 'Synthétique', type: TerrainType.synthetique),
       );
     });
 
@@ -252,7 +252,7 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
       );
     });
 

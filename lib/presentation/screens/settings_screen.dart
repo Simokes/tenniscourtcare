@@ -57,7 +57,7 @@ class SettingsScreen extends ConsumerWidget {
                         icon: Icons.location_on,
                         title: 'Coordonnées GPS',
                         subtitle: hasCoords
-                            ? '${loc!.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}'
+                            ? '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}'
                             : 'Non définies',
                         onTap: () {
                           Navigator.push(

@@ -20,7 +20,7 @@ final reportProvider = FutureProvider<PeriodReport>((ref) async {
   final terrainMap = {for (var t in terrains) t.id: t.nom};
 
   // Calculate totals
-  int totalInterventions = maintenances.length;
+  final int totalInterventions = maintenances.length;
   int totalManto = 0;
   int totalSottomanto = 0;
   int totalSilice = 0;

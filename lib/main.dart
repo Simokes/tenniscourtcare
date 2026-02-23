@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,16 +9,29 @@ import 'core/router/app_router.dart';
 import 'presentation/providers/app_settings_provider.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialisation des locales pour intl (fr_FR)
-  await initializeDateFormatting('fr_FR', null);
+    // Initialisation des locales pour intl (fr_FR)
+    await initializeDateFormatting('fr_FR', null);
 
-  runApp(
-    const ProviderScope(
-      child: CourtCareApp(),
-    ),
-  );
+    runApp(
+      const ProviderScope(
+        child: CourtCareApp(),
+      ),
+    );
+  }, (error, stack) {
+    // Gestionnaire d'erreurs globales
+    // Dans le futur, on pourrait intégrer Sentry ou Firebase Crashlytics ici.
+    if (kDebugMode) {
+      debugPrint('ERREUR NON GÉRÉE: $error');
+      debugPrint('STACKTRACE: $stack');
+    } else {
+      // En production, on pourrait logger dans un fichier ou envoyer vers un service
+      // Pour l'instant, on évite le crash silencieux complet en loggant a minima si possible
+      debugPrint('Erreur critique capturée: $error');
+    }
+  });
 }
 
 class CourtCareApp extends ConsumerWidget {
@@ -37,8 +52,7 @@ class CourtCareApp extends ConsumerWidget {
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.grey.shade100,
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
-      /*
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -46,7 +60,6 @@ class CourtCareApp extends ConsumerWidget {
         ),
         color: Colors.white,
       ),
-      */
     );
 
     // Dark Theme
@@ -59,8 +72,7 @@ class CourtCareApp extends ConsumerWidget {
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF121212), // Deep Grey/Black
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-      /*
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -68,7 +80,6 @@ class CourtCareApp extends ConsumerWidget {
         ),
         color: const Color(0xFF1E1E1E),
       ),
-      */
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF121212),
         surfaceTintColor: Colors.transparent,
