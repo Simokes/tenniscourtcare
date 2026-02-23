@@ -13,6 +13,7 @@ import 'tables/events_table.dart';
 import 'tables/stock_movements.dart';
 import 'tables/audit_logs.dart';
 import 'tables/login_attempts.dart';
+import 'tables/otp_records.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -36,13 +37,14 @@ part 'app_database.g.dart';
   Events,
   StockMovements,
   AuditLogs,
-  LoginAttempts
+  LoginAttempts,
+  OtpRecords
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -78,6 +80,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 9) {
         await m.createTable(auditLogs);
         await m.createTable(loginAttempts);
+      }
+      if (from < 10) {
+        await m.createTable(otpRecords);
       }
     },
   );
@@ -165,6 +170,34 @@ class AppDatabase extends _$AppDatabase {
       ..where((a) => a.email.equals(email) & a.timestamp.isBiggerOrEqualValue(since))
       ..orderBy([(a) => OrderingTerm.desc(a.timestamp)])
     ).get();
+  }
+
+  // ========== OTP Management ==========
+
+  Future<int> insertOtp(OtpRecordsCompanion companion) {
+    return into(otpRecords).insert(companion);
+  }
+
+  Future<OtpRecord?> getLatestValidOtp(String email) async {
+    // Return latest OTP that is NOT expired
+    return (select(otpRecords)
+      ..where((o) => o.email.equals(email) & o.expiresAt.isBiggerThan(currentDateAndTime))
+      ..orderBy([(o) => OrderingTerm.desc(o.createdAt)])
+      ..limit(1)
+    ).getSingleOrNull();
+  }
+
+  Future<void> deleteOtp(int id) async {
+    await (delete(otpRecords)..where((o) => o.id.equals(id))).go();
+  }
+
+  Future<int> countRecentOtps(String email, DateTime since) async {
+    final count = await (selectOnly(otpRecords)
+      ..addColumns([otpRecords.id.count()])
+      ..where(otpRecords.email.equals(email) & otpRecords.createdAt.isBiggerOrEqualValue(since))
+    ).getSingle();
+
+    return count.read(otpRecords.id.count()) ?? 0;
   }
 
   // ========== STOCK ITEMS ==========

@@ -3823,6 +3823,401 @@ class LoginAttemptsCompanion extends UpdateCompanion<LoginAttempt> {
   }
 }
 
+class $OtpRecordsTable extends OtpRecords
+    with TableInfo<$OtpRecordsTable, OtpRecord> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OtpRecordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hashedOtpMeta = const VerificationMeta(
+    'hashedOtp',
+  );
+  @override
+  late final GeneratedColumn<String> hashedOtp = GeneratedColumn<String>(
+    'hashed_otp',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expiresAtMeta = const VerificationMeta(
+    'expiresAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+    'expires_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    email,
+    hashedOtp,
+    expiresAt,
+    createdAt,
+    userId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'otp_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OtpRecord> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('hashed_otp')) {
+      context.handle(
+        _hashedOtpMeta,
+        hashedOtp.isAcceptableOrUnknown(data['hashed_otp']!, _hashedOtpMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hashedOtpMeta);
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(
+        _expiresAtMeta,
+        expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_expiresAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OtpRecord map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OtpRecord(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      hashedOtp: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hashed_otp'],
+      )!,
+      expiresAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      ),
+    );
+  }
+
+  @override
+  $OtpRecordsTable createAlias(String alias) {
+    return $OtpRecordsTable(attachedDatabase, alias);
+  }
+}
+
+class OtpRecord extends DataClass implements Insertable<OtpRecord> {
+  final int id;
+  final String email;
+  final String hashedOtp;
+  final DateTime expiresAt;
+  final DateTime createdAt;
+  final int? userId;
+  const OtpRecord({
+    required this.id,
+    required this.email,
+    required this.hashedOtp,
+    required this.expiresAt,
+    required this.createdAt,
+    this.userId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['email'] = Variable<String>(email);
+    map['hashed_otp'] = Variable<String>(hashedOtp);
+    map['expires_at'] = Variable<DateTime>(expiresAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<int>(userId);
+    }
+    return map;
+  }
+
+  OtpRecordsCompanion toCompanion(bool nullToAbsent) {
+    return OtpRecordsCompanion(
+      id: Value(id),
+      email: Value(email),
+      hashedOtp: Value(hashedOtp),
+      expiresAt: Value(expiresAt),
+      createdAt: Value(createdAt),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
+    );
+  }
+
+  factory OtpRecord.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OtpRecord(
+      id: serializer.fromJson<int>(json['id']),
+      email: serializer.fromJson<String>(json['email']),
+      hashedOtp: serializer.fromJson<String>(json['hashedOtp']),
+      expiresAt: serializer.fromJson<DateTime>(json['expiresAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      userId: serializer.fromJson<int?>(json['userId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'email': serializer.toJson<String>(email),
+      'hashedOtp': serializer.toJson<String>(hashedOtp),
+      'expiresAt': serializer.toJson<DateTime>(expiresAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'userId': serializer.toJson<int?>(userId),
+    };
+  }
+
+  OtpRecord copyWith({
+    int? id,
+    String? email,
+    String? hashedOtp,
+    DateTime? expiresAt,
+    DateTime? createdAt,
+    Value<int?> userId = const Value.absent(),
+  }) => OtpRecord(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    hashedOtp: hashedOtp ?? this.hashedOtp,
+    expiresAt: expiresAt ?? this.expiresAt,
+    createdAt: createdAt ?? this.createdAt,
+    userId: userId.present ? userId.value : this.userId,
+  );
+  OtpRecord copyWithCompanion(OtpRecordsCompanion data) {
+    return OtpRecord(
+      id: data.id.present ? data.id.value : this.id,
+      email: data.email.present ? data.email.value : this.email,
+      hashedOtp: data.hashedOtp.present ? data.hashedOtp.value : this.hashedOtp,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      userId: data.userId.present ? data.userId.value : this.userId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OtpRecord(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('hashedOtp: $hashedOtp, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, email, hashedOtp, expiresAt, createdAt, userId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OtpRecord &&
+          other.id == this.id &&
+          other.email == this.email &&
+          other.hashedOtp == this.hashedOtp &&
+          other.expiresAt == this.expiresAt &&
+          other.createdAt == this.createdAt &&
+          other.userId == this.userId);
+}
+
+class OtpRecordsCompanion extends UpdateCompanion<OtpRecord> {
+  final Value<int> id;
+  final Value<String> email;
+  final Value<String> hashedOtp;
+  final Value<DateTime> expiresAt;
+  final Value<DateTime> createdAt;
+  final Value<int?> userId;
+  const OtpRecordsCompanion({
+    this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.hashedOtp = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.userId = const Value.absent(),
+  });
+  OtpRecordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String email,
+    required String hashedOtp,
+    required DateTime expiresAt,
+    this.createdAt = const Value.absent(),
+    this.userId = const Value.absent(),
+  }) : email = Value(email),
+       hashedOtp = Value(hashedOtp),
+       expiresAt = Value(expiresAt);
+  static Insertable<OtpRecord> custom({
+    Expression<int>? id,
+    Expression<String>? email,
+    Expression<String>? hashedOtp,
+    Expression<DateTime>? expiresAt,
+    Expression<DateTime>? createdAt,
+    Expression<int>? userId,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (email != null) 'email': email,
+      if (hashedOtp != null) 'hashed_otp': hashedOtp,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (userId != null) 'user_id': userId,
+    });
+  }
+
+  OtpRecordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? email,
+    Value<String>? hashedOtp,
+    Value<DateTime>? expiresAt,
+    Value<DateTime>? createdAt,
+    Value<int?>? userId,
+  }) {
+    return OtpRecordsCompanion(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      hashedOtp: hashedOtp ?? this.hashedOtp,
+      expiresAt: expiresAt ?? this.expiresAt,
+      createdAt: createdAt ?? this.createdAt,
+      userId: userId ?? this.userId,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (hashedOtp.present) {
+      map['hashed_otp'] = Variable<String>(hashedOtp.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OtpRecordsCompanion(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('hashedOtp: $hashedOtp, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -3835,6 +4230,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $StockMovementsTable stockMovements = $StockMovementsTable(this);
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
   late final $LoginAttemptsTable loginAttempts = $LoginAttemptsTable(this);
+  late final $OtpRecordsTable otpRecords = $OtpRecordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3848,6 +4244,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     stockMovements,
     auditLogs,
     loginAttempts,
+    otpRecords,
   ];
 }
 
@@ -6195,6 +6592,216 @@ typedef $$LoginAttemptsTableProcessedTableManager =
       LoginAttempt,
       PrefetchHooks Function()
     >;
+typedef $$OtpRecordsTableCreateCompanionBuilder =
+    OtpRecordsCompanion Function({
+      Value<int> id,
+      required String email,
+      required String hashedOtp,
+      required DateTime expiresAt,
+      Value<DateTime> createdAt,
+      Value<int?> userId,
+    });
+typedef $$OtpRecordsTableUpdateCompanionBuilder =
+    OtpRecordsCompanion Function({
+      Value<int> id,
+      Value<String> email,
+      Value<String> hashedOtp,
+      Value<DateTime> expiresAt,
+      Value<DateTime> createdAt,
+      Value<int?> userId,
+    });
+
+class $$OtpRecordsTableFilterComposer
+    extends Composer<_$AppDatabase, $OtpRecordsTable> {
+  $$OtpRecordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hashedOtp => $composableBuilder(
+    column: $table.hashedOtp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OtpRecordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $OtpRecordsTable> {
+  $$OtpRecordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hashedOtp => $composableBuilder(
+    column: $table.hashedOtp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+    column: $table.expiresAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OtpRecordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OtpRecordsTable> {
+  $$OtpRecordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get hashedOtp =>
+      $composableBuilder(column: $table.hashedOtp, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+}
+
+class $$OtpRecordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OtpRecordsTable,
+          OtpRecord,
+          $$OtpRecordsTableFilterComposer,
+          $$OtpRecordsTableOrderingComposer,
+          $$OtpRecordsTableAnnotationComposer,
+          $$OtpRecordsTableCreateCompanionBuilder,
+          $$OtpRecordsTableUpdateCompanionBuilder,
+          (
+            OtpRecord,
+            BaseReferences<_$AppDatabase, $OtpRecordsTable, OtpRecord>,
+          ),
+          OtpRecord,
+          PrefetchHooks Function()
+        > {
+  $$OtpRecordsTableTableManager(_$AppDatabase db, $OtpRecordsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OtpRecordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OtpRecordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OtpRecordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> hashedOtp = const Value.absent(),
+                Value<DateTime> expiresAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> userId = const Value.absent(),
+              }) => OtpRecordsCompanion(
+                id: id,
+                email: email,
+                hashedOtp: hashedOtp,
+                expiresAt: expiresAt,
+                createdAt: createdAt,
+                userId: userId,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String email,
+                required String hashedOtp,
+                required DateTime expiresAt,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int?> userId = const Value.absent(),
+              }) => OtpRecordsCompanion.insert(
+                id: id,
+                email: email,
+                hashedOtp: hashedOtp,
+                expiresAt: expiresAt,
+                createdAt: createdAt,
+                userId: userId,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OtpRecordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OtpRecordsTable,
+      OtpRecord,
+      $$OtpRecordsTableFilterComposer,
+      $$OtpRecordsTableOrderingComposer,
+      $$OtpRecordsTableAnnotationComposer,
+      $$OtpRecordsTableCreateCompanionBuilder,
+      $$OtpRecordsTableUpdateCompanionBuilder,
+      (OtpRecord, BaseReferences<_$AppDatabase, $OtpRecordsTable, OtpRecord>),
+      OtpRecord,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6215,4 +6822,6 @@ class $AppDatabaseManager {
       $$AuditLogsTableTableManager(_db, _db.auditLogs);
   $$LoginAttemptsTableTableManager get loginAttempts =>
       $$LoginAttemptsTableTableManager(_db, _db.loginAttempts);
+  $$OtpRecordsTableTableManager get otpRecords =>
+      $$OtpRecordsTableTableManager(_db, _db.otpRecords);
 }

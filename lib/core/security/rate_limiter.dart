@@ -1,6 +1,5 @@
 import 'dart:async';
 import '../../data/repositories/audit_repository.dart';
-import '../../data/database/app_database.dart';
 import '../security/auth_exceptions.dart';
 
 class RateLimiter {
@@ -9,10 +8,15 @@ class RateLimiter {
   // Configuration
   static const int maxAttempts = 5;
   static const Duration lockoutDuration = Duration(minutes: 15);
+  static const int maxOtpRequests = 3;
+  static const Duration otpLimitDuration = Duration(minutes: 10);
 
   // Tier 1: In-memory tracking (Consecutive failures)
   // Key: Email, Value: List of failed attempt timestamps
   final Map<String, List<DateTime>> _memoryAttempts = {};
+
+  // OTP Requests Memory Cache (Key: Email, Value: List of timestamps)
+  final Map<String, List<DateTime>> _memoryOtpRequests = {};
 
   RateLimiter(this._auditRepository);
 
@@ -101,5 +105,45 @@ class RateLimiter {
     if (_memoryAttempts[email]!.isEmpty) {
       _memoryAttempts.remove(email);
     }
+  }
+
+  /// Checks rate limit for OTP requests
+  Future<void> checkOtpLimit(String email) async {
+    final now = DateTime.now();
+    final cutoff = now.subtract(otpLimitDuration);
+
+    // Check memory first (Fast path)
+    final memoryReqs = _memoryOtpRequests[email];
+    if (memoryReqs != null) {
+      final recent = memoryReqs.where((t) => t.isAfter(cutoff)).toList();
+      if (recent.length >= maxOtpRequests) {
+        throw const AccountLockedException('Trop de demandes de code. Veuillez patienter 10 minutes.');
+      }
+      // Clean memory
+      _memoryOtpRequests[email] = recent;
+    }
+
+    // Check DB (Persistent path)
+    // We count actual OTP records created recently
+    final dbCount = await _auditRepository.countRecentOtps(email, cutoff);
+    if (dbCount >= maxOtpRequests) {
+       // Sync memory
+       final reqs = _memoryOtpRequests[email] ?? [];
+       // We don't have exact timestamps from count, so just fill with 'now' to block locally
+       while(reqs.length < maxOtpRequests) reqs.add(now);
+       _memoryOtpRequests[email] = reqs;
+
+       throw const AccountLockedException('Trop de demandes de code. Veuillez patienter 10 minutes.');
+    }
+  }
+
+  /// Records that an OTP was requested (update memory cache)
+  /// DB record is inserted by AuthRepository, but we need to update memory here
+  /// to keep Tier 1 consistent.
+  void recordOtpRequest(String email) {
+    final now = DateTime.now();
+    final reqs = _memoryOtpRequests[email] ?? [];
+    reqs.add(now);
+    _memoryOtpRequests[email] = reqs;
   }
 }

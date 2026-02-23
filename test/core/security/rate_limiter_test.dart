@@ -42,9 +42,10 @@ class MockAuditRepository implements AuditRepository {
   @override
   Future<void> cleanOldAttempts(DateTime cutoff) async {}
 
-  // Need to implement get db if accessing private field? No, just implementing interface.
-  // But wait, AuditRepository has a field _db. Implementing the interface means I just need the public members.
-  // Dart interfaces include getters for fields? AuditRepository doesn't expose _db.
+  @override
+  Future<int> countRecentOtps(String email, DateTime since) async {
+    return 0; // Default 0
+  }
 }
 
 void main() {

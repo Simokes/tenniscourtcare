@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:drift/drift.dart' as drift;
+import 'dart:math';
 
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_entity.dart';
@@ -104,6 +105,16 @@ class AuthRepositoryImpl implements AuthRepository {
       result |= a[i] ^ b[i];
     }
     return result == 0;
+  }
+
+  /// Génère un OTP à 6 chiffres sécurisé
+  String _generateSecureOtp() {
+    final random = Random.secure();
+    String otp = '';
+    for (int i = 0; i < 6; i++) {
+      otp += random.nextInt(10).toString();
+    }
+    return otp;
   }
 
   @override
@@ -249,16 +260,73 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> requestOtp(String email) async {
-    // TODO: implement real OTP
-    // Mock implementation
+    // 1. Validation
+    AuthValidator.validateEmail(email);
+
+    // 2. Rate Limiting pour OTP
+    await _rateLimiter.checkOtpLimit(email);
+
+    // 3. Génération OTP
+    final otp = _generateSecureOtp();
+    final hashedOtp = await _hashPassword(otp);
+
+    // 4. Stockage (Expiration 5 minutes)
+    final expiresAt = DateTime.now().add(const Duration(minutes: 5));
+
+    // Récupérer userId si existe (optionnel)
+    final user = await _db.getUserRowByEmail(email);
+
+    await _db.insertOtp(
+      OtpRecordsCompanion(
+        email: drift.Value(email),
+        hashedOtp: drift.Value(hashedOtp),
+        expiresAt: drift.Value(expiresAt),
+        userId: drift.Value(user?.id),
+        createdAt: drift.Value(DateTime.now()),
+      ),
+    );
+
+    // Update rate limiter memory
+    _rateLimiter.recordOtpRequest(email);
+
+    // 5. Audit
+    await _auditRepository.logEvent(
+      action: 'OTP_REQUESTED',
+      email: email,
+      userId: user?.id,
+    );
+
+    // TODO: Envoyer l'email réel
+    if (kDebugMode) {
+      print('OTP pour $email: $otp');
+    }
   }
 
   @override
   Future<bool> verifyOtp(String email, String code) async {
-    // Isolé avec kDebugMode pour la sécurité en production
-    if (kDebugMode) {
-      return code == '1234';
+    // 1. Récupérer le dernier OTP valide
+    final otpRecord = await _db.getLatestValidOtp(email);
+
+    if (otpRecord == null) {
+      // Pas d'OTP valide trouvé (expiré ou inexistant)
+      // Log failed attempt via RateLimiter?
+      // Maybe simple log for now.
+      await _auditRepository.logEvent(action: 'OTP_VERIFY_FAILED', email: email);
+      return false;
     }
-    return false;
+
+    // 2. Vérifier le hash
+    final isValid = await _verifyPassword(code, otpRecord.hashedOtp);
+
+    if (isValid) {
+      // 3. Consommer l'OTP
+      await _db.deleteOtp(otpRecord.id);
+
+      await _auditRepository.logEvent(action: 'OTP_VERIFY_SUCCESS', email: email);
+      return true;
+    } else {
+      await _auditRepository.logEvent(action: 'OTP_VERIFY_FAILED', email: email);
+      return false;
+    }
   }
 }
