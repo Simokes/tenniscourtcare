@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import 'core_providers.dart';
+import 'security_providers.dart';
 
 class AuthState {
   final UserEntity? user;
@@ -28,7 +28,12 @@ class AuthState {
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return AuthRepositoryImpl(db, const FlutterSecureStorage());
+  final storage = ref.watch(secureStorageProvider);
+  final tokenService = ref.watch(tokenServiceProvider);
+  final auditRepo = ref.watch(auditRepositoryProvider);
+  final rateLimiter = ref.watch(rateLimiterProvider);
+
+  return AuthRepositoryImpl(db, storage, tokenService, auditRepo, rateLimiter);
 });
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
@@ -54,7 +59,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      // If session expired or other auth error, just log out locally
+      state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
     }
   }
 
@@ -70,14 +76,13 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   }
 
   Future<void> signIn(String email, String password) async {
-    // On conserve l'état actuel pour savoir si le setup était requis, mais ici on suppose qu'on est sur login
-    // donc setup n'est pas requis.
     state = const AsyncValue.loading();
     try {
       final user = await _repo.signIn(email, password);
       if (user != null) {
         state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
       } else {
+        // This path is less likely now as exceptions are thrown
         state = AsyncValue.error('Identifiants invalides', StackTrace.current);
       }
     } catch (e, st) {
