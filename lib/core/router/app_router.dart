@@ -44,8 +44,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       // 4. Si connecté et tente d'accéder au login -> redirection vers dashboard
       if (isLoggingIn) {
-        final role = authStateValue!.user!.role;
-        if (role == Role.admin) return '/admin';
+        // final role = authStateValue!.user!.role;
+        // L'admin utilise l'application normalement (comme un agent)
+        // if (role == Role.admin) return '/admin';
         return '/';
       }
 

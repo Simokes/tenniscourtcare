@@ -157,17 +157,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity?> signIn(String email, String password) async {
-    // 1. Validation de base
     try {
-      AuthValidator.validateEmail(email);
-    } catch (e) {
-      throw const InvalidCredentialsException();
-    }
+      // 1. Validation de base
+      try {
+        AuthValidator.validateEmail(email);
+      } catch (e) {
+        throw const InvalidCredentialsException();
+      }
 
-    // 2. Vérification Rate Limiting (Tier 1 & Tier 2)
-    await _rateLimiter.checkLimit(email);
+      // 2. Vérification Rate Limiting (Tier 1 & Tier 2)
+      await _rateLimiter.checkLimit(email);
 
-    try {
       // 3. Récupération utilisateur
       final userRow = await _db.getUserRowByEmail(email);
 
@@ -209,13 +209,94 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       return userRow.toDomain();
-
     } catch (e) {
+      // Log failure
+      await _auditRepository.logEvent(
+        action: 'LOGIN_FAILED',
+        email: email,
+        details: {'error': e.toString()},
+      );
+
       // Si c'est déjà une AuthException, on la propage
       if (e is AuthException) rethrow;
       // Sinon on masque l'erreur interne
       throw const InvalidCredentialsException();
     }
+  }
+
+  @override
+  Future<void> createUser({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
+    AuthValidator.validateEmail(email);
+    AuthValidator.validateName(name);
+    AuthValidator.validatePassword(password);
+
+    final existing = await _db.getUserByEmail(email);
+    if (existing != null) {
+      throw SecurityException('Cet email est déjà utilisé.');
+    }
+
+    final passwordHash = await _hashPassword(password);
+
+    await _db.insertUser(
+      UsersCompanion(
+        email: drift.Value(email),
+        name: drift.Value(name),
+        passwordHash: drift.Value(passwordHash),
+        role: drift.Value(role),
+        createdAt: drift.Value(DateTime.now()),
+      ),
+    );
+
+    final currentUser = await getCurrentUser();
+    await _auditRepository.logEvent(
+      action: 'USER_CREATED',
+      email: currentUser?.email,
+      userId: currentUser?.id,
+      details: {'created_email': email, 'role': role.name},
+    );
+  }
+
+  @override
+  Future<void> deleteUser(int userId) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser?.id == userId) {
+      throw SecurityException("Vous ne pouvez pas supprimer votre propre compte.");
+    }
+
+    await _db.deleteUser(userId);
+
+    await _auditRepository.logEvent(
+      action: 'USER_DELETED',
+      email: currentUser?.email,
+      userId: currentUser?.id,
+      details: {'deleted_user_id': userId},
+    );
+  }
+
+  @override
+  Future<void> updateUserPassword(int userId, String newPassword) async {
+    AuthValidator.validatePassword(newPassword);
+
+    final passwordHash = await _hashPassword(newPassword);
+    await _db.updateUserPassword(userId, passwordHash);
+
+    final currentUser = await getCurrentUser();
+    await _auditRepository.logEvent(
+      action: 'PASSWORD_RESET',
+      email: currentUser?.email,
+      userId: currentUser?.id,
+      details: {'target_user_id': userId},
+    );
+  }
+
+  @override
+  Future<List<UserEntity>> getAllUsers() {
+    return _db.getAllUsers();
   }
 
   @override

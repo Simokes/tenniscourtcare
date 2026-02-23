@@ -55,4 +55,8 @@ class AuditRepository {
     // This assumes AppDatabase has this method (added in migration)
     return _db.countRecentOtps(email, since);
   }
+
+  Future<List<AuditLog>> getRecentAuditLogs({int limit = 100}) {
+    return _db.getRecentAuditLogs(limit: limit);
+  }
 }

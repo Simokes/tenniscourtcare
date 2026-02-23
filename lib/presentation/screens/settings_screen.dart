@@ -3,13 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/app_settings_provider.dart';
 import '../providers/auth_providers.dart';
 import '../widgets/settings_components.dart';
+import '../../domain/enums/role.dart';
 import 'edit_coords_page.dart';
+import 'admin/user_management_screen.dart';
+import 'admin/security_log_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.watch(currentUserProvider);
     final settingsAsync = ref.watch(appSettingsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -82,6 +86,40 @@ class SettingsScreen extends ConsumerWidget {
               ),
 
               const SizedBox(height: 24),
+
+              if (currentUser?.role == Role.admin) ...[
+                SettingsSection(
+                  title: 'ADMINISTRATION',
+                  children: [
+                    SettingsTile(
+                      icon: Icons.manage_accounts,
+                      title: 'Gestion des membres',
+                      subtitle: 'Ajouter, supprimer, modifier',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const UserManagementScreen()),
+                        );
+                      },
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    SettingsTile(
+                      icon: Icons.security,
+                      title: 'Journal de sécurité',
+                      subtitle: 'Audit des connexions',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SecurityLogScreen()),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
 
               SettingsSection(
                 title: 'Application',

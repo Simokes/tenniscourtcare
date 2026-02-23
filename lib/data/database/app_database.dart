@@ -150,10 +150,27 @@ class AppDatabase extends _$AppDatabase {
      return count.read(users.id.count()) ?? 0;
   }
 
+  Future<int> deleteUser(int userId) {
+    return (delete(users)..where((u) => u.id.equals(userId))).go();
+  }
+
+  Future<int> updateUserPassword(int userId, String newHash) {
+    return (update(users)..where((u) => u.id.equals(userId))).write(
+      UsersCompanion(passwordHash: Value(newHash)),
+    );
+  }
+
   // ========== AUDIT & SECURITY ==========
 
   Future<int> insertAuditLog(AuditLogsCompanion log) {
     return into(auditLogs).insert(log);
+  }
+
+  Future<List<AuditLog>> getRecentAuditLogs({int limit = 100}) {
+    return (select(auditLogs)
+      ..orderBy([(l) => OrderingTerm.desc(l.timestamp)])
+      ..limit(limit)
+    ).get();
   }
 
   Future<int> insertLoginAttempt(LoginAttemptsCompanion attempt) {
