@@ -1,4 +1,5 @@
 import '../entities/user_entity.dart';
+import '../enums/role.dart';
 
 abstract class AuthRepository {
   /// Connecte un utilisateur avec email et mot de passe.

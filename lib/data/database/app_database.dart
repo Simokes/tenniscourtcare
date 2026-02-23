@@ -111,6 +111,11 @@ class AppDatabase extends _$AppDatabase {
     return row?.toDomain();
   }
 
+  Future<domu.UserEntity?> getUserById(int id) async {
+    final row = await (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
+    return row?.toDomain();
+  }
+
   // Cette méthode retourne le UserRow complet (avec hash) pour la vérification du mot de passe
   Future<UserRow?> getUserRowByEmail(String email) async {
     return (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();

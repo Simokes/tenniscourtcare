@@ -12,6 +12,7 @@ import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
 
 import '../../core/security/auth_exceptions.dart';
+import '../../core/security/security_exceptions.dart'; // New exceptions
 import '../../core/security/auth_validator.dart';
 import '../../core/security/token_service.dart';
 import '../../core/security/rate_limiter.dart';
@@ -231,13 +232,30 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required Role role,
   }) async {
-    AuthValidator.validateEmail(email);
-    AuthValidator.validateName(name);
-    AuthValidator.validatePassword(password);
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut créer des utilisateurs.');
+    }
+
+    try {
+      AuthValidator.validateEmail(email);
+    } catch (_) {
+      throw const ValidationException('Format d\'email invalide.');
+    }
+
+    if (name.length < 2) {
+      throw const ValidationException('Le nom est trop court.');
+    }
+
+    try {
+      AuthValidator.validatePassword(password);
+    } catch (e) {
+      throw ValidationException(e.toString());
+    }
 
     final existing = await _db.getUserByEmail(email);
     if (existing != null) {
-      throw SecurityException('Cet email est déjà utilisé.');
+      throw const ValidationException('Cet email est déjà utilisé.');
     }
 
     final passwordHash = await _hashPassword(password);
@@ -252,11 +270,10 @@ class AuthRepositoryImpl implements AuthRepository {
       ),
     );
 
-    final currentUser = await getCurrentUser();
     await _auditRepository.logEvent(
       action: 'USER_CREATED',
-      email: currentUser?.email,
-      userId: currentUser?.id,
+      email: currentUser.email,
+      userId: currentUser.id,
       details: {'created_email': email, 'role': role.name},
     );
   }
@@ -264,32 +281,56 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> deleteUser(int userId) async {
     final currentUser = await getCurrentUser();
-    if (currentUser?.id == userId) {
-      throw SecurityException("Vous ne pouvez pas supprimer votre propre compte.");
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut supprimer des utilisateurs.');
+    }
+
+    if (currentUser.id == userId) {
+      throw const ValidationException("Vous ne pouvez pas supprimer votre propre compte.");
+    }
+
+    final userToDelete = await _db.getUserById(userId);
+    if (userToDelete == null) {
+      throw const UserNotFoundException();
+    }
+
+    if (userToDelete.role == Role.admin) {
+       final adminCount = await _db.countUsersByRole(Role.admin);
+       if (adminCount <= 1) {
+         throw const ValidationException('Impossible de supprimer le dernier administrateur.');
+       }
     }
 
     await _db.deleteUser(userId);
 
     await _auditRepository.logEvent(
       action: 'USER_DELETED',
-      email: currentUser?.email,
-      userId: currentUser?.id,
-      details: {'deleted_user_id': userId},
+      email: currentUser.email,
+      userId: currentUser.id,
+      details: {'deleted_user_id': userId, 'deleted_email': userToDelete.email},
     );
   }
 
   @override
   Future<void> updateUserPassword(int userId, String newPassword) async {
-    AuthValidator.validatePassword(newPassword);
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut modifier les mots de passe.');
+    }
+
+    try {
+      AuthValidator.validatePassword(newPassword);
+    } catch (e) {
+      throw ValidationException(e.toString());
+    }
 
     final passwordHash = await _hashPassword(newPassword);
     await _db.updateUserPassword(userId, passwordHash);
 
-    final currentUser = await getCurrentUser();
     await _auditRepository.logEvent(
       action: 'PASSWORD_RESET',
-      email: currentUser?.email,
-      userId: currentUser?.id,
+      email: currentUser.email,
+      userId: currentUser.id,
       details: {'target_user_id': userId},
     );
   }
