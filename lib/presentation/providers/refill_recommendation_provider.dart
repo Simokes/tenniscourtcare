@@ -15,7 +15,7 @@ final weatherServiceProvider = Provider((ref) => WeatherService());
 
 final refillRecommendationProvider = FutureProvider.family<RefillRecommendation, int>((ref, terrainId) async {
   // 1. Localisation
-  final clubLocation = ref.watch(appSettingsProvider).value;
+  final clubLocation = ref.watch(appSettingsProvider).value?.location;
   if (clubLocation == null) {
     // Impossible de calculer sans météo fiable -> fallback
     return const RefillRecommendation(

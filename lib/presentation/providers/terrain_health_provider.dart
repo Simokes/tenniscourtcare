@@ -26,7 +26,7 @@ final terrainHealthProvider = FutureProvider.family<TerrainHealthState, int>((re
 
   final db = ref.read(databaseProvider);
   final settingsAsync = ref.watch(appSettingsProvider);
-  final location = settingsAsync.valueOrNull;
+  final location = settingsAsync.valueOrNull?.location;
 
   int score = 100;
   String? warning;

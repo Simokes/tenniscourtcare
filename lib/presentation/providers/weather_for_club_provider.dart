@@ -18,8 +18,8 @@ class WeatherComputed {
 /// Météo pour le club (coordonnée globale), en fonction d’un type de terrain
 final weatherForClubProvider =
 FutureProvider.family<WeatherComputed, TerrainType>((ref, type) async {
-  final locAsync = ref.watch(appSettingsProvider);
-  final loc = locAsync.value;
+  final settingsAsync = ref.watch(appSettingsProvider);
+  final loc = settingsAsync.value?.location;
   if (loc == null) {
     throw Exception('Aucune coordonnée du club définie');
   }

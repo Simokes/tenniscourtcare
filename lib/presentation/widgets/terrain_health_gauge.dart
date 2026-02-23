@@ -34,7 +34,7 @@ class TerrainHealthGauge extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: value,
-                    backgroundColor: Colors.grey.shade200,
+                    backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                     valueColor: AlwaysStoppedAnimation<Color>(color),
                     minHeight: 6,
                   ),
@@ -56,13 +56,13 @@ class TerrainHealthGauge extends StatelessWidget {
               padding: const EdgeInsets.only(top: 4),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, size: 12, color: Colors.red),
+                  Icon(Icons.warning_amber_rounded, size: 12, color: Theme.of(context).colorScheme.error),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       warningMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),

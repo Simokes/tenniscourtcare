@@ -19,7 +19,7 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
   @override
   void initState() {
     super.initState();
-    final current = ref.read(appSettingsProvider).value;
+    final current = ref.read(appSettingsProvider).value?.location;
     _latCtrl = TextEditingController(text: current?.latitude.toStringAsFixed(6) ?? '');
     _lonCtrl = TextEditingController(text: current?.longitude.toStringAsFixed(6) ?? '');
   }

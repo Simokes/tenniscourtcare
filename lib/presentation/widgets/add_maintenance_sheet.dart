@@ -99,7 +99,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   }
 
   Future<void> _loadWeather() async {
-    final clubLoc = ref.read(appSettingsProvider).value;
+    final clubLoc = ref.read(appSettingsProvider).value?.location;
     if (clubLoc == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,9 +204,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -217,7 +217,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -381,18 +381,18 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.blueGrey.shade50,
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.blueGrey.shade100),
+                              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.info_outline, color: Colors.blueGrey.shade700),
+                                Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     'Aucun matériau n\'est requis pour ce type de terrain.',
-                                    style: TextStyle(color: Colors.blueGrey.shade800),
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                                   ),
                                 ),
                               ],
@@ -430,9 +430,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                               ),
                               IconButton(
                                 onPressed: () => setState(() => _imagePath = null),
-                                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.error),
                                 style: IconButton.styleFrom(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
                                 ),
                               ),
                             ],
