@@ -17,6 +17,7 @@ import 'premium/premium_text_form_field.dart';
 import '../providers/refill_recommendation_provider.dart';
 import 'maintenance/refill_recommendation_card.dart';
 import '../../infrastructure/services/image_picker_service.dart';
+import 'image_viewer_dialog.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain terrain;
@@ -412,13 +413,19 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           Stack(
                             alignment: Alignment.topRight,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  File(_imagePath!),
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
+                              GestureDetector(
+                                onTap: () => showDialog(
+                                  context: context,
+                                  builder: (context) => ImageViewerDialog(imagePath: _imagePath!),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    File(_imagePath!),
+                                    height: 200,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                               IconButton(
