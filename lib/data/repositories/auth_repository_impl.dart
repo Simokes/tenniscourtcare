@@ -12,6 +12,7 @@ import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
 
 import '../../core/security/auth_exceptions.dart';
+import '../../core/security/security_exceptions.dart'; // New exceptions
 import '../../core/security/auth_validator.dart';
 import '../../core/security/token_service.dart';
 import '../../core/security/rate_limiter.dart';
@@ -157,17 +158,17 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity?> signIn(String email, String password) async {
-    // 1. Validation de base
     try {
-      AuthValidator.validateEmail(email);
-    } catch (e) {
-      throw const InvalidCredentialsException();
-    }
+      // 1. Validation de base
+      try {
+        AuthValidator.validateEmail(email);
+      } catch (e) {
+        throw const InvalidCredentialsException();
+      }
 
-    // 2. Vérification Rate Limiting (Tier 1 & Tier 2)
-    await _rateLimiter.checkLimit(email);
+      // 2. Vérification Rate Limiting (Tier 1 & Tier 2)
+      await _rateLimiter.checkLimit(email);
 
-    try {
       // 3. Récupération utilisateur
       final userRow = await _db.getUserRowByEmail(email);
 
@@ -209,13 +210,134 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       return userRow.toDomain();
-
     } catch (e) {
+      // Log failure
+      await _auditRepository.logEvent(
+        action: 'LOGIN_FAILED',
+        email: email,
+        details: {'error': e.toString()},
+      );
+
       // Si c'est déjà une AuthException, on la propage
       if (e is AuthException) rethrow;
       // Sinon on masque l'erreur interne
       throw const InvalidCredentialsException();
     }
+  }
+
+  @override
+  Future<void> createUser({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut créer des utilisateurs.');
+    }
+
+    try {
+      AuthValidator.validateEmail(email);
+    } catch (_) {
+      throw const ValidationException('Format d\'email invalide.');
+    }
+
+    if (name.length < 2) {
+      throw const ValidationException('Le nom est trop court.');
+    }
+
+    try {
+      AuthValidator.validatePassword(password);
+    } catch (e) {
+      throw ValidationException(e.toString());
+    }
+
+    final existing = await _db.getUserByEmail(email);
+    if (existing != null) {
+      throw const ValidationException('Cet email est déjà utilisé.');
+    }
+
+    final passwordHash = await _hashPassword(password);
+
+    await _db.insertUser(
+      UsersCompanion(
+        email: drift.Value(email),
+        name: drift.Value(name),
+        passwordHash: drift.Value(passwordHash),
+        role: drift.Value(role),
+        createdAt: drift.Value(DateTime.now()),
+      ),
+    );
+
+    await _auditRepository.logEvent(
+      action: 'USER_CREATED',
+      email: currentUser.email,
+      userId: currentUser.id,
+      details: {'created_email': email, 'role': role.name},
+    );
+  }
+
+  @override
+  Future<void> deleteUser(int userId) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut supprimer des utilisateurs.');
+    }
+
+    if (currentUser.id == userId) {
+      throw const ValidationException("Vous ne pouvez pas supprimer votre propre compte.");
+    }
+
+    final userToDelete = await _db.getUserById(userId);
+    if (userToDelete == null) {
+      throw const UserNotFoundException();
+    }
+
+    if (userToDelete.role == Role.admin) {
+       final adminCount = await _db.countUsersByRole(Role.admin);
+       if (adminCount <= 1) {
+         throw const ValidationException('Impossible de supprimer le dernier administrateur.');
+       }
+    }
+
+    await _db.deleteUser(userId);
+
+    await _auditRepository.logEvent(
+      action: 'USER_DELETED',
+      email: currentUser.email,
+      userId: currentUser.id,
+      details: {'deleted_user_id': userId, 'deleted_email': userToDelete.email},
+    );
+  }
+
+  @override
+  Future<void> updateUserPassword(int userId, String newPassword) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(message: 'Seul un administrateur peut modifier les mots de passe.');
+    }
+
+    try {
+      AuthValidator.validatePassword(newPassword);
+    } catch (e) {
+      throw ValidationException(e.toString());
+    }
+
+    final passwordHash = await _hashPassword(newPassword);
+    await _db.updateUserPassword(userId, passwordHash);
+
+    await _auditRepository.logEvent(
+      action: 'PASSWORD_RESET',
+      email: currentUser.email,
+      userId: currentUser.id,
+      details: {'target_user_id': userId},
+    );
+  }
+
+  @override
+  Future<List<UserEntity>> getAllUsers() {
+    return _db.getAllUsers();
   }
 
   @override
