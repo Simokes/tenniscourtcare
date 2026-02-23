@@ -12,6 +12,9 @@ class Maintenance {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
 
+  /// Chemin vers la photo de preuve (optionnel)
+  final String? imagePath;
+
   /// Snapshot météo au moment de la maintenance (optionnel)
   final WeatherSnapshot? weather;
 
@@ -28,6 +31,7 @@ class Maintenance {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.imagePath,
     this.weather,
     this.terrainGele,
     this.terrainImpraticable,
@@ -42,6 +46,7 @@ class Maintenance {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
+    String? imagePath,
     WeatherSnapshot? weather,
     bool? terrainGele,
     bool? terrainImpraticable,
@@ -56,6 +61,7 @@ class Maintenance {
       sacsSottomantoUtilises:
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+      imagePath: imagePath ?? this.imagePath,
       weather: weather ?? this.weather,
       terrainGele: terrainGele ?? this.terrainGele,
       terrainImpraticable: terrainImpraticable ?? this.terrainImpraticable,
@@ -75,6 +81,7 @@ class Maintenance {
           sacsMantoUtilises == other.sacsMantoUtilises &&
           sacsSottomantoUtilises == other.sacsSottomantoUtilises &&
           sacsSiliceUtilises == other.sacsSiliceUtilises &&
+          imagePath == other.imagePath &&
           weather == other.weather &&
           terrainGele == other.terrainGele &&
           terrainImpraticable == other.terrainImpraticable;
@@ -89,6 +96,7 @@ class Maintenance {
       sacsMantoUtilises.hashCode ^
       sacsSottomantoUtilises.hashCode ^
       sacsSiliceUtilises.hashCode ^
+      imagePath.hashCode ^
       weather.hashCode ^
       terrainGele.hashCode ^
       terrainImpraticable.hashCode;
@@ -97,5 +105,6 @@ class Maintenance {
   String toString() =>
       'Maintenance(id: $id, terrainId: $terrainId, type: $type, date: $date, '
       'manto: $sacsMantoUtilises, sotto: $sacsSottomantoUtilises, silice: $sacsSiliceUtilises, '
+      'imagePath: $imagePath, '
       'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable)';
 }

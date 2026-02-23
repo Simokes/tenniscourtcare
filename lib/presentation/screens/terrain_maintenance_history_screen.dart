@@ -7,6 +7,7 @@ import '../providers/stats_providers.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../widgets/maintenance_stats_chart.dart';
 import '../../utils/date_utils.dart';
+import '../widgets/image_viewer_dialog.dart';
 
 class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   final Terrain terrain;
@@ -199,9 +200,31 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                         ),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          title: Text(
-                            maintenance.type,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          title: Row(
+                            children: [
+                              Text(
+                                maintenance.type,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                              if (maintenance.imagePath != null) ...[
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => ImageViewerDialog(
+                                        imagePath: maintenance.imagePath!,
+                                      ),
+                                    );
+                                  },
+                                  child: Icon(
+                                    Icons.image_outlined,
+                                    size: 18,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

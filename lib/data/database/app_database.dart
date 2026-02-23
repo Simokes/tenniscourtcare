@@ -21,6 +21,7 @@ import '../../utils/date_utils.dart' as cc;
 import '../mappers/terrain_mapper.dart'; 
 import '../mappers/stock_item_mapper.dart';
 import '../mappers/user_mapper.dart';
+import '../mappers/maintenance_mapper.dart';
 
 part 'app_database.g.dart';
 
@@ -29,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -51,6 +52,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await m.createTable(events);
+      }
+      if (from < 6) {
+        await m.addColumn(maintenances, maintenances.imagePath);
       }
     },
   );
@@ -191,17 +195,7 @@ class AppDatabase extends _$AppDatabase {
       checkAndDec('Silice', m.sacsSiliceUtilises);
 
       // 3. Insérer la maintenance
-      await into(maintenances).insert(
-        MaintenancesCompanion.insert(
-          terrainId: m.terrainId,
-          type: m.type,
-          date: m.date,
-          commentaire: Value(m.commentaire),
-          sacsMantoUtilises: Value(m.sacsMantoUtilises),
-          sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
-          sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
-        ),
-      );
+      await into(maintenances).insert(m.toCompanion());
     });
   }
 
@@ -315,18 +309,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
       // 4. Mettre à jour la maintenance
-      await update(maintenances).replace(
-        MaintenancesCompanion(
-          id: Value(newMaintenance.id!),
-          terrainId: Value(newMaintenance.terrainId),
-          type: Value(newMaintenance.type),
-          date: Value(newMaintenance.date),
-          commentaire: Value(newMaintenance.commentaire),
-          sacsMantoUtilises: Value(newMaintenance.sacsMantoUtilises),
-          sacsSottomantoUtilises: Value(newMaintenance.sacsSottomantoUtilises),
-          sacsSiliceUtilises: Value(newMaintenance.sacsSiliceUtilises),
-        ),
-      );
+      await update(maintenances).replace(newMaintenance.toCompanion());
     });
   }
 
@@ -336,7 +319,7 @@ class AppDatabase extends _$AppDatabase {
           ..where((m) => m.type.like('%Recharge%') | m.type.like('%Travaux%'))
           ..orderBy([(m) => OrderingTerm.desc(m.date)])
           ..limit(1))
-        .map(_maintenanceFromRow)
+        .map((r) => r.toDomain())
         .getSingleOrNull();
   }
 
@@ -354,7 +337,7 @@ class AppDatabase extends _$AppDatabase {
     }
 
     final row = await query.getSingleOrNull();
-    return row != null ? _maintenanceFromRow(row) : null;
+    return row?.toDomain();
   }
 
   // ========== TERRAINS ==========
@@ -396,7 +379,7 @@ class AppDatabase extends _$AppDatabase {
               ..where((m) => m.terrainId.equals(terrainId))
               ..orderBy([(m) => OrderingTerm.desc(m.date)]))
             .get();
-    return rows.map(_maintenanceFromRow).toList();
+    return rows.map((r) => r.toDomain()).toList();
   }
 
   Stream<List<domm.Maintenance>> watchMaintenancesInRange(int start, int end) {
@@ -404,7 +387,7 @@ class AppDatabase extends _$AppDatabase {
           ..where((m) => m.date.isBetweenValues(start, end))
           ..orderBy([(m) => OrderingTerm.asc(m.date)]))
         .watch()
-        .map((rows) => rows.map(_maintenanceFromRow).toList());
+        .map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
   Future<List<domm.Maintenance>> getMaintenancesInPeriod(
@@ -419,28 +402,18 @@ class AppDatabase extends _$AppDatabase {
               ..where((m) => m.date.isBetweenValues(startMs, endMs))
               ..orderBy([(m) => OrderingTerm.asc(m.date)]))
             .get();
-    return rows.map(_maintenanceFromRow).toList();
+    return rows.map((r) => r.toDomain()).toList();
   }
 
   Future<domm.Maintenance?> getMaintenanceById(int id) async {
     final row = await (select(
       maintenances,
     )..where((m) => m.id.equals(id))).getSingleOrNull();
-    return row != null ? _maintenanceFromRow(row) : null;
+    return row?.toDomain();
   }
 
   Future<int> insertMaintenance(domm.Maintenance m) {
-    return into(maintenances).insert(
-      MaintenancesCompanion.insert(
-        terrainId: m.terrainId,
-        type: m.type,
-        date: m.date,
-        commentaire: Value(m.commentaire),
-        sacsMantoUtilises: Value(m.sacsMantoUtilises),
-        sacsSottomantoUtilises: Value(m.sacsSottomantoUtilises),
-        sacsSiliceUtilises: Value(m.sacsSiliceUtilises),
-      ),
-    );
+    return into(maintenances).insert(m.toCompanion());
   }
 
   Future<int> updateMaintenance(MaintenancesCompanion companion) {
@@ -449,19 +422,6 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> deleteMaintenance(int id) {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
-  }
-
-  domm.Maintenance _maintenanceFromRow(MaintenanceRow row) {
-    return domm.Maintenance(
-      id: row.id,
-      terrainId: row.terrainId,
-      type: row.type,
-      commentaire: row.commentaire,
-      date: row.date,
-      sacsMantoUtilises: row.sacsMantoUtilises,
-      sacsSottomantoUtilises: row.sacsSottomantoUtilises,
-      sacsSiliceUtilises: row.sacsSiliceUtilises,
-    );
   }
 
   // ========== WATCHERS & AGRÉGATIONS ==========

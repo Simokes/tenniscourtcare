@@ -14,4 +14,6 @@ class Maintenances extends Table {
       integer().withDefault(const Constant(0))();
   IntColumn get sacsSiliceUtilises =>
       integer().withDefault(const Constant(0))();
+
+  TextColumn get imagePath => text().nullable()();
 }
