@@ -21,9 +21,15 @@ class StatsScreen extends ConsumerWidget {
     final sacksSeriesAsync = ref.watch(sacksSeriesProvider);
     final distribution = ref.watch(maintenanceTypesDistributionProvider);
     final sacksTotals = ref.watch(sacksTotalsForPeriodProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Premium Gradient logic for AppBar
+    final gradientColors = isDark
+        ? [const Color(0xFF1A1A1A), const Color(0xFF2C2C2C)]
+        : [Colors.blue.shade800, Colors.blue.shade500];
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      // backgroundColor: handled by Theme
       body: CustomScrollView(
         slivers: [
           // Header
@@ -70,10 +76,7 @@ class StatsScreen extends ConsumerWidget {
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.blue.shade800,
-                      Colors.blue.shade500,
-                    ],
+                    colors: gradientColors,
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -99,9 +102,9 @@ class StatsScreen extends ConsumerWidget {
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(
-                          colorScheme: ColorScheme.light(
-                            primary: Colors.blue.shade800,
-                          ),
+                          colorScheme: isDark
+                            ? ColorScheme.dark(primary: Colors.blue.shade300, onPrimary: Colors.black)
+                            : ColorScheme.light(primary: Colors.blue.shade800),
                         ),
                         child: child!,
                       );
@@ -151,11 +154,11 @@ class StatsScreen extends ConsumerWidget {
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -183,11 +186,11 @@ class StatsScreen extends ConsumerWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardTheme.color,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

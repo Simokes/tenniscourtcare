@@ -21,9 +21,11 @@ class SeasonComparisonCard extends ConsumerWidget {
   }
 
   Widget _buildCard(BuildContext context, YearlyComparisonState state) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     // Couleurs
     const mantoColor = Color(0xFFf8b250);
-    const sottoColor = Colors.brown;
+    final sottoColor = isDark ? Colors.brown.shade300 : Colors.brown;
     const siliceColor = Color(0xFF0293ee);
 
     // Données pour le graphique
@@ -47,11 +49,11 @@ class SeasonComparisonCard extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -70,7 +72,7 @@ class SeasonComparisonCard extends ConsumerWidget {
           Text(
             state.message,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade700,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                 ),
           ),
           const SizedBox(height: 24),
@@ -123,8 +125,8 @@ class SeasonComparisonCard extends ConsumerWidget {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (double value, TitleMeta meta) {
-                        const style = TextStyle(
-                          color: Colors.grey,
+                        final style = TextStyle(
+                          color: Theme.of(context).textTheme.bodySmall?.color,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         );
@@ -160,8 +162,8 @@ class SeasonComparisonCard extends ConsumerWidget {
                         if (value == 0) return const SizedBox.shrink();
                         return Text(
                           value.toInt().toString(),
-                          style: const TextStyle(
-                            color: Colors.grey,
+                          style: TextStyle(
+                            color: Theme.of(context).textTheme.bodySmall?.color,
                             fontSize: 10,
                           ),
                         );
@@ -175,7 +177,7 @@ class SeasonComparisonCard extends ConsumerWidget {
                   drawVerticalLine: false,
                   horizontalInterval: maxY / 5,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.grey.withValues(alpha: 0.1),
+                    color: Theme.of(context).dividerColor.withOpacity(0.1),
                     strokeWidth: 1,
                   ),
                 ),
@@ -188,9 +190,9 @@ class SeasonComparisonCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(Colors.grey, 'Année N-1 (${state.yearN - 1})', isLight: true),
+              _buildLegendItem(context, Colors.grey, 'Année N-1 (${state.yearN - 1})', isLight: true),
               const SizedBox(width: 24),
-              _buildLegendItem(Colors.grey.shade800, 'Année N (${state.yearN})', isLight: false),
+              _buildLegendItem(context, isDark ? Colors.grey.shade400 : Colors.grey.shade800, 'Année N (${state.yearN})', isLight: false),
             ],
           ),
         ],
@@ -225,7 +227,7 @@ class SeasonComparisonCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendItem(Color color, String text, {required bool isLight}) {
+  Widget _buildLegendItem(BuildContext context, Color color, String text, {required bool isLight}) {
     return Row(
       children: [
         Container(
@@ -240,9 +242,9 @@ class SeasonComparisonCard extends ConsumerWidget {
         const SizedBox(width: 8),
         Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
-            color: Colors.grey,
+            color: Theme.of(context).textTheme.bodySmall?.color,
             fontWeight: FontWeight.w500,
           ),
         ),

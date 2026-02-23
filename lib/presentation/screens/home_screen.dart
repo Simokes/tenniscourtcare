@@ -55,9 +55,17 @@ class HomeScreen extends ConsumerWidget {
 
     final now = DateTime.now();
     final dateFormat = DateFormat('EEEE d MMMM', 'fr_FR');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Adaptive colors for cards
+    // Maintenance (Blue), Stock (Orange), Weather (Teal), Stats (Purple)
+    final maintenanceColor = isDark ? Colors.blue.shade300 : Colors.blue.shade700;
+    final stockColor = isDark ? Colors.orange.shade300 : Colors.orange.shade800;
+    final weatherColor = isDark ? Colors.teal.shade300 : Colors.teal.shade600;
+    final statsColor = isDark ? Colors.purple.shade300 : Colors.purple.shade600;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      // backgroundColor: handled by Theme
       body: CustomScrollView(
         slivers: [
           // 1. Premium Sliver App Bar
@@ -181,7 +189,7 @@ class HomeScreen extends ConsumerWidget {
                   title: 'Maintenances\nAujourd\'hui',
                   valueAsync: todayCountAsync,
                   icon: Icons.assignment_turned_in,
-                  color: Colors.blue.shade700,
+                  color: maintenanceColor,
                   onTap: () {
                      // Navigate to maintenance list?
                      Navigator.push(
@@ -194,7 +202,7 @@ class HomeScreen extends ConsumerWidget {
                   title: 'Alertes\nStock',
                   valueAsync: stockAlertCountAsync,
                   icon: Icons.inventory_2,
-                  color: Colors.orange.shade800,
+                  color: stockColor,
                   isAlert: true,
                   onTap: () {
                     Navigator.push(
@@ -206,13 +214,13 @@ class HomeScreen extends ConsumerWidget {
                 _ActionCard(
                   title: 'Météo\nClub',
                   icon: Icons.wb_sunny,
-                  color: Colors.teal.shade600,
+                  color: weatherColor,
                   onTap: () => _openWeatherForFirstTerrainWithCoords(context, ref),
                 ),
                 _ActionCard(
                   title: 'Stats\nGlobales',
                   icon: Icons.bar_chart,
-                  color: Colors.purple.shade600,
+                  color: statsColor,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -240,7 +248,6 @@ class HomeScreen extends ConsumerWidget {
                     'Mes Terrains',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
                         ),
                   ),
                   TextButton(
@@ -327,14 +334,24 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     // Calcul de l'état d'alerte : si isAlert=true et valeur > 0
     final val = valueAsync.asData?.value ?? 0;
     final hasActiveAlert = isAlert && val > 0;
 
     // Couleurs dynamiques
     final effectiveColor = hasActiveAlert ? Colors.red : color;
-    final bgColor = hasActiveAlert ? Colors.red.shade50 : Colors.white;
-    final iconColor = hasActiveAlert ? Colors.red : color;
+
+    // BgColor
+    Color bgColor;
+    if (hasActiveAlert) {
+      bgColor = isDark ? Colors.red.withOpacity(0.15) : Colors.red.shade50;
+    } else {
+      bgColor = Theme.of(context).cardTheme.color ?? (isDark ? const Color(0xFF1E1E1E) : Colors.white);
+    }
+
+    final iconColor = hasActiveAlert ? (isDark ? Colors.red.shade300 : Colors.red) : color;
 
     return Card(
       elevation: 4,
@@ -350,7 +367,7 @@ class _StatCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [bgColor, effectiveColor.withValues(alpha: 0.05)],
+              colors: [bgColor, effectiveColor.withValues(alpha: isDark ? 0.15 : 0.05)],
             ),
           ),
           padding: const EdgeInsets.all(12),
@@ -366,15 +383,19 @@ class _StatCard extends StatelessWidget {
                     data: (val) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: hasActiveAlert ? Colors.white : Colors.grey.shade100,
+                        color: hasActiveAlert
+                            ? (isDark ? Colors.red.withOpacity(0.2) : Colors.white)
+                            : (isDark ? Colors.grey.withOpacity(0.2) : Colors.grey.shade100),
                         borderRadius: BorderRadius.circular(12),
-                        border: hasActiveAlert ? Border.all(color: Colors.red.shade200) : null,
+                        border: hasActiveAlert ? Border.all(color: isDark ? Colors.red.shade900 : Colors.red.shade200) : null,
                       ),
                       child: Text(
                         '$val',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: hasActiveAlert ? Colors.red.shade700 : Colors.black87,
+                          color: hasActiveAlert
+                             ? (isDark ? Colors.red.shade200 : Colors.red.shade700)
+                             : Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                       ),
                     ),
@@ -387,7 +408,9 @@ class _StatCard extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: hasActiveAlert ? Colors.red.shade900 : Colors.grey.shade800,
+                  color: hasActiveAlert
+                      ? (isDark ? Colors.red.shade200 : Colors.red.shade900)
+                      : (isDark ? Colors.grey.shade300 : Colors.grey.shade800),
                   fontSize: 13,
                 ),
               ),
@@ -414,6 +437,8 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -428,7 +453,7 @@ class _ActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
+                  color: color.withValues(alpha: isDark ? 0.15 : 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 28),
@@ -461,7 +486,7 @@ class _DashboardTerrainItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 0,
-      color: Colors.white,
+      // color handled by Theme (CardTheme)
       child: ListTile(
         onTap: () {
           Navigator.push(

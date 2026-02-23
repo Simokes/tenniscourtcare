@@ -4,17 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'core/router/app_router.dart';
-
-
+import 'presentation/providers/app_settings_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialisation des locales pour intl (fr_FR)
   await initializeDateFormatting('fr_FR', null);
-
-  // Si tu as d'autres initialisations async (ex: SharedPreferences.getInstance(),
-  // Firebase.initializeApp(), etc.), fais-les ici AVANT runApp().
 
   runApp(
     const ProviderScope(
@@ -29,27 +25,58 @@ class CourtCareApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
+    final settingsAsync = ref.watch(appSettingsProvider);
+    final themeMode = settingsAsync.valueOrNull?.themeMode ?? ThemeMode.system;
+
+    // Light Theme
+    final lightTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF2E7D32), // Premium Green
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+      scaffoldBackgroundColor: Colors.grey.shade100,
+      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
+      cardTheme: CardTheme(
+        surfaceTintColor: Colors.transparent,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: Colors.white,
+      ),
+    );
+
+    // Dark Theme
+    final darkTheme = ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF81C784), // Desaturated Green for Dark Mode
+        brightness: Brightness.dark,
+        surface: const Color(0xFF1E1E1E),
+      ),
+      useMaterial3: true,
+      scaffoldBackgroundColor: const Color(0xFF121212), // Deep Grey/Black
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      cardTheme: CardTheme(
+        surfaceTintColor: Colors.transparent,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        color: const Color(0xFF1E1E1E),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF121212),
+        surfaceTintColor: Colors.transparent,
+      ),
+    );
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Court Care',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2E7D32), // Premium Green
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        textTheme: GoogleFonts.interTextTheme(
-          Theme.of(context).textTheme,
-        ),
-        cardTheme: CardThemeData( // 👈 Le 'const' a été retiré
-        surfaceTintColor: Colors.transparent,
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
