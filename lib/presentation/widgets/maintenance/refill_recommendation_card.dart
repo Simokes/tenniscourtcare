@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/stock_item.dart';
-import '../../domain/entities/refill_recommendation.dart';
-import '../providers/stock_provider.dart';
-import 'premium/premium_card.dart';
+import '../../../domain/entities/stock_item.dart';
+import '../../../domain/entities/refill_recommendation.dart';
+import '../../providers/stock_provider.dart';
+import '../premium/premium_card.dart';
 
 class RefillRecommendationCard extends ConsumerWidget {
   final RefillRecommendation recommendation;

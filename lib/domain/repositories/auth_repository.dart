@@ -17,6 +17,9 @@ abstract class AuthRepository {
   /// (Optionnel) Vérifie un code OTP.
   Future<bool> verifyOtp(String email, String code);
 
-  /// Initialise la base avec un admin par défaut si aucun utilisateur n'existe.
-  Future<void> seedDefaultAdmin();
+  /// Vérifie s'il existe au moins un utilisateur en base (pour le premier lancement).
+  Future<bool> hasAnyUser();
+
+  /// Crée le premier utilisateur Administrateur.
+  Future<void> registerAdmin(String email, String name, String password);
 }

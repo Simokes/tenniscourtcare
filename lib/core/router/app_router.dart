@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/providers/auth_providers.dart';
 import '../../presentation/pages/auth/login_page.dart';
+import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
 import '../../presentation/pages/error/access_denied_page.dart';
 import '../../presentation/screens/home_screen.dart'; // Existing screen
@@ -16,20 +17,34 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: '/',
     refreshListenable: GoRouterRefreshStream(authNotifier.stream),
     redirect: (context, state) {
-      // Note: ref.read(authStateProvider) gives the current state at the time of redirect call
-      // Because we use refreshListenable, this callback is re-run on state change.
       final authState = ref.read(authStateProvider);
 
-      final isLoggedIn = authState.value != null;
+      final authStateValue = authState.value;
+
+      final isSetupRequired = authStateValue?.isSetupRequired ?? false;
+      final isLoggedIn = authStateValue?.user != null;
+
+      final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
 
+      // 1. Redirection forcée vers le setup si aucun utilisateur n'existe
+      if (isSetupRequired) {
+        return isSettingUp ? null : '/admin-setup';
+      }
+
+      // 2. Empêcher l'accès à la page de setup si elle n'est pas requise
+      if (isSettingUp) {
+        return '/login';
+      }
+
+      // 3. Redirection vers login si non connecté
       if (!isLoggedIn) {
         return isLoggingIn ? null : '/login';
       }
 
-      // If logged in and trying to go to login, redirect to home/admin
+      // 4. Si connecté et tente d'accéder au login -> redirection vers dashboard
       if (isLoggingIn) {
-        final role = authState.value!.role;
+        final role = authStateValue!.user!.role;
         if (role == Role.admin) return '/admin';
         return '/';
       }
@@ -40,6 +55,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/admin-setup',
+        builder: (context, state) => const AdminSetupPage(),
       ),
       GoRoute(
         path: '/access-denied',

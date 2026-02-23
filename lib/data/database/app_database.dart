@@ -30,7 +30,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +55,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await m.addColumn(maintenances, maintenances.imagePath);
+      }
+      if (from < 7) {
+        // Supprimer tous les utilisateurs pour forcer la migration vers le nouveau hachage PBKDF2
+        await delete(users).go();
       }
     },
   );

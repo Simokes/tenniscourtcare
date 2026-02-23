@@ -37,6 +37,7 @@ class CourtCareApp extends ConsumerWidget {
       useMaterial3: true,
       scaffoldBackgroundColor: Colors.grey.shade100,
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
+      /*
       cardTheme: CardTheme(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
@@ -45,6 +46,7 @@ class CourtCareApp extends ConsumerWidget {
         ),
         color: Colors.white,
       ),
+      */
     );
 
     // Dark Theme
@@ -57,6 +59,7 @@ class CourtCareApp extends ConsumerWidget {
       useMaterial3: true,
       scaffoldBackgroundColor: const Color(0xFF121212), // Deep Grey/Black
       textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      /*
       cardTheme: CardTheme(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
@@ -65,6 +68,7 @@ class CourtCareApp extends ConsumerWidget {
         ),
         color: const Color(0xFF1E1E1E),
       ),
+      */
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF121212),
         surfaceTintColor: Colors.transparent,
