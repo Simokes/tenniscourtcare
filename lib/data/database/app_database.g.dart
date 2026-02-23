@@ -338,6 +338,17 @@ class $MaintenancesTable extends Maintenances
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -348,6 +359,7 @@ class $MaintenancesTable extends Maintenances
     sacsMantoUtilises,
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
+    imagePath,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -424,6 +436,12 @@ class $MaintenancesTable extends Maintenances
         ),
       );
     }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    }
     return context;
   }
 
@@ -465,6 +483,10 @@ class $MaintenancesTable extends Maintenances
         DriftSqlType.int,
         data['${effectivePrefix}sacs_silice_utilises'],
       )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      ),
     );
   }
 
@@ -483,6 +505,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final int sacsMantoUtilises;
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
+  final String? imagePath;
   const MaintenanceRow({
     required this.id,
     required this.terrainId,
@@ -492,6 +515,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.imagePath,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -506,6 +530,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     map['sacs_manto_utilises'] = Variable<int>(sacsMantoUtilises);
     map['sacs_sottomanto_utilises'] = Variable<int>(sacsSottomantoUtilises);
     map['sacs_silice_utilises'] = Variable<int>(sacsSiliceUtilises);
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
     return map;
   }
 
@@ -521,6 +548,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       sacsMantoUtilises: Value(sacsMantoUtilises),
       sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
       sacsSiliceUtilises: Value(sacsSiliceUtilises),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
     );
   }
 
@@ -540,6 +570,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
         json['sacsSottomantoUtilises'],
       ),
       sacsSiliceUtilises: serializer.fromJson<int>(json['sacsSiliceUtilises']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
     );
   }
   @override
@@ -554,6 +585,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       'sacsMantoUtilises': serializer.toJson<int>(sacsMantoUtilises),
       'sacsSottomantoUtilises': serializer.toJson<int>(sacsSottomantoUtilises),
       'sacsSiliceUtilises': serializer.toJson<int>(sacsSiliceUtilises),
+      'imagePath': serializer.toJson<String?>(imagePath),
     };
   }
 
@@ -566,6 +598,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
+    Value<String?> imagePath = const Value.absent(),
   }) => MaintenanceRow(
     id: id ?? this.id,
     terrainId: terrainId ?? this.terrainId,
@@ -576,6 +609,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     sacsSottomantoUtilises:
         sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
     sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+    imagePath: imagePath.present ? imagePath.value : this.imagePath,
   );
   MaintenanceRow copyWithCompanion(MaintenancesCompanion data) {
     return MaintenanceRow(
@@ -595,6 +629,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       sacsSiliceUtilises: data.sacsSiliceUtilises.present
           ? data.sacsSiliceUtilises.value
           : this.sacsSiliceUtilises,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
     );
   }
 
@@ -608,7 +643,8 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ..write('date: $date, ')
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
-          ..write('sacsSiliceUtilises: $sacsSiliceUtilises')
+          ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
+          ..write('imagePath: $imagePath')
           ..write(')'))
         .toString();
   }
@@ -623,6 +659,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     sacsMantoUtilises,
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
+    imagePath,
   );
   @override
   bool operator ==(Object other) =>
@@ -635,7 +672,8 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           other.date == this.date &&
           other.sacsMantoUtilises == this.sacsMantoUtilises &&
           other.sacsSottomantoUtilises == this.sacsSottomantoUtilises &&
-          other.sacsSiliceUtilises == this.sacsSiliceUtilises);
+          other.sacsSiliceUtilises == this.sacsSiliceUtilises &&
+          other.imagePath == this.imagePath);
 }
 
 class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
@@ -647,6 +685,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<int> sacsMantoUtilises;
   final Value<int> sacsSottomantoUtilises;
   final Value<int> sacsSiliceUtilises;
+  final Value<String?> imagePath;
   const MaintenancesCompanion({
     this.id = const Value.absent(),
     this.terrainId = const Value.absent(),
@@ -656,6 +695,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsMantoUtilises = const Value.absent(),
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
+    this.imagePath = const Value.absent(),
   });
   MaintenancesCompanion.insert({
     this.id = const Value.absent(),
@@ -666,6 +706,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsMantoUtilises = const Value.absent(),
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
+    this.imagePath = const Value.absent(),
   }) : terrainId = Value(terrainId),
        type = Value(type),
        date = Value(date);
@@ -678,6 +719,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Expression<int>? sacsMantoUtilises,
     Expression<int>? sacsSottomantoUtilises,
     Expression<int>? sacsSiliceUtilises,
+    Expression<String>? imagePath,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -690,6 +732,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
         'sacs_sottomanto_utilises': sacsSottomantoUtilises,
       if (sacsSiliceUtilises != null)
         'sacs_silice_utilises': sacsSiliceUtilises,
+      if (imagePath != null) 'image_path': imagePath,
     });
   }
 
@@ -702,6 +745,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Value<int>? sacsMantoUtilises,
     Value<int>? sacsSottomantoUtilises,
     Value<int>? sacsSiliceUtilises,
+    Value<String?>? imagePath,
   }) {
     return MaintenancesCompanion(
       id: id ?? this.id,
@@ -713,6 +757,7 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       sacsSottomantoUtilises:
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+      imagePath: imagePath ?? this.imagePath,
     );
   }
 
@@ -745,6 +790,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     if (sacsSiliceUtilises.present) {
       map['sacs_silice_utilises'] = Variable<int>(sacsSiliceUtilises.value);
     }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
     return map;
   }
 
@@ -758,7 +806,8 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           ..write('date: $date, ')
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
-          ..write('sacsSiliceUtilises: $sacsSiliceUtilises')
+          ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
+          ..write('imagePath: $imagePath')
           ..write(')'))
         .toString();
   }
@@ -2519,6 +2568,7 @@ typedef $$MaintenancesTableCreateCompanionBuilder =
       Value<int> sacsMantoUtilises,
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
+      Value<String?> imagePath,
     });
 typedef $$MaintenancesTableUpdateCompanionBuilder =
     MaintenancesCompanion Function({
@@ -2530,6 +2580,7 @@ typedef $$MaintenancesTableUpdateCompanionBuilder =
       Value<int> sacsMantoUtilises,
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
+      Value<String?> imagePath,
     });
 
 class $$MaintenancesTableFilterComposer
@@ -2578,6 +2629,11 @@ class $$MaintenancesTableFilterComposer
 
   ColumnFilters<int> get sacsSiliceUtilises => $composableBuilder(
     column: $table.sacsSiliceUtilises,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2630,6 +2686,11 @@ class $$MaintenancesTableOrderingComposer
     column: $table.sacsSiliceUtilises,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MaintenancesTableAnnotationComposer
@@ -2672,6 +2733,9 @@ class $$MaintenancesTableAnnotationComposer
     column: $table.sacsSiliceUtilises,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
 }
 
 class $$MaintenancesTableTableManager
@@ -2713,6 +2777,7 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsMantoUtilises = const Value.absent(),
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
               }) => MaintenancesCompanion(
                 id: id,
                 terrainId: terrainId,
@@ -2722,6 +2787,7 @@ class $$MaintenancesTableTableManager
                 sacsMantoUtilises: sacsMantoUtilises,
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
+                imagePath: imagePath,
               ),
           createCompanionCallback:
               ({
@@ -2733,6 +2799,7 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsMantoUtilises = const Value.absent(),
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
+                Value<String?> imagePath = const Value.absent(),
               }) => MaintenancesCompanion.insert(
                 id: id,
                 terrainId: terrainId,
@@ -2742,6 +2809,7 @@ class $$MaintenancesTableTableManager
                 sacsMantoUtilises: sacsMantoUtilises,
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
+                imagePath: imagePath,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
