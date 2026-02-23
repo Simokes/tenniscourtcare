@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/entities/stock_item.dart';
 import '../../domain/entities/refill_recommendation.dart';
 import '../providers/stock_provider.dart';
 import 'premium/premium_card.dart';
@@ -15,15 +16,39 @@ class RefillRecommendationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
-    // Couleur dynamique selon si c'est critique ou non
-    final accentColor = recommendation.isCritical
-        ? Colors.orange.shade800
+    // Watch stock items
+    final stockItemsAsync = ref.watch(stockItemsProvider);
+
+    // Calculate stock status
+    int? availableManto;
+    bool isInsufficient = false;
+
+    // We try to find Manto if data is available
+    if (stockItemsAsync.hasValue) {
+      final items = stockItemsAsync.value!;
+      // Recherche insensible à la casse
+      final mantoItem = items.cast<StockItem?>().firstWhere(
+        (item) => item!.name.toLowerCase().contains('manto'),
+        orElse: () => null,
+      );
+
+      if (mantoItem != null) {
+        availableManto = mantoItem.quantity;
+        isInsufficient = availableManto < recommendation.recommendedBags;
+      }
+    }
+
+    // Couleur dynamique : Critique (selon l'algo) OU Stock Insuffisant
+    // Si stock insuffisant, on force le rouge (alerte).
+    final showRedAlert = recommendation.isCritical || isInsufficient;
+
+    final accentColor = showRedAlert
+        ? Colors.red.shade700
         : Colors.blueGrey.shade700;
 
-    final backgroundColor = recommendation.isCritical
-        ? Colors.orange.shade50
+    final backgroundColor = showRedAlert
+        ? Colors.red.shade50
         : Colors.blueGrey.shade50;
 
     return PremiumCard(
@@ -57,7 +82,7 @@ class RefillRecommendationCard extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: accentColor.withOpacity(0.3)),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   children: [
@@ -88,15 +113,38 @@ class RefillRecommendationCard extends ConsumerWidget {
                       style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
                     ),
                     const SizedBox(height: 12),
+
+                    // Alerte Stock Insuffisant
+                    if (isInsufficient && availableManto != null)
+                       Padding(
+                         padding: const EdgeInsets.only(bottom: 12.0),
+                         child: Row(
+                           children: [
+                             const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+                             const SizedBox(width: 8),
+                             Expanded(
+                               child: Text(
+                                 '⚠️ Stock insuffisant pour la recharge conseillée (Dispo: $availableManto)',
+                                 style: const TextStyle(
+                                   color: Colors.red,
+                                   fontWeight: FontWeight.bold,
+                                   fontSize: 13, // Slightly larger for readability
+                                 ),
+                               ),
+                             ),
+                           ],
+                         ),
+                       ),
+
                     InkWell(
                       onTap: () => _checkStock(context, ref, recommendation.recommendedBags),
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.1),
+                          color: accentColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: accentColor.withOpacity(0.5)),
+                          border: Border.all(color: accentColor.withValues(alpha: 0.5)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -125,17 +173,13 @@ class RefillRecommendationCard extends ConsumerWidget {
   }
 
   void _checkStock(BuildContext context, WidgetRef ref, int requiredBags) {
-    // Lire la liste des items de stock de manière asynchrone sans watch pour éviter les rebuilds
-    // On utilise read sur le notifier ou le provider.
-    // filteredStockItemsProvider dépend de stockItemsProvider.
-    // Le plus sûr est de lire stockItemsProvider.future
-
+    // Lire la liste des items de stock de manière asynchrone sans watch
     ref.read(stockItemsProvider.future).then((items) {
       if (!context.mounted) return;
 
       // Recherche insensible à la casse
-      final mantoItem = items.cast().firstWhere(
-        (item) => item.name.toLowerCase().contains('manto'),
+      final mantoItem = items.cast<StockItem?>().firstWhere(
+        (item) => item!.name.toLowerCase().contains('manto'),
         orElse: () => null,
       );
 

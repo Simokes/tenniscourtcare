@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../domain/entities/terrain.dart';
 import '../providers/dashboard_providers.dart';
 import '../providers/terrain_provider.dart';
+import '../providers/global_stock_alert_provider.dart';
 import 'maintenance_screen.dart';
 import 'stats_screen.dart';
 import 'weather_screen.dart';
@@ -46,8 +47,9 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todayCountAsync = ref.watch(todayMaintenanceCountProvider);
-    final lowStockAsync = ref.watch(lowStockCountProvider);
-    final terrainsAsync = ref.watch(terrainsProvider); // Use the main one which is cached properly
+    // Utilisation du nouveau provider pour le compte précis des alertes stock
+    final stockAlertCountAsync = ref.watch(globalStockAlertCountProvider);
+    final terrainsAsync = ref.watch(terrainsProvider);
 
     final now = DateTime.now();
     final dateFormat = DateFormat('EEEE d MMMM', 'fr_FR');
@@ -61,6 +63,27 @@ class HomeScreen extends ConsumerWidget {
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
+            // Ajout de l'icône de notification (cloche) avec badge
+            leading: IconButton(
+              icon: Consumer(
+                builder: (context, ref, child) {
+                  final alertCount = ref.watch(globalStockAlertCountProvider).valueOrNull ?? 0;
+                  return Badge(
+                    isLabelVisible: alertCount > 0,
+                    label: Text('$alertCount'),
+                    backgroundColor: Colors.red,
+                    child: const Icon(Icons.notifications, color: Colors.white),
+                  );
+                },
+              ),
+              onPressed: () {
+                 // Navigation vers l'écran de stock si on clique sur la cloche
+                 Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const StockScreen()),
+                  );
+              },
+            ),
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false,
               titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
@@ -167,7 +190,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 _StatCard(
                   title: 'Alertes\nStock',
-                  valueAsync: lowStockAsync,
+                  valueAsync: stockAlertCountAsync,
                   icon: Icons.inventory_2,
                   color: Colors.orange.shade800,
                   isAlert: true,
@@ -302,9 +325,18 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Calcul de l'état d'alerte : si isAlert=true et valeur > 0
+    final val = valueAsync.asData?.value ?? 0;
+    final hasActiveAlert = isAlert && val > 0;
+
+    // Couleurs dynamiques
+    final effectiveColor = hasActiveAlert ? Colors.red : color;
+    final bgColor = hasActiveAlert ? Colors.red.shade50 : Colors.white;
+    final iconColor = hasActiveAlert ? Colors.red : color;
+
     return Card(
       elevation: 4,
-      shadowColor: color.withValues(alpha: 0.3),
+      shadowColor: effectiveColor.withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
@@ -312,10 +344,11 @@ class _StatCard extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
+            color: bgColor,
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.white, color.withValues(alpha: 0.05)],
+              colors: [bgColor, effectiveColor.withValues(alpha: 0.05)],
             ),
           ),
           padding: const EdgeInsets.all(12),
@@ -326,19 +359,20 @@ class _StatCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(icon, color: color, size: 28),
+                  Icon(icon, color: iconColor, size: 28),
                   valueAsync.when(
                     data: (val) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isAlert && val > 0 ? Colors.red.shade100 : Colors.grey.shade100,
+                        color: hasActiveAlert ? Colors.white : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12),
+                        border: hasActiveAlert ? Border.all(color: Colors.red.shade200) : null,
                       ),
                       child: Text(
                         '$val',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: isAlert && val > 0 ? Colors.red.shade700 : Colors.black87,
+                          color: hasActiveAlert ? Colors.red.shade700 : Colors.black87,
                         ),
                       ),
                     ),
@@ -351,7 +385,7 @@ class _StatCard extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade800,
+                  color: hasActiveAlert ? Colors.red.shade900 : Colors.grey.shade800,
                   fontSize: 13,
                 ),
               ),
