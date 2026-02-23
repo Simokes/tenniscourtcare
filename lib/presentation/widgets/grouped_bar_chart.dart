@@ -176,7 +176,7 @@ class _GroupedBarChartPainter extends CustomPainter {
 
     // Axe Y (vertical, gauche)
     canvas.drawLine(
-      Offset(_padding, _padding),
+      const Offset(_padding, _padding),
       Offset(_padding, _padding + chartHeight),
       paint,
     );
@@ -253,7 +253,7 @@ class _GroupedBarChartPainter extends CustomPainter {
       ('Silice', _siliceColor),
     ];
 
-    double x = size.width - 100;
+    final double x = size.width - 100;
     double y = 20;
 
     for (final (label, color) in legendItems) {

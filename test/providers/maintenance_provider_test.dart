@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 
 void main() {
   group('MaintenanceNotifier - Validation métier', () {
@@ -34,7 +33,7 @@ void main() {
 
       // Créer des terrains de test
       terrainTerreBattueId = await database.insertTerrain(
-        Terrain(
+        const Terrain(
           id: 0,
           nom: 'Terre battue',
           type: TerrainType.terreBattue,
@@ -42,7 +41,7 @@ void main() {
       );
 
       terrainSynthetiqueId = await database.insertTerrain(
-        Terrain(
+        const Terrain(
           id: 0,
           nom: 'Synthétique',
           type: TerrainType.synthetique,
@@ -50,7 +49,7 @@ void main() {
       );
 
       terrainDurId = await database.insertTerrain(
-        Terrain(
+        const Terrain(
           id: 0,
           nom: 'Dur',
           type: TerrainType.dur,

@@ -10,6 +10,7 @@ import 'tables/maintenances.dart';
 import 'tables/stock_items.dart';
 import 'tables/users_table.dart';
 import 'tables/events_table.dart';
+import 'tables/stock_movements.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -25,12 +26,12 @@ import '../mappers/maintenance_mapper.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users, Events])
+@DriftDatabase(tables: [Terrains, Maintenances, StockItems, Users, Events, StockMovements])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +56,13 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await m.addColumn(maintenances, maintenances.imagePath);
+      }
+      if (from < 7) {
+        // Supprimer tous les utilisateurs pour forcer la migration vers le nouveau hachage PBKDF2
+        await delete(users).go();
+      }
+      if (from < 8) {
+        await m.createTable(stockMovements);
       }
     },
   );
@@ -164,12 +172,12 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== MAINTENANCES AVEC STOCK ==========
 
-  Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m) async {
+  Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m, {int? userId}) async {
     return transaction(() async {
       // 1. Récupérer les items de stock
       final stockList = await select(stockItems).get();
       
-      void checkAndDec(String name, int used) {
+      Future<void> checkAndDec(String name, int used) async {
         if (used <= 0) return;
         final itemRow = stockList.firstWhere(
           (i) => i.name.toLowerCase() == name.toLowerCase(),
@@ -177,29 +185,47 @@ class AppDatabase extends _$AppDatabase {
         );
         
         if (itemRow.quantity < used) {
-          throw Exception("Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).");
+          throw Exception('Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).');
         }
         
+        final newQty = itemRow.quantity - used;
+
         // Mise à jour de la quantité en base
-        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
+        await (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
           StockItemsCompanion(
-            quantity: Value(itemRow.quantity - used),
+            quantity: Value(newQty),
             updatedAt: Value(DateTime.now()),
+          ),
+        );
+
+        // Historisation
+        await into(stockMovements).insert(
+          StockMovementsCompanion(
+            stockItemId: Value(itemRow.id),
+            previousQuantity: Value(itemRow.quantity),
+            newQuantity: Value(newQty),
+            quantityChange: Value(-used), // Négatif car consommation
+            reason: const Value('Maintenance'),
+            // Le nom du terrain n'est pas encore dispo si on crée la maintenance.
+            // On peut récupérer le nom du terrain via m.terrainId si besoin, mais ici c'est suffisant.
+            description: Value('Maintenance sur terrain #${m.terrainId}'),
+            userId: Value(userId),
+            occurredAt: Value(DateTime.now()),
           ),
         );
       }
 
       // 2. On déduit les stocks (quel que soit le type de maintenance)
-      checkAndDec('Manto', m.sacsMantoUtilises);
-      checkAndDec('Sottomanto', m.sacsSottomantoUtilises);
-      checkAndDec('Silice', m.sacsSiliceUtilises);
+      await checkAndDec('Manto', m.sacsMantoUtilises);
+      await checkAndDec('Sottomanto', m.sacsSottomantoUtilises);
+      await checkAndDec('Silice', m.sacsSiliceUtilises);
 
       // 3. Insérer la maintenance
       await into(maintenances).insert(m.toCompanion());
     });
   }
 
-  Future<void> deleteMaintenanceWithStockRestoration(int maintenanceId) async {
+  Future<void> deleteMaintenanceWithStockRestoration(int maintenanceId, {int? userId}) async {
     return transaction(() async {
       // 1. Récupérer la maintenance à supprimer
       final maintenance = await (select(maintenances)
@@ -207,13 +233,13 @@ class AppDatabase extends _$AppDatabase {
           .getSingleOrNull();
 
       if (maintenance == null) {
-        throw Exception("Maintenance introuvable");
+        throw Exception('Maintenance introuvable');
       }
 
       // 2. Récupérer les items de stock
       final stockList = await select(stockItems).get();
 
-      void restoreStock(String name, int used) {
+      Future<void> restoreStock(String name, int used) async {
         if (used <= 0) return;
         final itemRow = stockList.firstWhere(
           (i) => i.name.toLowerCase() == name.toLowerCase(),
@@ -221,19 +247,35 @@ class AppDatabase extends _$AppDatabase {
               throw Exception("Article de stock '$name' introuvable."),
         );
 
+        final newQty = itemRow.quantity + used;
+
         // Ré-incrémenter le stock
-        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
+        await (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
           StockItemsCompanion(
-            quantity: Value(itemRow.quantity + used),
+            quantity: Value(newQty),
             updatedAt: Value(DateTime.now()),
+          ),
+        );
+
+        // Historisation
+        await into(stockMovements).insert(
+          StockMovementsCompanion(
+            stockItemId: Value(itemRow.id),
+            previousQuantity: Value(itemRow.quantity),
+            newQuantity: Value(newQty),
+            quantityChange: Value(used), // Positif car restauration
+            reason: const Value('Correction'),
+            description: Value('Suppression maintenance #${maintenance.id}'),
+            userId: Value(userId),
+            occurredAt: Value(DateTime.now()),
           ),
         );
       }
 
       // 3. Restaurer les stocks
-      restoreStock('Manto', maintenance.sacsMantoUtilises);
-      restoreStock('Sottomanto', maintenance.sacsSottomantoUtilises);
-      restoreStock('Silice', maintenance.sacsSiliceUtilises);
+      await restoreStock('Manto', maintenance.sacsMantoUtilises);
+      await restoreStock('Sottomanto', maintenance.sacsSottomantoUtilises);
+      await restoreStock('Silice', maintenance.sacsSiliceUtilises);
 
       // 4. Supprimer la maintenance
       await (delete(maintenances)..where((m) => m.id.equals(maintenanceId)))
@@ -242,8 +284,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> updateMaintenanceWithStockAdjustment(
-    domm.Maintenance newMaintenance,
-  ) async {
+    domm.Maintenance newMaintenance, {
+    int? userId,
+  }) async {
     if (newMaintenance.id == null) {
       throw Exception('ID de maintenance requis pour la mise à jour');
     }
@@ -255,13 +298,13 @@ class AppDatabase extends _$AppDatabase {
           .getSingleOrNull();
 
       if (oldMaintenance == null) {
-        throw Exception("Maintenance originale introuvable");
+        throw Exception('Maintenance originale introuvable');
       }
 
       // 2. Récupérer les items de stock
       final stockList = await select(stockItems).get();
 
-      void adjustStock(String name, int oldUsed, int newUsed) {
+      Future<void> adjustStock(String name, int oldUsed, int newUsed) async {
         final diff = newUsed - oldUsed;
         if (diff == 0) return;
 
@@ -275,34 +318,48 @@ class AppDatabase extends _$AppDatabase {
           // On consomme plus -> vérifier si stock suffisant
           if (itemRow.quantity < diff) {
             throw Exception(
-              "Stock insuffisant pour $name (dispo: ${itemRow.quantity}, requis en plus: $diff).",
+              'Stock insuffisant pour $name (dispo: ${itemRow.quantity}, requis en plus: $diff).',
             );
           }
         }
 
-        // Mise à jour du stock (diff peut être positif ou négatif)
-        // Si diff > 0, on consomme (quantité - diff)
-        // Si diff < 0, on rend (quantité - diff) car diff est négatif -> quantité + abs(diff)
-        (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
+        final newQty = itemRow.quantity - diff; // diff positif = consommation = moins de stock
+
+        // Mise à jour du stock
+        await (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
           StockItemsCompanion(
-            quantity: Value(itemRow.quantity - diff),
+            quantity: Value(newQty),
             updatedAt: Value(DateTime.now()),
+          ),
+        );
+
+        // Historisation
+        await into(stockMovements).insert(
+          StockMovementsCompanion(
+            stockItemId: Value(itemRow.id),
+            previousQuantity: Value(itemRow.quantity),
+            newQuantity: Value(newQty),
+            quantityChange: Value(-diff), // diff positif = conso = changement négatif
+            reason: const Value('Correction'),
+            description: Value('Modif maintenance #${newMaintenance.id}'),
+            userId: Value(userId),
+            occurredAt: Value(DateTime.now()),
           ),
         );
       }
 
       // 3. Ajuster les stocks
-      adjustStock(
+      await adjustStock(
         'Manto',
         oldMaintenance.sacsMantoUtilises,
         newMaintenance.sacsMantoUtilises,
       );
-      adjustStock(
+      await adjustStock(
         'Sottomanto',
         oldMaintenance.sacsSottomantoUtilises,
         newMaintenance.sacsSottomantoUtilises,
       );
-      adjustStock(
+      await adjustStock(
         'Silice',
         oldMaintenance.sacsSiliceUtilises,
         newMaintenance.sacsSiliceUtilises,

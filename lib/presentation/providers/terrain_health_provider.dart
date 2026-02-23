@@ -48,7 +48,7 @@ final terrainHealthProvider = FutureProvider.family<TerrainHealthState, int>((re
       if (precip24h > 5.0) {
         return const TerrainHealthState(
           score: 0,
-          warningMessage: "Terrain inondé / impraticable (Pluie > 5mm)",
+          warningMessage: 'Terrain inondé / impraticable (Pluie > 5mm)',
         );
       }
 

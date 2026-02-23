@@ -5,16 +5,37 @@ import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/entities/user_entity.dart';
 import 'core_providers.dart';
 
+class AuthState {
+  final UserEntity? user;
+  final bool isSetupRequired;
+
+  const AuthState({
+    this.user,
+    this.isSetupRequired = false,
+  });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is AuthState &&
+        other.user == user &&
+        other.isSetupRequired == isSetupRequired;
+  }
+
+  @override
+  int get hashCode => Object.hash(user, isSetupRequired);
+}
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final db = ref.watch(databaseProvider);
   return AuthRepositoryImpl(db, const FlutterSecureStorage());
 });
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserEntity?>>((ref) {
+final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
   return AuthNotifier(ref.watch(authRepositoryProvider));
 });
 
-class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
+class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   final AuthRepository _repo;
 
   AuthNotifier(this._repo) : super(const AsyncValue.loading()) {
@@ -23,22 +44,39 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
 
   Future<void> _init() async {
     try {
-      // Seed if necessary (this is fast if data exists)
-      await _repo.seedDefaultAdmin();
+      final hasUsers = await _repo.hasAnyUser();
+
+      if (!hasUsers) {
+        state = const AsyncValue.data(AuthState(user: null, isSetupRequired: true));
+        return;
+      }
 
       final user = await _repo.getCurrentUser();
-      state = AsyncValue.data(user);
+      state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> registerAdmin(String email, String name, String password) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.registerAdmin(email, name, password);
+      // Auto-login après inscription
+      await signIn(email, password);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
   }
 
   Future<void> signIn(String email, String password) async {
+    // On conserve l'état actuel pour savoir si le setup était requis, mais ici on suppose qu'on est sur login
+    // donc setup n'est pas requis.
     state = const AsyncValue.loading();
     try {
       final user = await _repo.signIn(email, password);
       if (user != null) {
-        state = AsyncValue.data(user);
+        state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
       } else {
         state = AsyncValue.error('Identifiants invalides', StackTrace.current);
       }
@@ -49,14 +87,18 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserEntity?>> {
 
   Future<void> signOut() async {
     await _repo.signOut();
-    state = const AsyncValue.data(null);
+    state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
   }
 }
 
 final currentUserProvider = Provider<UserEntity?>((ref) {
-  return ref.watch(authStateProvider).value;
+  return ref.watch(authStateProvider).value?.user;
 });
 
 final isAuthenticatedProvider = Provider<bool>((ref) {
   return ref.watch(currentUserProvider) != null;
+});
+
+final isSetupRequiredProvider = Provider<bool>((ref) {
+  return ref.watch(authStateProvider).value?.isSetupRequired ?? false;
 });

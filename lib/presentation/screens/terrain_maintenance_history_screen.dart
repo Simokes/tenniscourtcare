@@ -98,7 +98,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                       Expanded(
                         child: weekTotalsAsync.when(
                           data: (totals) => MaintenanceStatsChart(
-                            title: "Cette semaine",
+                            title: 'Cette semaine',
                             manto: totals.manto,
                             sottomanto: totals.sottomanto,
                             silice: totals.silice,
@@ -146,7 +146,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
                       confirmDismiss: (direction) async {
-                        return await showDialog<bool>(
+                        return showDialog<bool>(
                           context: context,
                           builder: (context) {
                             return AlertDialog(

@@ -15,7 +15,7 @@ class ImagePickerService {
 
     if (photo == null) return null;
 
-    return await _saveImagePermanently(photo.path);
+    return _saveImagePermanently(photo.path);
   }
 
   /// Sélectionne une image depuis la galerie
@@ -27,7 +27,7 @@ class ImagePickerService {
 
     if (image == null) return null;
 
-    return await _saveImagePermanently(image.path);
+    return _saveImagePermanently(image.path);
   }
 
   /// Déplace l'image du cache vers le dossier Documents de l'app

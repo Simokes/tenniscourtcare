@@ -84,7 +84,7 @@ class UpcomingEventsList extends ConsumerWidget {
           )),
           error: (err, stack) => Center(child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text('Erreur: $err', style: TextStyle(color: Colors.red)),
+            child: Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
           )),
         ),
       ],

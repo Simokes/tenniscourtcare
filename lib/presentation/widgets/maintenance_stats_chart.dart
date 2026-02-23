@@ -115,9 +115,9 @@ class MaintenanceStatsChart extends StatelessWidget {
             runSpacing: 4,
             alignment: WrapAlignment.center,
             children: [
-              if (manto > 0) _LegendItem(color: Colors.orange, text: 'Manto'),
-              if (sottomanto > 0) _LegendItem(color: Colors.brown, text: 'Sotto'),
-              if (silice > 0) _LegendItem(color: Colors.blue, text: 'Silice'),
+              if (manto > 0) const _LegendItem(color: Colors.orange, text: 'Manto'),
+              if (sottomanto > 0) const _LegendItem(color: Colors.brown, text: 'Sotto'),
+              if (silice > 0) const _LegendItem(color: Colors.blue, text: 'Silice'),
             ],
           )
         else
