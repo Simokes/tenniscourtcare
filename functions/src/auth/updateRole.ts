@@ -6,8 +6,8 @@ import { isValidRole } from '../utils/validation';
 export const updateUserRole = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
-    const userId = (data.userId as string).trim();
-    const newRole = (data.newRole as string).toLowerCase();
+    const userId = (data.userId as string)?.trim();
+    const newRole = (data.newRole as string)?.toLowerCase();
 
     if (!userId || !newRole) {
         throw new functions.https.HttpsError('invalid-argument', 'User ID and new role are required.');
@@ -18,6 +18,13 @@ export const updateUserRole = functions.https.onCall(async (data, context) => {
     }
 
     try {
+        // CRITICAL FIX: Verify user exists in Auth
+        try {
+            await admin.auth().getUser(userId);
+        } catch (error) {
+            throw new functions.https.HttpsError('not-found', 'User not found in Auth.');
+        }
+
         // Prevent removing the last admin
         const userDoc = await admin.firestore().collection('users').doc(userId).get();
         if (userDoc.exists && userDoc.data()?.role === 'admin' && newRole !== 'admin') {
@@ -27,20 +34,21 @@ export const updateUserRole = functions.https.onCall(async (data, context) => {
              }
         }
 
+        // CRITICAL FIX: Set custom claims FIRST (immediate update)
+        await admin.auth().setCustomUserClaims(userId, { role: newRole });
+
+        // Then update Firestore
         await admin.firestore().collection('users').doc(userId).update({
             role: newRole,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
 
-        // The onUpdate trigger handles the custom claims update.
-
-        // Audit Log handled by onUpdate trigger or here?
-        // Let's add it here to capture "performedBy" accurately,
-        // as the trigger runs as system/admin context.
+        // Audit Log
         await admin.firestore().collection('audit_logs').add({
             action: 'ROLE_UPDATED_CALLABLE',
             targetUserId: userId,
             newRole: newRole,
-            performedBy: context.auth!.uid,
+            performedBy: context.auth!.uid, // ADDED: Audit trail
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
 

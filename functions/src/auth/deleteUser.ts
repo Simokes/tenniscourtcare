@@ -5,7 +5,7 @@ import { assertAdmin } from '../utils/security';
 export const deleteUser = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
-    const userId = (data.userId as string).trim();
+    const userId = (data.userId as string)?.trim();
 
     if (!userId) {
         throw new functions.https.HttpsError('invalid-argument', 'User ID is required.');
@@ -27,17 +27,18 @@ export const deleteUser = functions.https.onCall(async (data, context) => {
              }
         }
 
-        // Delete from Auth
-        await admin.auth().deleteUser(userId);
-
-        // Delete from Firestore
+        // CRITICAL FIX: Reverse delete order (Firestore first)
+        // 1. Delete from Firestore
         await admin.firestore().collection('users').doc(userId).delete();
+
+        // 2. Delete from Auth
+        await admin.auth().deleteUser(userId);
 
         // Audit Log
         await admin.firestore().collection('audit_logs').add({
             action: 'USER_DELETED',
             targetUserId: userId,
-            performedBy: context.auth!.uid,
+            performedBy: context.auth!.uid, // ADDED: Audit trail
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
 

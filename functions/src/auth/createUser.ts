@@ -7,10 +7,10 @@ export const createUser = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
     // Sanitize input
-    const email = (data.email as string).trim().toLowerCase();
-    const name = (data.name as string).trim();
+    const email = (data.email as string)?.trim().toLowerCase();
+    const name = (data.name as string)?.trim();
     const password = data.password;
-    const role = (data.role as string).toLowerCase();
+    const role = (data.role as string)?.toLowerCase();
 
     if (!isValidEmail(email)) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid email address.');
@@ -19,7 +19,7 @@ export const createUser = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('invalid-argument', 'Password must be at least 12 characters.');
     }
     if (!isValidName(name)) {
-        throw new functions.https.HttpsError('invalid-argument', 'Name must be at least 2 characters.');
+        throw new functions.https.HttpsError('invalid-argument', 'Name must be between 2 and 100 characters.');
     }
     if (!isValidRole(role)) {
         throw new functions.https.HttpsError('invalid-argument', 'Invalid role.');
@@ -59,6 +59,16 @@ export const createUser = functions.https.onCall(async (data, context) => {
         // Set custom claims
         await admin.auth().setCustomUserClaims(uid, { role });
 
+        // Audit Log
+        await admin.firestore().collection('audit_logs').add({
+            action: 'USER_CREATED',
+            targetUserId: uid,
+            targetEmail: email,
+            targetRole: role,
+            performedBy: context.auth!.uid, // ADDED: Audit trail
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
         return { uid: uid };
     } catch (error: any) {
         // CRITICAL: Cleanup if fails
@@ -66,8 +76,6 @@ export const createUser = functions.https.onCall(async (data, context) => {
             try {
                 await admin.auth().deleteUser(userRecord.uid);
                 // Also try to delete firestore doc if it was created?
-                // The transaction above is not atomic across Auth and Firestore.
-                // Best effort cleanup.
                 await admin.firestore().collection('users').doc(userRecord.uid).delete();
             } catch (cleanupError) {
                 console.error('Cleanup failed:', cleanupError);

@@ -1,16 +1,19 @@
-export const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const isValidEmail = (email: string | null | undefined): boolean => {
+    if (!email || typeof email !== 'string') return false;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
 };
 
-export const isValidPassword = (password: string): boolean => {
-    return password.length >= 12;
+export const isValidPassword = (password: string | null | undefined): boolean => {
+    return !!password && typeof password === 'string' && password.length >= 12;
 };
 
-export const isValidName = (name: string): boolean => {
-    return name.length >= 2;
+export const isValidName = (name: string | null | undefined): boolean => {
+    if (!name || typeof name !== 'string') return false;
+    return name.length >= 2 && name.length <= 100;
 };
 
-export const isValidRole = (role: string): boolean => {
-    return ['admin', 'agent', 'secretary'].includes(role);
+export const isValidRole = (role: string | null | undefined): boolean => {
+    if (!role || typeof role !== 'string') return false;
+    return ['admin', 'agent', 'secretary'].includes(role.toLowerCase());
 };

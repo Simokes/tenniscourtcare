@@ -58,12 +58,14 @@ La synchronisation entre Firebase et Drift (SQLite) repose sur une colonne `fire
 - **Clé Primaire Locale (`id`)** : Entier auto-incrémenté généré par SQLite.
 - **Mapping** : Chaque utilisateur local stocke son UID Firebase dans la colonne `firestore_uid`.
 
-Lorsqu'un utilisateur se connecte (`signIn`) ou est créé :
-1. L'application récupère l'objet `User` de Firebase (qui contient l'`uid`).
-2. Elle interroge la base locale via `_db.getUserByFirestoreUid(uid)`.
-   - **Important** : On ne synchronise JAMAIS par email seul, car les emails peuvent changer ou être réutilisés.
-3. Si l'utilisateur n'existe pas localement, il est créé avec son `firestore_uid`.
-4. Si l'utilisateur existe, son rôle est mis à jour si nécessaire.
+**Règle d'Or : Synchroniser TOUJOURS par UID, JAMAIS par email.**
+
+Exemple de flux :
+1. Firebase Auth crée un utilisateur → `uid = 'abc123xyz'`
+2. Firestore créé un document avec le même ID → `doc('users/abc123xyz')`
+3. L'application mobile (Drift) cherche l'utilisateur : `WHERE firestore_uid = 'abc123xyz'`
+
+Si on synchronisait par email, un changement d'email ou une suppression/récréation de compte briserait le lien avec les données locales existantes.
 
 ### Rôles et Permissions
 Les rôles sont gérés via des **Custom Claims** dans le token JWT de Firebase.

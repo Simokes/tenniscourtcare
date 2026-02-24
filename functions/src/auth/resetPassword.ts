@@ -6,7 +6,7 @@ import { isValidPassword } from '../utils/validation';
 export const resetUserPassword = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
-    const userId = (data.userId as string).trim();
+    const userId = (data.userId as string)?.trim();
     const newPassword = data.newPassword;
 
     if (!userId || !newPassword) {
@@ -18,6 +18,13 @@ export const resetUserPassword = functions.https.onCall(async (data, context) =>
     }
 
     try {
+        // CRITICAL FIX: Verify user exists first
+        try {
+          await admin.auth().getUser(userId);
+        } catch (error) {
+          throw new functions.https.HttpsError('not-found', 'User not found.');
+        }
+
         await admin.auth().updateUser(userId, {
             password: newPassword,
         });
@@ -26,7 +33,7 @@ export const resetUserPassword = functions.https.onCall(async (data, context) =>
         await admin.firestore().collection('audit_logs').add({
             action: 'PASSWORD_RESET',
             targetUserId: userId,
-            performedBy: context.auth!.uid,
+            performedBy: context.auth!.uid, // ADDED: Audit trail
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
 
