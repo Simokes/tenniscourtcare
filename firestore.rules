@@ -7,55 +7,81 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function hasRole(role) {
+      return isAuthenticated() &&
+             request.auth.token.custom_claims.role == role;
+    }
+
     function isAdmin() {
-      return isAuthenticated() && request.auth.token.role == 'admin';
+      return hasRole('admin');
+    }
+
+    function isAgent() {
+      return hasRole('agent');
     }
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Users Collection
+    // USERS
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if false; // Cloud Functions only
+
+      // Update: Owner can update own profile except role/isActive
+      // Admin can update everything (including role/isActive)
+      allow update: if (isOwner(userId) &&
+                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive']))
+                    || isAdmin();
+
       allow delete: if isAdmin();
     }
 
-    // Terrains Collection
+    // TERRAINS
     match /terrains/{terrainId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Reservations Collection
-    match /reservations/{reservationId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      // Conflict detection should be handled by logic or cloud functions,
-      // but basic ownership check is here.
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow delete: if isAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+    // RESERVATIONS
+    match /reservations/{resId} {
+      allow read: if isAuthenticated() &&
+                 (resource.data.userId == request.auth.uid || isAdmin());
+
+      // Create: Owner for self OR Admin for anyone
+      // Conflict detection: Enforced by Cloud Function triggers (async) or transaction logic in client SDK
+      // Rules cannot easily scan collection for time overlaps efficiently.
+      allow create: if isAuthenticated() &&
+                       (request.resource.data.userId == request.auth.uid || isAdmin());
+
+      // Update: Owner can only CANCEL
+      // Admin can update any field (reschedule, confirm, etc.)
+      allow update: if (isOwner(resource.data.userId) &&
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
+                        request.resource.data.status == 'cancelled')
+                    || isAdmin();
+
+      allow delete: if isAdmin();
     }
 
-    // Stock Collection
+    // STOCK - Sensitive info (prices, inventory levels)
     match /stock/{itemId} {
-      allow read: if isAuthenticated();
+      allow read: if isAdmin();
       allow write: if isAdmin();
     }
 
-    // Maintenances Collection
+    // MAINTENANCES
     match /maintenances/{maintenanceId} {
+      // Agents need to see and log maintenance work
       allow read: if isAuthenticated();
-      allow write: if isAdmin(); // Should be extended to 'agent' role if it exists
+      allow write: if isAdmin() || isAgent();
     }
 
-    // AuditLogs Collection (Immutable, System/Admin only)
+    // AUDIT LOGS - Immutable, System/Admin only
     match /auditLogs/{logId} {
       allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
+      allow write: if false; // Cloud Functions via Admin SDK only
     }
   }
 }
