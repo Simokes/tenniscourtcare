@@ -41,7 +41,7 @@ service cloud.firestore {
     // TERRAINS
     match /terrains/{terrainId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // RESERVATIONS
@@ -68,14 +68,13 @@ service cloud.firestore {
     // STOCK - Sensitive info (prices, inventory levels)
     match /stock/{itemId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // MAINTENANCES
     match /maintenances/{maintenanceId} {
-      // Agents need to see and log maintenance work
       allow read: if isAuthenticated();
-      allow write: if isAdmin() || isAgent();
+      allow create, update, delete: if isAdmin();
     }
 
     // AUDIT LOGS - Immutable, System/Admin only

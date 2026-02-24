@@ -20,9 +20,56 @@ const fixtures = {
     email: 'other@test.com',
     role: 'agent',
   },
+
+  // NEW - TERRAINS
+  terrain1: {
+    id: 'terrain1',
+    name: 'Court Central',
+    type: 'tennis',
+    hourlyRate: 50,
+    createdBy: 'admin123',
+    isActive: true,
+  },
+  terrain2: {
+    id: 'terrain2',
+    name: 'Court 2',
+    type: 'tennis',
+    hourlyRate: 40,
+    createdBy: 'admin123',
+    isActive: false,
+  },
+
+  // NEW - STOCK ITEMS
+  stockItem1: {
+    id: 'stock1',
+    name: 'Tennis Balls (Box of 12)',
+    quantity: 100,
+    minQuantity: 20,
+    lastUpdated: new Date(),
+    updatedBy: 'admin123',
+  },
+
+  // NEW - MAINTENANCE
+  maintenance1: {
+    id: 'maint1',
+    terrainId: 'terrain1',
+    description: 'Net repair',
+    status: 'pending',
+    createdBy: 'admin123',
+    createdAt: new Date(),
+  },
+
+  // NEW - AUDIT LOG
+  auditLog1: {
+    id: 'audit1',
+    action: 'USER_CREATED',
+    targetUserId: 'agent123',
+    performedBy: 'admin123',
+    timestamp: new Date(),
+  },
 };
 
-// Helper: Create test user in Firestore
+// Helper: Create test user in Firestore (using admin context passed in)
 async function createTestUser(db, userData) {
   await db.collection('users').doc(userData.uid).set({
     uid: userData.uid,
@@ -33,6 +80,32 @@ async function createTestUser(db, userData) {
     isActive: true,
   });
   return userData.uid;
+}
+
+// Helper: Create terrain (using admin context passed in)
+async function createTerrain(db, terrainData) {
+  await db.collection('terrains').doc(terrainData.id).set(terrainData);
+  return terrainData.id;
+}
+
+// Helper: Create stock item (using admin context passed in)
+async function createStockItem(db, stockData) {
+  await db.collection('stock').doc(stockData.id).set(stockData);
+  return stockData.id;
+}
+
+// Helper: Create maintenance (using admin context passed in)
+async function createMaintenance(db, maintData) {
+  await db.collection('maintenances').doc(maintData.id).set(maintData);
+  return maintData.id;
+}
+
+// Helper: Create audit log (using admin context passed in)
+async function createAuditLog(db, auditData) {
+  // Note: In real app, only Cloud Functions write to auditLogs
+  // For testing, use admin bypass (requires admin context)
+  await db.collection('auditLogs').doc(auditData.id).set(auditData);
+  return auditData.id;
 }
 
 // Helper: Expect permission denied
@@ -48,7 +121,7 @@ async function expectPermissionDenied(promise) {
     // Check for code or message containing permission denied
     const isPermissionDenied =
       (error.code && (error.code.includes('permission-denied') || error.code.includes('PERMISSION_DENIED'))) ||
-      (error.message && (error.message.includes('PERMISSION_DENIED') || error.message.includes('Missing or insufficient permissions') || error.message.includes('false for \'list\'') || error.message.includes('false for \'get\'') || error.message.includes('false for \'update\'')));
+      (error.message && (error.message.includes('PERMISSION_DENIED') || error.message.includes('Missing or insufficient permissions') || error.message.includes('false for \'list\'') || error.message.includes('false for \'get\'') || error.message.includes('false for \'update\'') || error.message.includes('false for \'create\'') || error.message.includes('false for \'delete\'')));
 
     if (isPermissionDenied) {
       return;
@@ -60,5 +133,9 @@ async function expectPermissionDenied(promise) {
 module.exports = {
   fixtures,
   createTestUser,
+  createTerrain,
+  createStockItem,
+  createMaintenance,
+  createAuditLog,
   expectPermissionDenied,
 };
