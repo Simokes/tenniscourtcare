@@ -43,7 +43,7 @@ class FirebaseAuthRepository implements AuthRepository {
         case 'invalid-email':
           return const ValidationException('Format d\'email invalide.');
         default:
-          return AuthException('Erreur d\'authentification: ${e.message}', code: e.code);
+          return GenericAuthException('Erreur d\'authentification: ${e.message}', code: e.code);
       }
     } else if (e is FirebaseFunctionsException) {
        switch (e.code) {
@@ -54,7 +54,7 @@ class FirebaseAuthRepository implements AuthRepository {
         case 'failed-precondition':
            return ValidationException(e.message ?? 'Condition préalable échouée.');
         default:
-           return AuthException('Erreur serveur: ${e.message}', code: e.code);
+           return GenericAuthException('Erreur serveur: ${e.message}', code: e.code);
        }
     }
     return SecurityException('Erreur inconnue: $e', originalError: e);
