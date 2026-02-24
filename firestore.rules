@@ -9,7 +9,7 @@ service cloud.firestore {
 
     function hasRole(role) {
       return isAuthenticated() &&
-             request.auth.token.custom_claims.role == role;
+             request.auth.token.role == role;
     }
 
     function isAdmin() {
@@ -35,47 +35,45 @@ service cloud.firestore {
                         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive']))
                     || isAdmin();
 
-      allow delete: if isAdmin();
+      allow delete: if false;
     }
 
     // TERRAINS
     match /terrains/{terrainId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // RESERVATIONS
     match /reservations/{resId} {
-      allow read: if isAuthenticated() &&
-                 (resource.data.userId == request.auth.uid || isAdmin());
+      // Read: Owner, Admin, or same terrain (for availability check - simplified here)
+      allow read: if isOwner(resource.data.userId) || isAdmin();
 
-      // Create: Owner for self OR Admin for anyone
-      // Conflict detection: Enforced by Cloud Function triggers (async) or transaction logic in client SDK
-      // Rules cannot easily scan collection for time overlaps efficiently.
-      allow create: if isAuthenticated() &&
-                       (request.resource.data.userId == request.auth.uid || isAdmin());
+      // Create: Self or Admin (Cloud Function handles conflict detection)
+      allow create: if (request.auth.uid == request.resource.data.userId || isAdmin())
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.startTime < request.resource.data.endTime
+                    && request.resource.data.startTime > request.time
+                    && request.resource.data.terrainId != null;
 
-      // Update: Owner can only CANCEL
-      // Admin can update any field (reschedule, confirm, etc.)
-      allow update: if (isOwner(resource.data.userId) &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']) &&
-                        request.resource.data.status == 'cancelled')
+      // Update: Owner can cancel, Admin can do anything
+      allow update: if (isOwner(resource.data.userId) && request.resource.data.status == 'cancelled')
                     || isAdmin();
 
+      // Delete: Admin only
       allow delete: if isAdmin();
     }
 
     // STOCK - Sensitive info (prices, inventory levels)
     match /stock/{itemId} {
       allow read: if isAdmin();
-      allow write: if isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
     // MAINTENANCES
     match /maintenances/{maintenanceId} {
-      // Agents need to see and log maintenance work
       allow read: if isAuthenticated();
-      allow write: if isAdmin() || isAgent();
+      allow create, update, delete: if isAdmin();
     }
 
     // AUDIT LOGS - Immutable, System/Admin only
