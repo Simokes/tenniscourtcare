@@ -130,7 +130,9 @@ class RateLimiter {
        // Sync memory
        final reqs = _memoryOtpRequests[email] ?? [];
        // We don't have exact timestamps from count, so just fill with 'now' to block locally
-       while(reqs.length < maxOtpRequests) reqs.add(now);
+       while(reqs.length < maxOtpRequests) {
+         reqs.add(now);
+       }
        _memoryOtpRequests[email] = reqs;
 
        throw const AccountLockedException('Trop de demandes de code. Veuillez patienter 10 minutes.');

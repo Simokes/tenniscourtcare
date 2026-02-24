@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../providers/admin_providers.dart';
 import '../../providers/auth_providers.dart';
 import '../../../domain/enums/role.dart';
@@ -19,8 +18,8 @@ class UserManagementScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: const Text('Gestion des membres'),
+          const SliverAppBar.large(
+            title: Text('Gestion des membres'),
             centerTitle: false,
           ),
           usersAsync.when(
@@ -83,11 +82,11 @@ class UserManagementScreen extends ConsumerWidget {
                                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: isSelf
-                                        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                                         : Theme.of(context).colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(20),
                                       border: isSelf
-                                        ? Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.2))
+                                        ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2))
                                         : null,
                                     ),
                                     child: Text(
@@ -135,7 +134,7 @@ class UserManagementScreen extends ConsumerWidget {
             loading: () => const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (err, stack) => SliverFillRemaining(
+            error: (err, stack) => const SliverFillRemaining(
               child: Center(child: Text('Erreur lors du chargement')),
             ),
           ),

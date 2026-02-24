@@ -34,7 +34,7 @@ final todayMaintenanceCountProvider = StreamProvider<int>((ref) {
       ).map((list) => list.fold(0, (sum, item) => sum + item.count));
     },
     loading: () => Stream.value(0),
-    error: (_, __) => Stream.value(0),
+    error: (context, index) => Stream.value(0),
   );
 });
 

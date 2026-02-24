@@ -16,8 +16,8 @@ class SecurityLogScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: const Text('Journal de sécurité'),
+          const SliverAppBar.large(
+            title: Text('Journal de sécurité'),
             centerTitle: false,
           ),
           logsAsync.when(
@@ -46,7 +46,7 @@ class SecurityLogScreen extends ConsumerWidget {
             loading: () => const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
             ),
-            error: (err, stack) => SliverFillRemaining(
+            error: (err, stack) => const SliverFillRemaining(
               child: Center(child: Text('Erreur lors du chargement des logs')),
             ),
           ),
@@ -64,13 +64,13 @@ class _LogItem extends StatelessWidget {
   Color _getColor(BuildContext context) {
     final action = log.action.toUpperCase();
     if (action.contains('SUCCESS')) {
-      return Colors.green.withOpacity(0.15); // Vert transparent
+      return Colors.green.withValues(alpha: 0.15); // Vert transparent
     } else if (action.contains('FAILED') || action.contains('ERROR')) {
-      return Colors.red.withOpacity(0.15); // Rouge transparent
+      return Colors.red.withValues(alpha: 0.15); // Rouge transparent
     } else if (action.contains('WARNING')) {
-      return Colors.orange.withOpacity(0.15);
+      return Colors.orange.withValues(alpha: 0.15);
     }
-    return Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5);
+    return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
   }
 
   Color _getIconColor(BuildContext context) {

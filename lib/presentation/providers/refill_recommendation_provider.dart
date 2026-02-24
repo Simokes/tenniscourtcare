@@ -2,15 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/refill_recommendation.dart';
 import 'app_settings_provider.dart';
 import 'database_provider.dart';
-import '../../infrastructure/weather/weather_service.dart';
-
-// Service Météo (si non existant en provider, on l'instancie ici ou on le crée)
-// Note: Il n'y a pas de provider global explicite pour WeatherService dans la liste,
-// mais `weatherForClubProvider` l'utilise probablement en interne.
-// Pour rester propre, on va créer une instance ici ou utiliser un provider si on en trouve un.
-// En regardant les fichiers, on a vu `weather_providers.dart`, peut-être qu'il y en a un.
-// Mais dans le doute, une instance simple suffit car c'est un service stateless (client http).
-final weatherServiceProvider = Provider((ref) => WeatherService());
+import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
+import 'weather_providers.dart';
 
 final refillRecommendationProvider = FutureProvider.family<RefillRecommendation, int>((ref, terrainId) async {
   // 1. Localisation

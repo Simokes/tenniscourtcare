@@ -1,13 +1,22 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/providers/auth_providers.dart';
+import '../../presentation/providers/terrain_provider.dart';
 import '../../presentation/pages/auth/login_page.dart';
 import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
 import '../../presentation/pages/error/access_denied_page.dart';
-import '../../presentation/screens/home_screen.dart'; // Existing screen
-import '../../presentation/screens/stock_history_screen.dart';
+import '../../features/home/presentation/screens/home_screen.dart';
+import '../../features/inventory/presentation/screens/stock_history_screen.dart';
+import '../../features/inventory/presentation/screens/stock_screen.dart';
+import '../../features/weather/presentation/screens/weather_screen.dart';
+import '../../presentation/screens/maintenance_screen.dart';
+import '../../presentation/screens/stats_screen.dart';
+import '../../presentation/screens/settings_screen.dart';
+import '../../presentation/screens/add_terrain_screen.dart';
+import '../../presentation/screens/terrain_maintenance_history_screen.dart';
 import '../../domain/enums/role.dart';
+import '../../domain/entities/terrain.dart';
 import 'go_router_refresh_stream.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -27,26 +36,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
 
-      // 1. Redirection forcée vers le setup si aucun utilisateur n'existe
       if (isSetupRequired) {
         return isSettingUp ? null : '/admin-setup';
       }
 
-      // 2. Empêcher l'accès à la page de setup si elle n'est pas requise
       if (isSettingUp) {
         return '/login';
       }
 
-      // 3. Redirection vers login si non connecté
       if (!isLoggedIn) {
         return isLoggingIn ? null : '/login';
       }
 
-      // 4. Si connecté et tente d'accéder au login -> redirection vers dashboard
       if (isLoggingIn) {
-        // final role = authStateValue!.user!.role;
-        // L'admin utilise l'application normalement (comme un agent)
-        // if (role == Role.admin) return '/admin';
         return '/';
       }
 
@@ -83,6 +85,52 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const StockHistoryScreen(),
           ),
         ],
+      ),
+      GoRoute(
+        path: '/stock',
+        builder: (context, state) => const StockScreen(),
+      ),
+      GoRoute(
+        path: '/weather/:type',
+        builder: (context, state) {
+            final typeStr = state.pathParameters['type'];
+            final type = TerrainType.values.firstWhere(
+              (e) => e.name == typeStr,
+              orElse: () => TerrainType.terreBattue
+            );
+            return WeatherScreen(titre: 'Météo du club', terrainType: type);
+        },
+      ),
+      GoRoute(
+        path: '/maintenance',
+        builder: (context, state) => const MaintenanceScreen(),
+      ),
+      GoRoute(
+        path: '/stats',
+        builder: (context, state) => const StatsScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/add-terrain',
+        builder: (context, state) => const AddTerrainScreen(),
+      ),
+      GoRoute(
+        path: '/terrain/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          final terrains = ref.read(terrainsProvider).valueOrNull ?? [];
+          try {
+             final terrain = terrains.firstWhere((t) => t.id == id);
+             return TerrainMaintenanceHistoryScreen(terrain: terrain);
+          } catch (e) {
+             // Fallback or Error page if terrain not found (e.g. directly accessing url)
+             // For now redirect to home or show error
+             return const AccessDeniedPage(); // Or a specific Not Found page
+          }
+        },
       ),
     ],
   );

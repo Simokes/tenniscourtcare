@@ -132,7 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: () => _showThemeSelector(context, ref, settings.themeMode),
                     ),
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (context, index) => const SizedBox.shrink(),
                   ),
                   const Divider(height: 1, indent: 56),
                   SettingsTile(
@@ -234,7 +234,7 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       Icons.sports_tennis,
                       size: 48,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
                     ),
                     const SizedBox(height: 8),
                     Text(

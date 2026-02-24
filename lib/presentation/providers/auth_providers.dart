@@ -58,7 +58,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
-    } catch (e, st) {
+    } catch (e) {
       // If session expired or other auth error, just log out locally
       state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
     }

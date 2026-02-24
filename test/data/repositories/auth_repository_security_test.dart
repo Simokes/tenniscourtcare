@@ -7,7 +7,6 @@ import 'package:tenniscourtcare/data/repositories/audit_repository.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:drift/drift.dart' as drift;
 
 // Mocks
 class MockAppDatabase extends Fake implements AppDatabase {

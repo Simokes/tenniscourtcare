@@ -2,8 +2,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../../domain/entities/daily_forecast.dart';
-import '../../domain/entities/weather_snapshot.dart';
+import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
+import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+import 'package:tenniscourtcare/core/config/app_config.dart';
 
 class WeatherContext {
   final WeatherSnapshot snapshot;
@@ -26,7 +27,7 @@ class WeatherService {
     final dt = now ?? DateTime.now().toUtc();
 
     final uri = Uri.parse(
-      'https://api.open-meteo.com/v1/forecast'
+      '${AppConfig.weatherApiBaseUrl}'
       '?latitude=$latitude'
       '&longitude=$longitude'
       '&timezone=$timezone'

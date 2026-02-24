@@ -18,8 +18,8 @@ class InvalidCredentialsException extends AuthException {
 class AccountLockedException extends AuthException {
   final DateTime? lockedUntil;
 
-  const AccountLockedException(String message, {this.lockedUntil})
-      : super(message, code: 'ACCOUNT_LOCKED');
+  const AccountLockedException(super.message, {this.lockedUntil})
+      : super(code: 'ACCOUNT_LOCKED');
 }
 
 class SessionExpiredException extends AuthException {
@@ -28,8 +28,8 @@ class SessionExpiredException extends AuthException {
 }
 
 class PasswordValidationException extends AuthException {
-  const PasswordValidationException(String message)
-      : super(message, code: 'WEAK_PASSWORD');
+  const PasswordValidationException(super.message)
+      : super(code: 'WEAK_PASSWORD');
 }
 
 class UnauthorizedException extends AuthException {
@@ -38,6 +38,6 @@ class UnauthorizedException extends AuthException {
 }
 
 class SecurityException extends AuthException {
-  const SecurityException(String message, {dynamic originalError})
-      : super(message, code: 'SECURITY_ERROR', originalError: originalError);
+  const SecurityException(super.message, {super.originalError})
+      : super(code: 'SECURITY_ERROR');
 }

@@ -5,9 +5,7 @@ import 'package:tenniscourtcare/core/security/token_service.dart';
 import 'package:tenniscourtcare/core/security/rate_limiter.dart';
 import 'package:tenniscourtcare/data/repositories/audit_repository.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:drift/drift.dart' as drift;
 
 // Mocks
 class MockAppDatabase extends Fake implements AppDatabase {
@@ -70,7 +68,7 @@ class MockRateLimiter extends RateLimiter {
   bool shouldLockOtp = false;
   bool shouldLockAccount = false;
 
-  MockRateLimiter(AuditRepository auditRepository) : super(auditRepository);
+  MockRateLimiter(super.auditRepository);
 
   @override
   Future<void> checkLimit(String email) async {
@@ -86,10 +84,6 @@ class MockRateLimiter extends RateLimiter {
   @override
   Future<void> recordAttempt({required String email, required bool success, String? ipAddress}) async {}
 
-  @override
-  void recordOtpRequest(String email) {
-     super.recordOtpRequest(email);
-  }
 }
 
 class MockSecureStorage extends Fake implements FlutterSecureStorage {

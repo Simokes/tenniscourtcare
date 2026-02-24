@@ -197,7 +197,7 @@ class _GroupedBarChartPainter extends CustomPainter {
     double maxValue,
   ) {
     final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.3)
+      ..color = Colors.grey.withValues(alpha: 0.3)
       ..strokeWidth = 1;
 
     // 5 lignes de grille horizontales

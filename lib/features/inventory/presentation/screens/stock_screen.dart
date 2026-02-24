@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/logic/stock_categorizer.dart';
-import '../../domain/entities/stock_item.dart';
-import '../providers/stock_provider.dart';
+import 'package:tenniscourtcare/domain/logic/stock_categorizer.dart';
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
 import '../widgets/stock_item_tile.dart';
 import '../widgets/add_edit_stock_item_sheet.dart';
 

@@ -126,7 +126,7 @@ class TerrainCard extends ConsumerWidget {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                error: (_, __) => const Text('Erreur de chargement'),
+                error: (context, index) => const Text('Erreur de chargement'),
               ),
             ],
           ),

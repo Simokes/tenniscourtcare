@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/services/weather_rules.dart';
-import '../../infrastructure/weather/weather_service.dart';
+import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
 
 final weatherServiceProvider = Provider<WeatherService>((ref) {
   return WeatherService();
