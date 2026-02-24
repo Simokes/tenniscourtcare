@@ -1,1 +1,37 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"tenniscourtcare","appId":"1:476144130552:android:263928f28aa2d933cd1e0d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"tenniscourtcare","configurations":{"android":"1:476144130552:android:263928f28aa2d933cd1e0d","ios":"1:476144130552:ios:a4be5e075ab71de1cd1e0d","macos":"1:476144130552:ios:a4be5e075ab71de1cd1e0d","web":"1:476144130552:web:49ea86a530f26d6fcd1e0d","windows":"1:476144130552:web:0a4f59a4cbada74bcd1e0d"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}

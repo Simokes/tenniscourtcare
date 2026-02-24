@@ -12,4 +12,10 @@ class Users extends Table {
   DateTimeColumn get lastLoginAt => dateTime().nullable()();
   TextColumn get avatarUrl => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  // New fields for Firestore sync
+  TextColumn get remoteId => text().nullable()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 }

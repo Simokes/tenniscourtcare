@@ -44,8 +44,124 @@ class $TerrainsTable extends Terrains
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, nom, type];
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _locationMeta = const VerificationMeta(
+    'location',
+  );
+  @override
+  late final GeneratedColumn<String> location = GeneratedColumn<String>(
+    'location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _capacityMeta = const VerificationMeta(
+    'capacity',
+  );
+  @override
+  late final GeneratedColumn<int> capacity = GeneratedColumn<int>(
+    'capacity',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pricePerHourMeta = const VerificationMeta(
+    'pricePerHour',
+  );
+  @override
+  late final GeneratedColumn<double> pricePerHour = GeneratedColumn<double>(
+    'price_per_hour',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _availableMeta = const VerificationMeta(
+    'available',
+  );
+  @override
+  late final GeneratedColumn<bool> available = GeneratedColumn<bool>(
+    'available',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("available" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageUrlMeta = const VerificationMeta(
+    'imageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> imageUrl = GeneratedColumn<String>(
+    'image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    nom,
+    type,
+    remoteId,
+    location,
+    capacity,
+    pricePerHour,
+    available,
+    createdAt,
+    updatedAt,
+    syncedAt,
+    imageUrl,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -77,6 +193,63 @@ class $TerrainsTable extends Terrains
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('location')) {
+      context.handle(
+        _locationMeta,
+        location.isAcceptableOrUnknown(data['location']!, _locationMeta),
+      );
+    }
+    if (data.containsKey('capacity')) {
+      context.handle(
+        _capacityMeta,
+        capacity.isAcceptableOrUnknown(data['capacity']!, _capacityMeta),
+      );
+    }
+    if (data.containsKey('price_per_hour')) {
+      context.handle(
+        _pricePerHourMeta,
+        pricePerHour.isAcceptableOrUnknown(
+          data['price_per_hour']!,
+          _pricePerHourMeta,
+        ),
+      );
+    }
+    if (data.containsKey('available')) {
+      context.handle(
+        _availableMeta,
+        available.isAcceptableOrUnknown(data['available']!, _availableMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
+    if (data.containsKey('image_url')) {
+      context.handle(
+        _imageUrlMeta,
+        imageUrl.isAcceptableOrUnknown(data['image_url']!, _imageUrlMeta),
+      );
+    }
     return context;
   }
 
@@ -98,6 +271,42 @@ class $TerrainsTable extends Terrains
         DriftSqlType.int,
         data['${effectivePrefix}type'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      location: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}location'],
+      ),
+      capacity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}capacity'],
+      ),
+      pricePerHour: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}price_per_hour'],
+      ),
+      available: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}available'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
+      imageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_url'],
+      ),
     );
   }
 
@@ -111,18 +320,94 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final int id;
   final String nom;
   final int type;
-  const TerrainRow({required this.id, required this.nom, required this.type});
+  final String? remoteId;
+  final String? location;
+  final int? capacity;
+  final double? pricePerHour;
+  final bool available;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+  final DateTime? syncedAt;
+  final String? imageUrl;
+  const TerrainRow({
+    required this.id,
+    required this.nom,
+    required this.type,
+    this.remoteId,
+    this.location,
+    this.capacity,
+    this.pricePerHour,
+    required this.available,
+    this.createdAt,
+    this.updatedAt,
+    this.syncedAt,
+    this.imageUrl,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['nom'] = Variable<String>(nom);
     map['type'] = Variable<int>(type);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || location != null) {
+      map['location'] = Variable<String>(location);
+    }
+    if (!nullToAbsent || capacity != null) {
+      map['capacity'] = Variable<int>(capacity);
+    }
+    if (!nullToAbsent || pricePerHour != null) {
+      map['price_per_hour'] = Variable<double>(pricePerHour);
+    }
+    map['available'] = Variable<bool>(available);
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    if (!nullToAbsent || imageUrl != null) {
+      map['image_url'] = Variable<String>(imageUrl);
+    }
     return map;
   }
 
   TerrainsCompanion toCompanion(bool nullToAbsent) {
-    return TerrainsCompanion(id: Value(id), nom: Value(nom), type: Value(type));
+    return TerrainsCompanion(
+      id: Value(id),
+      nom: Value(nom),
+      type: Value(type),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      location: location == null && nullToAbsent
+          ? const Value.absent()
+          : Value(location),
+      capacity: capacity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capacity),
+      pricePerHour: pricePerHour == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pricePerHour),
+      available: Value(available),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
+    );
   }
 
   factory TerrainRow.fromJson(
@@ -134,6 +419,15 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       id: serializer.fromJson<int>(json['id']),
       nom: serializer.fromJson<String>(json['nom']),
       type: serializer.fromJson<int>(json['type']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      location: serializer.fromJson<String?>(json['location']),
+      capacity: serializer.fromJson<int?>(json['capacity']),
+      pricePerHour: serializer.fromJson<double?>(json['pricePerHour']),
+      available: serializer.fromJson<bool>(json['available']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      imageUrl: serializer.fromJson<String?>(json['imageUrl']),
     );
   }
   @override
@@ -143,19 +437,61 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       'id': serializer.toJson<int>(id),
       'nom': serializer.toJson<String>(nom),
       'type': serializer.toJson<int>(type),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'location': serializer.toJson<String?>(location),
+      'capacity': serializer.toJson<int?>(capacity),
+      'pricePerHour': serializer.toJson<double?>(pricePerHour),
+      'available': serializer.toJson<bool>(available),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'imageUrl': serializer.toJson<String?>(imageUrl),
     };
   }
 
-  TerrainRow copyWith({int? id, String? nom, int? type}) => TerrainRow(
+  TerrainRow copyWith({
+    int? id,
+    String? nom,
+    int? type,
+    Value<String?> remoteId = const Value.absent(),
+    Value<String?> location = const Value.absent(),
+    Value<int?> capacity = const Value.absent(),
+    Value<double?> pricePerHour = const Value.absent(),
+    bool? available,
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
+    Value<String?> imageUrl = const Value.absent(),
+  }) => TerrainRow(
     id: id ?? this.id,
     nom: nom ?? this.nom,
     type: type ?? this.type,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    location: location.present ? location.value : this.location,
+    capacity: capacity.present ? capacity.value : this.capacity,
+    pricePerHour: pricePerHour.present ? pricePerHour.value : this.pricePerHour,
+    available: available ?? this.available,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
   );
   TerrainRow copyWithCompanion(TerrainsCompanion data) {
     return TerrainRow(
       id: data.id.present ? data.id.value : this.id,
       nom: data.nom.present ? data.nom.value : this.nom,
       type: data.type.present ? data.type.value : this.type,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      location: data.location.present ? data.location.value : this.location,
+      capacity: data.capacity.present ? data.capacity.value : this.capacity,
+      pricePerHour: data.pricePerHour.present
+          ? data.pricePerHour.value
+          : this.pricePerHour,
+      available: data.available.present ? data.available.value : this.available,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
     );
   }
 
@@ -164,46 +500,122 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     return (StringBuffer('TerrainRow(')
           ..write('id: $id, ')
           ..write('nom: $nom, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('location: $location, ')
+          ..write('capacity: $capacity, ')
+          ..write('pricePerHour: $pricePerHour, ')
+          ..write('available: $available, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('imageUrl: $imageUrl')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, nom, type);
+  int get hashCode => Object.hash(
+    id,
+    nom,
+    type,
+    remoteId,
+    location,
+    capacity,
+    pricePerHour,
+    available,
+    createdAt,
+    updatedAt,
+    syncedAt,
+    imageUrl,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TerrainRow &&
           other.id == this.id &&
           other.nom == this.nom &&
-          other.type == this.type);
+          other.type == this.type &&
+          other.remoteId == this.remoteId &&
+          other.location == this.location &&
+          other.capacity == this.capacity &&
+          other.pricePerHour == this.pricePerHour &&
+          other.available == this.available &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.syncedAt == this.syncedAt &&
+          other.imageUrl == this.imageUrl);
 }
 
 class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<int> id;
   final Value<String> nom;
   final Value<int> type;
+  final Value<String?> remoteId;
+  final Value<String?> location;
+  final Value<int?> capacity;
+  final Value<double?> pricePerHour;
+  final Value<bool> available;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<DateTime?> syncedAt;
+  final Value<String?> imageUrl;
   const TerrainsCompanion({
     this.id = const Value.absent(),
     this.nom = const Value.absent(),
     this.type = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.location = const Value.absent(),
+    this.capacity = const Value.absent(),
+    this.pricePerHour = const Value.absent(),
+    this.available = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.imageUrl = const Value.absent(),
   });
   TerrainsCompanion.insert({
     this.id = const Value.absent(),
     required String nom,
     required int type,
+    this.remoteId = const Value.absent(),
+    this.location = const Value.absent(),
+    this.capacity = const Value.absent(),
+    this.pricePerHour = const Value.absent(),
+    this.available = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.imageUrl = const Value.absent(),
   }) : nom = Value(nom),
        type = Value(type);
   static Insertable<TerrainRow> custom({
     Expression<int>? id,
     Expression<String>? nom,
     Expression<int>? type,
+    Expression<String>? remoteId,
+    Expression<String>? location,
+    Expression<int>? capacity,
+    Expression<double>? pricePerHour,
+    Expression<bool>? available,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? syncedAt,
+    Expression<String>? imageUrl,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (nom != null) 'nom': nom,
       if (type != null) 'type': type,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (location != null) 'location': location,
+      if (capacity != null) 'capacity': capacity,
+      if (pricePerHour != null) 'price_per_hour': pricePerHour,
+      if (available != null) 'available': available,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (imageUrl != null) 'image_url': imageUrl,
     });
   }
 
@@ -211,11 +623,29 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Value<int>? id,
     Value<String>? nom,
     Value<int>? type,
+    Value<String?>? remoteId,
+    Value<String?>? location,
+    Value<int?>? capacity,
+    Value<double?>? pricePerHour,
+    Value<bool>? available,
+    Value<DateTime?>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<DateTime?>? syncedAt,
+    Value<String?>? imageUrl,
   }) {
     return TerrainsCompanion(
       id: id ?? this.id,
       nom: nom ?? this.nom,
       type: type ?? this.type,
+      remoteId: remoteId ?? this.remoteId,
+      location: location ?? this.location,
+      capacity: capacity ?? this.capacity,
+      pricePerHour: pricePerHour ?? this.pricePerHour,
+      available: available ?? this.available,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncedAt: syncedAt ?? this.syncedAt,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 
@@ -231,6 +661,33 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     if (type.present) {
       map['type'] = Variable<int>(type.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (location.present) {
+      map['location'] = Variable<String>(location.value);
+    }
+    if (capacity.present) {
+      map['capacity'] = Variable<int>(capacity.value);
+    }
+    if (pricePerHour.present) {
+      map['price_per_hour'] = Variable<double>(pricePerHour.value);
+    }
+    if (available.present) {
+      map['available'] = Variable<bool>(available.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (imageUrl.present) {
+      map['image_url'] = Variable<String>(imageUrl.value);
+    }
     return map;
   }
 
@@ -239,7 +696,16 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     return (StringBuffer('TerrainsCompanion(')
           ..write('id: $id, ')
           ..write('nom: $nom, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('location: $location, ')
+          ..write('capacity: $capacity, ')
+          ..write('pricePerHour: $pricePerHour, ')
+          ..write('available: $available, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('imageUrl: $imageUrl')
           ..write(')'))
         .toString();
   }
@@ -349,6 +815,83 @@ class $MaintenancesTable extends Maintenances
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _scheduledDateMeta = const VerificationMeta(
+    'scheduledDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> scheduledDate =
+      GeneratedColumn<DateTime>(
+        'scheduled_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _completedDateMeta = const VerificationMeta(
+    'completedDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedDate =
+      GeneratedColumn<DateTime>(
+        'completed_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -360,6 +903,13 @@ class $MaintenancesTable extends Maintenances
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
     imagePath,
+    remoteId,
+    status,
+    scheduledDate,
+    completedDate,
+    createdBy,
+    createdAt,
+    syncedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -442,6 +992,54 @@ class $MaintenancesTable extends Maintenances
         imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
       );
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('scheduled_date')) {
+      context.handle(
+        _scheduledDateMeta,
+        scheduledDate.isAcceptableOrUnknown(
+          data['scheduled_date']!,
+          _scheduledDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('completed_date')) {
+      context.handle(
+        _completedDateMeta,
+        completedDate.isAcceptableOrUnknown(
+          data['completed_date']!,
+          _completedDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -487,6 +1085,34 @@ class $MaintenancesTable extends Maintenances
         DriftSqlType.string,
         data['${effectivePrefix}image_path'],
       ),
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      ),
+      scheduledDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}scheduled_date'],
+      ),
+      completedDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_date'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
     );
   }
 
@@ -506,6 +1132,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
   final String? imagePath;
+  final String? remoteId;
+  final String? status;
+  final DateTime? scheduledDate;
+  final DateTime? completedDate;
+  final String? createdBy;
+  final DateTime? createdAt;
+  final DateTime? syncedAt;
   const MaintenanceRow({
     required this.id,
     required this.terrainId,
@@ -516,6 +1149,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
     this.imagePath,
+    this.remoteId,
+    this.status,
+    this.scheduledDate,
+    this.completedDate,
+    this.createdBy,
+    this.createdAt,
+    this.syncedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -532,6 +1172,27 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     map['sacs_silice_utilises'] = Variable<int>(sacsSiliceUtilises);
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
+    }
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || status != null) {
+      map['status'] = Variable<String>(status);
+    }
+    if (!nullToAbsent || scheduledDate != null) {
+      map['scheduled_date'] = Variable<DateTime>(scheduledDate);
+    }
+    if (!nullToAbsent || completedDate != null) {
+      map['completed_date'] = Variable<DateTime>(completedDate);
+    }
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
     }
     return map;
   }
@@ -551,6 +1212,27 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      status: status == null && nullToAbsent
+          ? const Value.absent()
+          : Value(status),
+      scheduledDate: scheduledDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scheduledDate),
+      completedDate: completedDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedDate),
+      createdBy: createdBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdBy),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
     );
   }
 
@@ -571,6 +1253,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       ),
       sacsSiliceUtilises: serializer.fromJson<int>(json['sacsSiliceUtilises']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      status: serializer.fromJson<String?>(json['status']),
+      scheduledDate: serializer.fromJson<DateTime?>(json['scheduledDate']),
+      completedDate: serializer.fromJson<DateTime?>(json['completedDate']),
+      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
     );
   }
   @override
@@ -586,6 +1275,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       'sacsSottomantoUtilises': serializer.toJson<int>(sacsSottomantoUtilises),
       'sacsSiliceUtilises': serializer.toJson<int>(sacsSiliceUtilises),
       'imagePath': serializer.toJson<String?>(imagePath),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'status': serializer.toJson<String?>(status),
+      'scheduledDate': serializer.toJson<DateTime?>(scheduledDate),
+      'completedDate': serializer.toJson<DateTime?>(completedDate),
+      'createdBy': serializer.toJson<String?>(createdBy),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
     };
   }
 
@@ -599,6 +1295,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
     Value<String?> imagePath = const Value.absent(),
+    Value<String?> remoteId = const Value.absent(),
+    Value<String?> status = const Value.absent(),
+    Value<DateTime?> scheduledDate = const Value.absent(),
+    Value<DateTime?> completedDate = const Value.absent(),
+    Value<String?> createdBy = const Value.absent(),
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
   }) => MaintenanceRow(
     id: id ?? this.id,
     terrainId: terrainId ?? this.terrainId,
@@ -610,6 +1313,17 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
         sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
     sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    status: status.present ? status.value : this.status,
+    scheduledDate: scheduledDate.present
+        ? scheduledDate.value
+        : this.scheduledDate,
+    completedDate: completedDate.present
+        ? completedDate.value
+        : this.completedDate,
+    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
   );
   MaintenanceRow copyWithCompanion(MaintenancesCompanion data) {
     return MaintenanceRow(
@@ -630,6 +1344,17 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ? data.sacsSiliceUtilises.value
           : this.sacsSiliceUtilises,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      status: data.status.present ? data.status.value : this.status,
+      scheduledDate: data.scheduledDate.present
+          ? data.scheduledDate.value
+          : this.scheduledDate,
+      completedDate: data.completedDate.present
+          ? data.completedDate.value
+          : this.completedDate,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
 
@@ -644,7 +1369,14 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
           ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
-          ..write('imagePath: $imagePath')
+          ..write('imagePath: $imagePath, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('status: $status, ')
+          ..write('scheduledDate: $scheduledDate, ')
+          ..write('completedDate: $completedDate, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
@@ -660,6 +1392,13 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
     imagePath,
+    remoteId,
+    status,
+    scheduledDate,
+    completedDate,
+    createdBy,
+    createdAt,
+    syncedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -673,7 +1412,14 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           other.sacsMantoUtilises == this.sacsMantoUtilises &&
           other.sacsSottomantoUtilises == this.sacsSottomantoUtilises &&
           other.sacsSiliceUtilises == this.sacsSiliceUtilises &&
-          other.imagePath == this.imagePath);
+          other.imagePath == this.imagePath &&
+          other.remoteId == this.remoteId &&
+          other.status == this.status &&
+          other.scheduledDate == this.scheduledDate &&
+          other.completedDate == this.completedDate &&
+          other.createdBy == this.createdBy &&
+          other.createdAt == this.createdAt &&
+          other.syncedAt == this.syncedAt);
 }
 
 class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
@@ -686,6 +1432,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<int> sacsSottomantoUtilises;
   final Value<int> sacsSiliceUtilises;
   final Value<String?> imagePath;
+  final Value<String?> remoteId;
+  final Value<String?> status;
+  final Value<DateTime?> scheduledDate;
+  final Value<DateTime?> completedDate;
+  final Value<String?> createdBy;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> syncedAt;
   const MaintenancesCompanion({
     this.id = const Value.absent(),
     this.terrainId = const Value.absent(),
@@ -696,6 +1449,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.scheduledDate = const Value.absent(),
+    this.completedDate = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
   });
   MaintenancesCompanion.insert({
     this.id = const Value.absent(),
@@ -707,6 +1467,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
     this.imagePath = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.scheduledDate = const Value.absent(),
+    this.completedDate = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
   }) : terrainId = Value(terrainId),
        type = Value(type),
        date = Value(date);
@@ -720,6 +1487,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Expression<int>? sacsSottomantoUtilises,
     Expression<int>? sacsSiliceUtilises,
     Expression<String>? imagePath,
+    Expression<String>? remoteId,
+    Expression<String>? status,
+    Expression<DateTime>? scheduledDate,
+    Expression<DateTime>? completedDate,
+    Expression<String>? createdBy,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? syncedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -733,6 +1507,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       if (sacsSiliceUtilises != null)
         'sacs_silice_utilises': sacsSiliceUtilises,
       if (imagePath != null) 'image_path': imagePath,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (status != null) 'status': status,
+      if (scheduledDate != null) 'scheduled_date': scheduledDate,
+      if (completedDate != null) 'completed_date': completedDate,
+      if (createdBy != null) 'created_by': createdBy,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncedAt != null) 'synced_at': syncedAt,
     });
   }
 
@@ -746,6 +1527,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Value<int>? sacsSottomantoUtilises,
     Value<int>? sacsSiliceUtilises,
     Value<String?>? imagePath,
+    Value<String?>? remoteId,
+    Value<String?>? status,
+    Value<DateTime?>? scheduledDate,
+    Value<DateTime?>? completedDate,
+    Value<String?>? createdBy,
+    Value<DateTime?>? createdAt,
+    Value<DateTime?>? syncedAt,
   }) {
     return MaintenancesCompanion(
       id: id ?? this.id,
@@ -758,6 +1546,13 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
       imagePath: imagePath ?? this.imagePath,
+      remoteId: remoteId ?? this.remoteId,
+      status: status ?? this.status,
+      scheduledDate: scheduledDate ?? this.scheduledDate,
+      completedDate: completedDate ?? this.completedDate,
+      createdBy: createdBy ?? this.createdBy,
+      createdAt: createdAt ?? this.createdAt,
+      syncedAt: syncedAt ?? this.syncedAt,
     );
   }
 
@@ -793,6 +1588,27 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (scheduledDate.present) {
+      map['scheduled_date'] = Variable<DateTime>(scheduledDate.value);
+    }
+    if (completedDate.present) {
+      map['completed_date'] = Variable<DateTime>(completedDate.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
     return map;
   }
 
@@ -807,7 +1623,14 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
           ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
-          ..write('imagePath: $imagePath')
+          ..write('imagePath: $imagePath, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('status: $status, ')
+          ..write('scheduledDate: $scheduledDate, ')
+          ..write('completedDate: $completedDate, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
@@ -940,6 +1763,76 @@ class $StockItemsTable extends StockItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitPriceMeta = const VerificationMeta(
+    'unitPrice',
+  );
+  @override
+  late final GeneratedColumn<double> unitPrice = GeneratedColumn<double>(
+    'unit_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastModifiedByMeta = const VerificationMeta(
+    'lastModifiedBy',
+  );
+  @override
+  late final GeneratedColumn<String> lastModifiedBy = GeneratedColumn<String>(
+    'last_modified_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSyncPendingMeta = const VerificationMeta(
+    'isSyncPending',
+  );
+  @override
+  late final GeneratedColumn<bool> isSyncPending = GeneratedColumn<bool>(
+    'is_sync_pending',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_sync_pending" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -952,6 +1845,12 @@ class $StockItemsTable extends StockItems
     updatedAt,
     category,
     sortOrder,
+    remoteId,
+    unitPrice,
+    createdAt,
+    lastModifiedBy,
+    syncedAt,
+    isSyncPending,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1033,6 +1932,48 @@ class $StockItemsTable extends StockItems
         sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
       );
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('unit_price')) {
+      context.handle(
+        _unitPriceMeta,
+        unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('last_modified_by')) {
+      context.handle(
+        _lastModifiedByMeta,
+        lastModifiedBy.isAcceptableOrUnknown(
+          data['last_modified_by']!,
+          _lastModifiedByMeta,
+        ),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
+    if (data.containsKey('is_sync_pending')) {
+      context.handle(
+        _isSyncPendingMeta,
+        isSyncPending.isAcceptableOrUnknown(
+          data['is_sync_pending']!,
+          _isSyncPendingMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1082,6 +2023,30 @@ class $StockItemsTable extends StockItems
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      unitPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}unit_price'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      ),
+      lastModifiedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_modified_by'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
+      isSyncPending: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_sync_pending'],
+      )!,
     );
   }
 
@@ -1102,6 +2067,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
   final DateTime updatedAt;
   final String? category;
   final int sortOrder;
+  final String? remoteId;
+  final double? unitPrice;
+  final DateTime? createdAt;
+  final String? lastModifiedBy;
+  final DateTime? syncedAt;
+  final bool isSyncPending;
   const StockItemRow({
     required this.id,
     required this.name,
@@ -1113,6 +2084,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     required this.updatedAt,
     this.category,
     required this.sortOrder,
+    this.remoteId,
+    this.unitPrice,
+    this.createdAt,
+    this.lastModifiedBy,
+    this.syncedAt,
+    required this.isSyncPending,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1133,6 +2110,22 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       map['category'] = Variable<String>(category);
     }
     map['sort_order'] = Variable<int>(sortOrder);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || unitPrice != null) {
+      map['unit_price'] = Variable<double>(unitPrice);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || lastModifiedBy != null) {
+      map['last_modified_by'] = Variable<String>(lastModifiedBy);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    map['is_sync_pending'] = Variable<bool>(isSyncPending);
     return map;
   }
 
@@ -1154,6 +2147,22 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ? const Value.absent()
           : Value(category),
       sortOrder: Value(sortOrder),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      unitPrice: unitPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unitPrice),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      lastModifiedBy: lastModifiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastModifiedBy),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      isSyncPending: Value(isSyncPending),
     );
   }
 
@@ -1173,6 +2182,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       category: serializer.fromJson<String?>(json['category']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      unitPrice: serializer.fromJson<double?>(json['unitPrice']),
+      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      lastModifiedBy: serializer.fromJson<String?>(json['lastModifiedBy']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      isSyncPending: serializer.fromJson<bool>(json['isSyncPending']),
     );
   }
   @override
@@ -1189,6 +2204,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'category': serializer.toJson<String?>(category),
       'sortOrder': serializer.toJson<int>(sortOrder),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'unitPrice': serializer.toJson<double?>(unitPrice),
+      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'lastModifiedBy': serializer.toJson<String?>(lastModifiedBy),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'isSyncPending': serializer.toJson<bool>(isSyncPending),
     };
   }
 
@@ -1203,6 +2224,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     DateTime? updatedAt,
     Value<String?> category = const Value.absent(),
     int? sortOrder,
+    Value<String?> remoteId = const Value.absent(),
+    Value<double?> unitPrice = const Value.absent(),
+    Value<DateTime?> createdAt = const Value.absent(),
+    Value<String?> lastModifiedBy = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
+    bool? isSyncPending,
   }) => StockItemRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -1214,6 +2241,14 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     updatedAt: updatedAt ?? this.updatedAt,
     category: category.present ? category.value : this.category,
     sortOrder: sortOrder ?? this.sortOrder,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    unitPrice: unitPrice.present ? unitPrice.value : this.unitPrice,
+    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    lastModifiedBy: lastModifiedBy.present
+        ? lastModifiedBy.value
+        : this.lastModifiedBy,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    isSyncPending: isSyncPending ?? this.isSyncPending,
   );
   StockItemRow copyWithCompanion(StockItemsCompanion data) {
     return StockItemRow(
@@ -1229,6 +2264,16 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       category: data.category.present ? data.category.value : this.category,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastModifiedBy: data.lastModifiedBy.present
+          ? data.lastModifiedBy.value
+          : this.lastModifiedBy,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      isSyncPending: data.isSyncPending.present
+          ? data.isSyncPending.value
+          : this.isSyncPending,
     );
   }
 
@@ -1244,7 +2289,13 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ..write('minThreshold: $minThreshold, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('category: $category, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModifiedBy: $lastModifiedBy, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('isSyncPending: $isSyncPending')
           ..write(')'))
         .toString();
   }
@@ -1261,6 +2312,12 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     updatedAt,
     category,
     sortOrder,
+    remoteId,
+    unitPrice,
+    createdAt,
+    lastModifiedBy,
+    syncedAt,
+    isSyncPending,
   );
   @override
   bool operator ==(Object other) =>
@@ -1275,7 +2332,13 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           other.minThreshold == this.minThreshold &&
           other.updatedAt == this.updatedAt &&
           other.category == this.category &&
-          other.sortOrder == this.sortOrder);
+          other.sortOrder == this.sortOrder &&
+          other.remoteId == this.remoteId &&
+          other.unitPrice == this.unitPrice &&
+          other.createdAt == this.createdAt &&
+          other.lastModifiedBy == this.lastModifiedBy &&
+          other.syncedAt == this.syncedAt &&
+          other.isSyncPending == this.isSyncPending);
 }
 
 class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
@@ -1289,6 +2352,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
   final Value<DateTime> updatedAt;
   final Value<String?> category;
   final Value<int> sortOrder;
+  final Value<String?> remoteId;
+  final Value<double?> unitPrice;
+  final Value<DateTime?> createdAt;
+  final Value<String?> lastModifiedBy;
+  final Value<DateTime?> syncedAt;
+  final Value<bool> isSyncPending;
   const StockItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -1300,6 +2369,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.updatedAt = const Value.absent(),
     this.category = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModifiedBy = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.isSyncPending = const Value.absent(),
   });
   StockItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -1312,6 +2387,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     required DateTime updatedAt,
     this.category = const Value.absent(),
     this.sortOrder = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.unitPrice = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastModifiedBy = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.isSyncPending = const Value.absent(),
   }) : name = Value(name),
        unit = Value(unit),
        isCustom = Value(isCustom),
@@ -1327,6 +2408,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Expression<DateTime>? updatedAt,
     Expression<String>? category,
     Expression<int>? sortOrder,
+    Expression<String>? remoteId,
+    Expression<double>? unitPrice,
+    Expression<DateTime>? createdAt,
+    Expression<String>? lastModifiedBy,
+    Expression<DateTime>? syncedAt,
+    Expression<bool>? isSyncPending,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1339,6 +2426,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (category != null) 'category': category,
       if (sortOrder != null) 'sort_order': sortOrder,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (unitPrice != null) 'unit_price': unitPrice,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastModifiedBy != null) 'last_modified_by': lastModifiedBy,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (isSyncPending != null) 'is_sync_pending': isSyncPending,
     });
   }
 
@@ -1353,6 +2446,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Value<DateTime>? updatedAt,
     Value<String?>? category,
     Value<int>? sortOrder,
+    Value<String?>? remoteId,
+    Value<double?>? unitPrice,
+    Value<DateTime?>? createdAt,
+    Value<String?>? lastModifiedBy,
+    Value<DateTime?>? syncedAt,
+    Value<bool>? isSyncPending,
   }) {
     return StockItemsCompanion(
       id: id ?? this.id,
@@ -1365,6 +2464,12 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       updatedAt: updatedAt ?? this.updatedAt,
       category: category ?? this.category,
       sortOrder: sortOrder ?? this.sortOrder,
+      remoteId: remoteId ?? this.remoteId,
+      unitPrice: unitPrice ?? this.unitPrice,
+      createdAt: createdAt ?? this.createdAt,
+      lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
+      syncedAt: syncedAt ?? this.syncedAt,
+      isSyncPending: isSyncPending ?? this.isSyncPending,
     );
   }
 
@@ -1401,6 +2506,24 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (unitPrice.present) {
+      map['unit_price'] = Variable<double>(unitPrice.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastModifiedBy.present) {
+      map['last_modified_by'] = Variable<String>(lastModifiedBy.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (isSyncPending.present) {
+      map['is_sync_pending'] = Variable<bool>(isSyncPending.value);
+    }
     return map;
   }
 
@@ -1416,7 +2539,13 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
           ..write('minThreshold: $minThreshold, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('category: $category, ')
-          ..write('sortOrder: $sortOrder')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('unitPrice: $unitPrice, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastModifiedBy: $lastModifiedBy, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('isSyncPending: $isSyncPending')
           ..write(')'))
         .toString();
   }
@@ -1525,6 +2654,54 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1536,6 +2713,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     lastLoginAt,
     avatarUrl,
     createdAt,
+    remoteId,
+    syncedAt,
+    updatedAt,
+    isActive,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1609,6 +2790,30 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
     return context;
   }
 
@@ -1656,6 +2861,22 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
     );
   }
 
@@ -1678,6 +2899,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   final DateTime? lastLoginAt;
   final String? avatarUrl;
   final DateTime createdAt;
+  final String? remoteId;
+  final DateTime? syncedAt;
+  final DateTime? updatedAt;
+  final bool isActive;
   const UserRow({
     required this.id,
     required this.email,
@@ -1688,6 +2913,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     this.lastLoginAt,
     this.avatarUrl,
     required this.createdAt,
+    this.remoteId,
+    this.syncedAt,
+    this.updatedAt,
+    required this.isActive,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1709,6 +2938,16 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       map['avatar_url'] = Variable<String>(avatarUrl);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    map['is_active'] = Variable<bool>(isActive);
     return map;
   }
 
@@ -1729,6 +2968,16 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           ? const Value.absent()
           : Value(avatarUrl),
       createdAt: Value(createdAt),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isActive: Value(isActive),
     );
   }
 
@@ -1749,6 +2998,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       lastLoginAt: serializer.fromJson<DateTime?>(json['lastLoginAt']),
       avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
     );
   }
   @override
@@ -1766,6 +3019,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       'lastLoginAt': serializer.toJson<DateTime?>(lastLoginAt),
       'avatarUrl': serializer.toJson<String?>(avatarUrl),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'isActive': serializer.toJson<bool>(isActive),
     };
   }
 
@@ -1779,6 +3036,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     Value<DateTime?> lastLoginAt = const Value.absent(),
     Value<String?> avatarUrl = const Value.absent(),
     DateTime? createdAt,
+    Value<String?> remoteId = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
+    Value<DateTime?> updatedAt = const Value.absent(),
+    bool? isActive,
   }) => UserRow(
     id: id ?? this.id,
     email: email ?? this.email,
@@ -1789,6 +3050,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     lastLoginAt: lastLoginAt.present ? lastLoginAt.value : this.lastLoginAt,
     avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
     createdAt: createdAt ?? this.createdAt,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isActive: isActive ?? this.isActive,
   );
   UserRow copyWithCompanion(UsersCompanion data) {
     return UserRow(
@@ -1807,6 +3072,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           : this.lastLoginAt,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
     );
   }
 
@@ -1821,7 +3090,11 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           ..write('role: $role, ')
           ..write('lastLoginAt: $lastLoginAt, ')
           ..write('avatarUrl: $avatarUrl, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
@@ -1837,6 +3110,10 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     lastLoginAt,
     avatarUrl,
     createdAt,
+    remoteId,
+    syncedAt,
+    updatedAt,
+    isActive,
   );
   @override
   bool operator ==(Object other) =>
@@ -1850,7 +3127,11 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           other.role == this.role &&
           other.lastLoginAt == this.lastLoginAt &&
           other.avatarUrl == this.avatarUrl &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.remoteId == this.remoteId &&
+          other.syncedAt == this.syncedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isActive == this.isActive);
 }
 
 class UsersCompanion extends UpdateCompanion<UserRow> {
@@ -1863,6 +3144,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   final Value<DateTime?> lastLoginAt;
   final Value<String?> avatarUrl;
   final Value<DateTime> createdAt;
+  final Value<String?> remoteId;
+  final Value<DateTime?> syncedAt;
+  final Value<DateTime?> updatedAt;
+  final Value<bool> isActive;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.email = const Value.absent(),
@@ -1873,6 +3158,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     this.lastLoginAt = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isActive = const Value.absent(),
   });
   UsersCompanion.insert({
     this.id = const Value.absent(),
@@ -1884,6 +3173,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     this.lastLoginAt = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isActive = const Value.absent(),
   }) : email = Value(email),
        name = Value(name),
        passwordHash = Value(passwordHash),
@@ -1898,6 +3191,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     Expression<DateTime>? lastLoginAt,
     Expression<String>? avatarUrl,
     Expression<DateTime>? createdAt,
+    Expression<String>? remoteId,
+    Expression<DateTime>? syncedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isActive,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1909,6 +3206,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
       if (lastLoginAt != null) 'last_login_at': lastLoginAt,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (createdAt != null) 'created_at': createdAt,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isActive != null) 'is_active': isActive,
     });
   }
 
@@ -1922,6 +3223,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     Value<DateTime?>? lastLoginAt,
     Value<String?>? avatarUrl,
     Value<DateTime>? createdAt,
+    Value<String?>? remoteId,
+    Value<DateTime?>? syncedAt,
+    Value<DateTime?>? updatedAt,
+    Value<bool>? isActive,
   }) {
     return UsersCompanion(
       id: id ?? this.id,
@@ -1933,6 +3238,10 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
+      remoteId: remoteId ?? this.remoteId,
+      syncedAt: syncedAt ?? this.syncedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isActive: isActive ?? this.isActive,
     );
   }
 
@@ -1968,6 +3277,18 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
     return map;
   }
 
@@ -1982,7 +3303,11 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
           ..write('role: $role, ')
           ..write('lastLoginAt: $lastLoginAt, ')
           ..write('avatarUrl: $avatarUrl, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isActive: $isActive')
           ..write(')'))
         .toString();
   }
@@ -3116,6 +4441,50 @@ class $AuditLogsTable extends AuditLogs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _userUidMeta = const VerificationMeta(
+    'userUid',
+  );
+  @override
+  late final GeneratedColumn<String> userUid = GeneratedColumn<String>(
+    'user_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _severityMeta = const VerificationMeta(
+    'severity',
+  );
+  @override
+  late final GeneratedColumn<String> severity = GeneratedColumn<String>(
+    'severity',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3126,6 +4495,10 @@ class $AuditLogsTable extends AuditLogs
     deviceInfo,
     timestamp,
     details,
+    remoteId,
+    userUid,
+    severity,
+    syncedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3186,6 +4559,30 @@ class $AuditLogsTable extends AuditLogs
         details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
       );
     }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('user_uid')) {
+      context.handle(
+        _userUidMeta,
+        userUid.isAcceptableOrUnknown(data['user_uid']!, _userUidMeta),
+      );
+    }
+    if (data.containsKey('severity')) {
+      context.handle(
+        _severityMeta,
+        severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -3227,6 +4624,22 @@ class $AuditLogsTable extends AuditLogs
         DriftSqlType.string,
         data['${effectivePrefix}details'],
       ),
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      userUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_uid'],
+      ),
+      severity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}severity'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
     );
   }
 
@@ -3245,6 +4658,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
   final String? deviceInfo;
   final DateTime timestamp;
   final String? details;
+  final String? remoteId;
+  final String? userUid;
+  final String? severity;
+  final DateTime? syncedAt;
   const AuditLog({
     required this.id,
     this.userId,
@@ -3254,6 +4671,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
     this.deviceInfo,
     required this.timestamp,
     this.details,
+    this.remoteId,
+    this.userUid,
+    this.severity,
+    this.syncedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3275,6 +4696,18 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
     map['timestamp'] = Variable<DateTime>(timestamp);
     if (!nullToAbsent || details != null) {
       map['details'] = Variable<String>(details);
+    }
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    if (!nullToAbsent || userUid != null) {
+      map['user_uid'] = Variable<String>(userUid);
+    }
+    if (!nullToAbsent || severity != null) {
+      map['severity'] = Variable<String>(severity);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
     }
     return map;
   }
@@ -3299,6 +4732,18 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
       details: details == null && nullToAbsent
           ? const Value.absent()
           : Value(details),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      userUid: userUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userUid),
+      severity: severity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(severity),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
     );
   }
 
@@ -3316,6 +4761,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
       deviceInfo: serializer.fromJson<String?>(json['deviceInfo']),
       timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       details: serializer.fromJson<String?>(json['details']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      userUid: serializer.fromJson<String?>(json['userUid']),
+      severity: serializer.fromJson<String?>(json['severity']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
     );
   }
   @override
@@ -3330,6 +4779,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
       'deviceInfo': serializer.toJson<String?>(deviceInfo),
       'timestamp': serializer.toJson<DateTime>(timestamp),
       'details': serializer.toJson<String?>(details),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'userUid': serializer.toJson<String?>(userUid),
+      'severity': serializer.toJson<String?>(severity),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
     };
   }
 
@@ -3342,6 +4795,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
     Value<String?> deviceInfo = const Value.absent(),
     DateTime? timestamp,
     Value<String?> details = const Value.absent(),
+    Value<String?> remoteId = const Value.absent(),
+    Value<String?> userUid = const Value.absent(),
+    Value<String?> severity = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
   }) => AuditLog(
     id: id ?? this.id,
     userId: userId.present ? userId.value : this.userId,
@@ -3351,6 +4808,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
     deviceInfo: deviceInfo.present ? deviceInfo.value : this.deviceInfo,
     timestamp: timestamp ?? this.timestamp,
     details: details.present ? details.value : this.details,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    userUid: userUid.present ? userUid.value : this.userUid,
+    severity: severity.present ? severity.value : this.severity,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
   );
   AuditLog copyWithCompanion(AuditLogsCompanion data) {
     return AuditLog(
@@ -3364,6 +4825,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
           : this.deviceInfo,
       timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       details: data.details.present ? data.details.value : this.details,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      userUid: data.userUid.present ? data.userUid.value : this.userUid,
+      severity: data.severity.present ? data.severity.value : this.severity,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
 
@@ -3377,7 +4842,11 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
           ..write('ipAddress: $ipAddress, ')
           ..write('deviceInfo: $deviceInfo, ')
           ..write('timestamp: $timestamp, ')
-          ..write('details: $details')
+          ..write('details: $details, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('userUid: $userUid, ')
+          ..write('severity: $severity, ')
+          ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
@@ -3392,6 +4861,10 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
     deviceInfo,
     timestamp,
     details,
+    remoteId,
+    userUid,
+    severity,
+    syncedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -3404,7 +4877,11 @@ class AuditLog extends DataClass implements Insertable<AuditLog> {
           other.ipAddress == this.ipAddress &&
           other.deviceInfo == this.deviceInfo &&
           other.timestamp == this.timestamp &&
-          other.details == this.details);
+          other.details == this.details &&
+          other.remoteId == this.remoteId &&
+          other.userUid == this.userUid &&
+          other.severity == this.severity &&
+          other.syncedAt == this.syncedAt);
 }
 
 class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
@@ -3416,6 +4893,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
   final Value<String?> deviceInfo;
   final Value<DateTime> timestamp;
   final Value<String?> details;
+  final Value<String?> remoteId;
+  final Value<String?> userUid;
+  final Value<String?> severity;
+  final Value<DateTime?> syncedAt;
   const AuditLogsCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
@@ -3425,6 +4906,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
     this.deviceInfo = const Value.absent(),
     this.timestamp = const Value.absent(),
     this.details = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.userUid = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.syncedAt = const Value.absent(),
   });
   AuditLogsCompanion.insert({
     this.id = const Value.absent(),
@@ -3435,6 +4920,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
     this.deviceInfo = const Value.absent(),
     this.timestamp = const Value.absent(),
     this.details = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.userUid = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.syncedAt = const Value.absent(),
   }) : action = Value(action);
   static Insertable<AuditLog> custom({
     Expression<int>? id,
@@ -3445,6 +4934,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
     Expression<String>? deviceInfo,
     Expression<DateTime>? timestamp,
     Expression<String>? details,
+    Expression<String>? remoteId,
+    Expression<String>? userUid,
+    Expression<String>? severity,
+    Expression<DateTime>? syncedAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3455,6 +4948,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
       if (deviceInfo != null) 'device_info': deviceInfo,
       if (timestamp != null) 'timestamp': timestamp,
       if (details != null) 'details': details,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (userUid != null) 'user_uid': userUid,
+      if (severity != null) 'severity': severity,
+      if (syncedAt != null) 'synced_at': syncedAt,
     });
   }
 
@@ -3467,6 +4964,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
     Value<String?>? deviceInfo,
     Value<DateTime>? timestamp,
     Value<String?>? details,
+    Value<String?>? remoteId,
+    Value<String?>? userUid,
+    Value<String?>? severity,
+    Value<DateTime?>? syncedAt,
   }) {
     return AuditLogsCompanion(
       id: id ?? this.id,
@@ -3477,6 +4978,10 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
       deviceInfo: deviceInfo ?? this.deviceInfo,
       timestamp: timestamp ?? this.timestamp,
       details: details ?? this.details,
+      remoteId: remoteId ?? this.remoteId,
+      userUid: userUid ?? this.userUid,
+      severity: severity ?? this.severity,
+      syncedAt: syncedAt ?? this.syncedAt,
     );
   }
 
@@ -3507,6 +5012,18 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
     if (details.present) {
       map['details'] = Variable<String>(details.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (userUid.present) {
+      map['user_uid'] = Variable<String>(userUid.value);
+    }
+    if (severity.present) {
+      map['severity'] = Variable<String>(severity.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
     return map;
   }
 
@@ -3520,7 +5037,11 @@ class AuditLogsCompanion extends UpdateCompanion<AuditLog> {
           ..write('ipAddress: $ipAddress, ')
           ..write('deviceInfo: $deviceInfo, ')
           ..write('timestamp: $timestamp, ')
-          ..write('details: $details')
+          ..write('details: $details, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('userUid: $userUid, ')
+          ..write('severity: $severity, ')
+          ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
   }
@@ -4273,6 +5794,755 @@ class OtpRecordsCompanion extends UpdateCompanion<OtpRecord> {
   }
 }
 
+class $ReservationsTable extends Reservations
+    with TableInfo<$ReservationsTable, Reservation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReservationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<int> userId = GeneratedColumn<int>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES users (id)',
+    ),
+  );
+  static const VerificationMeta _terrainIdMeta = const VerificationMeta(
+    'terrainId',
+  );
+  @override
+  late final GeneratedColumn<int> terrainId = GeneratedColumn<int>(
+    'terrain_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES terrains (id)',
+    ),
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startTimeMeta = const VerificationMeta(
+    'startTime',
+  );
+  @override
+  late final GeneratedColumn<String> startTime = GeneratedColumn<String>(
+    'start_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endTimeMeta = const VerificationMeta(
+    'endTime',
+  );
+  @override
+  late final GeneratedColumn<String> endTime = GeneratedColumn<String>(
+    'end_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
+    'syncedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
+    'synced_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isSyncPendingMeta = const VerificationMeta(
+    'isSyncPending',
+  );
+  @override
+  late final GeneratedColumn<bool> isSyncPending = GeneratedColumn<bool>(
+    'is_sync_pending',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_sync_pending" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    userId,
+    terrainId,
+    date,
+    startTime,
+    endTime,
+    status,
+    notes,
+    createdAt,
+    updatedAt,
+    syncedAt,
+    isSyncPending,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reservations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Reservation> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('terrain_id')) {
+      context.handle(
+        _terrainIdMeta,
+        terrainId.isAcceptableOrUnknown(data['terrain_id']!, _terrainIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_terrainIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('start_time')) {
+      context.handle(
+        _startTimeMeta,
+        startTime.isAcceptableOrUnknown(data['start_time']!, _startTimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startTimeMeta);
+    }
+    if (data.containsKey('end_time')) {
+      context.handle(
+        _endTimeMeta,
+        endTime.isAcceptableOrUnknown(data['end_time']!, _endTimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endTimeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('synced_at')) {
+      context.handle(
+        _syncedAtMeta,
+        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
+      );
+    }
+    if (data.containsKey('is_sync_pending')) {
+      context.handle(
+        _isSyncPendingMeta,
+        isSyncPending.isAcceptableOrUnknown(
+          data['is_sync_pending']!,
+          _isSyncPendingMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Reservation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Reservation(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}user_id'],
+      )!,
+      terrainId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}terrain_id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      startTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_time'],
+      )!,
+      endTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_time'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      syncedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}synced_at'],
+      ),
+      isSyncPending: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_sync_pending'],
+      )!,
+    );
+  }
+
+  @override
+  $ReservationsTable createAlias(String alias) {
+    return $ReservationsTable(attachedDatabase, alias);
+  }
+}
+
+class Reservation extends DataClass implements Insertable<Reservation> {
+  final int id;
+  final String? remoteId;
+  final int userId;
+  final int terrainId;
+  final DateTime date;
+  final String startTime;
+  final String endTime;
+  final String status;
+  final String? notes;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+  final DateTime? syncedAt;
+  final bool isSyncPending;
+  const Reservation({
+    required this.id,
+    this.remoteId,
+    required this.userId,
+    required this.terrainId,
+    required this.date,
+    required this.startTime,
+    required this.endTime,
+    required this.status,
+    this.notes,
+    required this.createdAt,
+    this.updatedAt,
+    this.syncedAt,
+    required this.isSyncPending,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    map['user_id'] = Variable<int>(userId);
+    map['terrain_id'] = Variable<int>(terrainId);
+    map['date'] = Variable<DateTime>(date);
+    map['start_time'] = Variable<String>(startTime);
+    map['end_time'] = Variable<String>(endTime);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || syncedAt != null) {
+      map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    map['is_sync_pending'] = Variable<bool>(isSyncPending);
+    return map;
+  }
+
+  ReservationsCompanion toCompanion(bool nullToAbsent) {
+    return ReservationsCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      userId: Value(userId),
+      terrainId: Value(terrainId),
+      date: Value(date),
+      startTime: Value(startTime),
+      endTime: Value(endTime),
+      status: Value(status),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      syncedAt: syncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncedAt),
+      isSyncPending: Value(isSyncPending),
+    );
+  }
+
+  factory Reservation.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Reservation(
+      id: serializer.fromJson<int>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      userId: serializer.fromJson<int>(json['userId']),
+      terrainId: serializer.fromJson<int>(json['terrainId']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      startTime: serializer.fromJson<String>(json['startTime']),
+      endTime: serializer.fromJson<String>(json['endTime']),
+      status: serializer.fromJson<String>(json['status']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      isSyncPending: serializer.fromJson<bool>(json['isSyncPending']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'userId': serializer.toJson<int>(userId),
+      'terrainId': serializer.toJson<int>(terrainId),
+      'date': serializer.toJson<DateTime>(date),
+      'startTime': serializer.toJson<String>(startTime),
+      'endTime': serializer.toJson<String>(endTime),
+      'status': serializer.toJson<String>(status),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'isSyncPending': serializer.toJson<bool>(isSyncPending),
+    };
+  }
+
+  Reservation copyWith({
+    int? id,
+    Value<String?> remoteId = const Value.absent(),
+    int? userId,
+    int? terrainId,
+    DateTime? date,
+    String? startTime,
+    String? endTime,
+    String? status,
+    Value<String?> notes = const Value.absent(),
+    DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+    Value<DateTime?> syncedAt = const Value.absent(),
+    bool? isSyncPending,
+  }) => Reservation(
+    id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    userId: userId ?? this.userId,
+    terrainId: terrainId ?? this.terrainId,
+    date: date ?? this.date,
+    startTime: startTime ?? this.startTime,
+    endTime: endTime ?? this.endTime,
+    status: status ?? this.status,
+    notes: notes.present ? notes.value : this.notes,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    isSyncPending: isSyncPending ?? this.isSyncPending,
+  );
+  Reservation copyWithCompanion(ReservationsCompanion data) {
+    return Reservation(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      terrainId: data.terrainId.present ? data.terrainId.value : this.terrainId,
+      date: data.date.present ? data.date.value : this.date,
+      startTime: data.startTime.present ? data.startTime.value : this.startTime,
+      endTime: data.endTime.present ? data.endTime.value : this.endTime,
+      status: data.status.present ? data.status.value : this.status,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      isSyncPending: data.isSyncPending.present
+          ? data.isSyncPending.value
+          : this.isSyncPending,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Reservation(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('userId: $userId, ')
+          ..write('terrainId: $terrainId, ')
+          ..write('date: $date, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('isSyncPending: $isSyncPending')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    userId,
+    terrainId,
+    date,
+    startTime,
+    endTime,
+    status,
+    notes,
+    createdAt,
+    updatedAt,
+    syncedAt,
+    isSyncPending,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Reservation &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.userId == this.userId &&
+          other.terrainId == this.terrainId &&
+          other.date == this.date &&
+          other.startTime == this.startTime &&
+          other.endTime == this.endTime &&
+          other.status == this.status &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.syncedAt == this.syncedAt &&
+          other.isSyncPending == this.isSyncPending);
+}
+
+class ReservationsCompanion extends UpdateCompanion<Reservation> {
+  final Value<int> id;
+  final Value<String?> remoteId;
+  final Value<int> userId;
+  final Value<int> terrainId;
+  final Value<DateTime> date;
+  final Value<String> startTime;
+  final Value<String> endTime;
+  final Value<String> status;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<DateTime?> syncedAt;
+  final Value<bool> isSyncPending;
+  const ReservationsCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.terrainId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.startTime = const Value.absent(),
+    this.endTime = const Value.absent(),
+    this.status = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.isSyncPending = const Value.absent(),
+  });
+  ReservationsCompanion.insert({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    required int userId,
+    required int terrainId,
+    required DateTime date,
+    required String startTime,
+    required String endTime,
+    required String status,
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.syncedAt = const Value.absent(),
+    this.isSyncPending = const Value.absent(),
+  }) : userId = Value(userId),
+       terrainId = Value(terrainId),
+       date = Value(date),
+       startTime = Value(startTime),
+       endTime = Value(endTime),
+       status = Value(status);
+  static Insertable<Reservation> custom({
+    Expression<int>? id,
+    Expression<String>? remoteId,
+    Expression<int>? userId,
+    Expression<int>? terrainId,
+    Expression<DateTime>? date,
+    Expression<String>? startTime,
+    Expression<String>? endTime,
+    Expression<String>? status,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? syncedAt,
+    Expression<bool>? isSyncPending,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (userId != null) 'user_id': userId,
+      if (terrainId != null) 'terrain_id': terrainId,
+      if (date != null) 'date': date,
+      if (startTime != null) 'start_time': startTime,
+      if (endTime != null) 'end_time': endTime,
+      if (status != null) 'status': status,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (syncedAt != null) 'synced_at': syncedAt,
+      if (isSyncPending != null) 'is_sync_pending': isSyncPending,
+    });
+  }
+
+  ReservationsCompanion copyWith({
+    Value<int>? id,
+    Value<String?>? remoteId,
+    Value<int>? userId,
+    Value<int>? terrainId,
+    Value<DateTime>? date,
+    Value<String>? startTime,
+    Value<String>? endTime,
+    Value<String>? status,
+    Value<String?>? notes,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<DateTime?>? syncedAt,
+    Value<bool>? isSyncPending,
+  }) {
+    return ReservationsCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      userId: userId ?? this.userId,
+      terrainId: terrainId ?? this.terrainId,
+      date: date ?? this.date,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      syncedAt: syncedAt ?? this.syncedAt,
+      isSyncPending: isSyncPending ?? this.isSyncPending,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<int>(userId.value);
+    }
+    if (terrainId.present) {
+      map['terrain_id'] = Variable<int>(terrainId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (startTime.present) {
+      map['start_time'] = Variable<String>(startTime.value);
+    }
+    if (endTime.present) {
+      map['end_time'] = Variable<String>(endTime.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (syncedAt.present) {
+      map['synced_at'] = Variable<DateTime>(syncedAt.value);
+    }
+    if (isSyncPending.present) {
+      map['is_sync_pending'] = Variable<bool>(isSyncPending.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReservationsCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('userId: $userId, ')
+          ..write('terrainId: $terrainId, ')
+          ..write('date: $date, ')
+          ..write('startTime: $startTime, ')
+          ..write('endTime: $endTime, ')
+          ..write('status: $status, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('syncedAt: $syncedAt, ')
+          ..write('isSyncPending: $isSyncPending')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -4286,6 +6556,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AuditLogsTable auditLogs = $AuditLogsTable(this);
   late final $LoginAttemptsTable loginAttempts = $LoginAttemptsTable(this);
   late final $OtpRecordsTable otpRecords = $OtpRecordsTable(this);
+  late final $ReservationsTable reservations = $ReservationsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4300,6 +6571,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     auditLogs,
     loginAttempts,
     otpRecords,
+    reservations,
   ];
 }
 
@@ -4308,13 +6580,54 @@ typedef $$TerrainsTableCreateCompanionBuilder =
       Value<int> id,
       required String nom,
       required int type,
+      Value<String?> remoteId,
+      Value<String?> location,
+      Value<int?> capacity,
+      Value<double?> pricePerHour,
+      Value<bool> available,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> syncedAt,
+      Value<String?> imageUrl,
     });
 typedef $$TerrainsTableUpdateCompanionBuilder =
     TerrainsCompanion Function({
       Value<int> id,
       Value<String> nom,
       Value<int> type,
+      Value<String?> remoteId,
+      Value<String?> location,
+      Value<int?> capacity,
+      Value<double?> pricePerHour,
+      Value<bool> available,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> syncedAt,
+      Value<String?> imageUrl,
     });
+
+final class $$TerrainsTableReferences
+    extends BaseReferences<_$AppDatabase, $TerrainsTable, TerrainRow> {
+  $$TerrainsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ReservationsTable, List<Reservation>>
+  _reservationsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.reservations,
+    aliasName: $_aliasNameGenerator(db.terrains.id, db.reservations.terrainId),
+  );
+
+  $$ReservationsTableProcessedTableManager get reservationsRefs {
+    final manager = $$ReservationsTableTableManager(
+      $_db,
+      $_db.reservations,
+    ).filter((f) => f.terrainId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_reservationsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$TerrainsTableFilterComposer
     extends Composer<_$AppDatabase, $TerrainsTable> {
@@ -4339,6 +6652,76 @@ class $$TerrainsTableFilterComposer
     column: $table.type,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get capacity => $composableBuilder(
+    column: $table.capacity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get pricePerHour => $composableBuilder(
+    column: $table.pricePerHour,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get available => $composableBuilder(
+    column: $table.available,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> reservationsRefs(
+    Expression<bool> Function($$ReservationsTableFilterComposer f) f,
+  ) {
+    final $$ReservationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reservations,
+      getReferencedColumn: (t) => t.terrainId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReservationsTableFilterComposer(
+            $db: $db,
+            $table: $db.reservations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TerrainsTableOrderingComposer
@@ -4364,6 +6747,51 @@ class $$TerrainsTableOrderingComposer
     column: $table.type,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get location => $composableBuilder(
+    column: $table.location,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get capacity => $composableBuilder(
+    column: $table.capacity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get pricePerHour => $composableBuilder(
+    column: $table.pricePerHour,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get available => $composableBuilder(
+    column: $table.available,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imageUrl => $composableBuilder(
+    column: $table.imageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TerrainsTableAnnotationComposer
@@ -4383,6 +6811,60 @@ class $$TerrainsTableAnnotationComposer
 
   GeneratedColumn<int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get location =>
+      $composableBuilder(column: $table.location, builder: (column) => column);
+
+  GeneratedColumn<int> get capacity =>
+      $composableBuilder(column: $table.capacity, builder: (column) => column);
+
+  GeneratedColumn<double> get pricePerHour => $composableBuilder(
+    column: $table.pricePerHour,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get available =>
+      $composableBuilder(column: $table.available, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get imageUrl =>
+      $composableBuilder(column: $table.imageUrl, builder: (column) => column);
+
+  Expression<T> reservationsRefs<T extends Object>(
+    Expression<T> Function($$ReservationsTableAnnotationComposer a) f,
+  ) {
+    final $$ReservationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reservations,
+      getReferencedColumn: (t) => t.terrainId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReservationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reservations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TerrainsTableTableManager
@@ -4396,12 +6878,9 @@ class $$TerrainsTableTableManager
           $$TerrainsTableAnnotationComposer,
           $$TerrainsTableCreateCompanionBuilder,
           $$TerrainsTableUpdateCompanionBuilder,
-          (
-            TerrainRow,
-            BaseReferences<_$AppDatabase, $TerrainsTable, TerrainRow>,
-          ),
+          (TerrainRow, $$TerrainsTableReferences),
           TerrainRow,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool reservationsRefs})
         > {
   $$TerrainsTableTableManager(_$AppDatabase db, $TerrainsTable table)
     : super(
@@ -4419,17 +6898,94 @@ class $$TerrainsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> nom = const Value.absent(),
                 Value<int> type = const Value.absent(),
-              }) => TerrainsCompanion(id: id, nom: nom, type: type),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<int?> capacity = const Value.absent(),
+                Value<double?> pricePerHour = const Value.absent(),
+                Value<bool> available = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+              }) => TerrainsCompanion(
+                id: id,
+                nom: nom,
+                type: type,
+                remoteId: remoteId,
+                location: location,
+                capacity: capacity,
+                pricePerHour: pricePerHour,
+                available: available,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncedAt: syncedAt,
+                imageUrl: imageUrl,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String nom,
                 required int type,
-              }) => TerrainsCompanion.insert(id: id, nom: nom, type: type),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> location = const Value.absent(),
+                Value<int?> capacity = const Value.absent(),
+                Value<double?> pricePerHour = const Value.absent(),
+                Value<bool> available = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> imageUrl = const Value.absent(),
+              }) => TerrainsCompanion.insert(
+                id: id,
+                nom: nom,
+                type: type,
+                remoteId: remoteId,
+                location: location,
+                capacity: capacity,
+                pricePerHour: pricePerHour,
+                available: available,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncedAt: syncedAt,
+                imageUrl: imageUrl,
+              ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$TerrainsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({reservationsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (reservationsRefs) db.reservations],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (reservationsRefs)
+                    await $_getPrefetchedData<
+                      TerrainRow,
+                      $TerrainsTable,
+                      Reservation
+                    >(
+                      currentTable: table,
+                      referencedTable: $$TerrainsTableReferences
+                          ._reservationsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$TerrainsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).reservationsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.terrainId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -4444,9 +7000,9 @@ typedef $$TerrainsTableProcessedTableManager =
       $$TerrainsTableAnnotationComposer,
       $$TerrainsTableCreateCompanionBuilder,
       $$TerrainsTableUpdateCompanionBuilder,
-      (TerrainRow, BaseReferences<_$AppDatabase, $TerrainsTable, TerrainRow>),
+      (TerrainRow, $$TerrainsTableReferences),
       TerrainRow,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool reservationsRefs})
     >;
 typedef $$MaintenancesTableCreateCompanionBuilder =
     MaintenancesCompanion Function({
@@ -4459,6 +7015,13 @@ typedef $$MaintenancesTableCreateCompanionBuilder =
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
       Value<String?> imagePath,
+      Value<String?> remoteId,
+      Value<String?> status,
+      Value<DateTime?> scheduledDate,
+      Value<DateTime?> completedDate,
+      Value<String?> createdBy,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> syncedAt,
     });
 typedef $$MaintenancesTableUpdateCompanionBuilder =
     MaintenancesCompanion Function({
@@ -4471,6 +7034,13 @@ typedef $$MaintenancesTableUpdateCompanionBuilder =
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
       Value<String?> imagePath,
+      Value<String?> remoteId,
+      Value<String?> status,
+      Value<DateTime?> scheduledDate,
+      Value<DateTime?> completedDate,
+      Value<String?> createdBy,
+      Value<DateTime?> createdAt,
+      Value<DateTime?> syncedAt,
     });
 
 class $$MaintenancesTableFilterComposer
@@ -4524,6 +7094,41 @@ class $$MaintenancesTableFilterComposer
 
   ColumnFilters<String> get imagePath => $composableBuilder(
     column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get scheduledDate => $composableBuilder(
+    column: $table.scheduledDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get completedDate => $composableBuilder(
+    column: $table.completedDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -4581,6 +7186,41 @@ class $$MaintenancesTableOrderingComposer
     column: $table.imagePath,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get scheduledDate => $composableBuilder(
+    column: $table.scheduledDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get completedDate => $composableBuilder(
+    column: $table.completedDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MaintenancesTableAnnotationComposer
@@ -4626,6 +7266,31 @@ class $$MaintenancesTableAnnotationComposer
 
   GeneratedColumn<String> get imagePath =>
       $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get scheduledDate => $composableBuilder(
+    column: $table.scheduledDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get completedDate => $composableBuilder(
+    column: $table.completedDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
 }
 
 class $$MaintenancesTableTableManager
@@ -4668,6 +7333,13 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> status = const Value.absent(),
+                Value<DateTime?> scheduledDate = const Value.absent(),
+                Value<DateTime?> completedDate = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
               }) => MaintenancesCompanion(
                 id: id,
                 terrainId: terrainId,
@@ -4678,6 +7350,13 @@ class $$MaintenancesTableTableManager
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
                 imagePath: imagePath,
+                remoteId: remoteId,
+                status: status,
+                scheduledDate: scheduledDate,
+                completedDate: completedDate,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                syncedAt: syncedAt,
               ),
           createCompanionCallback:
               ({
@@ -4690,6 +7369,13 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> status = const Value.absent(),
+                Value<DateTime?> scheduledDate = const Value.absent(),
+                Value<DateTime?> completedDate = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
               }) => MaintenancesCompanion.insert(
                 id: id,
                 terrainId: terrainId,
@@ -4700,6 +7386,13 @@ class $$MaintenancesTableTableManager
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
                 imagePath: imagePath,
+                remoteId: remoteId,
+                status: status,
+                scheduledDate: scheduledDate,
+                completedDate: completedDate,
+                createdBy: createdBy,
+                createdAt: createdAt,
+                syncedAt: syncedAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -4738,6 +7431,12 @@ typedef $$StockItemsTableCreateCompanionBuilder =
       required DateTime updatedAt,
       Value<String?> category,
       Value<int> sortOrder,
+      Value<String?> remoteId,
+      Value<double?> unitPrice,
+      Value<DateTime?> createdAt,
+      Value<String?> lastModifiedBy,
+      Value<DateTime?> syncedAt,
+      Value<bool> isSyncPending,
     });
 typedef $$StockItemsTableUpdateCompanionBuilder =
     StockItemsCompanion Function({
@@ -4751,6 +7450,12 @@ typedef $$StockItemsTableUpdateCompanionBuilder =
       Value<DateTime> updatedAt,
       Value<String?> category,
       Value<int> sortOrder,
+      Value<String?> remoteId,
+      Value<double?> unitPrice,
+      Value<DateTime?> createdAt,
+      Value<String?> lastModifiedBy,
+      Value<DateTime?> syncedAt,
+      Value<bool> isSyncPending,
     });
 
 final class $$StockItemsTableReferences
@@ -4838,6 +7543,36 @@ class $$StockItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastModifiedBy => $composableBuilder(
+    column: $table.lastModifiedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> stockMovementsRefs(
     Expression<bool> Function($$StockMovementsTableFilterComposer f) f,
   ) {
@@ -4922,6 +7657,36 @@ class $$StockItemsTableOrderingComposer
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get unitPrice => $composableBuilder(
+    column: $table.unitPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastModifiedBy => $composableBuilder(
+    column: $table.lastModifiedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$StockItemsTableAnnotationComposer
@@ -4964,6 +7729,28 @@ class $$StockItemsTableAnnotationComposer
 
   GeneratedColumn<int> get sortOrder =>
       $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<double> get unitPrice =>
+      $composableBuilder(column: $table.unitPrice, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get lastModifiedBy => $composableBuilder(
+    column: $table.lastModifiedBy,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => column,
+  );
 
   Expression<T> stockMovementsRefs<T extends Object>(
     Expression<T> Function($$StockMovementsTableAnnotationComposer a) f,
@@ -5029,6 +7816,12 @@ class $$StockItemsTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> category = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<double?> unitPrice = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<String?> lastModifiedBy = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<bool> isSyncPending = const Value.absent(),
               }) => StockItemsCompanion(
                 id: id,
                 name: name,
@@ -5040,6 +7833,12 @@ class $$StockItemsTableTableManager
                 updatedAt: updatedAt,
                 category: category,
                 sortOrder: sortOrder,
+                remoteId: remoteId,
+                unitPrice: unitPrice,
+                createdAt: createdAt,
+                lastModifiedBy: lastModifiedBy,
+                syncedAt: syncedAt,
+                isSyncPending: isSyncPending,
               ),
           createCompanionCallback:
               ({
@@ -5053,6 +7852,12 @@ class $$StockItemsTableTableManager
                 required DateTime updatedAt,
                 Value<String?> category = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<double?> unitPrice = const Value.absent(),
+                Value<DateTime?> createdAt = const Value.absent(),
+                Value<String?> lastModifiedBy = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<bool> isSyncPending = const Value.absent(),
               }) => StockItemsCompanion.insert(
                 id: id,
                 name: name,
@@ -5064,6 +7869,12 @@ class $$StockItemsTableTableManager
                 updatedAt: updatedAt,
                 category: category,
                 sortOrder: sortOrder,
+                remoteId: remoteId,
+                unitPrice: unitPrice,
+                createdAt: createdAt,
+                lastModifiedBy: lastModifiedBy,
+                syncedAt: syncedAt,
+                isSyncPending: isSyncPending,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5136,6 +7947,10 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<DateTime?> lastLoginAt,
       Value<String?> avatarUrl,
       Value<DateTime> createdAt,
+      Value<String?> remoteId,
+      Value<DateTime?> syncedAt,
+      Value<DateTime?> updatedAt,
+      Value<bool> isActive,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
@@ -5148,6 +7963,10 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<DateTime?> lastLoginAt,
       Value<String?> avatarUrl,
       Value<DateTime> createdAt,
+      Value<String?> remoteId,
+      Value<DateTime?> syncedAt,
+      Value<DateTime?> updatedAt,
+      Value<bool> isActive,
     });
 
 final class $$UsersTableReferences
@@ -5167,6 +7986,24 @@ final class $$UsersTableReferences
     ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
 
     final cache = $_typedResult.readTableOrNull(_stockMovementsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$ReservationsTable, List<Reservation>>
+  _reservationsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.reservations,
+    aliasName: $_aliasNameGenerator(db.users.id, db.reservations.userId),
+  );
+
+  $$ReservationsTableProcessedTableManager get reservationsRefs {
+    final manager = $$ReservationsTableTableManager(
+      $_db,
+      $_db.reservations,
+    ).filter((f) => f.userId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_reservationsRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -5227,6 +8064,26 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
   Expression<bool> stockMovementsRefs(
     Expression<bool> Function($$StockMovementsTableFilterComposer f) f,
   ) {
@@ -5243,6 +8100,31 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
           }) => $$StockMovementsTableFilterComposer(
             $db: $db,
             $table: $db.stockMovements,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> reservationsRefs(
+    Expression<bool> Function($$ReservationsTableFilterComposer f) f,
+  ) {
+    final $$ReservationsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reservations,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReservationsTableFilterComposer(
+            $db: $db,
+            $table: $db.reservations,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -5306,6 +8188,26 @@ class $$UsersTableOrderingComposer
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UsersTableAnnotationComposer
@@ -5350,6 +8252,18 @@ class $$UsersTableAnnotationComposer
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
   Expression<T> stockMovementsRefs<T extends Object>(
     Expression<T> Function($$StockMovementsTableAnnotationComposer a) f,
   ) {
@@ -5374,6 +8288,31 @@ class $$UsersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> reservationsRefs<T extends Object>(
+    Expression<T> Function($$ReservationsTableAnnotationComposer a) f,
+  ) {
+    final $$ReservationsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.reservations,
+      getReferencedColumn: (t) => t.userId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReservationsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.reservations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UsersTableTableManager
@@ -5389,7 +8328,10 @@ class $$UsersTableTableManager
           $$UsersTableUpdateCompanionBuilder,
           (UserRow, $$UsersTableReferences),
           UserRow,
-          PrefetchHooks Function({bool stockMovementsRefs})
+          PrefetchHooks Function({
+            bool stockMovementsRefs,
+            bool reservationsRefs,
+          })
         > {
   $$UsersTableTableManager(_$AppDatabase db, $UsersTable table)
     : super(
@@ -5413,6 +8355,10 @@ class $$UsersTableTableManager
                 Value<DateTime?> lastLoginAt = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
                 email: email,
@@ -5423,6 +8369,10 @@ class $$UsersTableTableManager
                 lastLoginAt: lastLoginAt,
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
+                remoteId: remoteId,
+                syncedAt: syncedAt,
+                updatedAt: updatedAt,
+                isActive: isActive,
               ),
           createCompanionCallback:
               ({
@@ -5435,6 +8385,10 @@ class $$UsersTableTableManager
                 Value<DateTime?> lastLoginAt = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
                 email: email,
@@ -5445,6 +8399,10 @@ class $$UsersTableTableManager
                 lastLoginAt: lastLoginAt,
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
+                remoteId: remoteId,
+                syncedAt: syncedAt,
+                updatedAt: updatedAt,
+                isActive: isActive,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -5452,37 +8410,63 @@ class $$UsersTableTableManager
                     (e.readTable(table), $$UsersTableReferences(db, table, e)),
               )
               .toList(),
-          prefetchHooksCallback: ({stockMovementsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (stockMovementsRefs) db.stockMovements,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (stockMovementsRefs)
-                    await $_getPrefetchedData<
-                      UserRow,
-                      $UsersTable,
-                      StockMovement
-                    >(
-                      currentTable: table,
-                      referencedTable: $$UsersTableReferences
-                          ._stockMovementsRefsTable(db),
-                      managerFromTypedResult: (p0) => $$UsersTableReferences(
-                        db,
-                        table,
-                        p0,
-                      ).stockMovementsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.userId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({stockMovementsRefs = false, reservationsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (stockMovementsRefs) db.stockMovements,
+                    if (reservationsRefs) db.reservations,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (stockMovementsRefs)
+                        await $_getPrefetchedData<
+                          UserRow,
+                          $UsersTable,
+                          StockMovement
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._stockMovementsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).stockMovementsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (reservationsRefs)
+                        await $_getPrefetchedData<
+                          UserRow,
+                          $UsersTable,
+                          Reservation
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UsersTableReferences
+                              ._reservationsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UsersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).reservationsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.userId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -5499,7 +8483,7 @@ typedef $$UsersTableProcessedTableManager =
       $$UsersTableUpdateCompanionBuilder,
       (UserRow, $$UsersTableReferences),
       UserRow,
-      PrefetchHooks Function({bool stockMovementsRefs})
+      PrefetchHooks Function({bool stockMovementsRefs, bool reservationsRefs})
     >;
 typedef $$EventsTableCreateCompanionBuilder =
     EventsCompanion Function({
@@ -6237,6 +9221,10 @@ typedef $$AuditLogsTableCreateCompanionBuilder =
       Value<String?> deviceInfo,
       Value<DateTime> timestamp,
       Value<String?> details,
+      Value<String?> remoteId,
+      Value<String?> userUid,
+      Value<String?> severity,
+      Value<DateTime?> syncedAt,
     });
 typedef $$AuditLogsTableUpdateCompanionBuilder =
     AuditLogsCompanion Function({
@@ -6248,6 +9236,10 @@ typedef $$AuditLogsTableUpdateCompanionBuilder =
       Value<String?> deviceInfo,
       Value<DateTime> timestamp,
       Value<String?> details,
+      Value<String?> remoteId,
+      Value<String?> userUid,
+      Value<String?> severity,
+      Value<DateTime?> syncedAt,
     });
 
 class $$AuditLogsTableFilterComposer
@@ -6296,6 +9288,26 @@ class $$AuditLogsTableFilterComposer
 
   ColumnFilters<String> get details => $composableBuilder(
     column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userUid => $composableBuilder(
+    column: $table.userUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -6348,6 +9360,26 @@ class $$AuditLogsTableOrderingComposer
     column: $table.details,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get userUid => $composableBuilder(
+    column: $table.userUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$AuditLogsTableAnnotationComposer
@@ -6384,6 +9416,18 @@ class $$AuditLogsTableAnnotationComposer
 
   GeneratedColumn<String> get details =>
       $composableBuilder(column: $table.details, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get userUid =>
+      $composableBuilder(column: $table.userUid, builder: (column) => column);
+
+  GeneratedColumn<String> get severity =>
+      $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
 }
 
 class $$AuditLogsTableTableManager
@@ -6422,6 +9466,10 @@ class $$AuditLogsTableTableManager
                 Value<String?> deviceInfo = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String?> details = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> userUid = const Value.absent(),
+                Value<String?> severity = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
               }) => AuditLogsCompanion(
                 id: id,
                 userId: userId,
@@ -6431,6 +9479,10 @@ class $$AuditLogsTableTableManager
                 deviceInfo: deviceInfo,
                 timestamp: timestamp,
                 details: details,
+                remoteId: remoteId,
+                userUid: userUid,
+                severity: severity,
+                syncedAt: syncedAt,
               ),
           createCompanionCallback:
               ({
@@ -6442,6 +9494,10 @@ class $$AuditLogsTableTableManager
                 Value<String?> deviceInfo = const Value.absent(),
                 Value<DateTime> timestamp = const Value.absent(),
                 Value<String?> details = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String?> userUid = const Value.absent(),
+                Value<String?> severity = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
               }) => AuditLogsCompanion.insert(
                 id: id,
                 userId: userId,
@@ -6451,6 +9507,10 @@ class $$AuditLogsTableTableManager
                 deviceInfo: deviceInfo,
                 timestamp: timestamp,
                 details: details,
+                remoteId: remoteId,
+                userUid: userUid,
+                severity: severity,
+                syncedAt: syncedAt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -6878,6 +9938,560 @@ typedef $$OtpRecordsTableProcessedTableManager =
       OtpRecord,
       PrefetchHooks Function()
     >;
+typedef $$ReservationsTableCreateCompanionBuilder =
+    ReservationsCompanion Function({
+      Value<int> id,
+      Value<String?> remoteId,
+      required int userId,
+      required int terrainId,
+      required DateTime date,
+      required String startTime,
+      required String endTime,
+      required String status,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> syncedAt,
+      Value<bool> isSyncPending,
+    });
+typedef $$ReservationsTableUpdateCompanionBuilder =
+    ReservationsCompanion Function({
+      Value<int> id,
+      Value<String?> remoteId,
+      Value<int> userId,
+      Value<int> terrainId,
+      Value<DateTime> date,
+      Value<String> startTime,
+      Value<String> endTime,
+      Value<String> status,
+      Value<String?> notes,
+      Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> syncedAt,
+      Value<bool> isSyncPending,
+    });
+
+final class $$ReservationsTableReferences
+    extends BaseReferences<_$AppDatabase, $ReservationsTable, Reservation> {
+  $$ReservationsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UsersTable _userIdTable(_$AppDatabase db) => db.users.createAlias(
+    $_aliasNameGenerator(db.reservations.userId, db.users.id),
+  );
+
+  $$UsersTableProcessedTableManager get userId {
+    final $_column = $_itemColumn<int>('user_id')!;
+
+    final manager = $$UsersTableTableManager(
+      $_db,
+      $_db.users,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_userIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TerrainsTable _terrainIdTable(_$AppDatabase db) =>
+      db.terrains.createAlias(
+        $_aliasNameGenerator(db.reservations.terrainId, db.terrains.id),
+      );
+
+  $$TerrainsTableProcessedTableManager get terrainId {
+    final $_column = $_itemColumn<int>('terrain_id')!;
+
+    final manager = $$TerrainsTableTableManager(
+      $_db,
+      $_db.terrains,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_terrainIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReservationsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReservationsTable> {
+  $$ReservationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UsersTableFilterComposer get userId {
+    final $$UsersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableFilterComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TerrainsTableFilterComposer get terrainId {
+    final $$TerrainsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.terrainId,
+      referencedTable: $db.terrains,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TerrainsTableFilterComposer(
+            $db: $db,
+            $table: $db.terrains,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReservationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReservationsTable> {
+  $$ReservationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startTime => $composableBuilder(
+    column: $table.startTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endTime => $composableBuilder(
+    column: $table.endTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
+    column: $table.syncedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UsersTableOrderingComposer get userId {
+    final $$UsersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableOrderingComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TerrainsTableOrderingComposer get terrainId {
+    final $$TerrainsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.terrainId,
+      referencedTable: $db.terrains,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TerrainsTableOrderingComposer(
+            $db: $db,
+            $table: $db.terrains,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReservationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReservationsTable> {
+  $$ReservationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get startTime =>
+      $composableBuilder(column: $table.startTime, builder: (column) => column);
+
+  GeneratedColumn<String> get endTime =>
+      $composableBuilder(column: $table.endTime, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get syncedAt =>
+      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSyncPending => $composableBuilder(
+    column: $table.isSyncPending,
+    builder: (column) => column,
+  );
+
+  $$UsersTableAnnotationComposer get userId {
+    final $$UsersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.userId,
+      referencedTable: $db.users,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UsersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.users,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TerrainsTableAnnotationComposer get terrainId {
+    final $$TerrainsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.terrainId,
+      referencedTable: $db.terrains,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TerrainsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.terrains,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReservationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReservationsTable,
+          Reservation,
+          $$ReservationsTableFilterComposer,
+          $$ReservationsTableOrderingComposer,
+          $$ReservationsTableAnnotationComposer,
+          $$ReservationsTableCreateCompanionBuilder,
+          $$ReservationsTableUpdateCompanionBuilder,
+          (Reservation, $$ReservationsTableReferences),
+          Reservation,
+          PrefetchHooks Function({bool userId, bool terrainId})
+        > {
+  $$ReservationsTableTableManager(_$AppDatabase db, $ReservationsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReservationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReservationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReservationsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<int> userId = const Value.absent(),
+                Value<int> terrainId = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<String> startTime = const Value.absent(),
+                Value<String> endTime = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<bool> isSyncPending = const Value.absent(),
+              }) => ReservationsCompanion(
+                id: id,
+                remoteId: remoteId,
+                userId: userId,
+                terrainId: terrainId,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                status: status,
+                notes: notes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncedAt: syncedAt,
+                isSyncPending: isSyncPending,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                required int userId,
+                required int terrainId,
+                required DateTime date,
+                required String startTime,
+                required String endTime,
+                required String status,
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> syncedAt = const Value.absent(),
+                Value<bool> isSyncPending = const Value.absent(),
+              }) => ReservationsCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                userId: userId,
+                terrainId: terrainId,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                status: status,
+                notes: notes,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                syncedAt: syncedAt,
+                isSyncPending: isSyncPending,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ReservationsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({userId = false, terrainId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (userId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.userId,
+                                referencedTable: $$ReservationsTableReferences
+                                    ._userIdTable(db),
+                                referencedColumn: $$ReservationsTableReferences
+                                    ._userIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (terrainId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.terrainId,
+                                referencedTable: $$ReservationsTableReferences
+                                    ._terrainIdTable(db),
+                                referencedColumn: $$ReservationsTableReferences
+                                    ._terrainIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReservationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReservationsTable,
+      Reservation,
+      $$ReservationsTableFilterComposer,
+      $$ReservationsTableOrderingComposer,
+      $$ReservationsTableAnnotationComposer,
+      $$ReservationsTableCreateCompanionBuilder,
+      $$ReservationsTableUpdateCompanionBuilder,
+      (Reservation, $$ReservationsTableReferences),
+      Reservation,
+      PrefetchHooks Function({bool userId, bool terrainId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6900,4 +10514,6 @@ class $AppDatabaseManager {
       $$LoginAttemptsTableTableManager(_db, _db.loginAttempts);
   $$OtpRecordsTableTableManager get otpRecords =>
       $$OtpRecordsTableTableManager(_db, _db.otpRecords);
+  $$ReservationsTableTableManager get reservations =>
+      $$ReservationsTableTableManager(_db, _db.reservations);
 }

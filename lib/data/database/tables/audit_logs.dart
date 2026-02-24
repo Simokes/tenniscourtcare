@@ -12,4 +12,10 @@ class AuditLogs extends Table {
   TextColumn get deviceInfo => text().nullable()();
   DateTimeColumn get timestamp => dateTime().withDefault(currentDateAndTime)();
   TextColumn get details => text().nullable()(); // JSON string for extra info
+
+  // New fields for Firestore sync
+  TextColumn get remoteId => text().nullable()();
+  TextColumn get userUid => text().nullable()(); // Remote User ID
+  TextColumn get severity => text().nullable()(); // info, warning, critical
+  DateTimeColumn get syncedAt => dateTime().nullable()();
 }

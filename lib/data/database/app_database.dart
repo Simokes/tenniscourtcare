@@ -14,6 +14,7 @@ import 'tables/stock_movements.dart';
 import 'tables/audit_logs.dart';
 import 'tables/login_attempts.dart';
 import 'tables/otp_records.dart';
+import 'tables/reservations.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -38,7 +39,8 @@ part 'app_database.g.dart';
   StockMovements,
   AuditLogs,
   LoginAttempts,
-  OtpRecords
+  OtpRecords,
+  Reservations
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
@@ -85,7 +87,55 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(otpRecords);
       }
       if (from < 11) {
-        await m.addColumn(users, users.firestoreUid);
+        // Users (created in v3)
+        if (from >= 3) {
+          await m.addColumn(users, users.remoteId);
+          await m.addColumn(users, users.firestoreUid); // Added in our branch
+          await m.addColumn(users, users.syncedAt);
+          await m.addColumn(users, users.updatedAt);
+          await m.addColumn(users, users.isActive);
+        }
+
+        // Terrains (created in v1)
+        await m.addColumn(terrains, terrains.remoteId);
+        await m.addColumn(terrains, terrains.location);
+        await m.addColumn(terrains, terrains.capacity);
+        await m.addColumn(terrains, terrains.pricePerHour);
+        await m.addColumn(terrains, terrains.available);
+        await m.addColumn(terrains, terrains.createdAt);
+        await m.addColumn(terrains, terrains.updatedAt);
+        await m.addColumn(terrains, terrains.syncedAt);
+        await m.addColumn(terrains, terrains.imageUrl);
+
+        // StockItems (created in v2)
+        if (from >= 2) {
+          await m.addColumn(stockItems, stockItems.remoteId);
+          await m.addColumn(stockItems, stockItems.unitPrice);
+          await m.addColumn(stockItems, stockItems.createdAt);
+          await m.addColumn(stockItems, stockItems.lastModifiedBy);
+          await m.addColumn(stockItems, stockItems.syncedAt);
+          await m.addColumn(stockItems, stockItems.isSyncPending);
+        }
+
+        // Maintenances (created in v1)
+        await m.addColumn(maintenances, maintenances.remoteId);
+        await m.addColumn(maintenances, maintenances.status);
+        await m.addColumn(maintenances, maintenances.scheduledDate);
+        await m.addColumn(maintenances, maintenances.completedDate);
+        await m.addColumn(maintenances, maintenances.createdBy);
+        await m.addColumn(maintenances, maintenances.createdAt);
+        await m.addColumn(maintenances, maintenances.syncedAt);
+
+        // AuditLogs (created in v9)
+        if (from >= 9) {
+          await m.addColumn(auditLogs, auditLogs.remoteId);
+          await m.addColumn(auditLogs, auditLogs.userUid);
+          await m.addColumn(auditLogs, auditLogs.severity);
+          await m.addColumn(auditLogs, auditLogs.syncedAt);
+        }
+
+        // Create Reservations
+        await m.createTable(reservations);
       }
     },
   );
