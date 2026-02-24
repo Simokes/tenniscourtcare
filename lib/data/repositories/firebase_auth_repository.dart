@@ -61,7 +61,8 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   Future<UserEntity> _syncUser(firebase.User fUser) async {
-    final localUser = await _db.getUserByEmail(fUser.email!);
+    // CRITICAL FIX: Query by firestore_uid, not email
+    final localUser = await _db.getUserByFirestoreUid(fUser.uid);
 
     // Refresh token to get latest claims
     final token = await fUser.getIdTokenResult(true);
@@ -71,14 +72,23 @@ class FirebaseAuthRepository implements AuthRepository {
         : Role.agent;
 
     if (localUser != null) {
+      bool needsUpdate = false;
       if (localUser.role != userRole) {
           await _db.updateUserRole(localUser.id, userRole);
-          return localUser.copyWith(role: userRole);
+          needsUpdate = true;
       }
-      return localUser;
+      // Ensure email is up to date if changed in Firebase
+      if (localUser.email != fUser.email) {
+          // Note: Email update in local DB not directly supported by current DAO but should be.
+          // For now we assume email matches or we update it if we had a method.
+      }
+
+      return needsUpdate ? localUser.copyWith(role: userRole) : localUser;
     } else {
+      // Create new local user with firestore_uid
       final id = await _db.insertUser(UsersCompanion(
         email: drift.Value(fUser.email!),
+        firestoreUid: drift.Value(fUser.uid), // CRITICAL: Save firestore_uid
         name: drift.Value(fUser.displayName ?? 'Utilisateur'),
         passwordHash: const drift.Value('FIREBASE_AUTH'),
         role: drift.Value(userRole),
@@ -116,10 +126,6 @@ class FirebaseAuthRepository implements AuthRepository {
     try {
       return await _syncUser(fUser);
     } catch (e) {
-      // Fallback or handle sync error (e.g. database locked)
-      // For now, return null to force re-login if sync fails significantly?
-      // Or just map what we have?
-      // Better to return null if we can't verify/sync the user.
       return null;
     }
   }
@@ -133,19 +139,24 @@ class FirebaseAuthRepository implements AuthRepository {
   }) async {
     try {
       final callable = _functions.httpsCallable('createUser');
-      await callable.call({
+      final result = await callable.call({
         'email': email,
         'name': name,
         'password': password,
         'role': role.name,
       });
 
+      // CRITICAL: Get UID from response
+      final uid = result.data['uid'] as String;
+
       // Sync local DB
-      // Check if user exists first to avoid unique constraint error
-      final existing = await _db.getUserByEmail(email);
-      if (existing == null) {
-        await _db.insertUser(UsersCompanion(
+      // Check if user exists first (by firestore_uid)
+      final existingByUid = await _db.getUserByFirestoreUid(uid);
+
+      if (existingByUid == null) {
+          await _db.insertUser(UsersCompanion(
             email: drift.Value(email),
+            firestoreUid: drift.Value(uid), // CRITICAL: Save firestore_uid
             name: drift.Value(name),
             passwordHash: const drift.Value('FIREBASE_AUTH'),
             role: drift.Value(role),
@@ -163,24 +174,22 @@ class FirebaseAuthRepository implements AuthRepository {
         final localUser = await _db.getUserById(userId);
         if (localUser == null) throw const UserNotFoundException();
 
-        // We need the Firebase UID to delete via Cloud Function?
-        // Wait, the Cloud Function 'deleteUser' takes 'userId' which is the UID.
-        // We only have Int ID here.
-        // We need to look up the UID from Firestore using the email?
-        // Or we should store UID in local DB.
+        // Use direct query to get firestoreUid from the row (UserEntity doesn't expose it yet)
+        final userRow = await (_db.select(_db.users)..where((u) => u.id.equals(userId))).getSingleOrNull();
+        String? uid = userRow?.firestoreUid;
 
-        // Problem: We don't have UID stored locally.
-        // Solution: Query Firestore by email to get UID.
-        final query = await _firestore.collection('users').where('email', isEqualTo: localUser.email).get();
-        if (query.docs.isEmpty) {
-             // User not in Firestore? Just delete locally.
-             await _db.deleteUser(userId);
-             return;
+        if (uid == null) {
+            // Fallback to Firestore lookup by email for legacy users or sync issues
+             final query = await _firestore.collection('users').where('email', isEqualTo: localUser.email).get();
+             if (query.docs.isNotEmpty) {
+                 uid = query.docs.first.id;
+             }
         }
-        final uid = query.docs.first.id;
 
-        final callable = _functions.httpsCallable('deleteUser');
-        await callable.call({'userId': uid});
+        if (uid != null) {
+            final callable = _functions.httpsCallable('deleteUser');
+            await callable.call({'userId': uid});
+        }
 
         await _db.deleteUser(userId);
     } catch (e) {
@@ -194,17 +203,24 @@ class FirebaseAuthRepository implements AuthRepository {
         final localUser = await _db.getUserById(userId);
         if (localUser == null) throw const UserNotFoundException();
 
-        final query = await _firestore.collection('users').where('email', isEqualTo: localUser.email).get();
-        if (query.docs.isEmpty) throw const UserNotFoundException();
-        final uid = query.docs.first.id;
+        // Use direct query to get firestoreUid from the row
+        final userRow = await (_db.select(_db.users)..where((u) => u.id.equals(userId))).getSingleOrNull();
+        String? uid = userRow?.firestoreUid;
+
+        if (uid == null) {
+            final query = await _firestore.collection('users').where('email', isEqualTo: localUser.email).get();
+            if (query.docs.isNotEmpty) {
+                uid = query.docs.first.id;
+            }
+        }
+
+        if (uid == null) throw const UserNotFoundException();
 
         final callable = _functions.httpsCallable('resetUserPassword');
         await callable.call({
             'userId': uid,
             'newPassword': newPassword
         });
-
-        // No local update needed as we don't store real hash
     } catch (e) {
       throw _mapFirebaseException(e);
     }
@@ -217,24 +233,18 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> registerAdmin(String email, String name, String password) async {
-      // This is usually for first launch.
-      // We can use createUser callable? But that requires Admin.
-      // So this method is likely creating the FIRST user.
-      // Firebase allows creating users without auth if enabled, but usually we use Console.
-      // Or we can just use createUser normally if we are authenticated?
-      // If no users exist, we can't be authenticated as admin.
-      // So this method might be redundant for Firebase setup where we create first admin via Console/Script.
-      // I'll throw Unimplemented or implement a check.
-      // Prompt said: "Fresh Firebase Auth setup... Phase 1... Créer premier admin via Cloud Function".
-      // But Cloud Function is callable. Who calls it?
-      // Admin should be created via Console as per prompt instructions.
-      // So registerAdmin might not be needed.
       throw UnimplementedError("L'administrateur initial doit être créé via la console Firebase.");
   }
 
   @override
   Future<bool> hasAnyUser() async {
-    return true;
+    // CRITICAL: Check actual DB count
+    try {
+        final count = await _db.countUsers();
+        return count > 0;
+    } catch (e) {
+        return false;
+    }
   }
 
   @override

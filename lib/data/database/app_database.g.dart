@@ -1450,6 +1450,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     requiredDuringInsert: true,
     defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
+  static const VerificationMeta _firestoreUidMeta = const VerificationMeta(
+    'firestoreUid',
+  );
+  @override
+  late final GeneratedColumn<String> firestoreUid = GeneratedColumn<String>(
+    'firestore_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -1517,6 +1529,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
   List<GeneratedColumn> get $columns => [
     id,
     email,
+    firestoreUid,
     name,
     passwordHash,
     role,
@@ -1546,6 +1559,15 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
       );
     } else if (isInserting) {
       context.missing(_emailMeta);
+    }
+    if (data.containsKey('firestore_uid')) {
+      context.handle(
+        _firestoreUidMeta,
+        firestoreUid.isAcceptableOrUnknown(
+          data['firestore_uid']!,
+          _firestoreUidMeta,
+        ),
+      );
     }
     if (data.containsKey('name')) {
       context.handle(
@@ -1604,6 +1626,10 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
         DriftSqlType.string,
         data['${effectivePrefix}email'],
       )!,
+      firestoreUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firestore_uid'],
+      ),
       name: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}name'],
@@ -1645,6 +1671,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
 class UserRow extends DataClass implements Insertable<UserRow> {
   final int id;
   final String email;
+  final String? firestoreUid;
   final String name;
   final String passwordHash;
   final Role role;
@@ -1654,6 +1681,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   const UserRow({
     required this.id,
     required this.email,
+    this.firestoreUid,
     required this.name,
     required this.passwordHash,
     required this.role,
@@ -1666,6 +1694,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['email'] = Variable<String>(email);
+    if (!nullToAbsent || firestoreUid != null) {
+      map['firestore_uid'] = Variable<String>(firestoreUid);
+    }
     map['name'] = Variable<String>(name);
     map['password_hash'] = Variable<String>(passwordHash);
     {
@@ -1685,6 +1716,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     return UsersCompanion(
       id: Value(id),
       email: Value(email),
+      firestoreUid: firestoreUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firestoreUid),
       name: Value(name),
       passwordHash: Value(passwordHash),
       role: Value(role),
@@ -1706,6 +1740,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     return UserRow(
       id: serializer.fromJson<int>(json['id']),
       email: serializer.fromJson<String>(json['email']),
+      firestoreUid: serializer.fromJson<String?>(json['firestoreUid']),
       name: serializer.fromJson<String>(json['name']),
       passwordHash: serializer.fromJson<String>(json['passwordHash']),
       role: $UsersTable.$converterrole.fromJson(
@@ -1722,6 +1757,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'email': serializer.toJson<String>(email),
+      'firestoreUid': serializer.toJson<String?>(firestoreUid),
       'name': serializer.toJson<String>(name),
       'passwordHash': serializer.toJson<String>(passwordHash),
       'role': serializer.toJson<String>(
@@ -1736,6 +1772,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   UserRow copyWith({
     int? id,
     String? email,
+    Value<String?> firestoreUid = const Value.absent(),
     String? name,
     String? passwordHash,
     Role? role,
@@ -1745,6 +1782,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   }) => UserRow(
     id: id ?? this.id,
     email: email ?? this.email,
+    firestoreUid: firestoreUid.present ? firestoreUid.value : this.firestoreUid,
     name: name ?? this.name,
     passwordHash: passwordHash ?? this.passwordHash,
     role: role ?? this.role,
@@ -1756,6 +1794,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     return UserRow(
       id: data.id.present ? data.id.value : this.id,
       email: data.email.present ? data.email.value : this.email,
+      firestoreUid: data.firestoreUid.present
+          ? data.firestoreUid.value
+          : this.firestoreUid,
       name: data.name.present ? data.name.value : this.name,
       passwordHash: data.passwordHash.present
           ? data.passwordHash.value
@@ -1774,6 +1815,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     return (StringBuffer('UserRow(')
           ..write('id: $id, ')
           ..write('email: $email, ')
+          ..write('firestoreUid: $firestoreUid, ')
           ..write('name: $name, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('role: $role, ')
@@ -1788,6 +1830,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   int get hashCode => Object.hash(
     id,
     email,
+    firestoreUid,
     name,
     passwordHash,
     role,
@@ -1801,6 +1844,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       (other is UserRow &&
           other.id == this.id &&
           other.email == this.email &&
+          other.firestoreUid == this.firestoreUid &&
           other.name == this.name &&
           other.passwordHash == this.passwordHash &&
           other.role == this.role &&
@@ -1812,6 +1856,7 @@ class UserRow extends DataClass implements Insertable<UserRow> {
 class UsersCompanion extends UpdateCompanion<UserRow> {
   final Value<int> id;
   final Value<String> email;
+  final Value<String?> firestoreUid;
   final Value<String> name;
   final Value<String> passwordHash;
   final Value<Role> role;
@@ -1821,6 +1866,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   const UsersCompanion({
     this.id = const Value.absent(),
     this.email = const Value.absent(),
+    this.firestoreUid = const Value.absent(),
     this.name = const Value.absent(),
     this.passwordHash = const Value.absent(),
     this.role = const Value.absent(),
@@ -1831,6 +1877,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   UsersCompanion.insert({
     this.id = const Value.absent(),
     required String email,
+    this.firestoreUid = const Value.absent(),
     required String name,
     required String passwordHash,
     required Role role,
@@ -1844,6 +1891,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   static Insertable<UserRow> custom({
     Expression<int>? id,
     Expression<String>? email,
+    Expression<String>? firestoreUid,
     Expression<String>? name,
     Expression<String>? passwordHash,
     Expression<String>? role,
@@ -1854,6 +1902,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (email != null) 'email': email,
+      if (firestoreUid != null) 'firestore_uid': firestoreUid,
       if (name != null) 'name': name,
       if (passwordHash != null) 'password_hash': passwordHash,
       if (role != null) 'role': role,
@@ -1866,6 +1915,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   UsersCompanion copyWith({
     Value<int>? id,
     Value<String>? email,
+    Value<String?>? firestoreUid,
     Value<String>? name,
     Value<String>? passwordHash,
     Value<Role>? role,
@@ -1876,6 +1926,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     return UsersCompanion(
       id: id ?? this.id,
       email: email ?? this.email,
+      firestoreUid: firestoreUid ?? this.firestoreUid,
       name: name ?? this.name,
       passwordHash: passwordHash ?? this.passwordHash,
       role: role ?? this.role,
@@ -1893,6 +1944,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
+    }
+    if (firestoreUid.present) {
+      map['firestore_uid'] = Variable<String>(firestoreUid.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1922,6 +1976,7 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     return (StringBuffer('UsersCompanion(')
           ..write('id: $id, ')
           ..write('email: $email, ')
+          ..write('firestoreUid: $firestoreUid, ')
           ..write('name: $name, ')
           ..write('passwordHash: $passwordHash, ')
           ..write('role: $role, ')
@@ -5074,6 +5129,7 @@ typedef $$UsersTableCreateCompanionBuilder =
     UsersCompanion Function({
       Value<int> id,
       required String email,
+      Value<String?> firestoreUid,
       required String name,
       required String passwordHash,
       required Role role,
@@ -5085,6 +5141,7 @@ typedef $$UsersTableUpdateCompanionBuilder =
     UsersCompanion Function({
       Value<int> id,
       Value<String> email,
+      Value<String?> firestoreUid,
       Value<String> name,
       Value<String> passwordHash,
       Value<Role> role,
@@ -5131,6 +5188,11 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<String> get email => $composableBuilder(
     column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firestoreUid => $composableBuilder(
+    column: $table.firestoreUid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5210,6 +5272,11 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get firestoreUid => $composableBuilder(
+    column: $table.firestoreUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
@@ -5255,6 +5322,11 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get firestoreUid => $composableBuilder(
+    column: $table.firestoreUid,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
@@ -5334,6 +5406,7 @@ class $$UsersTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> email = const Value.absent(),
+                Value<String?> firestoreUid = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> passwordHash = const Value.absent(),
                 Value<Role> role = const Value.absent(),
@@ -5343,6 +5416,7 @@ class $$UsersTableTableManager
               }) => UsersCompanion(
                 id: id,
                 email: email,
+                firestoreUid: firestoreUid,
                 name: name,
                 passwordHash: passwordHash,
                 role: role,
@@ -5354,6 +5428,7 @@ class $$UsersTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String email,
+                Value<String?> firestoreUid = const Value.absent(),
                 required String name,
                 required String passwordHash,
                 required Role role,
@@ -5363,6 +5438,7 @@ class $$UsersTableTableManager
               }) => UsersCompanion.insert(
                 id: id,
                 email: email,
+                firestoreUid: firestoreUid,
                 name: name,
                 passwordHash: passwordHash,
                 role: role,

@@ -50,12 +50,20 @@ Les fonctions backend se trouvent dans le dossier `functions/`.
 
 ## 4. Fonctionnement de l'Application
 
-### Synchronisation (Login)
-Lorsqu'un utilisateur se connecte (`signIn`):
-1. L'application authentifie l'utilisateur via Firebase Auth.
-2. Elle vérifie si l'utilisateur existe dans la base locale SQLite (via l'email).
-3. **Si Oui**: Elle met à jour le rôle local si nécessaire et connecte l'utilisateur.
-4. **Si Non**: Elle crée une entrée dans la table `Users` locale (avec un ID auto-incrémenté) pour permettre le fonctionnement des modules liés (Maintenance, etc.).
+### Synchronisation Local ↔ Cloud (CRITIQUE)
+
+La synchronisation entre Firebase et Drift (SQLite) repose sur une colonne `firestore_uid` dans la table `users`.
+
+- **Identifiant Unique (UID)** : Généré par Firebase Auth.
+- **Clé Primaire Locale (`id`)** : Entier auto-incrémenté généré par SQLite.
+- **Mapping** : Chaque utilisateur local stocke son UID Firebase dans la colonne `firestore_uid`.
+
+Lorsqu'un utilisateur se connecte (`signIn`) ou est créé :
+1. L'application récupère l'objet `User` de Firebase (qui contient l'`uid`).
+2. Elle interroge la base locale via `_db.getUserByFirestoreUid(uid)`.
+   - **Important** : On ne synchronise JAMAIS par email seul, car les emails peuvent changer ou être réutilisés.
+3. Si l'utilisateur n'existe pas localement, il est créé avec son `firestore_uid`.
+4. Si l'utilisateur existe, son rôle est mis à jour si nécessaire.
 
 ### Rôles et Permissions
 Les rôles sont gérés via des **Custom Claims** dans le token JWT de Firebase.

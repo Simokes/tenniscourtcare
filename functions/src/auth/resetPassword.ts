@@ -6,7 +6,8 @@ import { isValidPassword } from '../utils/validation';
 export const resetUserPassword = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
-    const { userId, newPassword } = data;
+    const userId = (data.userId as string).trim();
+    const newPassword = data.newPassword;
 
     if (!userId || !newPassword) {
         throw new functions.https.HttpsError('invalid-argument', 'User ID and new password are required.');
@@ -21,13 +22,13 @@ export const resetUserPassword = functions.https.onCall(async (data, context) =>
             password: newPassword,
         });
 
-        // Log to audit logs?
-        // We can do that in the Cloud Function or the client.
-        // Client side logs are easier to integrate with existing AuditRepository,
-        // but server side is more secure.
-        // The prompt asked for "Function 2... Log action in auditLogs".
-        // That was for onUpdate.
-        // For this callable, we can log to a Firestore collection 'audit_logs'.
+        // Audit Log
+        await admin.firestore().collection('audit_logs').add({
+            action: 'PASSWORD_RESET',
+            targetUserId: userId,
+            performedBy: context.auth!.uid,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
 
         return { success: true };
     } catch (error: any) {

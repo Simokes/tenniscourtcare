@@ -44,7 +44,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -84,6 +84,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 10) {
         await m.createTable(otpRecords);
       }
+      if (from < 11) {
+        await m.addColumn(users, users.firestoreUid);
+      }
     },
   );
 
@@ -108,6 +111,11 @@ class AppDatabase extends _$AppDatabase {
 
   Future<domu.UserEntity?> getUserByEmail(String email) async {
     final row = await (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+    return row?.toDomain();
+  }
+
+  Future<domu.UserEntity?> getUserByFirestoreUid(String uid) async {
+    final row = await (select(users)..where((u) => u.firestoreUid.equals(uid))).getSingleOrNull();
     return row?.toDomain();
   }
 

@@ -5,7 +5,7 @@ import { assertAdmin } from '../utils/security';
 export const deleteUser = functions.https.onCall(async (data, context) => {
     assertAdmin(context);
 
-    const { userId } = data;
+    const userId = (data.userId as string).trim();
 
     if (!userId) {
         throw new functions.https.HttpsError('invalid-argument', 'User ID is required.');
@@ -17,10 +17,9 @@ export const deleteUser = functions.https.onCall(async (data, context) => {
     }
 
     try {
-        // Check if user is the last admin?
-        // This requires reading all users or keeping a counter.
-        // For simplicity, we skip this check or implement it via a count query.
+        // Check if user exists and is not the last admin
         const userDoc = await admin.firestore().collection('users').doc(userId).get();
+
         if (userDoc.exists && userDoc.data()?.role === 'admin') {
              const adminsSnapshot = await admin.firestore().collection('users').where('role', '==', 'admin').get();
              if (adminsSnapshot.size <= 1) {
@@ -28,8 +27,19 @@ export const deleteUser = functions.https.onCall(async (data, context) => {
              }
         }
 
+        // Delete from Auth
         await admin.auth().deleteUser(userId);
+
+        // Delete from Firestore
         await admin.firestore().collection('users').doc(userId).delete();
+
+        // Audit Log
+        await admin.firestore().collection('audit_logs').add({
+            action: 'USER_DELETED',
+            targetUserId: userId,
+            performedBy: context.auth!.uid,
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
 
         return { success: true };
     } catch (error: any) {
