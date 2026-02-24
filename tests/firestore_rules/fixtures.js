@@ -67,6 +67,29 @@ const fixtures = {
     performedBy: 'admin123',
     timestamp: new Date(),
   },
+
+  // NEW - RESERVATIONS
+  reservation1: {
+    id: 'res1',
+    terrainId: 'terrain1',
+    userId: 'agent123',
+    startTime: new Date(Date.now() + 86400000), // Tomorrow
+    endTime: new Date(Date.now() + 86400000 + 3600000), // +1 hour
+    status: 'pending',
+    createdAt: new Date(),
+    createdBy: 'agent123',
+  },
+
+  reservation2: {
+    id: 'res2',
+    terrainId: 'terrain1',
+    userId: 'other123',
+    startTime: new Date(Date.now() + 86400000 + 7200000), // Tomorrow +2 hours
+    endTime: new Date(Date.now() + 86400000 + 10800000), // +3 hours
+    status: 'confirmed',
+    createdAt: new Date(),
+    createdBy: 'admin123',
+  },
 };
 
 // Helper: Create test user in Firestore (using admin context passed in)
@@ -108,6 +131,22 @@ async function createAuditLog(db, auditData) {
   return auditData.id;
 }
 
+// Helper: Create reservation
+async function createReservation(db, resData) {
+  await db.collection('reservations').doc(resData.id).set(resData);
+  return resData.id;
+}
+
+// Helper: Get future timestamp
+function getFutureTime(hoursFromNow = 24) {
+  return new Date(Date.now() + hoursFromNow * 3600000);
+}
+
+// Helper: Get past timestamp
+function getPastTime(hoursAgo = 1) {
+  return new Date(Date.now() - hoursAgo * 3600000);
+}
+
 // Helper: Expect permission denied
 async function expectPermissionDenied(promise) {
   try {
@@ -137,5 +176,8 @@ module.exports = {
   createStockItem,
   createMaintenance,
   createAuditLog,
+  createReservation,
   expectPermissionDenied,
+  getFutureTime,
+  getPastTime,
 };
