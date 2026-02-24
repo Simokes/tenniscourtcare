@@ -154,6 +154,7 @@ void main() {
         name: 'User',
         passwordHash: 'invalid_hash_format', // Will fail verification
         role: Role.agent, // Use Enum
+        isActive: true,
         lastLoginAt: null,
         avatarUrl: null,
         createdAt: DateTime.now()
