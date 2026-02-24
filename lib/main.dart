@@ -7,6 +7,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
@@ -14,7 +17,9 @@ Future<void> main() async {
 
     // Initialisation des locales pour intl (fr_FR)
     await initializeDateFormatting('fr_FR', null);
-
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     runApp(
       const ProviderScope(
         child: CourtCareApp(),
