@@ -1,0 +1,13 @@
+{
+  "name": "firestore-rules-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase-admin": "^12.7.0"
+  }
+}
