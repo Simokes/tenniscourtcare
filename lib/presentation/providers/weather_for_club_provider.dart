@@ -1,11 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/services/weather_rules.dart';
-import '../../infrastructure/weather/weather_service.dart';
+import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
 import 'app_settings_provider.dart';
-
-// Tu dois déjà avoir ce provider quelque part :
-final weatherServiceProvider = Provider<WeatherService>((ref) => WeatherService());
+import 'weather_providers.dart' show weatherServiceProvider;
 
 class WeatherComputed {
   final WeatherContext context;

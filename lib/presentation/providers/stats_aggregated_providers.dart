@@ -14,7 +14,7 @@ final maintenanceTypesDistributionProvider = Provider<Map<String, int>>((ref) {
       return distribution;
     },
     loading: () => {},
-    error: (_, __) => {},
+    error: (context, index) => {},
   );
 });
 
@@ -35,6 +35,6 @@ final sacksTotalsForPeriodProvider = Provider<({int manto, int sottomanto, int s
       return (manto: manto, sottomanto: sottomanto, silice: silice);
     },
     loading: () => (manto: 0, sottomanto: 0, silice: 0),
-    error: (_, __) => (manto: 0, sottomanto: 0, silice: 0),
+    error: (context, index) => (manto: 0, sottomanto: 0, silice: 0),
   );
 });

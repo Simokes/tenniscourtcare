@@ -72,7 +72,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Column(
         children: [
           Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),

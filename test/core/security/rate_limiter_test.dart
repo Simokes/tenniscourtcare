@@ -3,7 +3,6 @@ import 'package:tenniscourtcare/core/security/rate_limiter.dart';
 import 'package:tenniscourtcare/data/repositories/audit_repository.dart';
 import 'package:tenniscourtcare/core/security/auth_exceptions.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart'; // For LoginAttempt
-import 'package:drift/drift.dart' as drift;
 
 // Mock for AuditRepository
 class MockAuditRepository implements AuditRepository {
@@ -45,6 +44,11 @@ class MockAuditRepository implements AuditRepository {
   @override
   Future<int> countRecentOtps(String email, DateTime since) async {
     return 0; // Default 0
+  }
+
+  @override
+  Future<List<AuditLog>> getRecentAuditLogs({int limit = 100}) async {
+    return [];
   }
 }
 

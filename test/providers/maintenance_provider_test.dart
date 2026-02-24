@@ -12,7 +12,6 @@ void main() {
     late ProviderContainer container;
     late AppDatabase database;
     late int terrainTerreBattueId;
-    late int terrainSynthetiqueId;
     late int terrainDurId;
 
     setUp(() async {
@@ -40,7 +39,8 @@ void main() {
         ),
       );
 
-      terrainSynthetiqueId = await database.insertTerrain(
+      // ignore: unused_local_variable
+      final terrainSynthetiqueId = await database.insertTerrain(
         const Terrain(
           id: 0,
           nom: 'Synthétique',

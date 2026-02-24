@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../domain/entities/stock_item.dart';
-import '../providers/stock_provider.dart';
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
 import 'add_edit_stock_item_sheet.dart';
 
 class StockItemTile extends ConsumerWidget {

@@ -9,7 +9,7 @@ import '../providers/weather_for_club_provider.dart';
 import '../providers/app_settings_provider.dart';
 import 'maintenance_type_selector.dart';
 import 'quantity_selector.dart';
-import 'weather_card.dart';
+import '../../features/weather/presentation/widgets/weather_card.dart';
 import 'premium/premium_card.dart';
 import 'premium/premium_button.dart';
 import 'dart:io';
@@ -217,7 +217,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

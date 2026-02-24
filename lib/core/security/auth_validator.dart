@@ -61,7 +61,7 @@ class AuthValidator {
 
   static void validateName(String? name) {
     if (name == null || name.trim().isEmpty) {
-      throw const InvalidCredentialsException(message: "Le nom est requis.");
+      throw const InvalidCredentialsException(message: 'Le nom est requis.');
     }
   }
 }

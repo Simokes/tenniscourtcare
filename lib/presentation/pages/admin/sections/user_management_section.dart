@@ -51,7 +51,7 @@ class UserManagementSection extends ConsumerWidget {
                     DataCell(Text(user.email)),
                     DataCell(Chip(
                       label: Text(user.role.label),
-                      backgroundColor: _getRoleColor(user.role).withOpacity(0.2),
+                      backgroundColor: _getRoleColor(user.role).withValues(alpha: 0.2),
                     )),
                     DataCell(PopupMenuButton<Role>(
                       onSelected: (newRole) {

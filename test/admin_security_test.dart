@@ -7,7 +7,6 @@ import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 import 'package:tenniscourtcare/data/repositories/audit_repository.dart';
 import 'package:tenniscourtcare/domain/entities/user_entity.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
-import 'package:tenniscourtcare/core/security/security_exceptions.dart';
 import 'package:tenniscourtcare/core/security/auth_exceptions.dart'; // Added
 import 'package:tenniscourtcare/data/database/app_database.dart';
 
@@ -94,7 +93,7 @@ void main() {
 
   group('Admin Providers Security', () {
     test('adminUsersProvider throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       expect(
@@ -113,7 +112,7 @@ void main() {
     });
 
     test('securityLogsProvider throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       expect(
@@ -125,10 +124,10 @@ void main() {
 
   group('UserManagementController Security', () {
     test('createUser throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
-      final subscription = container.listen(userManagementControllerProvider, (_, __) {});
+      final subscription = container.listen(userManagementControllerProvider, (p, n) {});
       final controller = container.read(userManagementControllerProvider.notifier);
 
       await controller.createUser(email: 'new@test.com', name: 'New', password: 'password', role: Role.agent);
@@ -144,10 +143,10 @@ void main() {
     });
 
     test('deleteUser throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
-      final subscription = container.listen(userManagementControllerProvider, (_, __) {});
+      final subscription = container.listen(userManagementControllerProvider, (p, n) {});
       final controller = container.read(userManagementControllerProvider.notifier);
 
       await controller.deleteUser(2);

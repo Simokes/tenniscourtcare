@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/daily_forecast.dart';
-import '../../domain/entities/weather_snapshot.dart';
-import '../widgets/weather_badge.dart';
+import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
+import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+import 'weather_badge.dart';
 
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;
@@ -136,7 +136,7 @@ class ForecastList extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
             itemCount: forecasts.take(3).length, // Limit to 3
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final forecast = forecasts[index];
               return _ForecastCard(forecast: forecast);

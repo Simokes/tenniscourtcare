@@ -133,7 +133,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final hasUsers = await hasAnyUser();
     if (hasUsers) {
-      throw SecurityException("L'initialisation de l'administrateur a déjà été effectuée.");
+      throw const SecurityException("L'initialisation de l'administrateur a déjà été effectuée.");
     }
 
     final passwordHash = await _hashPassword(password);
@@ -286,7 +286,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (currentUser.id == userId) {
-      throw const ValidationException("Vous ne pouvez pas supprimer votre propre compte.");
+      throw const ValidationException('Vous ne pouvez pas supprimer votre propre compte.');
     }
 
     final userToDelete = await _db.getUserById(userId);

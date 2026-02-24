@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../data/database/stock_history_queries.dart';
-import '../providers/database_provider.dart';
-import '../widgets/premium/premium_card.dart';
+import 'package:tenniscourtcare/data/database/stock_history_queries.dart';
+import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
+import 'package:tenniscourtcare/presentation/widgets/premium/premium_card.dart';
 
 final stockHistoryProvider = StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {
   final db = ref.watch(databaseProvider);

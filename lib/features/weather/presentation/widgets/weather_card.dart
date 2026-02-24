@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/weather_snapshot.dart';
-import '../widgets/weather_badge.dart';
+import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+import 'weather_badge.dart';
 
 class WeatherCard extends StatelessWidget {
   final WeatherSnapshot? weather;
