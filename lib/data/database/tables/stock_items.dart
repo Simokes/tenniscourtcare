@@ -12,4 +12,12 @@ class StockItems extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get category => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
+
+  // New fields for Firestore sync
+  TextColumn get remoteId => text().nullable()();
+  RealColumn get unitPrice => real().nullable()();
+  DateTimeColumn get createdAt => dateTime().nullable()();
+  TextColumn get lastModifiedBy => text().nullable()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+  BoolColumn get isSyncPending => boolean().withDefault(const Constant(false))();
 }

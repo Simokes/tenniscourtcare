@@ -16,4 +16,13 @@ class Maintenances extends Table {
       integer().withDefault(const Constant(0))();
 
   TextColumn get imagePath => text().nullable()();
+
+  // New fields for Firestore sync
+  TextColumn get remoteId => text().nullable()();
+  TextColumn get status => text().nullable()();
+  DateTimeColumn get scheduledDate => dateTime().nullable()();
+  DateTimeColumn get completedDate => dateTime().nullable()();
+  TextColumn get createdBy => text().nullable()(); // UID
+  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
 }
