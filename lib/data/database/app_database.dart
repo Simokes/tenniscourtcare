@@ -90,6 +90,7 @@ class AppDatabase extends _$AppDatabase {
         // Users (created in v3)
         if (from >= 3) {
           await m.addColumn(users, users.remoteId);
+          await m.addColumn(users, users.firestoreUid); // Added in our branch
           await m.addColumn(users, users.syncedAt);
           await m.addColumn(users, users.updatedAt);
           await m.addColumn(users, users.isActive);
@@ -160,6 +161,11 @@ class AppDatabase extends _$AppDatabase {
 
   Future<domu.UserEntity?> getUserByEmail(String email) async {
     final row = await (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+    return row?.toDomain();
+  }
+
+  Future<domu.UserEntity?> getUserByFirestoreUid(String uid) async {
+    final row = await (select(users)..where((u) => u.firestoreUid.equals(uid))).getSingleOrNull();
     return row?.toDomain();
   }
 

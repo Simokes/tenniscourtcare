@@ -10,6 +10,12 @@ abstract class AuthException implements Exception {
   String toString() => 'AuthException: $message ${code != null ? "($code)" : ""}';
 }
 
+// Added concrete class for generic auth errors
+class GenericAuthException extends AuthException {
+  const GenericAuthException(String message, {String? code, dynamic originalError})
+      : super(message, code: code, originalError: originalError);
+}
+
 class InvalidCredentialsException extends AuthException {
   const InvalidCredentialsException({String message = 'Email ou mot de passe incorrect.'})
       : super(message, code: 'INVALID_CREDENTIALS');
