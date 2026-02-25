@@ -60,6 +60,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           isCustom: true,
           minThreshold: _minThreshold,
           updatedAt: DateTime.now(),
+          createdAt: DateTime.now(),
           category: _category,
         );
         await ref.read(stockNotifierProvider.notifier).addItem(newItem);

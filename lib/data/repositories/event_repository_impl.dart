@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import '../../domain/entities/app_event.dart';
+import '../../domain/entities/sync_status.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../database/app_database.dart';
 
@@ -83,6 +84,13 @@ class EventRepositoryImpl implements EventRepository {
       endTime: row.endTime,
       color: row.color,
       terrainIds: row.terrainIds,
+      // Sync mappings (Default values as DB table 'events' lacks these columns)
+      createdAt: DateTime.now(), // Placeholder
+      updatedAt: DateTime.now(), // Placeholder
+      firebaseId: null,
+      createdBy: null,
+      modifiedBy: null,
+      syncStatus: SyncStatus.local,
     );
   }
 }

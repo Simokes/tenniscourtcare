@@ -172,6 +172,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       weather: _weather,
       terrainGele: _frozen,
       terrainImpraticable: _unplayable,
+      createdAt: widget.maintenance?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     try {

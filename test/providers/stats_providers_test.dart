@@ -21,7 +21,7 @@ void main() {
       );
 
       terrainId = await database.insertTerrain(
-        const Terrain(
+        Terrain(
           id: 0,
           nom: 'Court 1',
           type: TerrainType.terreBattue,

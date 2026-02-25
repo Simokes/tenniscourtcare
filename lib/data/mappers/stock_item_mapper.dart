@@ -1,5 +1,6 @@
 import '../database/app_database.dart';
 import '../../domain/entities/stock_item.dart' as domain;
+import '../../domain/entities/sync_status.dart';
 import 'package:drift/drift.dart';
 
 extension StockItemRowMapper on StockItemRow {
@@ -14,6 +15,11 @@ extension StockItemRowMapper on StockItemRow {
         updatedAt: updatedAt,
         category: category,
         sortOrder: sortOrder,
+        // Sync mappings
+        createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+        firebaseId: remoteId,
+        modifiedBy: lastModifiedBy,
+        syncStatus: remoteId != null ? SyncStatus.synced : SyncStatus.local,
       );
 }
 
@@ -29,5 +35,11 @@ extension StockItemDomainMapper on domain.StockItem {
         updatedAt: Value(updatedAt),
         category: Value(category),
         sortOrder: Value(sortOrder),
+        // Sync mappings
+        createdAt: Value(createdAt),
+        remoteId: Value(firebaseId),
+        lastModifiedBy: Value(modifiedBy),
+        // We set isSyncPending to true if status is not synced (simple logic for now)
+        isSyncPending: Value(syncStatus != SyncStatus.synced),
       );
 }

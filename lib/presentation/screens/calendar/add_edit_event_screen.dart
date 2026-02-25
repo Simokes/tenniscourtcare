@@ -124,6 +124,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       endTime: _endTime,
       color: _selectedColor,
       terrainIds: _selectedTerrainIds,
+      createdAt: widget.eventToEdit?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     final repo = ref.read(eventRepositoryProvider);

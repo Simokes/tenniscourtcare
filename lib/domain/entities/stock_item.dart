@@ -1,5 +1,7 @@
+// lib/domain/entities/stock_item.dart
 
 import 'package:flutter/foundation.dart';
+import 'sync_status.dart';
 
 @immutable
 class StockItem {
@@ -10,11 +12,18 @@ class StockItem {
   final String? comment;
   final bool isCustom;
   final int? minThreshold;
-  final DateTime updatedAt;
   final String? category;
   final int sortOrder;
 
-  const StockItem({
+  // Sync fields
+  final SyncStatus syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
+
+  StockItem({
     this.id,
     required this.name,
     required this.quantity,
@@ -22,10 +31,16 @@ class StockItem {
     this.comment,
     required this.isCustom,
     this.minThreshold,
-    required this.updatedAt,
     this.category,
     this.sortOrder = 0,
-  });
+    this.syncStatus = SyncStatus.local,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   bool get isLowOnStock => minThreshold != null && quantity <= minThreshold!;
 
@@ -37,9 +52,14 @@ class StockItem {
     String? comment,
     bool? isCustom,
     int? minThreshold,
-    DateTime? updatedAt,
     String? category,
     int? sortOrder,
+    SyncStatus? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? firebaseId,
+    String? createdBy,
+    String? modifiedBy,
   }) {
     return StockItem(
       id: id ?? this.id,
@@ -49,9 +69,14 @@ class StockItem {
       comment: comment ?? this.comment,
       isCustom: isCustom ?? this.isCustom,
       minThreshold: minThreshold ?? this.minThreshold,
-      updatedAt: updatedAt ?? this.updatedAt,
       category: category ?? this.category,
       sortOrder: sortOrder ?? this.sortOrder,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -67,7 +92,14 @@ class StockItem {
           comment == other.comment &&
           isCustom == other.isCustom &&
           minThreshold == other.minThreshold &&
-          updatedAt == other.updatedAt;
+          category == other.category &&
+          sortOrder == other.sortOrder &&
+          syncStatus == other.syncStatus &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          firebaseId == other.firebaseId &&
+          createdBy == other.createdBy &&
+          modifiedBy == other.modifiedBy;
 
   @override
   int get hashCode =>
@@ -78,10 +110,17 @@ class StockItem {
       comment.hashCode ^
       isCustom.hashCode ^
       minThreshold.hashCode ^
-      updatedAt.hashCode;
+      category.hashCode ^
+      sortOrder.hashCode ^
+      syncStatus.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      firebaseId.hashCode ^
+      createdBy.hashCode ^
+      modifiedBy.hashCode;
 
   @override
   String toString() {
-    return 'StockItem{id: $id, name: $name, quantity: $quantity, unit: $unit, isCustom: $isCustom, isLow: $isLowOnStock}';
+    return 'StockItem{id: $id, name: $name, quantity: $quantity, unit: $unit, isCustom: $isCustom, isLow: $isLowOnStock, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }
