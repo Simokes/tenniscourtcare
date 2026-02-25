@@ -10,9 +10,7 @@ import '../presentation/providers/database_provider.dart';
 import '../presentation/providers/auth_providers.dart';
 import '../data/firestore/models/terrain_firestore_model.dart';
 import '../data/firestore/models/reservation_firestore_model.dart';
-import '../domain/entities/terrain.dart' as dom;
 import '../domain/enums/role.dart';
-import '../data/mappers/terrain_mapper.dart';
 
 part 'sync_providers.g.dart';
 
@@ -41,7 +39,7 @@ Stream<int> pendingChangesCount(PendingChangesCountRef ref) async* {
 }
 
 @Riverpod(keepAlive: true)
-Stream<List<dom.Terrain>> terrainsStream(TerrainsStreamRef ref) {
+Stream<void> backgroundTerrainsSync(BackgroundTerrainsSyncRef ref) async* {
   final db = ref.watch(databaseProvider);
   final sync = ref.watch(syncServiceProvider);
 
@@ -79,18 +77,15 @@ Stream<List<dom.Terrain>> terrainsStream(TerrainsStreamRef ref) {
   );
 
   ref.onDispose(() => sub.cancel());
-
-  return db.select(db.terrains).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
 }
 
 @Riverpod(keepAlive: true)
-Stream<List<Reservation>> reservationsStream(ReservationsStreamRef ref) async* {
+Stream<void> backgroundReservationsSync(BackgroundReservationsSyncRef ref) async* {
   final db = ref.watch(databaseProvider);
   final sync = ref.watch(syncServiceProvider);
   final currentUser = ref.watch(currentUserProvider);
 
   if (currentUser == null) {
-    yield [];
     return;
   }
 
@@ -111,10 +106,13 @@ Stream<List<Reservation>> reservationsStream(ReservationsStreamRef ref) async* {
              for (final item in items) {
                // Resolve User
                final u = await (db.select(db.users)..where((u) => u.firestoreUid.equals(item.userId))).getSingleOrNull();
+               // If user not found locally, we might need to sync users first or skip.
+               // For now, skip.
                if (u == null) continue;
 
                // Resolve Terrain
                final t = await (db.select(db.terrains)..where((t) => t.remoteId.equals(item.terrainId))).getSingleOrNull();
+               // If terrain not found, skip.
                if (t == null) continue;
 
                final existing = await (db.select(db.reservations)..where((r) => r.remoteId.equals(item.id))).getSingleOrNull();
@@ -145,11 +143,4 @@ Stream<List<Reservation>> reservationsStream(ReservationsStreamRef ref) async* {
       );
       ref.onDispose(() => sub.cancel());
   }
-
-  // Watch local
-  final query = db.select(db.reservations);
-  if (!isAdmin) {
-    query.where((r) => r.userId.equals(currentUser.id));
-  }
-  yield* query.watch();
 }

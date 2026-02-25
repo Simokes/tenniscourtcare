@@ -58,40 +58,41 @@ final pendingChangesCountProvider = AutoDisposeStreamProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PendingChangesCountRef = AutoDisposeStreamProviderRef<int>;
-String _$terrainsStreamHash() => r'8b542a6104c6baed216fcba445d2e80336d1aeb6';
+String _$backgroundTerrainsSyncHash() =>
+    r'100015ffc39f3a13da45b8e994bfbd779709a736';
 
-/// See also [terrainsStream].
-@ProviderFor(terrainsStream)
-final terrainsStreamProvider = StreamProvider<List<dom.Terrain>>.internal(
-  terrainsStream,
-  name: r'terrainsStreamProvider',
+/// See also [backgroundTerrainsSync].
+@ProviderFor(backgroundTerrainsSync)
+final backgroundTerrainsSyncProvider = StreamProvider<void>.internal(
+  backgroundTerrainsSync,
+  name: r'backgroundTerrainsSyncProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$terrainsStreamHash,
+      : _$backgroundTerrainsSyncHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef TerrainsStreamRef = StreamProviderRef<List<dom.Terrain>>;
-String _$reservationsStreamHash() =>
-    r'902f02ac147b4df7053987edbafb2ee1ad64719e';
+typedef BackgroundTerrainsSyncRef = StreamProviderRef<void>;
+String _$backgroundReservationsSyncHash() =>
+    r'73ee6db6b0c7e793fe96ef4ed800ae77f26725ae';
 
-/// See also [reservationsStream].
-@ProviderFor(reservationsStream)
-final reservationsStreamProvider = StreamProvider<List<Reservation>>.internal(
-  reservationsStream,
-  name: r'reservationsStreamProvider',
+/// See also [backgroundReservationsSync].
+@ProviderFor(backgroundReservationsSync)
+final backgroundReservationsSyncProvider = StreamProvider<void>.internal(
+  backgroundReservationsSync,
+  name: r'backgroundReservationsSyncProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$reservationsStreamHash,
+      : _$backgroundReservationsSyncHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef ReservationsStreamRef = StreamProviderRef<List<Reservation>>;
+typedef BackgroundReservationsSyncRef = StreamProviderRef<void>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

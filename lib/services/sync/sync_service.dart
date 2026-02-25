@@ -104,6 +104,78 @@ class SyncService {
     });
   }
 
+  /// RefreshCollection: Performs a one-time fetch from Firestore and updates local DB.
+  /// Useful for manual refresh (pull-to-refresh).
+  Future<void> refreshCollection<T>({
+    required String collection,
+    required T Function(DocumentSnapshot) fromFirestore,
+    required Future<void> Function(List<T> items) saveToLocal,
+    Query Function(Query)? queryFn,
+  }) async {
+    if (!_isOnline) {
+      debugPrint('SyncService: Offline. Cannot refresh $collection.');
+      return;
+    }
+
+    try {
+      Query query = _firestore.collection(collection);
+      if (queryFn != null) {
+        query = queryFn(query);
+      }
+
+      final snapshot = await query.get();
+      final items = snapshot.docs.map(fromFirestore).toList();
+
+      // For refresh, we generally want to update everything we fetched.
+      // We might want to respect pending changes (not overwrite local edits).
+      // Let's reuse the logic from syncDown: filter out pending IDs.
+      final pendingIds = await _getPendingDocumentIds(collection);
+
+      // Assume T has an ID access or we pass an getId function?
+      // The prompt didn't specify getId for refreshCollection, but syncDown has it.
+      // Let's add getId to refreshCollection signature to match syncDown pattern
+      // or assume we save all for now if no conflict.
+      // But to match syncDown logic, we need to know IDs.
+      // Wait, the prompt example usage:
+      // await sync.refreshCollection<Terrain>(..., saveToLocal: ...);
+      // It didn't show getId.
+      // But if I want to respect pending changes I need IDs.
+      // I will assume for now we overwrite unless I add getId.
+      // Given the prompt example "await db.terrains.deleteAll(); await db.terrains.insertAll(terrains);",
+      // it seems the user intends a FULL refresh replacing local data.
+      // BUT, deleting all would lose pending local changes if we are not careful.
+      // However, the prompt says "Update Drift local", and the example usage shows
+      // deleteAll(). This is aggressive.
+      // If I use deleteAll(), I lose pending creates/updates if they are not yet synced.
+      // But the sync queue stores the *changes* separately in `SyncQueue` table?
+      // No, `SyncQueue` stores the *operation* to replay.
+      // The `terrains` table stores the *current state*.
+      // If I delete `terrains`, I lose the local state.
+      // If `SyncQueue` has a pending update for ID '123', and I delete '123' from `terrains`,
+      // then `123` is gone from UI until I re-insert it.
+      // If I re-insert from Firestore, I get the OLD server version.
+      // Then the SyncQueue will eventually run and update server.
+      // But the UI will momentarily revert to server state.
+      //
+      // User Prompt Example:
+      //   await sync.refreshCollection<Terrain>(..., saveToLocal: (terrains) async {
+      //     final db = ref.read(databaseProvider);
+      //     await db.terrains.deleteAll(); // <--- THIS IS DANGEROUS for pending changes
+      //     await db.terrains.insertAll(terrains);
+      //   });
+      //
+      // I should probably follow the prompt's interface but implement `saveToLocal` safely in the provider.
+      // So `refreshCollection` just fetches and calls `saveToLocal`.
+      // It is up to `saveToLocal` implementation to decide how to merge.
+
+      await saveToLocal(items);
+
+    } catch (e) {
+      debugPrint('SyncService: Failed to refresh $collection. Error: $e');
+      rethrow;
+    }
+  }
+
   Future<void> _addToQueue(
     String collection,
     String documentId,
