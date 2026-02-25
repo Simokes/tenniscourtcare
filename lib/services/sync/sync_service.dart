@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as fb;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +10,7 @@ enum SyncAction { create, update, delete }
 
 class SyncService {
   final AppDatabase _db;
-  final FirebaseFirestore _firestore;
+  final fb.FirebaseFirestore _firestore;
 
   bool _isOnline = false;
   bool get isOnline => _isOnline;
@@ -19,7 +19,7 @@ class SyncService {
   bool get isSyncing => _isSyncing;
 
   final _connectivity = Connectivity();
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
   final _queueChangeController = StreamController<void>.broadcast();
   Stream<void> get onQueueChanged => _queueChangeController.stream;
@@ -31,14 +31,11 @@ class SyncService {
     _updateConnectionStatus(result);
 
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-
-    // Initial check for pending items even if offline (to update count)
-    // or just rely on providers.
   }
 
-  void _updateConnectionStatus(List<ConnectivityResult> result) {
+  void _updateConnectionStatus(ConnectivityResult result) {
     bool wasOnline = _isOnline;
-    _isOnline = result.any((r) => r != ConnectivityResult.none);
+    _isOnline = result != ConnectivityResult.none;
 
     if (_isOnline && !wasOnline) {
       debugPrint('SyncService: Online. Flushing queue...');
@@ -77,12 +74,12 @@ class SyncService {
   /// Respects "Cloud Wins" unless local has pending changes for that ID.
   StreamSubscription<List<T>> syncDown<T>({
     required String collection,
-    required T Function(DocumentSnapshot) fromFirestore,
+    required T Function(fb.DocumentSnapshot) fromFirestore,
     required Future<void> Function(List<T> items) saveToLocal,
     required String Function(T item) getId,
-    Query Function(Query)? queryFn,
+    fb.Query Function(fb.Query)? queryFn,
   }) {
-    Query query = _firestore.collection(collection);
+    fb.Query query = _firestore.collection(collection);
     if (queryFn != null) {
       query = queryFn(query);
     }
@@ -102,6 +99,38 @@ class SyncService {
         await saveToLocal(itemsToSave);
       }
     });
+  }
+
+  /// RefreshCollection: Performs a one-time fetch from Firestore and updates local DB.
+  /// Useful for manual refresh (pull-to-refresh).
+  Future<void> refreshCollection<T>({
+    required String collection,
+    required T Function(fb.DocumentSnapshot) fromFirestore,
+    required Future<void> Function(List<T> items) saveToLocal,
+    fb.Query Function(fb.Query)? queryFn,
+  }) async {
+    if (!_isOnline) {
+      debugPrint('SyncService: Offline. Cannot refresh $collection.');
+      return;
+    }
+
+    try {
+      fb.Query query = _firestore.collection(collection);
+      if (queryFn != null) {
+        query = queryFn(query);
+      }
+
+      final snapshot = await query.get();
+      final items = snapshot.docs.map(fromFirestore).toList();
+
+      // For refresh, we generally want to update everything we fetched.
+      // We rely on saveToLocal to handle conflict resolution.
+      await saveToLocal(items);
+
+    } catch (e) {
+      debugPrint('SyncService: Failed to refresh $collection. Error: $e');
+      rethrow;
+    }
   }
 
   Future<void> _addToQueue(
@@ -204,8 +233,6 @@ class SyncService {
 
     switch (action) {
       case SyncAction.create:
-        // Use set to ensure ID match, or set with merge if needed.
-        // Prompt said create: set() is safer for idempotency if ID is provided.
         await docRef.set(data);
         break;
       case SyncAction.update:
