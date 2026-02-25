@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -148,6 +148,9 @@ class AppDatabase extends _$AppDatabase {
         // Since this is a dev feature, we can safely drop and recreate.
         await m.deleteTable(syncQueue.actualTableName);
         await m.createTable(syncQueue);
+      }
+      if (from < 14) {
+        await m.addColumn(syncQueue, syncQueue.nextRetryAt);
       }
     },
   );
