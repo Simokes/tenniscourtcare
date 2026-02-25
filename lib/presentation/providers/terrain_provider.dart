@@ -14,6 +14,31 @@ final terrainProvider = FutureProvider.family<Terrain?, int>((ref, terrainId) {
   final database = ref.watch(databaseProvider);
   return database.getTerrainById(terrainId);
 });
+
+/// Provider pour mettre à jour le status d'un terrain
+final updateTerrainStatusProvider = FutureProvider.family<void, (int, TerrainStatus)>((ref, params) async {
+  final (terrainId, newStatus) = params;
+  final db = ref.watch(databaseProvider);
+
+  await db.updateTerrainStatus(terrainId, newStatus.name);
+
+  // Invalider le provider pour recharger les données
+  ref.invalidate(terrainsProvider);
+  ref.invalidate(terrainProvider(terrainId));
+});
+
+/// Calculer le nombre de terrains jouables
+final playableTerrainCountProvider = FutureProvider<int>((ref) async {
+  final terrains = await ref.watch(terrainsProvider.future);
+  return terrains.where((t) => t.status == TerrainStatus.playable).length;
+});
+
+/// Calculer le nombre de terrains en maintenance
+final maintenanceTerrainCountProvider = FutureProvider<int>((ref) async {
+  final terrains = await ref.watch(terrainsProvider.future);
+  return terrains.where((t) => t.status == TerrainStatus.maintenance).length;
+});
+
 /// Action d’update : écrit via la base, puis invalide les caches de lecture
 final updateTerrainProvider = Provider<Future<void> Function(Terrain)>((ref) {
   return (Terrain updated) async {
@@ -33,11 +58,12 @@ final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>(
   return (String name, TerrainType type) async {
     final db = ref.read(databaseProvider);
 
-    // On crée l'objet Terrain avec le bon type (TerrainType)
+    // On crée l'objet Terrain avec le bon type (TerrainType) et status par défaut
     final newTerrain = Terrain(
       id: 0,
       nom: name,
       type: type, // Utilise l'énumération ici
+      status: TerrainStatus.playable, // Défaut
     );
 
     await db.insertTerrain(newTerrain);

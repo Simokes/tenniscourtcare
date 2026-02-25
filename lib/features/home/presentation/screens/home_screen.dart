@@ -26,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
 
     // Calculate operational courts for the stats card
     final operationalCountAsync = terrainsAsync.whenData(
-      (terrains) => terrains.where((t) => !t.isUnderMaintenance).toList(),
+      (terrains) => terrains.where((t) => t.status == TerrainStatus.playable).toList(),
     );
 
     return Scaffold(
