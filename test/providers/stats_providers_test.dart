@@ -25,6 +25,7 @@ void main() {
           id: 0,
           nom: 'Court 1',
           type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
         ),
       );
     });

@@ -40,7 +40,7 @@ final pendingQueueCountProvider = StreamProvider<int>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef PendingQueueCountRef = StreamProviderRef<int>;
-String _$pendingQueueItemsHash() => r'89b9d2cd09043e13905e3d9387ea2efe5555b63f';
+String _$pendingQueueItemsHash() => r'2506505e453d647f5bb505b60a8a6bcd6651e92d';
 
 /// See also [pendingQueueItems].
 @ProviderFor(pendingQueueItems)

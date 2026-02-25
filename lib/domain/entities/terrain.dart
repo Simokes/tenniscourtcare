@@ -1,5 +1,7 @@
 // lib/domain/entities/terrain.dart
 
+import 'package:flutter/material.dart';
+
 enum TerrainType {
   terreBattue,
   synthetique,
@@ -17,36 +19,93 @@ enum TerrainType {
   }
 }
 
+enum TerrainStatus {
+  playable,      // 🟢 Jouable - prêt à jouer
+  maintenance,   // 🔵 Maintenance - en entretien
+  unavailable,   // ❌ Non jouable - fermé/endommagé
+  frozen;        // 🥶 Gelé - gelé/pluie/neige
+
+  String get displayName {
+    switch (this) {
+      case TerrainStatus.playable:
+        return 'Jouable';
+      case TerrainStatus.maintenance:
+        return 'Maintenance';
+      case TerrainStatus.unavailable:
+        return 'Non jouable';
+      case TerrainStatus.frozen:
+        return 'Gelé';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case TerrainStatus.playable:
+        return const Color(0xFF10B981);  // Vert
+      case TerrainStatus.maintenance:
+        return const Color(0xFF0EA5E9);  // Bleu ciel
+      case TerrainStatus.unavailable:
+        return const Color(0xFF6B7280);  // Gris
+      case TerrainStatus.frozen:
+        return const Color(0xFF3B82F6);  // Bleu
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case TerrainStatus.playable:
+        return Icons.check_circle;
+      case TerrainStatus.maintenance:
+        return Icons.build;
+      case TerrainStatus.unavailable:
+        return Icons.cancel;
+      case TerrainStatus.frozen:
+        return Icons.ac_unit;
+    }
+  }
+}
+
 class Terrain {
   final int id;
   final String nom;
   final TerrainType type;
+  final TerrainStatus status;
 
   /// Coordonnées GPS facultatives (pour la météo)
   final double? latitude;
   final double? longitude;
+  final String? photoUrl;
 
   const Terrain({
     required this.id,
     required this.nom,
     required this.type,
+    required this.status,
     this.latitude,
     this.longitude,
+    this.photoUrl,
   });
+
+  // Computed property for backwards compatibility / utility
+  bool get isUnderMaintenance => status == TerrainStatus.maintenance;
 
   Terrain copyWith({
     int? id,
     String? nom,
     TerrainType? type,
+    TerrainStatus? status,
     double? latitude,
     double? longitude,
+    String? photoUrl,
   }) {
     return Terrain(
       id: id ?? this.id,
       nom: nom ?? this.nom,
       type: type ?? this.type,
+      status: status ?? this.status,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      photoUrl: photoUrl ?? this.photoUrl,
     );
   }
 
@@ -58,18 +117,22 @@ class Terrain {
           id == other.id &&
           nom == other.nom &&
           type == other.type &&
+          status == other.status &&
           latitude == other.latitude &&
-          longitude == other.longitude;
+          longitude == other.longitude &&
+          photoUrl == other.photoUrl;
 
   @override
   int get hashCode =>
       id.hashCode ^
       nom.hashCode ^
       type.hashCode ^
+      status.hashCode ^
       latitude.hashCode ^
-      longitude.hashCode;
+      longitude.hashCode ^
+      photoUrl.hashCode;
 
   @override
   String toString() =>
-      'Terrain(id: $id, nom: $nom, type: $type, lat: $latitude, lon: $longitude)';
+      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl)';
 }

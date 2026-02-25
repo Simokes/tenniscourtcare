@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16; // Increment version to 16
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -154,6 +154,11 @@ class AppDatabase extends _$AppDatabase {
         // Removed UNIQUE constraint from firebaseUid column
         // (Done in table definition, no SQL migration needed)
         // Schema bumped to ensure clean state going forward
+      }
+
+      if (from < 16) {
+        // Added status column to Terrains
+        await m.addColumn(terrains, terrains.status);
       }
     },
   );
@@ -576,6 +581,14 @@ class AppDatabase extends _$AppDatabase {
     return (update(terrains)..where((t) => t.id.equals(terrain.id))).write(
       terrain.toCompanion(includeId: false),
     );
+  }
+
+  /// Mettre à jour le status d'un terrain
+  Future<bool> updateTerrainStatus(int terrainId, String newStatus) {
+    return (update(terrains)
+          ..where((t) => t.id.equals(terrainId)))
+        .write(TerrainsCompanion(status: Value(newStatus)))
+        .then((rows) => rows > 0);
   }
 
   Future<int> deleteTerrain(int id) {

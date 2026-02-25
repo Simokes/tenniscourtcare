@@ -44,6 +44,16 @@ class $TerrainsTable extends Terrains
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('playable'),
+  );
   static const VerificationMeta _remoteIdMeta = const VerificationMeta(
     'remoteId',
   );
@@ -152,6 +162,7 @@ class $TerrainsTable extends Terrains
     id,
     nom,
     type,
+    status,
     remoteId,
     location,
     capacity,
@@ -192,6 +203,12 @@ class $TerrainsTable extends Terrains
       );
     } else if (isInserting) {
       context.missing(_typeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     }
     if (data.containsKey('remote_id')) {
       context.handle(
@@ -271,6 +288,10 @@ class $TerrainsTable extends Terrains
         DriftSqlType.int,
         data['${effectivePrefix}type'],
       )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
       remoteId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remote_id'],
@@ -320,6 +341,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final int id;
   final String nom;
   final int type;
+  final String status;
   final String? remoteId;
   final String? location;
   final int? capacity;
@@ -333,6 +355,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     required this.id,
     required this.nom,
     required this.type,
+    required this.status,
     this.remoteId,
     this.location,
     this.capacity,
@@ -349,6 +372,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     map['id'] = Variable<int>(id);
     map['nom'] = Variable<String>(nom);
     map['type'] = Variable<int>(type);
+    map['status'] = Variable<String>(status);
     if (!nullToAbsent || remoteId != null) {
       map['remote_id'] = Variable<String>(remoteId);
     }
@@ -382,6 +406,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       id: Value(id),
       nom: Value(nom),
       type: Value(type),
+      status: Value(status),
       remoteId: remoteId == null && nullToAbsent
           ? const Value.absent()
           : Value(remoteId),
@@ -419,6 +444,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       id: serializer.fromJson<int>(json['id']),
       nom: serializer.fromJson<String>(json['nom']),
       type: serializer.fromJson<int>(json['type']),
+      status: serializer.fromJson<String>(json['status']),
       remoteId: serializer.fromJson<String?>(json['remoteId']),
       location: serializer.fromJson<String?>(json['location']),
       capacity: serializer.fromJson<int?>(json['capacity']),
@@ -437,6 +463,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       'id': serializer.toJson<int>(id),
       'nom': serializer.toJson<String>(nom),
       'type': serializer.toJson<int>(type),
+      'status': serializer.toJson<String>(status),
       'remoteId': serializer.toJson<String?>(remoteId),
       'location': serializer.toJson<String?>(location),
       'capacity': serializer.toJson<int?>(capacity),
@@ -453,6 +480,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     int? id,
     String? nom,
     int? type,
+    String? status,
     Value<String?> remoteId = const Value.absent(),
     Value<String?> location = const Value.absent(),
     Value<int?> capacity = const Value.absent(),
@@ -466,6 +494,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     id: id ?? this.id,
     nom: nom ?? this.nom,
     type: type ?? this.type,
+    status: status ?? this.status,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
     location: location.present ? location.value : this.location,
     capacity: capacity.present ? capacity.value : this.capacity,
@@ -481,6 +510,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       id: data.id.present ? data.id.value : this.id,
       nom: data.nom.present ? data.nom.value : this.nom,
       type: data.type.present ? data.type.value : this.type,
+      status: data.status.present ? data.status.value : this.status,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       location: data.location.present ? data.location.value : this.location,
       capacity: data.capacity.present ? data.capacity.value : this.capacity,
@@ -501,6 +531,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ..write('id: $id, ')
           ..write('nom: $nom, ')
           ..write('type: $type, ')
+          ..write('status: $status, ')
           ..write('remoteId: $remoteId, ')
           ..write('location: $location, ')
           ..write('capacity: $capacity, ')
@@ -519,6 +550,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     id,
     nom,
     type,
+    status,
     remoteId,
     location,
     capacity,
@@ -536,6 +568,7 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           other.id == this.id &&
           other.nom == this.nom &&
           other.type == this.type &&
+          other.status == this.status &&
           other.remoteId == this.remoteId &&
           other.location == this.location &&
           other.capacity == this.capacity &&
@@ -551,6 +584,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<int> id;
   final Value<String> nom;
   final Value<int> type;
+  final Value<String> status;
   final Value<String?> remoteId;
   final Value<String?> location;
   final Value<int?> capacity;
@@ -564,6 +598,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.id = const Value.absent(),
     this.nom = const Value.absent(),
     this.type = const Value.absent(),
+    this.status = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.location = const Value.absent(),
     this.capacity = const Value.absent(),
@@ -578,6 +613,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.id = const Value.absent(),
     required String nom,
     required int type,
+    this.status = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.location = const Value.absent(),
     this.capacity = const Value.absent(),
@@ -593,6 +629,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Expression<int>? id,
     Expression<String>? nom,
     Expression<int>? type,
+    Expression<String>? status,
     Expression<String>? remoteId,
     Expression<String>? location,
     Expression<int>? capacity,
@@ -607,6 +644,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       if (id != null) 'id': id,
       if (nom != null) 'nom': nom,
       if (type != null) 'type': type,
+      if (status != null) 'status': status,
       if (remoteId != null) 'remote_id': remoteId,
       if (location != null) 'location': location,
       if (capacity != null) 'capacity': capacity,
@@ -623,6 +661,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Value<int>? id,
     Value<String>? nom,
     Value<int>? type,
+    Value<String>? status,
     Value<String?>? remoteId,
     Value<String?>? location,
     Value<int?>? capacity,
@@ -637,6 +676,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       id: id ?? this.id,
       nom: nom ?? this.nom,
       type: type ?? this.type,
+      status: status ?? this.status,
       remoteId: remoteId ?? this.remoteId,
       location: location ?? this.location,
       capacity: capacity ?? this.capacity,
@@ -660,6 +700,9 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     }
     if (type.present) {
       map['type'] = Variable<int>(type.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
     }
     if (remoteId.present) {
       map['remote_id'] = Variable<String>(remoteId.value);
@@ -697,6 +740,7 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
           ..write('id: $id, ')
           ..write('nom: $nom, ')
           ..write('type: $type, ')
+          ..write('status: $status, ')
           ..write('remoteId: $remoteId, ')
           ..write('location: $location, ')
           ..write('capacity: $capacity, ')
@@ -7234,6 +7278,7 @@ typedef $$TerrainsTableCreateCompanionBuilder =
       Value<int> id,
       required String nom,
       required int type,
+      Value<String> status,
       Value<String?> remoteId,
       Value<String?> location,
       Value<int?> capacity,
@@ -7249,6 +7294,7 @@ typedef $$TerrainsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> nom,
       Value<int> type,
+      Value<String> status,
       Value<String?> remoteId,
       Value<String?> location,
       Value<int?> capacity,
@@ -7304,6 +7350,11 @@ class $$TerrainsTableFilterComposer
 
   ColumnFilters<int> get type => $composableBuilder(
     column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7402,6 +7453,11 @@ class $$TerrainsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get remoteId => $composableBuilder(
     column: $table.remoteId,
     builder: (column) => ColumnOrderings(column),
@@ -7465,6 +7521,9 @@ class $$TerrainsTableAnnotationComposer
 
   GeneratedColumn<int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
 
   GeneratedColumn<String> get remoteId =>
       $composableBuilder(column: $table.remoteId, builder: (column) => column);
@@ -7552,6 +7611,7 @@ class $$TerrainsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> nom = const Value.absent(),
                 Value<int> type = const Value.absent(),
+                Value<String> status = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<String?> location = const Value.absent(),
                 Value<int?> capacity = const Value.absent(),
@@ -7565,6 +7625,7 @@ class $$TerrainsTableTableManager
                 id: id,
                 nom: nom,
                 type: type,
+                status: status,
                 remoteId: remoteId,
                 location: location,
                 capacity: capacity,
@@ -7580,6 +7641,7 @@ class $$TerrainsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String nom,
                 required int type,
+                Value<String> status = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<String?> location = const Value.absent(),
                 Value<int?> capacity = const Value.absent(),
@@ -7593,6 +7655,7 @@ class $$TerrainsTableTableManager
                 id: id,
                 nom: nom,
                 type: type,
+                status: status,
                 remoteId: remoteId,
                 location: location,
                 capacity: capacity,
