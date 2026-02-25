@@ -1,8 +1,10 @@
-import '../../domain/entities/maintenance.dart';
-import '../../domain/entities/sync_status.dart';
-import '../../domain/repositories/maintenance_repository.dart';
-import '../database/app_database.dart';
-import '../services/firebase_sync_service.dart';
+// filepath: lib/data/repositories/maintenance_repository_impl.dart
+
+import 'package:tenniscourtcare/data/database/app_database.dart';
+import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
+import 'package:tenniscourtcare/domain/entities/maintenance.dart';
+import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+import 'package:tenniscourtcare/domain/repositories/maintenance_repository.dart';
 
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final AppDatabase _db;
@@ -17,8 +19,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    final id = await _db.insertMaintenance(localMaintenance);
 
+    final id = await _db.insertMaintenance(localMaintenance);
     _syncMaintenanceToFirebase(localMaintenance.copyWith(id: id));
 
     return id;
@@ -30,6 +32,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       syncStatus: SyncStatus.local,
       updatedAt: DateTime.now(),
     );
+
     final result = await _db.updateMaintenance(
       updatedMaintenance.toCompanion(includeId: true)
     );
@@ -45,6 +48,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     return result > 0;
   }
 
+  // Not strictly part of interface but good to have if needed by new providers or legacy
+  // However interface defines getAllMaintenances
   @override
   Future<List<Maintenance>> getAllMaintenances() async {
     return await _db.watchAllMaintenances().first;

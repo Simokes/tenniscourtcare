@@ -35,7 +35,7 @@ class StockRepositoryImpl implements StockRepository {
 
     _syncStockToFirebase(updatedItem);
 
-    return result > 0;
+    return result;
   }
 
   @override
@@ -52,7 +52,10 @@ class StockRepositoryImpl implements StockRepository {
   @override
   Future<StockItem?> getStockItemById(int id) async {
     final items = await _db.watchAllStockItems().first;
-    return items.firstWhereOrNull((s) => s.id == id);
+    return items.firstWhere(
+      (s) => s.id == id,
+      orElse: () => null as StockItem, // Force nullable return if not found, or handle properly
+    );
   }
 
   Future<void> _syncStockToFirebase(StockItem item) async {

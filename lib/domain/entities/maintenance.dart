@@ -1,4 +1,6 @@
 // lib/domain/entities/maintenance.dart
+import 'package:drift/drift.dart';
+import '../../data/database/app_database.dart'; // For MaintenancesCompanion
 import 'weather_snapshot.dart';
 import 'sync_status.dart';
 
@@ -148,4 +150,30 @@ class Maintenance {
       'imagePath: $imagePath, '
       'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable, '
       'syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
+}
+
+// Extension pour convertir Maintenance en MaintenancesCompanion
+extension MaintenanceDomainX on Maintenance {
+  MaintenancesCompanion toCompanion({bool includeId = true}) {
+    return MaintenancesCompanion(
+      id: includeId && id != null ? Value(id!) : const Value.absent(),
+      terrainId: Value(terrainId),
+      type: Value(type),
+      commentaire: Value(commentaire),
+      date: Value(date),
+      sacsMantoUtilises: Value(sacsMantoUtilises),
+      sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
+      sacsSiliceUtilises: Value(sacsSiliceUtilises),
+      imagePath: Value(imagePath),
+      weather: Value(weather),
+      terrainGele: Value(terrainGele),
+      terrainImpraticable: Value(terrainImpraticable),
+      syncStatus: Value(syncStatus.name),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      firebaseId: Value(firebaseId),
+      createdBy: Value(createdBy),
+      modifiedBy: Value(modifiedBy),
+    );
+  }
 }
