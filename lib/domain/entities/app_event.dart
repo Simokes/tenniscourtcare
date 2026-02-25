@@ -1,3 +1,7 @@
+// lib/domain/entities/app_event.dart
+
+import 'sync_status.dart';
+
 class AppEvent {
   final int? id;
   final String title;
@@ -7,6 +11,14 @@ class AppEvent {
   final int color;
   final List<int> terrainIds;
 
+  // Sync fields
+  final SyncStatus syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
+
   const AppEvent({
     this.id,
     required this.title,
@@ -15,6 +27,12 @@ class AppEvent {
     required this.endTime,
     required this.color,
     required this.terrainIds,
+    this.syncStatus = SyncStatus.local,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
   });
 
   AppEvent copyWith({
@@ -25,6 +43,12 @@ class AppEvent {
     DateTime? endTime,
     int? color,
     List<int>? terrainIds,
+    SyncStatus? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? firebaseId,
+    String? createdBy,
+    String? modifiedBy,
   }) {
     return AppEvent(
       id: id ?? this.id,
@@ -34,6 +58,12 @@ class AppEvent {
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
       terrainIds: terrainIds ?? this.terrainIds,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -48,7 +78,13 @@ class AppEvent {
           startTime == other.startTime &&
           endTime == other.endTime &&
           color == other.color &&
-          _listEquals(terrainIds, other.terrainIds);
+          _listEquals(terrainIds, other.terrainIds) &&
+          syncStatus == other.syncStatus &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          firebaseId == other.firebaseId &&
+          createdBy == other.createdBy &&
+          modifiedBy == other.modifiedBy;
 
   @override
   int get hashCode =>
@@ -58,11 +94,17 @@ class AppEvent {
       startTime.hashCode ^
       endTime.hashCode ^
       color.hashCode ^
-      terrainIds.hashCode;
+      terrainIds.hashCode ^
+      syncStatus.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      firebaseId.hashCode ^
+      createdBy.hashCode ^
+      modifiedBy.hashCode;
 
   @override
   String toString() {
-    return 'AppEvent{id: $id, title: $title, description: $description, startTime: $startTime, endTime: $endTime, color: $color, terrainIds: $terrainIds}';
+    return 'AppEvent{id: $id, title: $title, description: $description, startTime: $startTime, endTime: $endTime, color: $color, terrainIds: $terrainIds, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 
   bool _listEquals<T>(List<T>? a, List<T>? b) {

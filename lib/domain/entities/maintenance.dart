@@ -1,5 +1,6 @@
 // lib/domain/entities/maintenance.dart
 import 'weather_snapshot.dart';
+import 'sync_status.dart';
 
 class Maintenance {
   final int? id;
@@ -22,6 +23,14 @@ class Maintenance {
   final bool? terrainGele;          // true si T<=0°C au moment de l'opération
   final bool? terrainImpraticable;  // selon heuristique pluie/humidité/terrain
 
+  // Sync fields
+  final SyncStatus syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
+
   const Maintenance({
     this.id,
     required this.terrainId,
@@ -35,6 +44,12 @@ class Maintenance {
     this.weather,
     this.terrainGele,
     this.terrainImpraticable,
+    this.syncStatus = SyncStatus.local,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
   });
 
   Maintenance copyWith({
@@ -50,6 +65,12 @@ class Maintenance {
     WeatherSnapshot? weather,
     bool? terrainGele,
     bool? terrainImpraticable,
+    SyncStatus? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? firebaseId,
+    String? createdBy,
+    String? modifiedBy,
   }) {
     return Maintenance(
       id: id ?? this.id,
@@ -65,6 +86,12 @@ class Maintenance {
       weather: weather ?? this.weather,
       terrainGele: terrainGele ?? this.terrainGele,
       terrainImpraticable: terrainImpraticable ?? this.terrainImpraticable,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -84,7 +111,13 @@ class Maintenance {
           imagePath == other.imagePath &&
           weather == other.weather &&
           terrainGele == other.terrainGele &&
-          terrainImpraticable == other.terrainImpraticable;
+          terrainImpraticable == other.terrainImpraticable &&
+          syncStatus == other.syncStatus &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          firebaseId == other.firebaseId &&
+          createdBy == other.createdBy &&
+          modifiedBy == other.modifiedBy;
 
   @override
   int get hashCode =>
@@ -99,12 +132,19 @@ class Maintenance {
       imagePath.hashCode ^
       weather.hashCode ^
       terrainGele.hashCode ^
-      terrainImpraticable.hashCode;
+      terrainImpraticable.hashCode ^
+      syncStatus.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      firebaseId.hashCode ^
+      createdBy.hashCode ^
+      modifiedBy.hashCode;
 
   @override
   String toString() =>
       'Maintenance(id: $id, terrainId: $terrainId, type: $type, date: $date, '
       'manto: $sacsMantoUtilises, sotto: $sacsSottomantoUtilises, silice: $sacsSiliceUtilises, '
       'imagePath: $imagePath, '
-      'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable)';
+      'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable, '
+      'syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
 }

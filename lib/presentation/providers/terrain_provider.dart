@@ -64,6 +64,8 @@ final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>(
       nom: name,
       type: type, // Utilise l'énumération ici
       status: TerrainStatus.playable, // Défaut
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     await db.insertTerrain(newTerrain);

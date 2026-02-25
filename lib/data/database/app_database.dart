@@ -166,13 +166,13 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _seedStockItems() async {
     final now = DateTime.now();
     final items = [
-      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now),
-      doms.StockItem(name: 'Sottomanto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 5, updatedAt: now),
-      doms.StockItem(name: 'Silice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now),
-      doms.StockItem(name: 'Balles', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 24, updatedAt: now),
-      doms.StockItem(name: 'Filets', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 1, updatedAt: now),
-      doms.StockItem(name: 'Peinture', quantity: 0, unit: 'L', isCustom: false, minThreshold: 5, updatedAt: now),
-      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now),
+      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Sottomanto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 5, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Silice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Balles', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 24, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Filets', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 1, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Peinture', quantity: 0, unit: 'L', isCustom: false, minThreshold: 5, updatedAt: now, createdAt: now),
+      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now, createdAt: now),
     ];
     
     await batch((b) {

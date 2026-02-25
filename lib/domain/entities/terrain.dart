@@ -1,6 +1,7 @@
 // lib/domain/entities/terrain.dart
 
 import 'package:flutter/material.dart';
+import 'sync_status.dart';
 
 enum TerrainType {
   terreBattue,
@@ -76,6 +77,14 @@ class Terrain {
   final double? longitude;
   final String? photoUrl;
 
+  // Sync fields
+  final SyncStatus syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
+
   const Terrain({
     required this.id,
     required this.nom,
@@ -84,6 +93,12 @@ class Terrain {
     this.latitude,
     this.longitude,
     this.photoUrl,
+    this.syncStatus = SyncStatus.local,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
   });
 
   // Computed property for backwards compatibility / utility
@@ -97,6 +112,12 @@ class Terrain {
     double? latitude,
     double? longitude,
     String? photoUrl,
+    SyncStatus? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? firebaseId,
+    String? createdBy,
+    String? modifiedBy,
   }) {
     return Terrain(
       id: id ?? this.id,
@@ -106,6 +127,12 @@ class Terrain {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       photoUrl: photoUrl ?? this.photoUrl,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -120,7 +147,13 @@ class Terrain {
           status == other.status &&
           latitude == other.latitude &&
           longitude == other.longitude &&
-          photoUrl == other.photoUrl;
+          photoUrl == other.photoUrl &&
+          syncStatus == other.syncStatus &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          firebaseId == other.firebaseId &&
+          createdBy == other.createdBy &&
+          modifiedBy == other.modifiedBy;
 
   @override
   int get hashCode =>
@@ -130,9 +163,15 @@ class Terrain {
       status.hashCode ^
       latitude.hashCode ^
       longitude.hashCode ^
-      photoUrl.hashCode;
+      photoUrl.hashCode ^
+      syncStatus.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      firebaseId.hashCode ^
+      createdBy.hashCode ^
+      modifiedBy.hashCode;
 
   @override
   String toString() =>
-      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl)';
+      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
 }

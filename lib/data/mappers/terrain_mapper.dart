@@ -1,4 +1,5 @@
 import '../../domain/entities/terrain.dart' as dom;
+import '../../domain/entities/sync_status.dart';
 import '../database/app_database.dart' as db;
 import 'package:drift/drift.dart';
 
@@ -21,6 +22,13 @@ extension TerrainRowX on db.TerrainRow {
       latitude: null, // Mapped fields from DB if they exist in DB entity but not in current drift definition for this extension
       longitude: null,
       photoUrl: imageUrl,
+      // Sync mappings
+      createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+      firebaseId: remoteId,
+      createdBy: null, // Not in DB yet
+      modifiedBy: null, // Not in DB yet
+      syncStatus: remoteId != null ? SyncStatus.synced : SyncStatus.local,
     );
   }
 }
@@ -34,5 +42,9 @@ extension TerrainDomainX on dom.Terrain {
         type: Value(type.index),
         status: Value(status.name),
         imageUrl: photoUrl != null ? Value(photoUrl) : const Value.absent(),
+        // Sync mappings
+        createdAt: Value(createdAt),
+        updatedAt: Value(updatedAt),
+        remoteId: Value(firebaseId),
       );
 }
