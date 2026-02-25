@@ -78,7 +78,7 @@ extension EventDriftX on db.EventRow {
 extension AppEventDomainX on AppEvent {
   db.EventsCompanion toCompanion({bool includeId = true}) =>
       db.EventsCompanion(
-        id: includeId ? Value(id) : const Value.absent(),
+        id: includeId && id != null ? Value(id!) : const Value.absent(),
         title: Value(title),
         description: Value(description),
         startTime: Value(startTime),
