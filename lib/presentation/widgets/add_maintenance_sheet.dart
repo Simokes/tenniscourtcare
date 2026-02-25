@@ -9,8 +9,7 @@ import '../providers/weather_for_club_provider.dart';
 import '../providers/app_settings_provider.dart';
 import 'maintenance_type_selector.dart';
 import 'quantity_selector.dart';
-import 'weather_card.dart';
-import '../../infrastructure/weather/weather_service.dart';
+import '../../features/weather/presentation/widgets/weather_card.dart';
 import 'premium/premium_card.dart';
 import 'premium/premium_button.dart';
 import 'dart:io';
@@ -45,6 +44,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   late int _sacsSilice;
   String? _imagePath;
   WeatherSnapshot? _weather;
+  double? _precip24h;
   bool? _frozen;
   bool? _unplayable;
 
@@ -110,15 +110,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
     try {
       final computed = await ref.read(weatherForClubProvider(widget.terrain.type).future);
-      final ctx = computed.context;
       setState(() {
-        _weather = WeatherSnapshot(
-          temperature: ctx.temperature ?? 0.0,
-          precipitation: 0.0,
-          humidity: (ctx.humidity ?? 0.0).toInt(),
-          windSpeed: (ctx.windSpeed ?? 0).toDouble(),
-          weatherCode: 0,
-        );
+        _weather = computed.context.snapshot;
+        _precip24h = computed.context.precipitationLast24h;
         _frozen = computed.frozen;
         _unplayable = computed.unplayable;
       });
@@ -319,22 +313,13 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         const SizedBox(height: 24),
 
                         // Weather Section
-                        if (_weather == null)
-                          WeatherCard(
-                            weatherContext: WeatherContext.empty('temp'),
-                            onRefresh: _loadWeather,
-                          )
-                        else
-                          WeatherCard(
-                            weatherContext: WeatherContext(
-                              terrainId: 'temp',
-                              temperature: _weather!.temperature,
-                              humidity: _weather!.humidity.toDouble(),
-                              windSpeed: _weather!.windSpeed.toInt(),
-                              weatherCondition: 'Unknown',
-                            ),
-                            onRefresh: _loadWeather,
-                          ),
+                        WeatherCard(
+                          weather: _weather,
+                          precip24h: _precip24h,
+                          frozen: _frozen,
+                          unplayable: _unplayable,
+                          onRefresh: _loadWeather,
+                        ),
 
                         const SizedBox(height: 24),
 
