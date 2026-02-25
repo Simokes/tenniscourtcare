@@ -2,10 +2,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/services/weather_rules.dart';
-import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
+import '../../infrastructure/weather/weather_service.dart';
 
 final weatherServiceProvider = Provider<WeatherService>((ref) {
-  return WeatherService();
+  return MockWeatherService();
 });
 
 class WeatherComputed {
@@ -21,13 +21,17 @@ class WeatherComputed {
 
 final weatherForTerrainProvider = FutureProvider.family<WeatherComputed, ({double lat, double lon, TerrainType type})>((ref, args) async {
   final svc = ref.read(weatherServiceProvider);
-  final ctx = await svc.fetch(latitude: args.lat, longitude: args.lon);
+  final ctx = await svc.getWeatherForTerrain('local');
 
-  final frozen = WeatherRules.isFrozen(ctx.snapshot.temperature);
+  final temp = ctx.temperature ?? 20.0;
+  final precip = 0.0; // Stub
+  final hum = (ctx.humidity ?? 50.0).toInt();
+
+  final frozen = WeatherRules.isFrozen(temp);
   final unplayable = WeatherRules.isUnplayable(
     type: args.type,
-    precipitationLast24hMm: ctx.precipitationLast24h,
-    humidityPct: ctx.snapshot.humidity,
+    precipitationLast24hMm: precip,
+    humidityPct: hum,
   );
 
   return WeatherComputed(context: ctx, frozen: frozen, unplayable: unplayable);

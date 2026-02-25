@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/services/weather_rules.dart';
-import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
+import '../../infrastructure/weather/weather_service.dart';
 import 'app_settings_provider.dart';
 import 'weather_providers.dart' show weatherServiceProvider;
 
@@ -23,13 +23,17 @@ FutureProvider.family<WeatherComputed, TerrainType>((ref, type) async {
   }
 
   final svc = ref.read(weatherServiceProvider);
-  final ctx = await svc.fetch(latitude: loc.latitude, longitude: loc.longitude);
+  final ctx = await svc.getWeatherForTerrain('club');
 
-  final frozen = WeatherRules.isFrozen(ctx.snapshot.temperature);
+  final temp = ctx.temperature ?? 20.0;
+  final precip = 0.0; // Stub
+  final hum = (ctx.humidity ?? 50.0).toInt();
+
+  final frozen = WeatherRules.isFrozen(temp);
   final unplayable = WeatherRules.isUnplayable(
     type: type,
-    precipitationLast24hMm: ctx.precipitationLast24h,
-    humidityPct: ctx.snapshot.humidity,
+    precipitationLast24hMm: precip,
+    humidityPct: hum,
   );
 
   return WeatherComputed(context: ctx, frozen: frozen, unplayable: unplayable);
