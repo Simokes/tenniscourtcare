@@ -41,6 +41,8 @@ dependencies:
   cloud_firestore: ^6.1.2
   firebase_auth: ^6.1.4
   cloud_functions: ^6.0.6
+  connectivity_plus: ^5.0.0
+  riverpod_annotation: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -48,11 +50,12 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   
   # Build runner pour Drift
-  drift_dev: ^2.31.0
-  build_runner: ^2.11.1
+  drift_dev: ^2.18.0
+  build_runner: ^2.4.6
 
   sqlite3: any
   integration_test:
     sdk: flutter
+  riverpod_generator: ^2.6.5
 flutter:
   uses-material-design: true

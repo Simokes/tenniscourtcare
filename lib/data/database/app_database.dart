@@ -15,6 +15,7 @@ import 'tables/audit_logs.dart';
 import 'tables/login_attempts.dart';
 import 'tables/otp_records.dart';
 import 'tables/reservations.dart';
+import 'tables/sync_queue.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
@@ -40,13 +41,14 @@ part 'app_database.g.dart';
   AuditLogs,
   LoginAttempts,
   OtpRecords,
-  Reservations
+  Reservations,
+  SyncQueue
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -136,6 +138,9 @@ class AppDatabase extends _$AppDatabase {
 
         // Create Reservations
         await m.createTable(reservations);
+      }
+      if (from < 12) {
+        await m.createTable(syncQueue);
       }
     },
   );
