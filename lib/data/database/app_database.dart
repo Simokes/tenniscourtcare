@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -149,8 +149,11 @@ class AppDatabase extends _$AppDatabase {
         await m.deleteTable(syncQueue.actualTableName);
         await m.createTable(syncQueue);
       }
-      if (from < 14) {
-        await m.addColumn(syncQueue, syncQueue.nextRetryAt);
+        
+      if (from < 15) {
+        // Removed UNIQUE constraint from firebaseUid column
+        // (Done in table definition, no SQL migration needed)
+        // Schema bumped to ensure clean state going forward
       }
     },
   );
