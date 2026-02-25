@@ -57,5 +57,6 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   riverpod_generator: ^2.6.5
+  mockito: ^5.4.6
 flutter:
   uses-material-design: true

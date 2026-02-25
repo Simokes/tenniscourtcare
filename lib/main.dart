@@ -7,6 +7,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
+import 'providers/queue_providers.dart';
+import 'presentation/widgets/queue_status_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
@@ -48,6 +50,9 @@ class CourtCareApp extends ConsumerWidget {
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeMode = settingsAsync.valueOrNull?.themeMode ?? ThemeMode.system;
 
+    // Initialize background retry check
+    ref.watch(scheduleRetryCheckProvider);
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Court Care',
@@ -55,6 +60,14 @@ class CourtCareApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        return Column(
+          children: [
+            const QueueStatusBanner(),
+            Expanded(child: child ?? const SizedBox()),
+          ],
+        );
+      },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
