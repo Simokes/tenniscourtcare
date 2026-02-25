@@ -1,34 +1,100 @@
-import 'package:drift/drift.dart';
-import '../database/app_database.dart';
-import '../../domain/entities/maintenance.dart';
-import '../../domain/entities/sync_status.dart';
+// filepath: lib/data/mappers/maintenance_mapper.dart
 
-extension MaintenanceRowToDomain on MaintenanceRow {
-  Maintenance toDomain() {
+import 'package:drift/drift.dart';
+import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/models/maintenance_model.dart';
+import 'package:tenniscourtcare/domain/entities/maintenance.dart';
+import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+
+class MaintenanceMapper {
+  // Model → Domain Entity
+  static Maintenance toDomain(MaintenanceModel model) {
     return Maintenance(
-      id: id,
-      terrainId: terrainId,
-      type: type,
-      commentaire: commentaire,
-      date: date,
-      sacsMantoUtilises: sacsMantoUtilises,
-      sacsSottomantoUtilises: sacsSottomantoUtilises,
-      sacsSiliceUtilises: sacsSiliceUtilises,
-      imagePath: imagePath,
-      // Sync mappings
-      createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(date), // Fallback to operation date
-      updatedAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(date), // Fallback
-      firebaseId: remoteId,
-      createdBy: createdBy,
-      modifiedBy: null, // Not in DB yet
-      syncStatus: remoteId != null ? SyncStatus.synced : SyncStatus.local,
+      id: model.id,
+      terrainId: model.terrainId,
+      type: model.type,
+      commentaire: model.commentaire,
+      date: DateTime.parse(model.date).millisecondsSinceEpoch,
+      sacsMantoUtilises: model.sacsMantoUtilises,
+      sacsSottomantoUtilises: model.sacsSottomantoUtilises,
+      sacsSiliceUtilises: model.sacsSiliceUtilises,
+      imagePath: model.imagePath,
+      weather: model.weather != null ? WeatherSnapshot.fromJson(model.weather!) : null,
+      terrainGele: model.terrainGele,
+      terrainImpraticable: model.terrainImpraticable,
+      syncStatus: SyncStatus.fromString(model.syncStatus),
+      createdAt: DateTime.parse(model.createdAt),
+      updatedAt: DateTime.parse(model.updatedAt),
+      firebaseId: model.firebaseId,
+      createdBy: model.createdBy,
+      modifiedBy: model.modifiedBy,
+    );
+  }
+
+  // Domain Entity → Model
+  static MaintenanceModel toModel(Maintenance domain) {
+    return MaintenanceModel(
+      id: domain.id,
+      terrainId: domain.terrainId,
+      type: domain.type,
+      commentaire: domain.commentaire,
+      date: DateTime.fromMillisecondsSinceEpoch(domain.date).toIso8601String(),
+      sacsMantoUtilises: domain.sacsMantoUtilises,
+      sacsSottomantoUtilises: domain.sacsSottomantoUtilises,
+      sacsSiliceUtilises: domain.sacsSiliceUtilises,
+      imagePath: domain.imagePath,
+      weather: domain.weather?.toJson(),
+      terrainGele: domain.terrainGele,
+      terrainImpraticable: domain.terrainImpraticable,
+      syncStatus: domain.syncStatus.name,
+      createdAt: domain.createdAt.toIso8601String(),
+      updatedAt: domain.updatedAt.toIso8601String(),
+      firebaseId: domain.firebaseId,
+      createdBy: domain.createdBy,
+      modifiedBy: domain.modifiedBy,
+    );
+  }
+
+  // Drift Entity → Domain Entity
+  static Maintenance fromDriftEntity(db.MaintenanceRow driftEntity) {
+    return Maintenance(
+      id: driftEntity.id,
+      terrainId: driftEntity.terrainId,
+      type: driftEntity.type,
+      commentaire: driftEntity.commentaire,
+      date: driftEntity.date,
+      sacsMantoUtilises: driftEntity.sacsMantoUtilises,
+      sacsSottomantoUtilises: driftEntity.sacsSottomantoUtilises,
+      sacsSiliceUtilises: driftEntity.sacsSiliceUtilises,
+      imagePath: driftEntity.imagePath,
+      // Weather and flags are not stored in SQLite currently
+      weather: null,
+      terrainGele: null,
+      terrainImpraticable: null,
+      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
+      createdAt: driftEntity.createdAt ?? DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
+      updatedAt: driftEntity.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
+      firebaseId: driftEntity.firebaseId,
+      createdBy: driftEntity.createdBy,
+      modifiedBy: driftEntity.modifiedBy,
     );
   }
 }
 
-extension MaintenanceToCompanion on Maintenance {
-  MaintenancesCompanion toCompanion() {
-    return MaintenancesCompanion(
+// Extensions for compatibility
+extension MaintenanceModelX on MaintenanceModel {
+  Maintenance toDomain() => MaintenanceMapper.toDomain(this);
+}
+
+extension MaintenanceDriftX on db.MaintenanceRow {
+  Maintenance toDomain() => MaintenanceMapper.fromDriftEntity(this);
+}
+
+// Domain → Companion (Keeping for DB inserts)
+extension MaintenanceDomainX on Maintenance {
+  db.MaintenancesCompanion toCompanion() {
+    return db.MaintenancesCompanion(
       id: id != null ? Value(id!) : const Value.absent(),
       terrainId: Value(terrainId),
       type: Value(type),
@@ -39,9 +105,13 @@ extension MaintenanceToCompanion on Maintenance {
       sacsSiliceUtilises: Value(sacsSiliceUtilises),
       imagePath: Value(imagePath),
       // Sync mappings
+      syncStatus: Value(syncStatus.name),
       createdAt: Value(createdAt),
-      remoteId: Value(firebaseId),
+      updatedAt: Value(updatedAt),
+      firebaseId: Value(firebaseId),
+        remoteId: Value(firebaseId), // Fallback
       createdBy: Value(createdBy),
+      modifiedBy: Value(modifiedBy),
     );
   }
 }
