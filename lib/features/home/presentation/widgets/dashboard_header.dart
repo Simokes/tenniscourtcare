@@ -129,7 +129,7 @@ class _PulsingDotState extends State<PulsingDot> with SingleTickerProviderStateM
         width: 8,
         height: 8,
         decoration: const BoxDecoration(
-          color: Colors.emerald,
+          color: Color(0xFF10B981),
           shape: BoxShape.circle,
         ),
       ),
