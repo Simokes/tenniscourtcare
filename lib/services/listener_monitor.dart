@@ -31,7 +31,7 @@ class ListenerMonitor {
       final total = getActiveListenerCount();
       print('ListenerMonitor: Active Listeners: $total');
       _activeListeners.forEach((key, value) {
-        print('  - $key: $value');
+        debugPrint('  - $key: $value');
       });
     }
   }

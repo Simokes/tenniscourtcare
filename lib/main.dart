@@ -10,7 +10,6 @@ import 'presentation/providers/app_settings_provider.dart';
 import 'providers/queue_providers.dart';
 import 'presentation/widgets/queue_status_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {

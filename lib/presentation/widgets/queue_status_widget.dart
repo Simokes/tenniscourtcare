@@ -4,14 +4,13 @@ import '../../domain/models/queue_status.dart';
 import '../../providers/queue_providers.dart';
 
 class QueueStatusBanner extends ConsumerWidget {
-  const QueueStatusBanner({Key? key}) : super(key: key);
+  const QueueStatusBanner({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(queueStatusProvider);
     final progressAsync = ref.watch(queueProgressProvider);
-    final warningAsync = ref.watch(queueWarningsProvider);
-    final criticalAsync = ref.watch(queueCriticalProvider);
+  
 
     // Listen to warnings/critical alerts
     ref.listen(queueWarningsProvider, (prev, next) {

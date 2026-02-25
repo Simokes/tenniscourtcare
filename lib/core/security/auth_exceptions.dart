@@ -12,8 +12,7 @@ abstract class AuthException implements Exception {
 
 // Added concrete class for generic auth errors
 class GenericAuthException extends AuthException {
-  const GenericAuthException(String message, {String? code, dynamic originalError})
-      : super(message, code: code, originalError: originalError);
+  const GenericAuthException(super.message, {super.code, super.originalError});
 }
 
 class InvalidCredentialsException extends AuthException {
