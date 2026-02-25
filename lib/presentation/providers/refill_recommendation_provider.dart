@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/refill_recommendation.dart';
 import 'app_settings_provider.dart';
 import 'database_provider.dart';
-import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
+import '../../features/weather/infrastructure/weather_service.dart';
 import 'weather_providers.dart';
 
 final refillRecommendationProvider = FutureProvider.family<RefillRecommendation, int>((ref, terrainId) async {

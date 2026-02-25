@@ -3,6 +3,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
@@ -26,7 +27,7 @@ void main() {
       FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
       FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
     } catch (e) {
-      print('Emulators might already be configured or failed to connect: $e');
+      debugPrint('Emulators might already be configured or failed to connect: $e');
     }
   });
 
@@ -56,8 +57,8 @@ void main() {
       .where('targetUserId', isEqualTo: targetUserId)
       .get();
 
-    expect(auditLog.docs.isNotEmpty, true, reason: "Audit log for $action not found");
-    expect(auditLog.docs.first['performedBy'], performedByUserId, reason: "PerformedBy mismatch");
+    expect(auditLog.docs.isNotEmpty, true, reason: 'Audit log for $action not found');
+    expect(auditLog.docs.first['performedBy'], performedByUserId, reason: 'PerformedBy mismatch');
     expect(auditLog.docs.first['timestamp'], isNotNull);
   }
 
@@ -309,7 +310,7 @@ void main() {
 
     final userQuery = await FirebaseFirestore.instance.collection('users').where('email', isEqualTo: promoteEmail).get();
     final promoteUid = userQuery.docs.first.id;
-    final localUser = await db.getUserByFirestoreUid(promoteUid);
+
 
     // Need a method to call updateRole - Wait, FirebaseAuthRepository doesn't expose public updateUserRole with Role enum for OTHERS?
     // It has `updateUserRole(int userId, Role newRole)`? No, it has `updateUserRole` implemented?

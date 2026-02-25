@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:drift/drift.dart' hide isNull;
@@ -50,8 +49,8 @@ void main() {
         data: {'test': true},
       );
 
-      var items = await queueManager.getPendingItems();
-      var item = items.first;
+      final items = await queueManager.getPendingItems();
+      final item = items.first;
 
       // 2. Manually set nextRetryAt to future (10s later)
       final futureTime = DateTime.now().add(const Duration(seconds: 10));
@@ -144,8 +143,8 @@ void main() {
          await db.into(db.syncQueue).insert(
             SyncQueueCompanion(
               uuid: Value('uuid-$i'),
-              collection: Value('col'),
-              action: Value('create'),
+              collection: const Value('col'),
+              action: const Value('create'),
               documentId: Value('doc$i'),
               data: const Value('{}'),
               timestamp: Value(DateTime.now()),

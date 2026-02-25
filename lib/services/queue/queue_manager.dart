@@ -56,7 +56,7 @@ class QueueManager {
       ),
     );
 
-    debugPrint("QueueManager: Queued $action on $collection:$documentId");
+    debugPrint('QueueManager: Queued $action on $collection:$documentId');
     await _notifyQueueUpdated();
   }
 
@@ -123,7 +123,7 @@ class QueueManager {
             }
           } else {
             // Keep only latest create/update
-            final keepId = items.first.id;
+            
             for (final item in items.skip(1)) {
               await (_db.delete(_db.syncQueue)..where((q) => q.id.equals(item.id))).go();
               removed++;
@@ -341,10 +341,10 @@ class QueueManager {
 
   // F) clearQueue() - Clear all pending (dangerous)
   Future<void> clearQueue({required bool confirmed}) async {
-    if (!confirmed) throw Exception("Must confirm before clearing");
+    if (!confirmed) throw Exception('Must confirm before clearing');
 
     await (_db.delete(_db.syncQueue)..where((t) => t.syncedAt.isNull())).go();
-    debugPrint("QueueManager: Queue cleared by user");
+    debugPrint('QueueManager: Queue cleared by user');
     await _notifyQueueUpdated();
   }
 

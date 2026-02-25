@@ -52,7 +52,7 @@ Future<List<SyncQueueItem>> pendingQueueItems(PendingQueueItemsRef ref) async {
   // Rebuild when count changes
   ref.watch(pendingQueueCountProvider);
 
-  return await manager.getPendingItems();
+  return manager.getPendingItems();
 }
 
 @Riverpod()

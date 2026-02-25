@@ -313,22 +313,13 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         const SizedBox(height: 24),
 
                         // Weather Section
-                        if (_weather == null)
-                          WeatherCard(
-                            weather: null,
-                            precip24h: null,
-                            frozen: null,
-                            unplayable: null,
-                            onRefresh: _loadWeather,
-                          )
-                        else
-                          WeatherCard(
-                            weather: _weather,
-                            precip24h: _precip24h,
-                            frozen: _frozen,
-                            unplayable: _unplayable,
-                            onRefresh: _loadWeather,
-                          ),
+                        WeatherCard(
+                          weather: _weather,
+                          precip24h: _precip24h,
+                          frozen: _frozen,
+                          unplayable: _unplayable,
+                          onRefresh: _loadWeather,
+                        ),
 
                         const SizedBox(height: 24),
 

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/services/weather_rules.dart';
-import 'package:tenniscourtcare/features/weather/infrastructure/weather_service.dart';
+import '../../features/weather/infrastructure/weather_service.dart';
 import 'app_settings_provider.dart';
 import 'weather_providers.dart' show weatherServiceProvider;
 
