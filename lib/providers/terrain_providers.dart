@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:drift/drift.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../presentation/providers/database_provider.dart';
 import '../providers/sync_providers.dart';
@@ -24,10 +23,10 @@ Stream<List<dom.Terrain>> terrainsStream(TerrainsStreamRef ref) {
       .watch()
       .map((rows) {
         return rows
+          .where((row) => row.available) // Filter on Drift Row
           .map((r) => r.toDomain())
-          .where((t) => t.available)
           .toList()
-          ..sort((a, b) => a.name.compareTo(b.name));
+          ..sort((a, b) => a.nom.compareTo(b.nom)); // Sort on Domain Entity which has 'nom'
       });
 }
 
@@ -41,9 +40,6 @@ Future<void> refreshTerrains(RefreshTerrainsRef ref) async {
     fromFirestore: (doc) => TerrainFirestoreModel.fromFirestore(doc),
     saveToLocal: (items) async {
       await db.transaction(() async {
-        // Delete all to match server state (removals)
-        await db.delete(db.terrains).go();
-
         for (final item in items) {
           final companion = TerrainsCompanion(
             remoteId: Value(item.id),
@@ -58,7 +54,14 @@ Future<void> refreshTerrains(RefreshTerrainsRef ref) async {
             syncedAt: Value(DateTime.now()),
             imageUrl: Value(item.imageUrl),
           );
-          await db.into(db.terrains).insert(companion);
+
+          final existing = await (db.select(db.terrains)..where((t) => t.remoteId.equals(item.id))).getSingleOrNull();
+
+          if (existing != null) {
+            await (db.update(db.terrains)..where((t) => t.id.equals(existing.id))).write(companion);
+          } else {
+            await db.into(db.terrains).insert(companion);
+          }
         }
       });
     },

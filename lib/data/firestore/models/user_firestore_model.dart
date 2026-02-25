@@ -30,16 +30,28 @@ class UserFirestoreModel {
       uid: doc.id,
       email: data['email'] ?? '',
       name: data['name'] ?? '',
-      role: Role.values.firstWhere(
-        (e) => e.name == (data['role'] ?? 'user'),
-        orElse: () => Role.user,
-      ),
+      role: _roleFromString(data['role']),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
       syncedAt: (data['syncedAt'] as Timestamp?)?.toDate(),
       profileImageUrl: data['profileImageUrl'],
       isActive: data['isActive'] ?? true,
     );
+  }
+
+  static Role _roleFromString(String? roleStr) {
+    switch (roleStr?.toLowerCase()) {
+      case 'admin':
+        return Role.admin;
+      case 'agent':
+      case 'maintenance':
+        return Role.agent;
+      case 'secretary':
+      case 'user':
+        return Role.secretary; // Fallback
+      default:
+        return Role.secretary;
+    }
   }
 
   Map<String, dynamic> toFirestore() {

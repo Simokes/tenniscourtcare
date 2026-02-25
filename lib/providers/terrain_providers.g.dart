@@ -23,7 +23,7 @@ final terrainsStreamProvider = StreamProvider<List<dom.Terrain>>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef TerrainsStreamRef = StreamProviderRef<List<dom.Terrain>>;
-String _$refreshTerrainsHash() => r'66627e998a8cd18cd903b251ad3e6349500a2222';
+String _$refreshTerrainsHash() => r'863d783bbbb7c55ccbe1d4da92d52d424ace4bd8';
 
 /// See also [refreshTerrains].
 @ProviderFor(refreshTerrains)

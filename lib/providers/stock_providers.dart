@@ -29,7 +29,11 @@ Stream<List<dom.StockItem>> stockStream(StockStreamRef ref) {
       .map((rows) {
         return rows
             .map((r) => r.toDomain())
-            .where((item) => item.quantity <= item.minThreshold)
+            .where((item) {
+              final min = item.minThreshold;
+              if (min == null) return false; // Skip if no threshold set
+              return item.quantity <= min;
+            })
             .toList()
             ..sort((a, b) => a.quantity.compareTo(b.quantity)); // ASC (most critical first)
       });
@@ -43,5 +47,7 @@ Stream<int> lowStockCount(LowStockCountRef ref) {
   }
 
   // We watch the stockStreamProvider which already filters low stock items
+  // Note: If stockStreamProvider throws (e.g. auth issue), this might fail.
+  // But we check auth here too.
   return ref.watch(stockStreamProvider.stream).map((items) => items.length);
 }

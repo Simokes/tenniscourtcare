@@ -1,6 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:drift/drift.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../presentation/providers/database_provider.dart';
 import '../presentation/providers/auth_providers.dart';
@@ -31,30 +30,13 @@ DateTime _combineDateAndTime(DateTime date, String time) {
 @Riverpod(keepAlive: true)
 Stream<List<Reservation>> userReservationsStream(
   UserReservationsStreamRef ref,
-  String userId, // This is Firestore UID or Local ID? The prompt says "userId", usually meaning UID in this app context or just "userId" string.
-  // The prompt usage: `ref.watch(userReservationsStreamProvider('user123'));`
-  // The drift table has `userId` as Int (FK).
-  // The prompt says "filtered by userId".
-  // If the parameter is String (UID), I need to find the Int ID first.
-  // Or maybe the prompt meant the Int ID?
-  // "usage: ref.watch(userReservationsStreamProvider('user123'))" -> 'user123' looks like UID.
-  // I will assume UID.
+  String userId, // Firestore UID
 ) {
   final monitor = ListenerMonitor();
   monitor.registerListener('userReservationsStreamProvider');
   ref.onDispose(() => monitor.unregisterListener('userReservationsStreamProvider'));
 
   final db = ref.watch(databaseProvider);
-
-  // We need to resolve UID to Int ID
-  // But we can't await in a stream provider body easily without being async*.
-  // But this is `Stream<List<Reservation>>`, so we can `async*`.
-  // Wait, drift watch returns a stream.
-  // I can switch map to async map? No.
-
-  // Strategy: Watch Users table for that UID to get the ID, then switch map?
-  // Or just query once? If user ID changes (unlikely), we'd want to know.
-  // Let's assume we pass the Int ID? No, prompt says 'user123'.
 
   // Watch the user table to react when user is synced/inserted
   return (db.select(db.users)..where((u) => u.firestoreUid.equals(userId)))
@@ -65,7 +47,7 @@ Stream<List<Reservation>> userReservationsStream(
         }
 
         return (db.select(db.reservations)
-          ..where((r) => r.userId.equals(user.id) & r.status.isNotValue('cancelled'))
+          ..where((r) => r.userId.equals(user.id) & r.status.equals('cancelled').not())
         ).watch().map((reservations) {
           return reservations
             ..sort((a, b) {

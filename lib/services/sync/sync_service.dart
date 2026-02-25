@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' as fb;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -10,7 +10,7 @@ enum SyncAction { create, update, delete }
 
 class SyncService {
   final AppDatabase _db;
-  final FirebaseFirestore _firestore;
+  final fb.FirebaseFirestore _firestore;
 
   bool _isOnline = false;
   bool get isOnline => _isOnline;
@@ -19,7 +19,7 @@ class SyncService {
   bool get isSyncing => _isSyncing;
 
   final _connectivity = Connectivity();
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
   final _queueChangeController = StreamController<void>.broadcast();
   Stream<void> get onQueueChanged => _queueChangeController.stream;
@@ -31,14 +31,11 @@ class SyncService {
     _updateConnectionStatus(result);
 
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-
-    // Initial check for pending items even if offline (to update count)
-    // or just rely on providers.
   }
 
-  void _updateConnectionStatus(List<ConnectivityResult> result) {
+  void _updateConnectionStatus(ConnectivityResult result) {
     bool wasOnline = _isOnline;
-    _isOnline = result.any((r) => r != ConnectivityResult.none);
+    _isOnline = result != ConnectivityResult.none;
 
     if (_isOnline && !wasOnline) {
       debugPrint('SyncService: Online. Flushing queue...');
@@ -77,12 +74,12 @@ class SyncService {
   /// Respects "Cloud Wins" unless local has pending changes for that ID.
   StreamSubscription<List<T>> syncDown<T>({
     required String collection,
-    required T Function(DocumentSnapshot) fromFirestore,
+    required T Function(fb.DocumentSnapshot) fromFirestore,
     required Future<void> Function(List<T> items) saveToLocal,
     required String Function(T item) getId,
-    Query Function(Query)? queryFn,
+    fb.Query Function(fb.Query)? queryFn,
   }) {
-    Query query = _firestore.collection(collection);
+    fb.Query query = _firestore.collection(collection);
     if (queryFn != null) {
       query = queryFn(query);
     }
@@ -108,9 +105,9 @@ class SyncService {
   /// Useful for manual refresh (pull-to-refresh).
   Future<void> refreshCollection<T>({
     required String collection,
-    required T Function(DocumentSnapshot) fromFirestore,
+    required T Function(fb.DocumentSnapshot) fromFirestore,
     required Future<void> Function(List<T> items) saveToLocal,
-    Query Function(Query)? queryFn,
+    fb.Query Function(fb.Query)? queryFn,
   }) async {
     if (!_isOnline) {
       debugPrint('SyncService: Offline. Cannot refresh $collection.');
@@ -118,7 +115,7 @@ class SyncService {
     }
 
     try {
-      Query query = _firestore.collection(collection);
+      fb.Query query = _firestore.collection(collection);
       if (queryFn != null) {
         query = queryFn(query);
       }
@@ -127,47 +124,7 @@ class SyncService {
       final items = snapshot.docs.map(fromFirestore).toList();
 
       // For refresh, we generally want to update everything we fetched.
-      // We might want to respect pending changes (not overwrite local edits).
-      // Let's reuse the logic from syncDown: filter out pending IDs.
-      final pendingIds = await _getPendingDocumentIds(collection);
-
-      // Assume T has an ID access or we pass an getId function?
-      // The prompt didn't specify getId for refreshCollection, but syncDown has it.
-      // Let's add getId to refreshCollection signature to match syncDown pattern
-      // or assume we save all for now if no conflict.
-      // But to match syncDown logic, we need to know IDs.
-      // Wait, the prompt example usage:
-      // await sync.refreshCollection<Terrain>(..., saveToLocal: ...);
-      // It didn't show getId.
-      // But if I want to respect pending changes I need IDs.
-      // I will assume for now we overwrite unless I add getId.
-      // Given the prompt example "await db.terrains.deleteAll(); await db.terrains.insertAll(terrains);",
-      // it seems the user intends a FULL refresh replacing local data.
-      // BUT, deleting all would lose pending local changes if we are not careful.
-      // However, the prompt says "Update Drift local", and the example usage shows
-      // deleteAll(). This is aggressive.
-      // If I use deleteAll(), I lose pending creates/updates if they are not yet synced.
-      // But the sync queue stores the *changes* separately in `SyncQueue` table?
-      // No, `SyncQueue` stores the *operation* to replay.
-      // The `terrains` table stores the *current state*.
-      // If I delete `terrains`, I lose the local state.
-      // If `SyncQueue` has a pending update for ID '123', and I delete '123' from `terrains`,
-      // then `123` is gone from UI until I re-insert it.
-      // If I re-insert from Firestore, I get the OLD server version.
-      // Then the SyncQueue will eventually run and update server.
-      // But the UI will momentarily revert to server state.
-      //
-      // User Prompt Example:
-      //   await sync.refreshCollection<Terrain>(..., saveToLocal: (terrains) async {
-      //     final db = ref.read(databaseProvider);
-      //     await db.terrains.deleteAll(); // <--- THIS IS DANGEROUS for pending changes
-      //     await db.terrains.insertAll(terrains);
-      //   });
-      //
-      // I should probably follow the prompt's interface but implement `saveToLocal` safely in the provider.
-      // So `refreshCollection` just fetches and calls `saveToLocal`.
-      // It is up to `saveToLocal` implementation to decide how to merge.
-
+      // We rely on saveToLocal to handle conflict resolution.
       await saveToLocal(items);
 
     } catch (e) {
@@ -276,8 +233,6 @@ class SyncService {
 
     switch (action) {
       case SyncAction.create:
-        // Use set to ensure ID match, or set with merge if needed.
-        // Prompt said create: set() is safer for idempotency if ID is provided.
         await docRef.set(data);
         break;
       case SyncAction.update:
