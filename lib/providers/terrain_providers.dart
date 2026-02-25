@@ -50,7 +50,7 @@ Future<void> refreshTerrains(RefreshTerrainsRef ref) async {
             pricePerHour: Value(item.pricePerHour),
             available: Value(item.available),
             createdAt: Value(item.createdAt),
-            updatedAt: Value(item.updatedAt),
+            updatedAt: Value(item.updatedAt ?? item.createdAt),
             syncedAt: Value(DateTime.now()),
             imageUrl: Value(item.imageUrl),
           );

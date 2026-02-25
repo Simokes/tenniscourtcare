@@ -22,7 +22,14 @@ class Maintenances extends Table {
   TextColumn get status => text().nullable()();
   DateTimeColumn get scheduledDate => dateTime().nullable()();
   DateTimeColumn get completedDate => dateTime().nullable()();
-  TextColumn get createdBy => text().nullable()(); // UID
-  DateTimeColumn get createdAt => dateTime().nullable()();
+
+  // Sync fields
+  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get createdBy => text().nullable()();
+  TextColumn get modifiedBy => text().nullable()();
+
   DateTimeColumn get syncedAt => dateTime().nullable()();
 }

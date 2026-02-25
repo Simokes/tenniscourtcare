@@ -9,15 +9,21 @@ class StockItems extends Table {
   TextColumn get comment => text().nullable()();
   BoolColumn get isCustom => boolean()();
   IntColumn get minThreshold => integer().nullable()();
-  DateTimeColumn get updatedAt => dateTime()();
   TextColumn get category => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   // New fields for Firestore sync
   TextColumn get remoteId => text().nullable()();
   RealColumn get unitPrice => real().nullable()();
-  DateTimeColumn get createdAt => dateTime().nullable()();
   TextColumn get lastModifiedBy => text().nullable()();
   DateTimeColumn get syncedAt => dateTime().nullable()();
   BoolColumn get isSyncPending => boolean().withDefault(const Constant(false))();
+
+  // Sync fields
+  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get createdBy => text().nullable()();
+  TextColumn get modifiedBy => text().nullable()();
 }
