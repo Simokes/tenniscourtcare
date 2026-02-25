@@ -40,7 +40,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
     // 2. Sync Firebase (asynchrone)
     _syncTerrainToFirebase(updatedTerrain);
 
-    return result;
+    return result > 0;
   }
 
   @override
@@ -60,17 +60,17 @@ class TerrainRepositoryImpl implements TerrainRepository {
     // To be safe and follow the pattern:
     _deleteTerrainFromFirebase(id);
 
-    return result;
+    return result > 0;
   }
 
   @override
   Future<List<Terrain>> getAllTerrains() async {
-    return await _db.getAllTerrains();
+    return _db.getAllTerrains();
   }
 
   @override
   Future<Terrain?> getTerrainById(int id) async {
-    return await _db.getTerrainById(id);
+    return _db.getTerrainById(id);
   }
 
   // Helper: Sync à Firestore en background

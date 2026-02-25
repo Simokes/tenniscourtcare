@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import '../../domain/entities/stock_item.dart';
 import '../../domain/entities/sync_status.dart';
 import '../../domain/repositories/stock_repository.dart';
@@ -34,23 +35,24 @@ class StockRepositoryImpl implements StockRepository {
 
     _syncStockToFirebase(updatedItem);
 
-    return result;
+    return result > 0;
   }
 
   @override
   Future<bool> deleteStockItem(int id) async {
     final result = await _db.deleteStockItem(id);
-    return result;
+    return result > 0;
   }
 
   @override
   Future<List<StockItem>> getAllStockItems() async {
-    return await _db.getAllStockItems();
+    return await _db.watchAllStockItems().first;
   }
 
   @override
   Future<StockItem?> getStockItemById(int id) async {
-    return await _db.getStockItemById(id);
+    final items = await _db.watchAllStockItems().first;
+    return items.firstWhereOrNull((s) => s.id == id);
   }
 
   Future<void> _syncStockToFirebase(StockItem item) async {

@@ -30,27 +30,29 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       syncStatus: SyncStatus.local,
       updatedAt: DateTime.now(),
     );
-    final result = await _db.updateMaintenance(updatedMaintenance);
+    final result = await _db.updateMaintenance(
+      updatedMaintenance.toCompanion(includeId: true)
+    );
 
     _syncMaintenanceToFirebase(updatedMaintenance);
 
-    return result;
+    return result > 0;
   }
 
   @override
   Future<bool> deleteMaintenance(int id) async {
     final result = await _db.deleteMaintenance(id);
-    return result;
+    return result > 0;
   }
 
   @override
   Future<List<Maintenance>> getAllMaintenances() async {
-    return await _db.getAllMaintenances();
+    return await _db.watchAllMaintenances().first;
   }
 
   @override
   Future<Maintenance?> getMaintenanceById(int id) async {
-    return await _db.getMaintenanceById(id);
+    return _db.getMaintenanceById(id);
   }
 
   Future<void> _syncMaintenanceToFirebase(Maintenance maintenance) async {
