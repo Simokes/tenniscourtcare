@@ -18,7 +18,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    final id = await _db.terrainsDao.insertTerrain(localTerrain);
+    final id = await _db.insertTerrain(localTerrain);
 
     // 2. Déclenche sync Firebase (asynchrone, non-bloquant)
     // On doit passer l'ID généré localement pour la suite si besoin,
@@ -35,7 +35,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
       syncStatus: SyncStatus.local,
       updatedAt: DateTime.now(),
     );
-    final result = await _db.terrainsDao.updateTerrain(updatedTerrain);
+    final result = await _db.updateTerrain(updatedTerrain);
 
     // 2. Sync Firebase (asynchrone)
     _syncTerrainToFirebase(updatedTerrain);
@@ -45,7 +45,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
 
   @override
   Future<bool> deleteTerrain(int id) async {
-    final result = await _db.terrainsDao.deleteTerrain(id);
+    final result = await _db.deleteTerrain(id);
     // Note: Soft delete pattern could be implemented here if needed by sync logic
     // For now we just delete local. Ideally we should also propagate delete to Firebase
     // But the interface provided by user only asked for add/update sync in this block.
@@ -65,12 +65,12 @@ class TerrainRepositoryImpl implements TerrainRepository {
 
   @override
   Future<List<Terrain>> getAllTerrains() async {
-    return await _db.terrainsDao.getAllTerrains();
+    return await _db.getAllTerrains();
   }
 
   @override
   Future<Terrain?> getTerrainById(int id) async {
-    return await _db.terrainsDao.getTerrainById(id);
+    return await _db.getTerrainById(id);
   }
 
   // Helper: Sync à Firestore en background

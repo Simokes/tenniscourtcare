@@ -17,7 +17,7 @@ class StockRepositoryImpl implements StockRepository {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    final id = await _db.stockDao.insertStockItem(localItem);
+    final id = await _db.insertStockItem(localItem);
 
     _syncStockToFirebase(localItem.copyWith(id: id));
 
@@ -30,7 +30,7 @@ class StockRepositoryImpl implements StockRepository {
       syncStatus: SyncStatus.local,
       updatedAt: DateTime.now(),
     );
-    final result = await _db.stockDao.updateStockItem(updatedItem);
+    final result = await _db.updateStockItem(updatedItem);
 
     _syncStockToFirebase(updatedItem);
 
@@ -39,18 +39,18 @@ class StockRepositoryImpl implements StockRepository {
 
   @override
   Future<bool> deleteStockItem(int id) async {
-    final result = await _db.stockDao.deleteStockItem(id);
+    final result = await _db.deleteStockItem(id);
     return result;
   }
 
   @override
   Future<List<StockItem>> getAllStockItems() async {
-    return await _db.stockDao.getAllStockItems();
+    return await _db.getAllStockItems();
   }
 
   @override
   Future<StockItem?> getStockItemById(int id) async {
-    return await _db.stockDao.getStockItemById(id);
+    return await _db.getStockItemById(id);
   }
 
   Future<void> _syncStockToFirebase(StockItem item) async {

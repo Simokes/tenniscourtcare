@@ -149,9 +149,19 @@ class FirebaseStockService {
 
   Future<void> uploadStockToFirestore(StockItem item) async {
       final data = {
-      'label': item.label,
+      'name': item.name,
       'quantity': item.quantity,
+      'unit': item.unit,
+      'comment': item.comment,
+      'isCustom': item.isCustom,
+      'minThreshold': item.minThreshold,
+      'category': item.category,
+      'sortOrder': item.sortOrder,
+      'syncStatus': item.syncStatus.name,
+      'createdAt': item.createdAt.toIso8601String(), // Or Timestamp
       'updatedAt': FieldValue.serverTimestamp(),
+      'createdBy': item.createdBy,
+      'modifiedBy': item.modifiedBy,
     };
      if (item.firebaseId != null) {
       await _firestore.collection('stock').doc(item.firebaseId).set(data, SetOptions(merge: true));
@@ -165,12 +175,20 @@ class FirebaseStockService {
       return snapshot.docs.map((doc) {
         final data = doc.data();
         return StockItem(
-          label: data['label'] ?? '',
-          quantity: data['quantity'] ?? 0,
-          firebaseId: doc.id,
+          name: data['name'] as String? ?? '',
+          quantity: (data['quantity'] as num?)?.toInt() ?? 0,
+          unit: data['unit'] as String? ?? 'unit',
+          comment: data['comment'] as String?,
+          isCustom: data['isCustom'] as bool? ?? false,
+          minThreshold: (data['minThreshold'] as num?)?.toInt(),
+          category: data['category'] as String?,
+          sortOrder: (data['sortOrder'] as num?)?.toInt() ?? 0,
+          syncStatus: SyncStatus.fromString(data['syncStatus'] as String? ?? 'LOCAL'),
+          createdAt: data['createdAt'] != null ? DateTime.tryParse(data['createdAt'] as String) ?? DateTime.now() : DateTime.now(),
           updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          limit: 0,
-          category: StockCategory.maintenance,
+          firebaseId: doc.id,
+          createdBy: data['createdBy'] as String?,
+          modifiedBy: data['modifiedBy'] as String?,
         );
       }).toList();
     });
