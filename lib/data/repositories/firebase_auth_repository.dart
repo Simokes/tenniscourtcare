@@ -260,12 +260,43 @@ class FirebaseAuthRepository implements AuthRepository {
     return _db.getAllUsers();
   }
 
-  @override
-  Future<void> registerAdmin(String email, String name, String password) async {
-    throw UnimplementedError(
-      "L'administrateur initial doit être créé via la console Firebase.",
+@override
+Future<void> registerAdmin(String email, String name, String password) async {
+  try {
+    // 1. Créer l'utilisateur dans Firebase Auth
+    final userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
     );
+    
+    final uid = userCredential.user!.uid;
+    
+    // 2. Créer le document admin dans Firestore
+    await _firestore.collection('users').doc(uid).set({
+      'email': email,
+      'firstName': name,
+      'lastName': '',
+      'role': 'admin',
+      'status': 'active',
+      'createdAt': FieldValue.serverTimestamp(),
+      'uid': uid,
+    });
+    
+    // 3. Sauvegarder dans la base de données locale (Drift)
+    await _db.insertUser(
+      UsersCompanion(
+        email: drift.Value(email),
+        firestoreUid: drift.Value(uid),
+        name: drift.Value(name),
+        passwordHash: const drift.Value('FIREBASE_AUTH'),
+        role: drift.Value(Role.admin),
+        createdAt: drift.Value(DateTime.now()),
+      ),
+    );
+  } catch (e) {
+    throw _mapFirebaseException(e);
   }
+}
 
   @override
   Future<bool> hasAnyUser() async {
