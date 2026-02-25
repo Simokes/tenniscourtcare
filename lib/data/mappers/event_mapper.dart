@@ -48,7 +48,7 @@ class EventMapper {
   // Drift Entity → Domain Entity
   static AppEvent fromDriftEntity(db.EventRow driftEntity) {
     return AppEvent(
-      id: driftEntity.id,
+      id: driftEntity.id ?? 0,
       title: driftEntity.title,
       description: driftEntity.description,
       startTime: driftEntity.startTime,
@@ -56,8 +56,8 @@ class EventMapper {
       color: driftEntity.color,
       terrainIds: driftEntity.terrainIds,
       syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
-      createdAt: driftEntity.createdAt,
-      updatedAt: driftEntity.updatedAt,
+      createdAt: driftEntity.createdAt ?? DateTime.now(),
+      updatedAt: driftEntity.updatedAt ?? DateTime.now(),
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,

@@ -4,12 +4,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/mappers/event_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
-import 'package:tenniscourtcare/data/mappers/stock_item_mapper.dart';
-import 'package:tenniscourtcare/data/mappers/terrain_mapper.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/data/services/firebase_terrain_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_maintenance_service.dart';
