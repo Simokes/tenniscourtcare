@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../providers/event_providers.dart';
+import '../../providers/event_provider.dart';
 import '../../screens/calendar/calendar_screen.dart';
 import '../../widgets/premium/premium_card.dart';
 import '../../screens/calendar/add_edit_event_screen.dart';

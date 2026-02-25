@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../domain/entities/stock_item.dart';
 import '../../../domain/entities/refill_recommendation.dart';
 import '../../providers/stock_provider.dart';
-import '../premium/premium_card.dart';
+import '../../widgets/premium/premium_card.dart';
 
 class RefillRecommendationCard extends ConsumerWidget {
   final RefillRecommendation recommendation;
@@ -28,14 +28,15 @@ class RefillRecommendationCard extends ConsumerWidget {
     if (stockItemsAsync.hasValue) {
       final items = stockItemsAsync.value!;
       // Recherche insensible à la casse
-      final mantoItem = items.cast<StockItem?>().firstWhere(
-        (item) => item!.name.toLowerCase().contains('manto'),
-        orElse: () => null,
-      );
-
-      if (mantoItem != null) {
+      try {
+        final mantoItem = items.firstWhere(
+          (item) => item.name.toLowerCase().contains('manto'),
+        );
         availableManto = mantoItem.quantity;
         isInsufficient = availableManto < recommendation.recommendedBags;
+      } catch (e) {
+        // Item not found
+        availableManto = null;
       }
     }
 
@@ -178,12 +179,17 @@ class RefillRecommendationCard extends ConsumerWidget {
       if (!context.mounted) return;
 
       // Recherche insensible à la casse
-      final mantoItem = items.cast<StockItem?>().firstWhere(
-        (item) => item!.name.toLowerCase().contains('manto'),
-        orElse: () => null,
-      );
+      int? available;
+      try {
+        final mantoItem = items.firstWhere(
+          (item) => item.name.toLowerCase().contains('manto'),
+        );
+        available = mantoItem.quantity;
+      } catch (e) {
+        available = null;
+      }
 
-      if (mantoItem == null) {
+      if (available == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Article 'Manto' introuvable dans le stock."),
@@ -192,8 +198,6 @@ class RefillRecommendationCard extends ConsumerWidget {
         );
         return;
       }
-
-      final available = mantoItem.quantity;
       final missing = requiredBags - available;
 
       showDialog(

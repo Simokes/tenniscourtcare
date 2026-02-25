@@ -3,11 +3,13 @@ import '../../domain/entities/app_event.dart';
 import '../../domain/entities/sync_status.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../database/app_database.dart';
+import '../services/firebase_sync_service.dart';
 
 class EventRepositoryImpl implements EventRepository {
   final AppDatabase _db;
+  final FirebaseSyncService _firebaseService;
 
-  EventRepositoryImpl(this._db);
+  EventRepositoryImpl(this._db, this._firebaseService);
 
   @override
   Stream<List<AppEvent>> watchEvents({DateTime? start, DateTime? end}) {
@@ -39,52 +41,84 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<int> addEvent(AppEvent event) {
-    return _db.into(_db.events).insert(
+  Future<int> addEvent(AppEvent event) async {
+    // 1. Sauvegarde LOCAL
+    final localEvent = event.copyWith(
+      syncStatus: SyncStatus.local,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final id = await _db.into(_db.events).insert(
           EventsCompanion.insert(
-            title: event.title,
-            description: Value(event.description),
-            startTime: event.startTime,
-            endTime: event.endTime,
-            color: event.color,
-            terrainIds: event.terrainIds,
+            title: localEvent.title,
+            description: Value(localEvent.description),
+            startTime: localEvent.startTime,
+            endTime: localEvent.endTime,
+            color: localEvent.color,
+            terrainIds: localEvent.terrainIds,
             // Sync fields
-            createdAt: event.createdAt,
-            updatedAt: event.updatedAt,
-            syncStatus: Value(event.syncStatus.name),
-            firebaseId: Value(event.firebaseId),
-            createdBy: Value(event.createdBy),
-            modifiedBy: Value(event.modifiedBy),
+            createdAt: localEvent.createdAt,
+            updatedAt: localEvent.updatedAt,
+            syncStatus: Value(localEvent.syncStatus.name),
+            firebaseId: Value(localEvent.firebaseId),
+            createdBy: Value(localEvent.createdBy),
+            modifiedBy: Value(localEvent.modifiedBy),
           ),
         );
+
+    // 2. Sync Firebase
+    _syncEventToFirebase(localEvent.copyWith(id: id));
+
+    return id;
   }
 
   @override
   Future<bool> updateEvent(AppEvent event) async {
     if (event.id == null) return false;
+
+    final updatedEvent = event.copyWith(
+      syncStatus: SyncStatus.local,
+      updatedAt: DateTime.now(),
+    );
+
     final result = await (_db.update(_db.events)
-          ..where((t) => t.id.equals(event.id!)))
+          ..where((t) => t.id.equals(updatedEvent.id!)))
         .write(
       EventsCompanion(
-        title: Value(event.title),
-        description: Value(event.description),
-        startTime: Value(event.startTime),
-        endTime: Value(event.endTime),
-        color: Value(event.color),
-        terrainIds: Value(event.terrainIds),
+        title: Value(updatedEvent.title),
+        description: Value(updatedEvent.description),
+        startTime: Value(updatedEvent.startTime),
+        endTime: Value(updatedEvent.endTime),
+        color: Value(updatedEvent.color),
+        terrainIds: Value(updatedEvent.terrainIds),
         // Sync fields
-        updatedAt: Value(DateTime.now()),
-        syncStatus: Value(event.syncStatus.name),
-        firebaseId: Value(event.firebaseId),
-        modifiedBy: Value(event.modifiedBy),
+        updatedAt: Value(updatedEvent.updatedAt),
+        syncStatus: Value(updatedEvent.syncStatus.name),
+        firebaseId: Value(updatedEvent.firebaseId),
+        modifiedBy: Value(updatedEvent.modifiedBy),
       ),
     );
-    return result > 0;
+
+    if (result > 0) {
+      _syncEventToFirebase(updatedEvent);
+      return true;
+    }
+    return false;
   }
 
   @override
-  Future<int> deleteEvent(int id) {
-    return (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+  Future<int> deleteEvent(int id) async {
+    final result = await (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+    return result;
+  }
+
+  Future<void> _syncEventToFirebase(AppEvent event) async {
+    try {
+      await _firebaseService.eventService.uploadEventToFirestore(event);
+    } catch (e) {
+      print('Failed to sync event: $e');
+    }
   }
 
   AppEvent _toDomain(EventRow row) {
