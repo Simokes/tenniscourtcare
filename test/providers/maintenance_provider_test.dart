@@ -36,6 +36,7 @@ void main() {
           id: 0,
           nom: 'Terre battue',
           type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
         ),
       );
 
@@ -45,6 +46,7 @@ void main() {
           id: 0,
           nom: 'Synthétique',
           type: TerrainType.synthetique,
+          status: TerrainStatus.playable,
         ),
       );
 
@@ -53,6 +55,7 @@ void main() {
           id: 0,
           nom: 'Dur',
           type: TerrainType.dur,
+          status: TerrainStatus.playable,
         ),
       );
     });

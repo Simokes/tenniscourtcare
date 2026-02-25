@@ -23,6 +23,7 @@ void main() {
         id: 0,
         nom: 'Court 1',
         type: TerrainType.terreBattue,
+        status: TerrainStatus.playable,
       );
 
       final id = await database.insertTerrain(terrain);
@@ -32,14 +33,15 @@ void main() {
       expect(retrieved, isNotNull);
       expect(retrieved!.nom, 'Court 1');
       expect(retrieved.type, TerrainType.terreBattue);
+      expect(retrieved.status, TerrainStatus.playable);
     });
 
     test('getAllTerrains retourne tous les terrains', () async {
       await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
       );
       await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Court 2', type: TerrainType.synthetique),
+        const Terrain(id: 0, nom: 'Court 2', type: TerrainType.synthetique, status: TerrainStatus.playable),
       );
 
       final terrains = await database.getAllTerrains();
@@ -52,7 +54,7 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
       );
     });
 
@@ -140,10 +142,10 @@ void main() {
 
     setUp(() async {
       terrainTerreBattueId = await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Terre battue', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Terre battue', type: TerrainType.terreBattue, status: TerrainStatus.playable),
       );
       terrainSynthetiqueId = await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Synthétique', type: TerrainType.synthetique),
+        const Terrain(id: 0, nom: 'Synthétique', type: TerrainType.synthetique, status: TerrainStatus.playable),
       );
     });
 
@@ -252,7 +254,7 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue),
+        const Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
       );
     });
 

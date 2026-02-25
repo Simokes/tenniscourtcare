@@ -42,10 +42,33 @@ class CourtListSliver extends ConsumerWidget {
   }
 
   Widget _buildCourtItem(BuildContext context, Terrain terrain) {
-    final isMaintenance = terrain.isUnderMaintenance;
-    final statusColor = isMaintenance ? Colors.blue.shade100 : Colors.green.shade100;
-    final statusTextColor = isMaintenance ? Colors.blue.shade800 : Colors.green.shade800;
-    final statusText = isMaintenance ? 'MAINTENANCE' : 'PLAYABLE';
+    final status = terrain.status;
+    Color statusColor;
+    Color statusTextColor;
+    String statusText;
+
+    switch (status) {
+      case TerrainStatus.playable:
+        statusColor = Colors.green.shade100;
+        statusTextColor = Colors.green.shade800;
+        statusText = 'PLAYABLE';
+        break;
+      case TerrainStatus.maintenance:
+        statusColor = Colors.blue.shade100;
+        statusTextColor = Colors.blue.shade800;
+        statusText = 'MAINTENANCE';
+        break;
+      case TerrainStatus.unavailable:
+        statusColor = Colors.red.shade100;
+        statusTextColor = Colors.red.shade800;
+        statusText = 'UNAVAILABLE';
+        break;
+      case TerrainStatus.frozen:
+        statusColor = Colors.cyan.shade100;
+        statusTextColor = Colors.cyan.shade800;
+        statusText = 'FROZEN';
+        break;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -95,7 +118,7 @@ class CourtListSliver extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  isMaintenance ? 'Under maintenance' : 'Available now',
+                  _getStatusDescription(status),
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -124,5 +147,18 @@ class CourtListSliver extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _getStatusDescription(TerrainStatus status) {
+    switch (status) {
+      case TerrainStatus.playable:
+        return 'Available now';
+      case TerrainStatus.maintenance:
+        return 'Under maintenance';
+      case TerrainStatus.unavailable:
+        return 'Temporarily closed';
+      case TerrainStatus.frozen:
+        return 'Frozen / Unplayable';
+    }
   }
 }
