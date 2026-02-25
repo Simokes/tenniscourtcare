@@ -23,7 +23,7 @@ class StockItem {
   final String? createdBy;
   final String? modifiedBy;
 
-  const StockItem({
+  StockItem({
     this.id,
     required this.name,
     required this.quantity,
@@ -34,12 +34,13 @@ class StockItem {
     this.category,
     this.sortOrder = 0,
     this.syncStatus = SyncStatus.local,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   bool get isLowOnStock => minThreshold != null && quantity <= minThreshold!;
 

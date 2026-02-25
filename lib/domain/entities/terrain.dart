@@ -85,7 +85,7 @@ class Terrain {
   final String? createdBy;
   final String? modifiedBy;
 
-  const Terrain({
+  Terrain({
     required this.id,
     required this.nom,
     required this.type,
@@ -94,12 +94,13 @@ class Terrain {
     this.longitude,
     this.photoUrl,
     this.syncStatus = SyncStatus.local,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   // Computed property for backwards compatibility / utility
   bool get isUnderMaintenance => status == TerrainStatus.maintenance;

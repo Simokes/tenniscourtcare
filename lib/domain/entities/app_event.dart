@@ -19,7 +19,7 @@ class AppEvent {
   final String? createdBy;
   final String? modifiedBy;
 
-  const AppEvent({
+  AppEvent({
     this.id,
     required this.title,
     this.description,
@@ -28,12 +28,13 @@ class AppEvent {
     required this.color,
     required this.terrainIds,
     this.syncStatus = SyncStatus.local,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   AppEvent copyWith({
     int? id,

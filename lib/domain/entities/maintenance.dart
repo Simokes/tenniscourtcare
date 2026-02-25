@@ -31,7 +31,7 @@ class Maintenance {
   final String? createdBy;
   final String? modifiedBy;
 
-  const Maintenance({
+  Maintenance({
     this.id,
     required this.terrainId,
     required this.type,
@@ -45,12 +45,13 @@ class Maintenance {
     this.terrainGele,
     this.terrainImpraticable,
     this.syncStatus = SyncStatus.local,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   Maintenance copyWith({
     int? id,

@@ -93,7 +93,7 @@ void main() {
 
   group('Admin Providers Security', () {
     test('adminUsersProvider throws UnauthorizedException if user is not admin', () async {
-      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       expect(
@@ -112,7 +112,7 @@ void main() {
     });
 
     test('securityLogsProvider throws UnauthorizedException if user is not admin', () async {
-      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       expect(
@@ -124,7 +124,7 @@ void main() {
 
   group('UserManagementController Security', () {
     test('createUser throws UnauthorizedException if user is not admin', () async {
-      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       final subscription = container.listen(userManagementControllerProvider, (p, n) {});
@@ -143,7 +143,7 @@ void main() {
     });
 
     test('deleteUser throws UnauthorizedException if user is not admin', () async {
-      final user = const UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
+      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
       final container = createContainer(currentUser: user);
 
       final subscription = container.listen(userManagementControllerProvider, (p, n) {});

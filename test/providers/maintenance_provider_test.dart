@@ -32,7 +32,7 @@ void main() {
 
       // Créer des terrains de test
       terrainTerreBattueId = await database.insertTerrain(
-        const Terrain(
+        Terrain(
           id: 0,
           nom: 'Terre battue',
           type: TerrainType.terreBattue,
@@ -42,7 +42,7 @@ void main() {
 
       // ignore: unused_local_variable
       final terrainSynthetiqueId = await database.insertTerrain(
-        const Terrain(
+        Terrain(
           id: 0,
           nom: 'Synthétique',
           type: TerrainType.synthetique,
@@ -51,7 +51,7 @@ void main() {
       );
 
       terrainDurId = await database.insertTerrain(
-        const Terrain(
+        Terrain(
           id: 0,
           nom: 'Dur',
           type: TerrainType.dur,

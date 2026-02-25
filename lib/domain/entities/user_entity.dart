@@ -19,7 +19,7 @@ class UserEntity {
   final String? createdBy;
   final String? modifiedBy;
 
-  const UserEntity({
+  UserEntity({
     required this.id,
     required this.email,
     required this.name,
@@ -27,12 +27,13 @@ class UserEntity {
     this.lastLoginAt,
     this.avatarUrl,
     this.syncStatus = SyncStatus.local,
-    required this.createdAt,
-    required this.updatedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  });
+  })  : createdAt = createdAt ?? DateTime.now(),
+        updatedAt = updatedAt ?? DateTime.now();
 
   // Copie immuable pour les mises à jour
   UserEntity copyWith({
