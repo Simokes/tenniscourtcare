@@ -6562,6 +6562,16 @@ class $SyncQueueTable extends SyncQueue
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
   static const VerificationMeta _collectionMeta = const VerificationMeta(
     'collection',
   );
@@ -6602,12 +6612,12 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
+  static const VerificationMeta _timestampMeta = const VerificationMeta(
+    'timestamp',
   );
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
+  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
+    'timestamp',
     aliasedName,
     false,
     type: DriftSqlType.dateTime,
@@ -6650,11 +6660,12 @@ class $SyncQueueTable extends SyncQueue
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    uuid,
     collection,
     action,
     documentId,
     data,
-    createdAt,
+    timestamp,
     syncedAt,
     retryCount,
     lastError,
@@ -6673,6 +6684,14 @@ class $SyncQueueTable extends SyncQueue
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uuidMeta);
     }
     if (data.containsKey('collection')) {
       context.handle(
@@ -6706,13 +6725,13 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
-    if (data.containsKey('created_at')) {
+    if (data.containsKey('timestamp')) {
       context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+        _timestampMeta,
+        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
       );
     } else if (isInserting) {
-      context.missing(_createdAtMeta);
+      context.missing(_timestampMeta);
     }
     if (data.containsKey('synced_at')) {
       context.handle(
@@ -6745,6 +6764,10 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
       collection: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}collection'],
@@ -6761,9 +6784,9 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.string,
         data['${effectivePrefix}data'],
       )!,
-      createdAt: attachedDatabase.typeMapping.read(
+      timestamp: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
+        data['${effectivePrefix}timestamp'],
       )!,
       syncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -6788,21 +6811,23 @@ class $SyncQueueTable extends SyncQueue
 
 class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   final int id;
+  final String uuid;
   final String collection;
   final String action;
   final String documentId;
   final String data;
-  final DateTime createdAt;
+  final DateTime timestamp;
   final DateTime? syncedAt;
   final int retryCount;
   final String? lastError;
   const SyncQueueItem({
     required this.id,
+    required this.uuid,
     required this.collection,
     required this.action,
     required this.documentId,
     required this.data,
-    required this.createdAt,
+    required this.timestamp,
     this.syncedAt,
     required this.retryCount,
     this.lastError,
@@ -6811,11 +6836,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
     map['collection'] = Variable<String>(collection);
     map['action'] = Variable<String>(action);
     map['document_id'] = Variable<String>(documentId);
     map['data'] = Variable<String>(data);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['timestamp'] = Variable<DateTime>(timestamp);
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
     }
@@ -6829,11 +6855,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   SyncQueueCompanion toCompanion(bool nullToAbsent) {
     return SyncQueueCompanion(
       id: Value(id),
+      uuid: Value(uuid),
       collection: Value(collection),
       action: Value(action),
       documentId: Value(documentId),
       data: Value(data),
-      createdAt: Value(createdAt),
+      timestamp: Value(timestamp),
       syncedAt: syncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(syncedAt),
@@ -6851,11 +6878,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncQueueItem(
       id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
       collection: serializer.fromJson<String>(json['collection']),
       action: serializer.fromJson<String>(json['action']),
       documentId: serializer.fromJson<String>(json['documentId']),
       data: serializer.fromJson<String>(json['data']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       retryCount: serializer.fromJson<int>(json['retryCount']),
       lastError: serializer.fromJson<String?>(json['lastError']),
@@ -6866,11 +6894,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
       'collection': serializer.toJson<String>(collection),
       'action': serializer.toJson<String>(action),
       'documentId': serializer.toJson<String>(documentId),
       'data': serializer.toJson<String>(data),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'timestamp': serializer.toJson<DateTime>(timestamp),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'retryCount': serializer.toJson<int>(retryCount),
       'lastError': serializer.toJson<String?>(lastError),
@@ -6879,21 +6908,23 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
 
   SyncQueueItem copyWith({
     int? id,
+    String? uuid,
     String? collection,
     String? action,
     String? documentId,
     String? data,
-    DateTime? createdAt,
+    DateTime? timestamp,
     Value<DateTime?> syncedAt = const Value.absent(),
     int? retryCount,
     Value<String?> lastError = const Value.absent(),
   }) => SyncQueueItem(
     id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
     collection: collection ?? this.collection,
     action: action ?? this.action,
     documentId: documentId ?? this.documentId,
     data: data ?? this.data,
-    createdAt: createdAt ?? this.createdAt,
+    timestamp: timestamp ?? this.timestamp,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     retryCount: retryCount ?? this.retryCount,
     lastError: lastError.present ? lastError.value : this.lastError,
@@ -6901,6 +6932,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   SyncQueueItem copyWithCompanion(SyncQueueCompanion data) {
     return SyncQueueItem(
       id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
       collection: data.collection.present
           ? data.collection.value
           : this.collection,
@@ -6909,7 +6941,7 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
           ? data.documentId.value
           : this.documentId,
       data: data.data.present ? data.data.value : this.data,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
       retryCount: data.retryCount.present
           ? data.retryCount.value
@@ -6922,11 +6954,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   String toString() {
     return (StringBuffer('SyncQueueItem(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collection: $collection, ')
           ..write('action: $action, ')
           ..write('documentId: $documentId, ')
           ..write('data: $data, ')
-          ..write('createdAt: $createdAt, ')
+          ..write('timestamp: $timestamp, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('retryCount: $retryCount, ')
           ..write('lastError: $lastError')
@@ -6937,11 +6970,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
   @override
   int get hashCode => Object.hash(
     id,
+    uuid,
     collection,
     action,
     documentId,
     data,
-    createdAt,
+    timestamp,
     syncedAt,
     retryCount,
     lastError,
@@ -6951,11 +6985,12 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
       identical(this, other) ||
       (other is SyncQueueItem &&
           other.id == this.id &&
+          other.uuid == this.uuid &&
           other.collection == this.collection &&
           other.action == this.action &&
           other.documentId == this.documentId &&
           other.data == this.data &&
-          other.createdAt == this.createdAt &&
+          other.timestamp == this.timestamp &&
           other.syncedAt == this.syncedAt &&
           other.retryCount == this.retryCount &&
           other.lastError == this.lastError);
@@ -6963,58 +6998,64 @@ class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
 
 class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
   final Value<int> id;
+  final Value<String> uuid;
   final Value<String> collection;
   final Value<String> action;
   final Value<String> documentId;
   final Value<String> data;
-  final Value<DateTime> createdAt;
+  final Value<DateTime> timestamp;
   final Value<DateTime?> syncedAt;
   final Value<int> retryCount;
   final Value<String?> lastError;
   const SyncQueueCompanion({
     this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
     this.collection = const Value.absent(),
     this.action = const Value.absent(),
     this.documentId = const Value.absent(),
     this.data = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.timestamp = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.retryCount = const Value.absent(),
     this.lastError = const Value.absent(),
   });
   SyncQueueCompanion.insert({
     this.id = const Value.absent(),
+    required String uuid,
     required String collection,
     required String action,
     required String documentId,
     required String data,
-    required DateTime createdAt,
+    required DateTime timestamp,
     this.syncedAt = const Value.absent(),
     this.retryCount = const Value.absent(),
     this.lastError = const Value.absent(),
-  }) : collection = Value(collection),
+  }) : uuid = Value(uuid),
+       collection = Value(collection),
        action = Value(action),
        documentId = Value(documentId),
        data = Value(data),
-       createdAt = Value(createdAt);
+       timestamp = Value(timestamp);
   static Insertable<SyncQueueItem> custom({
     Expression<int>? id,
+    Expression<String>? uuid,
     Expression<String>? collection,
     Expression<String>? action,
     Expression<String>? documentId,
     Expression<String>? data,
-    Expression<DateTime>? createdAt,
+    Expression<DateTime>? timestamp,
     Expression<DateTime>? syncedAt,
     Expression<int>? retryCount,
     Expression<String>? lastError,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
       if (collection != null) 'collection': collection,
       if (action != null) 'action': action,
       if (documentId != null) 'document_id': documentId,
       if (data != null) 'data': data,
-      if (createdAt != null) 'created_at': createdAt,
+      if (timestamp != null) 'timestamp': timestamp,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (retryCount != null) 'retry_count': retryCount,
       if (lastError != null) 'last_error': lastError,
@@ -7023,22 +7064,24 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
 
   SyncQueueCompanion copyWith({
     Value<int>? id,
+    Value<String>? uuid,
     Value<String>? collection,
     Value<String>? action,
     Value<String>? documentId,
     Value<String>? data,
-    Value<DateTime>? createdAt,
+    Value<DateTime>? timestamp,
     Value<DateTime?>? syncedAt,
     Value<int>? retryCount,
     Value<String?>? lastError,
   }) {
     return SyncQueueCompanion(
       id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
       collection: collection ?? this.collection,
       action: action ?? this.action,
       documentId: documentId ?? this.documentId,
       data: data ?? this.data,
-      createdAt: createdAt ?? this.createdAt,
+      timestamp: timestamp ?? this.timestamp,
       syncedAt: syncedAt ?? this.syncedAt,
       retryCount: retryCount ?? this.retryCount,
       lastError: lastError ?? this.lastError,
@@ -7050,6 +7093,9 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
     }
     if (collection.present) {
       map['collection'] = Variable<String>(collection.value);
@@ -7063,8 +7109,8 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
     if (data.present) {
       map['data'] = Variable<String>(data.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (timestamp.present) {
+      map['timestamp'] = Variable<DateTime>(timestamp.value);
     }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
@@ -7082,11 +7128,12 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
   String toString() {
     return (StringBuffer('SyncQueueCompanion(')
           ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
           ..write('collection: $collection, ')
           ..write('action: $action, ')
           ..write('documentId: $documentId, ')
           ..write('data: $data, ')
-          ..write('createdAt: $createdAt, ')
+          ..write('timestamp: $timestamp, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('retryCount: $retryCount, ')
           ..write('lastError: $lastError')
@@ -11049,11 +11096,12 @@ typedef $$ReservationsTableProcessedTableManager =
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> id,
+      required String uuid,
       required String collection,
       required String action,
       required String documentId,
       required String data,
-      required DateTime createdAt,
+      required DateTime timestamp,
       Value<DateTime?> syncedAt,
       Value<int> retryCount,
       Value<String?> lastError,
@@ -11061,11 +11109,12 @@ typedef $$SyncQueueTableCreateCompanionBuilder =
 typedef $$SyncQueueTableUpdateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> id,
+      Value<String> uuid,
       Value<String> collection,
       Value<String> action,
       Value<String> documentId,
       Value<String> data,
-      Value<DateTime> createdAt,
+      Value<DateTime> timestamp,
       Value<DateTime?> syncedAt,
       Value<int> retryCount,
       Value<String?> lastError,
@@ -11082,6 +11131,11 @@ class $$SyncQueueTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11105,8 +11159,8 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnFilters<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11140,6 +11194,11 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get collection => $composableBuilder(
     column: $table.collection,
     builder: (column) => ColumnOrderings(column),
@@ -11160,8 +11219,8 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
+  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
+    column: $table.timestamp,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11193,6 +11252,9 @@ class $$SyncQueueTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
   GeneratedColumn<String> get collection => $composableBuilder(
     column: $table.collection,
     builder: (column) => column,
@@ -11209,8 +11271,8 @@ class $$SyncQueueTableAnnotationComposer
   GeneratedColumn<String> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  GeneratedColumn<DateTime> get timestamp =>
+      $composableBuilder(column: $table.timestamp, builder: (column) => column);
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
@@ -11256,21 +11318,23 @@ class $$SyncQueueTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
                 Value<String> collection = const Value.absent(),
                 Value<String> action = const Value.absent(),
                 Value<String> documentId = const Value.absent(),
                 Value<String> data = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> timestamp = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
               }) => SyncQueueCompanion(
                 id: id,
+                uuid: uuid,
                 collection: collection,
                 action: action,
                 documentId: documentId,
                 data: data,
-                createdAt: createdAt,
+                timestamp: timestamp,
                 syncedAt: syncedAt,
                 retryCount: retryCount,
                 lastError: lastError,
@@ -11278,21 +11342,23 @@ class $$SyncQueueTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                required String uuid,
                 required String collection,
                 required String action,
                 required String documentId,
                 required String data,
-                required DateTime createdAt,
+                required DateTime timestamp,
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<int> retryCount = const Value.absent(),
                 Value<String?> lastError = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,
+                uuid: uuid,
                 collection: collection,
                 action: action,
                 documentId: documentId,
                 data: data,
-                createdAt: createdAt,
+                timestamp: timestamp,
                 syncedAt: syncedAt,
                 retryCount: retryCount,
                 lastError: lastError,

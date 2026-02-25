@@ -1,7 +1,6 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:drift/drift.dart' hide isNull;
 
 void main() {
   late AppDatabase db;
@@ -16,11 +15,12 @@ void main() {
 
   test('SyncQueue insert and retrieve', () async {
     final item = SyncQueueCompanion.insert(
+      uuid: 'uuid-123',
       collection: 'test_col',
       action: 'create',
       documentId: 'doc1',
       data: '{}',
-      createdAt: DateTime.now(),
+      timestamp: DateTime.now(),
     );
 
     await db.into(db.syncQueue).insert(item);

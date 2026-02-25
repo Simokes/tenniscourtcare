@@ -37,15 +37,6 @@ Stream<bool> isOnlineStatus(IsOnlineStatusRef ref) async* {
   }
 }
 
-@Riverpod()
-Stream<int> pendingChangesCount(PendingChangesCountRef ref) async* {
-  final service = ref.watch(syncServiceProvider);
-  yield await service.getPendingChangesCount();
-
-  await for (final _ in service.onQueueChanged) {
-    yield await service.getPendingChangesCount();
-  }
-}
 
 @Riverpod(keepAlive: true)
 Stream<void> backgroundTerrainsSync(BackgroundTerrainsSyncRef ref) async* {

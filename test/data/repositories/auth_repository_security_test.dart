@@ -158,7 +158,6 @@ void main() {
         lastLoginAt: null,
         avatarUrl: null,
         createdAt: DateTime.now(),
-        isActive: true,
       );
 
       // It will throw because hash verification fails (we can't easily mock private method)

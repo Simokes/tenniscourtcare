@@ -23,7 +23,7 @@ final syncServiceProvider = Provider<SyncService>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef SyncServiceRef = ProviderRef<SyncService>;
-String _$isOnlineStatusHash() => r'98c821b51da4084a80d7650bdcd8cd194c31cb74';
+String _$isOnlineStatusHash() => r'97202c1a06493f199b9aedf830dcabb118de4e51';
 
 /// See also [isOnlineStatus].
 @ProviderFor(isOnlineStatus)
@@ -40,24 +40,6 @@ final isOnlineStatusProvider = StreamProvider<bool>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef IsOnlineStatusRef = StreamProviderRef<bool>;
-String _$pendingChangesCountHash() =>
-    r'ca3cb082c057b8a132f9fb5b2eca0b2d84beb68d';
-
-/// See also [pendingChangesCount].
-@ProviderFor(pendingChangesCount)
-final pendingChangesCountProvider = AutoDisposeStreamProvider<int>.internal(
-  pendingChangesCount,
-  name: r'pendingChangesCountProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pendingChangesCountHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef PendingChangesCountRef = AutoDisposeStreamProviderRef<int>;
 String _$backgroundTerrainsSyncHash() =>
     r'100015ffc39f3a13da45b8e994bfbd779709a736';
 
