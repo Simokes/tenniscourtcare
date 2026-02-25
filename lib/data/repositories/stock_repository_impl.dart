@@ -1,9 +1,10 @@
-import 'package:collection/collection.dart';
-import '../../domain/entities/stock_item.dart';
-import '../../domain/entities/sync_status.dart';
-import '../../domain/repositories/stock_repository.dart';
-import '../database/app_database.dart';
-import '../services/firebase_sync_service.dart';
+// filepath: lib/data/repositories/stock_repository_impl.dart
+
+import 'package:tenniscourtcare/data/database/app_database.dart';
+import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+import 'package:tenniscourtcare/domain/repositories/stock_repository.dart';
 
 class StockRepositoryImpl implements StockRepository {
   final AppDatabase _db;
@@ -18,8 +19,8 @@ class StockRepositoryImpl implements StockRepository {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    final id = await _db.insertStockItem(localItem);
 
+    final id = await _db.insertStockItem(localItem);
     _syncStockToFirebase(localItem.copyWith(id: id));
 
     return id;
@@ -31,11 +32,11 @@ class StockRepositoryImpl implements StockRepository {
       syncStatus: SyncStatus.local,
       updatedAt: DateTime.now(),
     );
-    final result = await _db.updateStockItem(updatedItem);
 
+    final result = await _db.updateStockItem(updatedItem);
     _syncStockToFirebase(updatedItem);
 
-    return result;
+    return result;  // updateStockItem() retourne déjà bool
   }
 
   @override
@@ -52,10 +53,11 @@ class StockRepositoryImpl implements StockRepository {
   @override
   Future<StockItem?> getStockItemById(int id) async {
     final items = await _db.watchAllStockItems().first;
-    return items.firstWhere(
-      (s) => s.id == id,
-      orElse: () => null as StockItem, // Force nullable return if not found, or handle properly
-    );
+    try {
+      return items.firstWhere((item) => item.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   Future<void> _syncStockToFirebase(StockItem item) async {
