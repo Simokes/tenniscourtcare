@@ -1,40 +1,89 @@
-import '../../domain/entities/terrain.dart' as dom;
-import '../../domain/entities/sync_status.dart';
-import '../database/app_database.dart' as db;
-import 'package:drift/drift.dart';
+// filepath: lib/data/mappers/terrain_mapper.dart
 
-// DB -> Domaine
-extension TerrainRowX on db.TerrainRow {
-  dom.Terrain toDomain() {
-    dom.TerrainStatus domainStatus;
+import 'package:drift/drift.dart';
+import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/models/terrain_model.dart';
+import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+import 'package:tenniscourtcare/domain/entities/terrain.dart';
+
+class TerrainMapper {
+  // Model → Domain Entity
+  static Terrain toDomain(TerrainModel model) {
+    return Terrain(
+      id: model.id,
+      nom: model.nom,
+      type: TerrainType.values.byName(model.type),
+      status: TerrainStatus.values.byName(model.status),
+      latitude: model.latitude,
+      longitude: model.longitude,
+      photoUrl: model.photoUrl,
+      syncStatus: SyncStatus.fromString(model.syncStatus),
+      createdAt: DateTime.parse(model.createdAt),
+      updatedAt: DateTime.parse(model.updatedAt),
+      firebaseId: model.firebaseId,
+      createdBy: model.createdBy,
+      modifiedBy: model.modifiedBy,
+    );
+  }
+
+  // Domain Entity → Model
+  static TerrainModel toModel(Terrain domain) {
+    return TerrainModel(
+      id: domain.id,
+      nom: domain.nom,
+      type: domain.type.name,
+      status: domain.status.name,
+      latitude: domain.latitude,
+      longitude: domain.longitude,
+      photoUrl: domain.photoUrl,
+      syncStatus: domain.syncStatus.name,
+      createdAt: domain.createdAt.toIso8601String(),
+      updatedAt: domain.updatedAt.toIso8601String(),
+      firebaseId: domain.firebaseId,
+      createdBy: domain.createdBy,
+      modifiedBy: domain.modifiedBy,
+    );
+  }
+
+  // Drift Entity → Domain Entity
+  static Terrain fromDriftEntity(db.TerrainRow driftEntity) {
+    TerrainStatus domainStatus;
     try {
-      domainStatus = dom.TerrainStatus.values.byName(status);
+      domainStatus = TerrainStatus.values.byName(driftEntity.status);
     } catch (_) {
-      // Fallback if the status string in DB doesn't match any enum value
-      domainStatus = dom.TerrainStatus.playable;
+      domainStatus = TerrainStatus.playable;
     }
 
-    return dom.Terrain(
-      id: id,
-      nom: nom,
-      type: dom.TerrainType.values[type], // type stocké en int (index)
+    // Assuming driftEntity.type is int (index)
+    return Terrain(
+      id: driftEntity.id,
+      nom: driftEntity.nom,
+      type: TerrainType.values[driftEntity.type],
       status: domainStatus,
-      latitude: null, // Mapped fields from DB if they exist in DB entity but not in current drift definition for this extension
-      longitude: null,
-      photoUrl: imageUrl,
-      // Sync mappings
-      createdAt: createdAt ?? DateTime.fromMillisecondsSinceEpoch(0),
-      updatedAt: updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
-      firebaseId: remoteId,
-      createdBy: null, // Not in DB yet
-      modifiedBy: null, // Not in DB yet
-      syncStatus: remoteId != null ? SyncStatus.synced : SyncStatus.local,
+      latitude: null, // Drift entity does not store latitude
+      longitude: null, // Drift entity does not store longitude
+      photoUrl: driftEntity.imageUrl,
+      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
+      createdAt: driftEntity.createdAt,
+      updatedAt: driftEntity.updatedAt,
+      firebaseId: driftEntity.firebaseId,
+      createdBy: driftEntity.createdBy,
+      modifiedBy: driftEntity.modifiedBy,
     );
   }
 }
 
-// Domaine -> Companion (INSERT/UPDATE)
-extension TerrainDomainX on dom.Terrain {
+// Extensions for compatibility
+extension TerrainModelX on TerrainModel {
+  Terrain toDomain() => TerrainMapper.toDomain(this);
+}
+
+extension TerrainDriftX on db.TerrainRow {
+  Terrain toDomain() => TerrainMapper.fromDriftEntity(this);
+}
+
+// Domain → Companion (Keeping for DB inserts)
+extension TerrainDomainX on Terrain {
   db.TerrainsCompanion toCompanion({bool includeId = true}) =>
       db.TerrainsCompanion(
         id: includeId ? Value(id) : const Value.absent(),
@@ -43,8 +92,12 @@ extension TerrainDomainX on dom.Terrain {
         status: Value(status.name),
         imageUrl: photoUrl != null ? Value(photoUrl) : const Value.absent(),
         // Sync mappings
+        syncStatus: Value(syncStatus.name),
         createdAt: Value(createdAt),
         updatedAt: Value(updatedAt),
-        remoteId: Value(firebaseId),
+        firebaseId: Value(firebaseId),
+        remoteId: Value(firebaseId), // Fallback
+        createdBy: Value(createdBy),
+        modifiedBy: Value(modifiedBy),
       );
 }
