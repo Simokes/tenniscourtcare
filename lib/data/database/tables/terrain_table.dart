@@ -28,8 +28,5 @@ class Terrains extends Table {
   TextColumn get imageUrl => text().nullable()();
 
   @override
-  List<Index> get tableIndexes => [
-    Index('idx_terrains_created_at', [createdAt]),
-    Index('idx_terrains_sync_status', [syncStatus]),
-  ];
+  List<Set<Column>> get uniqueKeys => []; // Removed indices on createdAt/syncStatus as per fix request
 }

@@ -48,6 +48,13 @@ class EventRepositoryImpl implements EventRepository {
             endTime: event.endTime,
             color: event.color,
             terrainIds: event.terrainIds,
+            // Sync fields
+            createdAt: event.createdAt,
+            updatedAt: event.updatedAt,
+            syncStatus: Value(event.syncStatus.name),
+            firebaseId: Value(event.firebaseId),
+            createdBy: Value(event.createdBy),
+            modifiedBy: Value(event.modifiedBy),
           ),
         );
   }
@@ -65,6 +72,11 @@ class EventRepositoryImpl implements EventRepository {
         endTime: Value(event.endTime),
         color: Value(event.color),
         terrainIds: Value(event.terrainIds),
+        // Sync fields
+        updatedAt: Value(DateTime.now()),
+        syncStatus: Value(event.syncStatus.name),
+        firebaseId: Value(event.firebaseId),
+        modifiedBy: Value(event.modifiedBy),
       ),
     );
     return result > 0;
@@ -84,13 +96,12 @@ class EventRepositoryImpl implements EventRepository {
       endTime: row.endTime,
       color: row.color,
       terrainIds: row.terrainIds,
-      // Sync mappings (Default values as DB table 'events' lacks these columns)
-      createdAt: DateTime.now(), // Placeholder
-      updatedAt: DateTime.now(), // Placeholder
-      firebaseId: null,
-      createdBy: null,
-      modifiedBy: null,
-      syncStatus: SyncStatus.local,
+      syncStatus: SyncStatus.fromString(row.syncStatus),
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      firebaseId: row.firebaseId,
+      createdBy: row.createdBy,
+      modifiedBy: row.modifiedBy,
     );
   }
 }
