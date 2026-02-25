@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/sync_providers.dart';
+import '../providers/queue_providers.dart';
 
 class SyncStatusBar extends ConsumerWidget {
   const SyncStatusBar({super.key});
@@ -8,7 +9,7 @@ class SyncStatusBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isOnlineAsync = ref.watch(isOnlineStatusProvider);
-    final pendingCountAsync = ref.watch(pendingChangesCountProvider);
+    final pendingCountAsync = ref.watch(pendingQueueCountProvider);
 
     final isOnline = isOnlineAsync.valueOrNull ?? true;
     final pendingCount = pendingCountAsync.valueOrNull ?? 0;

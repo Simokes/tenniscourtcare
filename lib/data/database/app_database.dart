@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -140,6 +140,13 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(reservations);
       }
       if (from < 12) {
+        await m.createTable(syncQueue);
+      }
+      if (from < 13) {
+        // Re-create syncQueue table to add uuid column with UNIQUE constraint
+        // and rename createdAt to timestamp.
+        // Since this is a dev feature, we can safely drop and recreate.
+        await m.deleteTable(syncQueue.actualTableName);
         await m.createTable(syncQueue);
       }
     },

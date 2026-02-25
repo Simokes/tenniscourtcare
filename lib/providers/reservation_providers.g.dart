@@ -7,7 +7,7 @@ part of 'reservation_providers.dart';
 // **************************************************************************
 
 String _$userReservationsStreamHash() =>
-    r'c9ccc5aaa6f9962519067f4334f6f7533e5dc346';
+    r'bbce58e881a54e140003863534ed20f783a9c235';
 
 /// Copied from Dart SDK
 class _SystemHash {
