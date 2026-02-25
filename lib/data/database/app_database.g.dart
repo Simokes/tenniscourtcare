@@ -113,6 +113,18 @@ class $TerrainsTable extends Terrains
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('LOCAL'),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -120,9 +132,9 @@ class $TerrainsTable extends Terrains
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
     'created_at',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
+    requiredDuringInsert: true,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
@@ -131,8 +143,41 @@ class $TerrainsTable extends Terrains
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
     'updated_at',
     aliasedName,
-    true,
+    false,
     type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firebaseIdMeta = const VerificationMeta(
+    'firebaseId',
+  );
+  @override
+  late final GeneratedColumn<String> firebaseId = GeneratedColumn<String>(
+    'firebase_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modifiedByMeta = const VerificationMeta(
+    'modifiedBy',
+  );
+  @override
+  late final GeneratedColumn<String> modifiedBy = GeneratedColumn<String>(
+    'modified_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _syncedAtMeta = const VerificationMeta(
@@ -168,8 +213,12 @@ class $TerrainsTable extends Terrains
     capacity,
     pricePerHour,
     available,
+    syncStatus,
     createdAt,
     updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
     syncedAt,
     imageUrl,
   ];
@@ -243,16 +292,44 @@ class $TerrainsTable extends Terrains
         available.isAcceptableOrUnknown(data['available']!, _availableMeta),
       );
     }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
     }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('firebase_id')) {
+      context.handle(
+        _firebaseIdMeta,
+        firebaseId.isAcceptableOrUnknown(data['firebase_id']!, _firebaseIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('modified_by')) {
+      context.handle(
+        _modifiedByMeta,
+        modifiedBy.isAcceptableOrUnknown(data['modified_by']!, _modifiedByMeta),
       );
     }
     if (data.containsKey('synced_at')) {
@@ -312,13 +389,29 @@ class $TerrainsTable extends Terrains
         DriftSqlType.bool,
         data['${effectivePrefix}available'],
       )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
-      ),
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
+      )!,
+      firebaseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firebase_id'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      ),
+      modifiedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}modified_by'],
       ),
       syncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -347,8 +440,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final int? capacity;
   final double? pricePerHour;
   final bool available;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final String syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
   final DateTime? syncedAt;
   final String? imageUrl;
   const TerrainRow({
@@ -361,8 +458,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     this.capacity,
     this.pricePerHour,
     required this.available,
-    this.createdAt,
-    this.updatedAt,
+    required this.syncStatus,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
     this.syncedAt,
     this.imageUrl,
   });
@@ -386,11 +487,17 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       map['price_per_hour'] = Variable<double>(pricePerHour);
     }
     map['available'] = Variable<bool>(available);
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || firebaseId != null) {
+      map['firebase_id'] = Variable<String>(firebaseId);
     }
-    if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    if (!nullToAbsent || modifiedBy != null) {
+      map['modified_by'] = Variable<String>(modifiedBy);
     }
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
@@ -420,12 +527,18 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ? const Value.absent()
           : Value(pricePerHour),
       available: Value(available),
-      createdAt: createdAt == null && nullToAbsent
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      firebaseId: firebaseId == null && nullToAbsent
           ? const Value.absent()
-          : Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
+          : Value(firebaseId),
+      createdBy: createdBy == null && nullToAbsent
           ? const Value.absent()
-          : Value(updatedAt),
+          : Value(createdBy),
+      modifiedBy: modifiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modifiedBy),
       syncedAt: syncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(syncedAt),
@@ -450,8 +563,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       capacity: serializer.fromJson<int?>(json['capacity']),
       pricePerHour: serializer.fromJson<double?>(json['pricePerHour']),
       available: serializer.fromJson<bool>(json['available']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
-      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      firebaseId: serializer.fromJson<String?>(json['firebaseId']),
+      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      modifiedBy: serializer.fromJson<String?>(json['modifiedBy']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
     );
@@ -469,8 +586,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       'capacity': serializer.toJson<int?>(capacity),
       'pricePerHour': serializer.toJson<double?>(pricePerHour),
       'available': serializer.toJson<bool>(available),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
-      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'firebaseId': serializer.toJson<String?>(firebaseId),
+      'createdBy': serializer.toJson<String?>(createdBy),
+      'modifiedBy': serializer.toJson<String?>(modifiedBy),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'imageUrl': serializer.toJson<String?>(imageUrl),
     };
@@ -486,8 +607,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     Value<int?> capacity = const Value.absent(),
     Value<double?> pricePerHour = const Value.absent(),
     bool? available,
-    Value<DateTime?> createdAt = const Value.absent(),
-    Value<DateTime?> updatedAt = const Value.absent(),
+    String? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<String?> firebaseId = const Value.absent(),
+    Value<String?> createdBy = const Value.absent(),
+    Value<String?> modifiedBy = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
     Value<String?> imageUrl = const Value.absent(),
   }) => TerrainRow(
@@ -500,8 +625,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     capacity: capacity.present ? capacity.value : this.capacity,
     pricePerHour: pricePerHour.present ? pricePerHour.value : this.pricePerHour,
     available: available ?? this.available,
-    createdAt: createdAt.present ? createdAt.value : this.createdAt,
-    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    syncStatus: syncStatus ?? this.syncStatus,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
+    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    modifiedBy: modifiedBy.present ? modifiedBy.value : this.modifiedBy,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
   );
@@ -518,8 +647,18 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ? data.pricePerHour.value
           : this.pricePerHour,
       available: data.available.present ? data.available.value : this.available,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      firebaseId: data.firebaseId.present
+          ? data.firebaseId.value
+          : this.firebaseId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      modifiedBy: data.modifiedBy.present
+          ? data.modifiedBy.value
+          : this.modifiedBy,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
     );
@@ -537,8 +676,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ..write('capacity: $capacity, ')
           ..write('pricePerHour: $pricePerHour, ')
           ..write('available: $available, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('imageUrl: $imageUrl')
           ..write(')'))
@@ -556,8 +699,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     capacity,
     pricePerHour,
     available,
+    syncStatus,
     createdAt,
     updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
     syncedAt,
     imageUrl,
   );
@@ -574,8 +721,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           other.capacity == this.capacity &&
           other.pricePerHour == this.pricePerHour &&
           other.available == this.available &&
+          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.firebaseId == this.firebaseId &&
+          other.createdBy == this.createdBy &&
+          other.modifiedBy == this.modifiedBy &&
           other.syncedAt == this.syncedAt &&
           other.imageUrl == this.imageUrl);
 }
@@ -590,8 +741,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<int?> capacity;
   final Value<double?> pricePerHour;
   final Value<bool> available;
-  final Value<DateTime?> createdAt;
-  final Value<DateTime?> updatedAt;
+  final Value<String> syncStatus;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String?> firebaseId;
+  final Value<String?> createdBy;
+  final Value<String?> modifiedBy;
   final Value<DateTime?> syncedAt;
   final Value<String?> imageUrl;
   const TerrainsCompanion({
@@ -604,8 +759,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.capacity = const Value.absent(),
     this.pricePerHour = const Value.absent(),
     this.available = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.imageUrl = const Value.absent(),
   });
@@ -619,12 +778,18 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.capacity = const Value.absent(),
     this.pricePerHour = const Value.absent(),
     this.available = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updatedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.imageUrl = const Value.absent(),
   }) : nom = Value(nom),
-       type = Value(type);
+       type = Value(type),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<TerrainRow> custom({
     Expression<int>? id,
     Expression<String>? nom,
@@ -635,8 +800,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Expression<int>? capacity,
     Expression<double>? pricePerHour,
     Expression<bool>? available,
+    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? firebaseId,
+    Expression<String>? createdBy,
+    Expression<String>? modifiedBy,
     Expression<DateTime>? syncedAt,
     Expression<String>? imageUrl,
   }) {
@@ -650,8 +819,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       if (capacity != null) 'capacity': capacity,
       if (pricePerHour != null) 'price_per_hour': pricePerHour,
       if (available != null) 'available': available,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (firebaseId != null) 'firebase_id': firebaseId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (modifiedBy != null) 'modified_by': modifiedBy,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (imageUrl != null) 'image_url': imageUrl,
     });
@@ -667,8 +840,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Value<int?>? capacity,
     Value<double?>? pricePerHour,
     Value<bool>? available,
-    Value<DateTime?>? createdAt,
-    Value<DateTime?>? updatedAt,
+    Value<String>? syncStatus,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String?>? firebaseId,
+    Value<String?>? createdBy,
+    Value<String?>? modifiedBy,
     Value<DateTime?>? syncedAt,
     Value<String?>? imageUrl,
   }) {
@@ -682,8 +859,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       capacity: capacity ?? this.capacity,
       pricePerHour: pricePerHour ?? this.pricePerHour,
       available: available ?? this.available,
+      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
       syncedAt: syncedAt ?? this.syncedAt,
       imageUrl: imageUrl ?? this.imageUrl,
     );
@@ -719,11 +900,23 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     if (available.present) {
       map['available'] = Variable<bool>(available.value);
     }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (firebaseId.present) {
+      map['firebase_id'] = Variable<String>(firebaseId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (modifiedBy.present) {
+      map['modified_by'] = Variable<String>(modifiedBy.value);
     }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
@@ -746,8 +939,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
           ..write('capacity: $capacity, ')
           ..write('pricePerHour: $pricePerHour, ')
           ..write('available: $available, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('imageUrl: $imageUrl')
           ..write(')'))
@@ -903,6 +1100,51 @@ class $MaintenancesTable extends Maintenances
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('LOCAL'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firebaseIdMeta = const VerificationMeta(
+    'firebaseId',
+  );
+  @override
+  late final GeneratedColumn<String> firebaseId = GeneratedColumn<String>(
+    'firebase_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdByMeta = const VerificationMeta(
     'createdBy',
   );
@@ -914,15 +1156,15 @@ class $MaintenancesTable extends Maintenances
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
+  static const VerificationMeta _modifiedByMeta = const VerificationMeta(
+    'modifiedBy',
   );
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
+  late final GeneratedColumn<String> modifiedBy = GeneratedColumn<String>(
+    'modified_by',
     aliasedName,
     true,
-    type: DriftSqlType.dateTime,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _syncedAtMeta = const VerificationMeta(
@@ -951,8 +1193,12 @@ class $MaintenancesTable extends Maintenances
     status,
     scheduledDate,
     completedDate,
-    createdBy,
+    syncStatus,
     createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
     syncedAt,
   ];
   @override
@@ -1066,16 +1312,44 @@ class $MaintenancesTable extends Maintenances
         ),
       );
     }
-    if (data.containsKey('created_by')) {
+    if (data.containsKey('sync_status')) {
       context.handle(
-        _createdByMeta,
-        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
       );
     }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('firebase_id')) {
+      context.handle(
+        _firebaseIdMeta,
+        firebaseId.isAcceptableOrUnknown(data['firebase_id']!, _firebaseIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('modified_by')) {
+      context.handle(
+        _modifiedByMeta,
+        modifiedBy.isAcceptableOrUnknown(data['modified_by']!, _modifiedByMeta),
       );
     }
     if (data.containsKey('synced_at')) {
@@ -1145,13 +1419,29 @@ class $MaintenancesTable extends Maintenances
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_date'],
       ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      firebaseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firebase_id'],
+      ),
       createdBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_by'],
       ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
+      modifiedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}modified_by'],
       ),
       syncedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1180,8 +1470,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final String? status;
   final DateTime? scheduledDate;
   final DateTime? completedDate;
+  final String syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
   final String? createdBy;
-  final DateTime? createdAt;
+  final String? modifiedBy;
   final DateTime? syncedAt;
   const MaintenanceRow({
     required this.id,
@@ -1197,8 +1491,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     this.status,
     this.scheduledDate,
     this.completedDate,
+    required this.syncStatus,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
     this.createdBy,
-    this.createdAt,
+    this.modifiedBy,
     this.syncedAt,
   });
   @override
@@ -1229,11 +1527,17 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     if (!nullToAbsent || completedDate != null) {
       map['completed_date'] = Variable<DateTime>(completedDate);
     }
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || firebaseId != null) {
+      map['firebase_id'] = Variable<String>(firebaseId);
+    }
     if (!nullToAbsent || createdBy != null) {
       map['created_by'] = Variable<String>(createdBy);
     }
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || modifiedBy != null) {
+      map['modified_by'] = Variable<String>(modifiedBy);
     }
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
@@ -1268,12 +1572,18 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       completedDate: completedDate == null && nullToAbsent
           ? const Value.absent()
           : Value(completedDate),
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      firebaseId: firebaseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firebaseId),
       createdBy: createdBy == null && nullToAbsent
           ? const Value.absent()
           : Value(createdBy),
-      createdAt: createdAt == null && nullToAbsent
+      modifiedBy: modifiedBy == null && nullToAbsent
           ? const Value.absent()
-          : Value(createdAt),
+          : Value(modifiedBy),
       syncedAt: syncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(syncedAt),
@@ -1301,8 +1611,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       status: serializer.fromJson<String?>(json['status']),
       scheduledDate: serializer.fromJson<DateTime?>(json['scheduledDate']),
       completedDate: serializer.fromJson<DateTime?>(json['completedDate']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      firebaseId: serializer.fromJson<String?>(json['firebaseId']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
+      modifiedBy: serializer.fromJson<String?>(json['modifiedBy']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
     );
   }
@@ -1323,8 +1637,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       'status': serializer.toJson<String?>(status),
       'scheduledDate': serializer.toJson<DateTime?>(scheduledDate),
       'completedDate': serializer.toJson<DateTime?>(completedDate),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'firebaseId': serializer.toJson<String?>(firebaseId),
       'createdBy': serializer.toJson<String?>(createdBy),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
+      'modifiedBy': serializer.toJson<String?>(modifiedBy),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
     };
   }
@@ -1343,8 +1661,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     Value<String?> status = const Value.absent(),
     Value<DateTime?> scheduledDate = const Value.absent(),
     Value<DateTime?> completedDate = const Value.absent(),
+    String? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<String?> firebaseId = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
-    Value<DateTime?> createdAt = const Value.absent(),
+    Value<String?> modifiedBy = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
   }) => MaintenanceRow(
     id: id ?? this.id,
@@ -1365,8 +1687,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     completedDate: completedDate.present
         ? completedDate.value
         : this.completedDate,
+    syncStatus: syncStatus ?? this.syncStatus,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
-    createdAt: createdAt.present ? createdAt.value : this.createdAt,
+    modifiedBy: modifiedBy.present ? modifiedBy.value : this.modifiedBy,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
   );
   MaintenanceRow copyWithCompanion(MaintenancesCompanion data) {
@@ -1396,8 +1722,18 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       completedDate: data.completedDate.present
           ? data.completedDate.value
           : this.completedDate,
-      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      firebaseId: data.firebaseId.present
+          ? data.firebaseId.value
+          : this.firebaseId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      modifiedBy: data.modifiedBy.present
+          ? data.modifiedBy.value
+          : this.modifiedBy,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
     );
   }
@@ -1418,8 +1754,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ..write('status: $status, ')
           ..write('scheduledDate: $scheduledDate, ')
           ..write('completedDate: $completedDate, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
@@ -1440,8 +1780,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     status,
     scheduledDate,
     completedDate,
-    createdBy,
+    syncStatus,
     createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
     syncedAt,
   );
   @override
@@ -1461,8 +1805,12 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           other.status == this.status &&
           other.scheduledDate == this.scheduledDate &&
           other.completedDate == this.completedDate &&
-          other.createdBy == this.createdBy &&
+          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.firebaseId == this.firebaseId &&
+          other.createdBy == this.createdBy &&
+          other.modifiedBy == this.modifiedBy &&
           other.syncedAt == this.syncedAt);
 }
 
@@ -1480,8 +1828,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<String?> status;
   final Value<DateTime?> scheduledDate;
   final Value<DateTime?> completedDate;
+  final Value<String> syncStatus;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String?> firebaseId;
   final Value<String?> createdBy;
-  final Value<DateTime?> createdAt;
+  final Value<String?> modifiedBy;
   final Value<DateTime?> syncedAt;
   const MaintenancesCompanion({
     this.id = const Value.absent(),
@@ -1497,8 +1849,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.status = const Value.absent(),
     this.scheduledDate = const Value.absent(),
     this.completedDate = const Value.absent(),
-    this.createdBy = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
   });
   MaintenancesCompanion.insert({
@@ -1515,12 +1871,18 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.status = const Value.absent(),
     this.scheduledDate = const Value.absent(),
     this.completedDate = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.firebaseId = const Value.absent(),
     this.createdBy = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
   }) : terrainId = Value(terrainId),
        type = Value(type),
-       date = Value(date);
+       date = Value(date),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<MaintenanceRow> custom({
     Expression<int>? id,
     Expression<int>? terrainId,
@@ -1535,8 +1897,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Expression<String>? status,
     Expression<DateTime>? scheduledDate,
     Expression<DateTime>? completedDate,
-    Expression<String>? createdBy,
+    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? firebaseId,
+    Expression<String>? createdBy,
+    Expression<String>? modifiedBy,
     Expression<DateTime>? syncedAt,
   }) {
     return RawValuesInsertable({
@@ -1555,8 +1921,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       if (status != null) 'status': status,
       if (scheduledDate != null) 'scheduled_date': scheduledDate,
       if (completedDate != null) 'completed_date': completedDate,
-      if (createdBy != null) 'created_by': createdBy,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (firebaseId != null) 'firebase_id': firebaseId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (modifiedBy != null) 'modified_by': modifiedBy,
       if (syncedAt != null) 'synced_at': syncedAt,
     });
   }
@@ -1575,8 +1945,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Value<String?>? status,
     Value<DateTime?>? scheduledDate,
     Value<DateTime?>? completedDate,
+    Value<String>? syncStatus,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String?>? firebaseId,
     Value<String?>? createdBy,
-    Value<DateTime?>? createdAt,
+    Value<String?>? modifiedBy,
     Value<DateTime?>? syncedAt,
   }) {
     return MaintenancesCompanion(
@@ -1594,8 +1968,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       completedDate: completedDate ?? this.completedDate,
-      createdBy: createdBy ?? this.createdBy,
+      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
       syncedAt: syncedAt ?? this.syncedAt,
     );
   }
@@ -1644,11 +2022,23 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     if (completedDate.present) {
       map['completed_date'] = Variable<DateTime>(completedDate.value);
     }
-    if (createdBy.present) {
-      map['created_by'] = Variable<String>(createdBy.value);
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (firebaseId.present) {
+      map['firebase_id'] = Variable<String>(firebaseId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (modifiedBy.present) {
+      map['modified_by'] = Variable<String>(modifiedBy.value);
     }
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
@@ -1672,8 +2062,12 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           ..write('status: $status, ')
           ..write('scheduledDate: $scheduledDate, ')
           ..write('completedDate: $completedDate, ')
-          ..write('createdBy: $createdBy, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt')
           ..write(')'))
         .toString();
@@ -1773,17 +2167,6 @@ class $StockItemsTable extends StockItems
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
-    'updatedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
-    'updated_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _categoryMeta = const VerificationMeta(
     'category',
   );
@@ -1829,17 +2212,6 @@ class $StockItemsTable extends StockItems
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _lastModifiedByMeta = const VerificationMeta(
     'lastModifiedBy',
   );
@@ -1877,6 +2249,73 @@ class $StockItemsTable extends StockItems
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('LOCAL'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firebaseIdMeta = const VerificationMeta(
+    'firebaseId',
+  );
+  @override
+  late final GeneratedColumn<String> firebaseId = GeneratedColumn<String>(
+    'firebase_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modifiedByMeta = const VerificationMeta(
+    'modifiedBy',
+  );
+  @override
+  late final GeneratedColumn<String> modifiedBy = GeneratedColumn<String>(
+    'modified_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1886,15 +2325,19 @@ class $StockItemsTable extends StockItems
     comment,
     isCustom,
     minThreshold,
-    updatedAt,
     category,
     sortOrder,
     remoteId,
     unitPrice,
-    createdAt,
     lastModifiedBy,
     syncedAt,
     isSyncPending,
+    syncStatus,
+    createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1956,14 +2399,6 @@ class $StockItemsTable extends StockItems
         ),
       );
     }
-    if (data.containsKey('updated_at')) {
-      context.handle(
-        _updatedAtMeta,
-        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
-    }
     if (data.containsKey('category')) {
       context.handle(
         _categoryMeta,
@@ -1988,12 +2423,6 @@ class $StockItemsTable extends StockItems
         unitPrice.isAcceptableOrUnknown(data['unit_price']!, _unitPriceMeta),
       );
     }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
     if (data.containsKey('last_modified_by')) {
       context.handle(
         _lastModifiedByMeta,
@@ -2016,6 +2445,46 @@ class $StockItemsTable extends StockItems
           data['is_sync_pending']!,
           _isSyncPendingMeta,
         ),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('firebase_id')) {
+      context.handle(
+        _firebaseIdMeta,
+        firebaseId.isAcceptableOrUnknown(data['firebase_id']!, _firebaseIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('modified_by')) {
+      context.handle(
+        _modifiedByMeta,
+        modifiedBy.isAcceptableOrUnknown(data['modified_by']!, _modifiedByMeta),
       );
     }
     return context;
@@ -2055,10 +2524,6 @@ class $StockItemsTable extends StockItems
         DriftSqlType.int,
         data['${effectivePrefix}min_threshold'],
       ),
-      updatedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}updated_at'],
-      )!,
       category: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}category'],
@@ -2075,10 +2540,6 @@ class $StockItemsTable extends StockItems
         DriftSqlType.double,
         data['${effectivePrefix}unit_price'],
       ),
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      ),
       lastModifiedBy: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}last_modified_by'],
@@ -2091,6 +2552,30 @@ class $StockItemsTable extends StockItems
         DriftSqlType.bool,
         data['${effectivePrefix}is_sync_pending'],
       )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      firebaseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firebase_id'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      ),
+      modifiedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}modified_by'],
+      ),
     );
   }
 
@@ -2108,15 +2593,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
   final String? comment;
   final bool isCustom;
   final int? minThreshold;
-  final DateTime updatedAt;
   final String? category;
   final int sortOrder;
   final String? remoteId;
   final double? unitPrice;
-  final DateTime? createdAt;
   final String? lastModifiedBy;
   final DateTime? syncedAt;
   final bool isSyncPending;
+  final String syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
   const StockItemRow({
     required this.id,
     required this.name,
@@ -2125,15 +2614,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     this.comment,
     required this.isCustom,
     this.minThreshold,
-    required this.updatedAt,
     this.category,
     required this.sortOrder,
     this.remoteId,
     this.unitPrice,
-    this.createdAt,
     this.lastModifiedBy,
     this.syncedAt,
     required this.isSyncPending,
+    required this.syncStatus,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2149,7 +2642,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     if (!nullToAbsent || minThreshold != null) {
       map['min_threshold'] = Variable<int>(minThreshold);
     }
-    map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<String>(category);
     }
@@ -2160,9 +2652,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     if (!nullToAbsent || unitPrice != null) {
       map['unit_price'] = Variable<double>(unitPrice);
     }
-    if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
-    }
     if (!nullToAbsent || lastModifiedBy != null) {
       map['last_modified_by'] = Variable<String>(lastModifiedBy);
     }
@@ -2170,6 +2659,18 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       map['synced_at'] = Variable<DateTime>(syncedAt);
     }
     map['is_sync_pending'] = Variable<bool>(isSyncPending);
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || firebaseId != null) {
+      map['firebase_id'] = Variable<String>(firebaseId);
+    }
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    if (!nullToAbsent || modifiedBy != null) {
+      map['modified_by'] = Variable<String>(modifiedBy);
+    }
     return map;
   }
 
@@ -2186,7 +2687,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       minThreshold: minThreshold == null && nullToAbsent
           ? const Value.absent()
           : Value(minThreshold),
-      updatedAt: Value(updatedAt),
       category: category == null && nullToAbsent
           ? const Value.absent()
           : Value(category),
@@ -2197,9 +2697,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       unitPrice: unitPrice == null && nullToAbsent
           ? const Value.absent()
           : Value(unitPrice),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
       lastModifiedBy: lastModifiedBy == null && nullToAbsent
           ? const Value.absent()
           : Value(lastModifiedBy),
@@ -2207,6 +2704,18 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ? const Value.absent()
           : Value(syncedAt),
       isSyncPending: Value(isSyncPending),
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      firebaseId: firebaseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firebaseId),
+      createdBy: createdBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdBy),
+      modifiedBy: modifiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modifiedBy),
     );
   }
 
@@ -2223,15 +2732,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       comment: serializer.fromJson<String?>(json['comment']),
       isCustom: serializer.fromJson<bool>(json['isCustom']),
       minThreshold: serializer.fromJson<int?>(json['minThreshold']),
-      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       category: serializer.fromJson<String?>(json['category']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       remoteId: serializer.fromJson<String?>(json['remoteId']),
       unitPrice: serializer.fromJson<double?>(json['unitPrice']),
-      createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       lastModifiedBy: serializer.fromJson<String?>(json['lastModifiedBy']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       isSyncPending: serializer.fromJson<bool>(json['isSyncPending']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      firebaseId: serializer.fromJson<String?>(json['firebaseId']),
+      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      modifiedBy: serializer.fromJson<String?>(json['modifiedBy']),
     );
   }
   @override
@@ -2245,15 +2758,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       'comment': serializer.toJson<String?>(comment),
       'isCustom': serializer.toJson<bool>(isCustom),
       'minThreshold': serializer.toJson<int?>(minThreshold),
-      'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'category': serializer.toJson<String?>(category),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'remoteId': serializer.toJson<String?>(remoteId),
       'unitPrice': serializer.toJson<double?>(unitPrice),
-      'createdAt': serializer.toJson<DateTime?>(createdAt),
       'lastModifiedBy': serializer.toJson<String?>(lastModifiedBy),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'isSyncPending': serializer.toJson<bool>(isSyncPending),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'firebaseId': serializer.toJson<String?>(firebaseId),
+      'createdBy': serializer.toJson<String?>(createdBy),
+      'modifiedBy': serializer.toJson<String?>(modifiedBy),
     };
   }
 
@@ -2265,15 +2782,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     Value<String?> comment = const Value.absent(),
     bool? isCustom,
     Value<int?> minThreshold = const Value.absent(),
-    DateTime? updatedAt,
     Value<String?> category = const Value.absent(),
     int? sortOrder,
     Value<String?> remoteId = const Value.absent(),
     Value<double?> unitPrice = const Value.absent(),
-    Value<DateTime?> createdAt = const Value.absent(),
     Value<String?> lastModifiedBy = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
     bool? isSyncPending,
+    String? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<String?> firebaseId = const Value.absent(),
+    Value<String?> createdBy = const Value.absent(),
+    Value<String?> modifiedBy = const Value.absent(),
   }) => StockItemRow(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -2282,17 +2803,21 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     comment: comment.present ? comment.value : this.comment,
     isCustom: isCustom ?? this.isCustom,
     minThreshold: minThreshold.present ? minThreshold.value : this.minThreshold,
-    updatedAt: updatedAt ?? this.updatedAt,
     category: category.present ? category.value : this.category,
     sortOrder: sortOrder ?? this.sortOrder,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
     unitPrice: unitPrice.present ? unitPrice.value : this.unitPrice,
-    createdAt: createdAt.present ? createdAt.value : this.createdAt,
     lastModifiedBy: lastModifiedBy.present
         ? lastModifiedBy.value
         : this.lastModifiedBy,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     isSyncPending: isSyncPending ?? this.isSyncPending,
+    syncStatus: syncStatus ?? this.syncStatus,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
+    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    modifiedBy: modifiedBy.present ? modifiedBy.value : this.modifiedBy,
   );
   StockItemRow copyWithCompanion(StockItemsCompanion data) {
     return StockItemRow(
@@ -2305,12 +2830,10 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       minThreshold: data.minThreshold.present
           ? data.minThreshold.value
           : this.minThreshold,
-      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       category: data.category.present ? data.category.value : this.category,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       unitPrice: data.unitPrice.present ? data.unitPrice.value : this.unitPrice,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       lastModifiedBy: data.lastModifiedBy.present
           ? data.lastModifiedBy.value
           : this.lastModifiedBy,
@@ -2318,6 +2841,18 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       isSyncPending: data.isSyncPending.present
           ? data.isSyncPending.value
           : this.isSyncPending,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      firebaseId: data.firebaseId.present
+          ? data.firebaseId.value
+          : this.firebaseId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      modifiedBy: data.modifiedBy.present
+          ? data.modifiedBy.value
+          : this.modifiedBy,
     );
   }
 
@@ -2331,15 +2866,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ..write('comment: $comment, ')
           ..write('isCustom: $isCustom, ')
           ..write('minThreshold: $minThreshold, ')
-          ..write('updatedAt: $updatedAt, ')
           ..write('category: $category, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('remoteId: $remoteId, ')
           ..write('unitPrice: $unitPrice, ')
-          ..write('createdAt: $createdAt, ')
           ..write('lastModifiedBy: $lastModifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
-          ..write('isSyncPending: $isSyncPending')
+          ..write('isSyncPending: $isSyncPending, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy')
           ..write(')'))
         .toString();
   }
@@ -2353,15 +2892,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     comment,
     isCustom,
     minThreshold,
-    updatedAt,
     category,
     sortOrder,
     remoteId,
     unitPrice,
-    createdAt,
     lastModifiedBy,
     syncedAt,
     isSyncPending,
+    syncStatus,
+    createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -2374,15 +2917,19 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           other.comment == this.comment &&
           other.isCustom == this.isCustom &&
           other.minThreshold == this.minThreshold &&
-          other.updatedAt == this.updatedAt &&
           other.category == this.category &&
           other.sortOrder == this.sortOrder &&
           other.remoteId == this.remoteId &&
           other.unitPrice == this.unitPrice &&
-          other.createdAt == this.createdAt &&
           other.lastModifiedBy == this.lastModifiedBy &&
           other.syncedAt == this.syncedAt &&
-          other.isSyncPending == this.isSyncPending);
+          other.isSyncPending == this.isSyncPending &&
+          other.syncStatus == this.syncStatus &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.firebaseId == this.firebaseId &&
+          other.createdBy == this.createdBy &&
+          other.modifiedBy == this.modifiedBy);
 }
 
 class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
@@ -2393,15 +2940,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
   final Value<String?> comment;
   final Value<bool> isCustom;
   final Value<int?> minThreshold;
-  final Value<DateTime> updatedAt;
   final Value<String?> category;
   final Value<int> sortOrder;
   final Value<String?> remoteId;
   final Value<double?> unitPrice;
-  final Value<DateTime?> createdAt;
   final Value<String?> lastModifiedBy;
   final Value<DateTime?> syncedAt;
   final Value<bool> isSyncPending;
+  final Value<String> syncStatus;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String?> firebaseId;
+  final Value<String?> createdBy;
+  final Value<String?> modifiedBy;
   const StockItemsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -2410,15 +2961,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.comment = const Value.absent(),
     this.isCustom = const Value.absent(),
     this.minThreshold = const Value.absent(),
-    this.updatedAt = const Value.absent(),
     this.category = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.unitPrice = const Value.absent(),
-    this.createdAt = const Value.absent(),
     this.lastModifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.isSyncPending = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
   });
   StockItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -2428,18 +2983,23 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.comment = const Value.absent(),
     required bool isCustom,
     this.minThreshold = const Value.absent(),
-    required DateTime updatedAt,
     this.category = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.unitPrice = const Value.absent(),
-    this.createdAt = const Value.absent(),
     this.lastModifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.isSyncPending = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
   }) : name = Value(name),
        unit = Value(unit),
        isCustom = Value(isCustom),
+       createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
   static Insertable<StockItemRow> custom({
     Expression<int>? id,
@@ -2449,15 +3009,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Expression<String>? comment,
     Expression<bool>? isCustom,
     Expression<int>? minThreshold,
-    Expression<DateTime>? updatedAt,
     Expression<String>? category,
     Expression<int>? sortOrder,
     Expression<String>? remoteId,
     Expression<double>? unitPrice,
-    Expression<DateTime>? createdAt,
     Expression<String>? lastModifiedBy,
     Expression<DateTime>? syncedAt,
     Expression<bool>? isSyncPending,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? firebaseId,
+    Expression<String>? createdBy,
+    Expression<String>? modifiedBy,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2467,15 +3031,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       if (comment != null) 'comment': comment,
       if (isCustom != null) 'is_custom': isCustom,
       if (minThreshold != null) 'min_threshold': minThreshold,
-      if (updatedAt != null) 'updated_at': updatedAt,
       if (category != null) 'category': category,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (remoteId != null) 'remote_id': remoteId,
       if (unitPrice != null) 'unit_price': unitPrice,
-      if (createdAt != null) 'created_at': createdAt,
       if (lastModifiedBy != null) 'last_modified_by': lastModifiedBy,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (isSyncPending != null) 'is_sync_pending': isSyncPending,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (firebaseId != null) 'firebase_id': firebaseId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (modifiedBy != null) 'modified_by': modifiedBy,
     });
   }
 
@@ -2487,15 +3055,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Value<String?>? comment,
     Value<bool>? isCustom,
     Value<int?>? minThreshold,
-    Value<DateTime>? updatedAt,
     Value<String?>? category,
     Value<int>? sortOrder,
     Value<String?>? remoteId,
     Value<double?>? unitPrice,
-    Value<DateTime?>? createdAt,
     Value<String?>? lastModifiedBy,
     Value<DateTime?>? syncedAt,
     Value<bool>? isSyncPending,
+    Value<String>? syncStatus,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String?>? firebaseId,
+    Value<String?>? createdBy,
+    Value<String?>? modifiedBy,
   }) {
     return StockItemsCompanion(
       id: id ?? this.id,
@@ -2505,15 +3077,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       comment: comment ?? this.comment,
       isCustom: isCustom ?? this.isCustom,
       minThreshold: minThreshold ?? this.minThreshold,
-      updatedAt: updatedAt ?? this.updatedAt,
       category: category ?? this.category,
       sortOrder: sortOrder ?? this.sortOrder,
       remoteId: remoteId ?? this.remoteId,
       unitPrice: unitPrice ?? this.unitPrice,
-      createdAt: createdAt ?? this.createdAt,
       lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
       syncedAt: syncedAt ?? this.syncedAt,
       isSyncPending: isSyncPending ?? this.isSyncPending,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -2541,9 +3117,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     if (minThreshold.present) {
       map['min_threshold'] = Variable<int>(minThreshold.value);
     }
-    if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
-    }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
     }
@@ -2556,9 +3129,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     if (unitPrice.present) {
       map['unit_price'] = Variable<double>(unitPrice.value);
     }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
     if (lastModifiedBy.present) {
       map['last_modified_by'] = Variable<String>(lastModifiedBy.value);
     }
@@ -2567,6 +3137,24 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     }
     if (isSyncPending.present) {
       map['is_sync_pending'] = Variable<bool>(isSyncPending.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (firebaseId.present) {
+      map['firebase_id'] = Variable<String>(firebaseId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (modifiedBy.present) {
+      map['modified_by'] = Variable<String>(modifiedBy.value);
     }
     return map;
   }
@@ -2581,15 +3169,19 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
           ..write('comment: $comment, ')
           ..write('isCustom: $isCustom, ')
           ..write('minThreshold: $minThreshold, ')
-          ..write('updatedAt: $updatedAt, ')
           ..write('category: $category, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('remoteId: $remoteId, ')
           ..write('unitPrice: $unitPrice, ')
-          ..write('createdAt: $createdAt, ')
           ..write('lastModifiedBy: $lastModifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
-          ..write('isSyncPending: $isSyncPending')
+          ..write('isSyncPending: $isSyncPending, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy')
           ..write(')'))
         .toString();
   }
@@ -3434,6 +4026,73 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<List<int>>($EventsTable.$converterterrainIds);
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('LOCAL'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firebaseIdMeta = const VerificationMeta(
+    'firebaseId',
+  );
+  @override
+  late final GeneratedColumn<String> firebaseId = GeneratedColumn<String>(
+    'firebase_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _modifiedByMeta = const VerificationMeta(
+    'modifiedBy',
+  );
+  @override
+  late final GeneratedColumn<String> modifiedBy = GeneratedColumn<String>(
+    'modified_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3443,6 +4102,12 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
     endTime,
     color,
     terrainIds,
+    syncStatus,
+    createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3500,6 +4165,46 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
     } else if (isInserting) {
       context.missing(_colorMeta);
     }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('firebase_id')) {
+      context.handle(
+        _firebaseIdMeta,
+        firebaseId.isAcceptableOrUnknown(data['firebase_id']!, _firebaseIdMeta),
+      );
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    }
+    if (data.containsKey('modified_by')) {
+      context.handle(
+        _modifiedByMeta,
+        modifiedBy.isAcceptableOrUnknown(data['modified_by']!, _modifiedByMeta),
+      );
+    }
     return context;
   }
 
@@ -3539,6 +4244,30 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
           data['${effectivePrefix}terrain_ids'],
         )!,
       ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      firebaseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firebase_id'],
+      ),
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      ),
+      modifiedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}modified_by'],
+      ),
     );
   }
 
@@ -3559,6 +4288,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
   final DateTime endTime;
   final int color;
   final List<int> terrainIds;
+  final String syncStatus;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final String? firebaseId;
+  final String? createdBy;
+  final String? modifiedBy;
   const EventRow({
     required this.id,
     required this.title,
@@ -3567,6 +4302,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     required this.endTime,
     required this.color,
     required this.terrainIds,
+    required this.syncStatus,
+    required this.createdAt,
+    required this.updatedAt,
+    this.firebaseId,
+    this.createdBy,
+    this.modifiedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3584,6 +4325,18 @@ class EventRow extends DataClass implements Insertable<EventRow> {
         $EventsTable.$converterterrainIds.toSql(terrainIds),
       );
     }
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || firebaseId != null) {
+      map['firebase_id'] = Variable<String>(firebaseId);
+    }
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    if (!nullToAbsent || modifiedBy != null) {
+      map['modified_by'] = Variable<String>(modifiedBy);
+    }
     return map;
   }
 
@@ -3598,6 +4351,18 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       endTime: Value(endTime),
       color: Value(color),
       terrainIds: Value(terrainIds),
+      syncStatus: Value(syncStatus),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      firebaseId: firebaseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(firebaseId),
+      createdBy: createdBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdBy),
+      modifiedBy: modifiedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(modifiedBy),
     );
   }
 
@@ -3614,6 +4379,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       endTime: serializer.fromJson<DateTime>(json['endTime']),
       color: serializer.fromJson<int>(json['color']),
       terrainIds: serializer.fromJson<List<int>>(json['terrainIds']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      firebaseId: serializer.fromJson<String?>(json['firebaseId']),
+      createdBy: serializer.fromJson<String?>(json['createdBy']),
+      modifiedBy: serializer.fromJson<String?>(json['modifiedBy']),
     );
   }
   @override
@@ -3627,6 +4398,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       'endTime': serializer.toJson<DateTime>(endTime),
       'color': serializer.toJson<int>(color),
       'terrainIds': serializer.toJson<List<int>>(terrainIds),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'firebaseId': serializer.toJson<String?>(firebaseId),
+      'createdBy': serializer.toJson<String?>(createdBy),
+      'modifiedBy': serializer.toJson<String?>(modifiedBy),
     };
   }
 
@@ -3638,6 +4415,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     DateTime? endTime,
     int? color,
     List<int>? terrainIds,
+    String? syncStatus,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<String?> firebaseId = const Value.absent(),
+    Value<String?> createdBy = const Value.absent(),
+    Value<String?> modifiedBy = const Value.absent(),
   }) => EventRow(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -3646,6 +4429,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     endTime: endTime ?? this.endTime,
     color: color ?? this.color,
     terrainIds: terrainIds ?? this.terrainIds,
+    syncStatus: syncStatus ?? this.syncStatus,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
+    createdBy: createdBy.present ? createdBy.value : this.createdBy,
+    modifiedBy: modifiedBy.present ? modifiedBy.value : this.modifiedBy,
   );
   EventRow copyWithCompanion(EventsCompanion data) {
     return EventRow(
@@ -3660,6 +4449,18 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       terrainIds: data.terrainIds.present
           ? data.terrainIds.value
           : this.terrainIds,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      firebaseId: data.firebaseId.present
+          ? data.firebaseId.value
+          : this.firebaseId,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      modifiedBy: data.modifiedBy.present
+          ? data.modifiedBy.value
+          : this.modifiedBy,
     );
   }
 
@@ -3672,7 +4473,13 @@ class EventRow extends DataClass implements Insertable<EventRow> {
           ..write('startTime: $startTime, ')
           ..write('endTime: $endTime, ')
           ..write('color: $color, ')
-          ..write('terrainIds: $terrainIds')
+          ..write('terrainIds: $terrainIds, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy')
           ..write(')'))
         .toString();
   }
@@ -3686,6 +4493,12 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     endTime,
     color,
     terrainIds,
+    syncStatus,
+    createdAt,
+    updatedAt,
+    firebaseId,
+    createdBy,
+    modifiedBy,
   );
   @override
   bool operator ==(Object other) =>
@@ -3697,7 +4510,13 @@ class EventRow extends DataClass implements Insertable<EventRow> {
           other.startTime == this.startTime &&
           other.endTime == this.endTime &&
           other.color == this.color &&
-          other.terrainIds == this.terrainIds);
+          other.terrainIds == this.terrainIds &&
+          other.syncStatus == this.syncStatus &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.firebaseId == this.firebaseId &&
+          other.createdBy == this.createdBy &&
+          other.modifiedBy == this.modifiedBy);
 }
 
 class EventsCompanion extends UpdateCompanion<EventRow> {
@@ -3708,6 +4527,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
   final Value<DateTime> endTime;
   final Value<int> color;
   final Value<List<int>> terrainIds;
+  final Value<String> syncStatus;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<String?> firebaseId;
+  final Value<String?> createdBy;
+  final Value<String?> modifiedBy;
   const EventsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -3716,6 +4541,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     this.endTime = const Value.absent(),
     this.color = const Value.absent(),
     this.terrainIds = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
   });
   EventsCompanion.insert({
     this.id = const Value.absent(),
@@ -3725,11 +4556,19 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     required DateTime endTime,
     required int color,
     required List<int> terrainIds,
+    this.syncStatus = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.firebaseId = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.modifiedBy = const Value.absent(),
   }) : title = Value(title),
        startTime = Value(startTime),
        endTime = Value(endTime),
        color = Value(color),
-       terrainIds = Value(terrainIds);
+       terrainIds = Value(terrainIds),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
   static Insertable<EventRow> custom({
     Expression<int>? id,
     Expression<String>? title,
@@ -3738,6 +4577,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     Expression<DateTime>? endTime,
     Expression<int>? color,
     Expression<String>? terrainIds,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? firebaseId,
+    Expression<String>? createdBy,
+    Expression<String>? modifiedBy,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3747,6 +4592,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
       if (endTime != null) 'end_time': endTime,
       if (color != null) 'color': color,
       if (terrainIds != null) 'terrain_ids': terrainIds,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (firebaseId != null) 'firebase_id': firebaseId,
+      if (createdBy != null) 'created_by': createdBy,
+      if (modifiedBy != null) 'modified_by': modifiedBy,
     });
   }
 
@@ -3758,6 +4609,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     Value<DateTime>? endTime,
     Value<int>? color,
     Value<List<int>>? terrainIds,
+    Value<String>? syncStatus,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<String?>? firebaseId,
+    Value<String?>? createdBy,
+    Value<String?>? modifiedBy,
   }) {
     return EventsCompanion(
       id: id ?? this.id,
@@ -3767,6 +4624,12 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
       terrainIds: terrainIds ?? this.terrainIds,
+      syncStatus: syncStatus ?? this.syncStatus,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      firebaseId: firebaseId ?? this.firebaseId,
+      createdBy: createdBy ?? this.createdBy,
+      modifiedBy: modifiedBy ?? this.modifiedBy,
     );
   }
 
@@ -3796,6 +4659,24 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
         $EventsTable.$converterterrainIds.toSql(terrainIds.value),
       );
     }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (firebaseId.present) {
+      map['firebase_id'] = Variable<String>(firebaseId.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (modifiedBy.present) {
+      map['modified_by'] = Variable<String>(modifiedBy.value);
+    }
     return map;
   }
 
@@ -3808,7 +4689,13 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
           ..write('startTime: $startTime, ')
           ..write('endTime: $endTime, ')
           ..write('color: $color, ')
-          ..write('terrainIds: $terrainIds')
+          ..write('terrainIds: $terrainIds, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('firebaseId: $firebaseId, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('modifiedBy: $modifiedBy')
           ..write(')'))
         .toString();
   }
@@ -7284,8 +8171,12 @@ typedef $$TerrainsTableCreateCompanionBuilder =
       Value<int?> capacity,
       Value<double?> pricePerHour,
       Value<bool> available,
-      Value<DateTime?> createdAt,
-      Value<DateTime?> updatedAt,
+      Value<String> syncStatus,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
       Value<String?> imageUrl,
     });
@@ -7300,8 +8191,12 @@ typedef $$TerrainsTableUpdateCompanionBuilder =
       Value<int?> capacity,
       Value<double?> pricePerHour,
       Value<bool> available,
-      Value<DateTime?> createdAt,
-      Value<DateTime?> updatedAt,
+      Value<String> syncStatus,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
       Value<String?> imageUrl,
     });
@@ -7383,6 +8278,11 @@ class $$TerrainsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -7390,6 +8290,21 @@ class $$TerrainsTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7483,6 +8398,11 @@ class $$TerrainsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -7490,6 +8410,21 @@ class $$TerrainsTableOrderingComposer
 
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -7542,11 +8477,29 @@ class $$TerrainsTableAnnotationComposer
   GeneratedColumn<bool> get available =>
       $composableBuilder(column: $table.available, builder: (column) => column);
 
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
@@ -7617,8 +8570,12 @@ class $$TerrainsTableTableManager
                 Value<int?> capacity = const Value.absent(),
                 Value<double?> pricePerHour = const Value.absent(),
                 Value<bool> available = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
-                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
               }) => TerrainsCompanion(
@@ -7631,8 +8588,12 @@ class $$TerrainsTableTableManager
                 capacity: capacity,
                 pricePerHour: pricePerHour,
                 available: available,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
                 imageUrl: imageUrl,
               ),
@@ -7647,8 +8608,12 @@ class $$TerrainsTableTableManager
                 Value<int?> capacity = const Value.absent(),
                 Value<double?> pricePerHour = const Value.absent(),
                 Value<bool> available = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
-                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
               }) => TerrainsCompanion.insert(
@@ -7661,8 +8626,12 @@ class $$TerrainsTableTableManager
                 capacity: capacity,
                 pricePerHour: pricePerHour,
                 available: available,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
                 imageUrl: imageUrl,
               ),
@@ -7736,8 +8705,12 @@ typedef $$MaintenancesTableCreateCompanionBuilder =
       Value<String?> status,
       Value<DateTime?> scheduledDate,
       Value<DateTime?> completedDate,
+      Value<String> syncStatus,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<String?> firebaseId,
       Value<String?> createdBy,
-      Value<DateTime?> createdAt,
+      Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
     });
 typedef $$MaintenancesTableUpdateCompanionBuilder =
@@ -7755,8 +8728,12 @@ typedef $$MaintenancesTableUpdateCompanionBuilder =
       Value<String?> status,
       Value<DateTime?> scheduledDate,
       Value<DateTime?> completedDate,
+      Value<String> syncStatus,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String?> firebaseId,
       Value<String?> createdBy,
-      Value<DateTime?> createdAt,
+      Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
     });
 
@@ -7834,13 +8811,33 @@ class $$MaintenancesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7924,13 +8921,33 @@ class $$MaintenancesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get createdBy => $composableBuilder(
-    column: $table.createdBy,
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8000,11 +9017,29 @@ class $$MaintenancesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get createdBy =>
-      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
@@ -8054,8 +9089,12 @@ class $$MaintenancesTableTableManager
                 Value<String?> status = const Value.absent(),
                 Value<DateTime?> scheduledDate = const Value.absent(),
                 Value<DateTime?> completedDate = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> firebaseId = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
               }) => MaintenancesCompanion(
                 id: id,
@@ -8071,8 +9110,12 @@ class $$MaintenancesTableTableManager
                 status: status,
                 scheduledDate: scheduledDate,
                 completedDate: completedDate,
-                createdBy: createdBy,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
               ),
           createCompanionCallback:
@@ -8090,8 +9133,12 @@ class $$MaintenancesTableTableManager
                 Value<String?> status = const Value.absent(),
                 Value<DateTime?> scheduledDate = const Value.absent(),
                 Value<DateTime?> completedDate = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<String?> firebaseId = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
               }) => MaintenancesCompanion.insert(
                 id: id,
@@ -8107,8 +9154,12 @@ class $$MaintenancesTableTableManager
                 status: status,
                 scheduledDate: scheduledDate,
                 completedDate: completedDate,
-                createdBy: createdBy,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
               ),
           withReferenceMapper: (p0) => p0
@@ -8145,15 +9196,19 @@ typedef $$StockItemsTableCreateCompanionBuilder =
       Value<String?> comment,
       required bool isCustom,
       Value<int?> minThreshold,
-      required DateTime updatedAt,
       Value<String?> category,
       Value<int> sortOrder,
       Value<String?> remoteId,
       Value<double?> unitPrice,
-      Value<DateTime?> createdAt,
       Value<String?> lastModifiedBy,
       Value<DateTime?> syncedAt,
       Value<bool> isSyncPending,
+      Value<String> syncStatus,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
     });
 typedef $$StockItemsTableUpdateCompanionBuilder =
     StockItemsCompanion Function({
@@ -8164,15 +9219,19 @@ typedef $$StockItemsTableUpdateCompanionBuilder =
       Value<String?> comment,
       Value<bool> isCustom,
       Value<int?> minThreshold,
-      Value<DateTime> updatedAt,
       Value<String?> category,
       Value<int> sortOrder,
       Value<String?> remoteId,
       Value<double?> unitPrice,
-      Value<DateTime?> createdAt,
       Value<String?> lastModifiedBy,
       Value<DateTime?> syncedAt,
       Value<bool> isSyncPending,
+      Value<String> syncStatus,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
     });
 
 final class $$StockItemsTableReferences
@@ -8245,11 +9304,6 @@ class $$StockItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get category => $composableBuilder(
     column: $table.category,
     builder: (column) => ColumnFilters(column),
@@ -8270,11 +9324,6 @@ class $$StockItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get lastModifiedBy => $composableBuilder(
     column: $table.lastModifiedBy,
     builder: (column) => ColumnFilters(column),
@@ -8287,6 +9336,36 @@ class $$StockItemsTableFilterComposer
 
   ColumnFilters<bool> get isSyncPending => $composableBuilder(
     column: $table.isSyncPending,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8360,11 +9439,6 @@ class $$StockItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
-    column: $table.updatedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get category => $composableBuilder(
     column: $table.category,
     builder: (column) => ColumnOrderings(column),
@@ -8385,11 +9459,6 @@ class $$StockItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get lastModifiedBy => $composableBuilder(
     column: $table.lastModifiedBy,
     builder: (column) => ColumnOrderings(column),
@@ -8402,6 +9471,36 @@ class $$StockItemsTableOrderingComposer
 
   ColumnOrderings<bool> get isSyncPending => $composableBuilder(
     column: $table.isSyncPending,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -8438,9 +9537,6 @@ class $$StockItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<DateTime> get updatedAt =>
-      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
-
   GeneratedColumn<String> get category =>
       $composableBuilder(column: $table.category, builder: (column) => column);
 
@@ -8453,9 +9549,6 @@ class $$StockItemsTableAnnotationComposer
   GeneratedColumn<double> get unitPrice =>
       $composableBuilder(column: $table.unitPrice, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-
   GeneratedColumn<String> get lastModifiedBy => $composableBuilder(
     column: $table.lastModifiedBy,
     builder: (column) => column,
@@ -8466,6 +9559,30 @@ class $$StockItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSyncPending => $composableBuilder(
     column: $table.isSyncPending,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
     builder: (column) => column,
   );
 
@@ -8530,15 +9647,19 @@ class $$StockItemsTableTableManager
                 Value<String?> comment = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
                 Value<int?> minThreshold = const Value.absent(),
-                Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> category = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<double?> unitPrice = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
                 Value<String?> lastModifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<bool> isSyncPending = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
               }) => StockItemsCompanion(
                 id: id,
                 name: name,
@@ -8547,15 +9668,19 @@ class $$StockItemsTableTableManager
                 comment: comment,
                 isCustom: isCustom,
                 minThreshold: minThreshold,
-                updatedAt: updatedAt,
                 category: category,
                 sortOrder: sortOrder,
                 remoteId: remoteId,
                 unitPrice: unitPrice,
-                createdAt: createdAt,
                 lastModifiedBy: lastModifiedBy,
                 syncedAt: syncedAt,
                 isSyncPending: isSyncPending,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
               ),
           createCompanionCallback:
               ({
@@ -8566,15 +9691,19 @@ class $$StockItemsTableTableManager
                 Value<String?> comment = const Value.absent(),
                 required bool isCustom,
                 Value<int?> minThreshold = const Value.absent(),
-                required DateTime updatedAt,
                 Value<String?> category = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<double?> unitPrice = const Value.absent(),
-                Value<DateTime?> createdAt = const Value.absent(),
                 Value<String?> lastModifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<bool> isSyncPending = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
               }) => StockItemsCompanion.insert(
                 id: id,
                 name: name,
@@ -8583,15 +9712,19 @@ class $$StockItemsTableTableManager
                 comment: comment,
                 isCustom: isCustom,
                 minThreshold: minThreshold,
-                updatedAt: updatedAt,
                 category: category,
                 sortOrder: sortOrder,
                 remoteId: remoteId,
                 unitPrice: unitPrice,
-                createdAt: createdAt,
                 lastModifiedBy: lastModifiedBy,
                 syncedAt: syncedAt,
                 isSyncPending: isSyncPending,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -9211,6 +10344,12 @@ typedef $$EventsTableCreateCompanionBuilder =
       required DateTime endTime,
       required int color,
       required List<int> terrainIds,
+      Value<String> syncStatus,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
     });
 typedef $$EventsTableUpdateCompanionBuilder =
     EventsCompanion Function({
@@ -9221,6 +10360,12 @@ typedef $$EventsTableUpdateCompanionBuilder =
       Value<DateTime> endTime,
       Value<int> color,
       Value<List<int>> terrainIds,
+      Value<String> syncStatus,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<String?> firebaseId,
+      Value<String?> createdBy,
+      Value<String?> modifiedBy,
     });
 
 class $$EventsTableFilterComposer
@@ -9267,6 +10412,36 @@ class $$EventsTableFilterComposer
         column: $table.terrainIds,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$EventsTableOrderingComposer
@@ -9312,6 +10487,36 @@ class $$EventsTableOrderingComposer
     column: $table.terrainIds,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EventsTableAnnotationComposer
@@ -9348,6 +10553,30 @@ class $$EventsTableAnnotationComposer
         column: $table.terrainIds,
         builder: (column) => column,
       );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get firebaseId => $composableBuilder(
+    column: $table.firebaseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<String> get modifiedBy => $composableBuilder(
+    column: $table.modifiedBy,
+    builder: (column) => column,
+  );
 }
 
 class $$EventsTableTableManager
@@ -9385,6 +10614,12 @@ class $$EventsTableTableManager
                 Value<DateTime> endTime = const Value.absent(),
                 Value<int> color = const Value.absent(),
                 Value<List<int>> terrainIds = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
               }) => EventsCompanion(
                 id: id,
                 title: title,
@@ -9393,6 +10628,12 @@ class $$EventsTableTableManager
                 endTime: endTime,
                 color: color,
                 terrainIds: terrainIds,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
               ),
           createCompanionCallback:
               ({
@@ -9403,6 +10644,12 @@ class $$EventsTableTableManager
                 required DateTime endTime,
                 required int color,
                 required List<int> terrainIds,
+                Value<String> syncStatus = const Value.absent(),
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<String?> firebaseId = const Value.absent(),
+                Value<String?> createdBy = const Value.absent(),
+                Value<String?> modifiedBy = const Value.absent(),
               }) => EventsCompanion.insert(
                 id: id,
                 title: title,
@@ -9411,6 +10658,12 @@ class $$EventsTableTableManager
                 endTime: endTime,
                 color: color,
                 terrainIds: terrainIds,
+                syncStatus: syncStatus,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                firebaseId: firebaseId,
+                createdBy: createdBy,
+                modifiedBy: modifiedBy,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

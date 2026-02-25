@@ -15,8 +15,18 @@ class Terrains extends Table {
   IntColumn get capacity => integer().nullable()();
   RealColumn get pricePerHour => real().nullable()();
   BoolColumn get available => boolean().withDefault(const Constant(true))();
-  DateTimeColumn get createdAt => dateTime().nullable()();
-  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  // Sync fields
+  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get createdBy => text().nullable()();
+  TextColumn get modifiedBy => text().nullable()();
+
   DateTimeColumn get syncedAt => dateTime().nullable()();
   TextColumn get imageUrl => text().nullable()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => []; // Removed indices on createdAt/syncStatus as per fix request
 }

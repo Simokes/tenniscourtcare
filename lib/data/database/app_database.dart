@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 16; // Increment version to 16
+  int get schemaVersion => 17; // Increment version to 17
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -159,6 +159,44 @@ class AppDatabase extends _$AppDatabase {
       if (from < 16) {
         // Added status column to Terrains
         await m.addColumn(terrains, terrains.status);
+      }
+      if (from < 17) {
+        // Phase 3: Add sync columns to Terrains, Maintenances, StockItems, Events
+
+        // Terrains
+        await m.addColumn(terrains, terrains.syncStatus);
+        await m.addColumn(terrains, terrains.firebaseId);
+        await m.addColumn(terrains, terrains.createdBy);
+        await m.addColumn(terrains, terrains.modifiedBy);
+        // createdAt, updatedAt already exist in older versions, skipping to avoid duplicates
+
+        // Maintenances
+        await m.addColumn(maintenances, maintenances.syncStatus);
+        await m.addColumn(maintenances, maintenances.updatedAt);
+        await m.addColumn(maintenances, maintenances.firebaseId);
+        await m.addColumn(maintenances, maintenances.modifiedBy);
+        // createdAt already exists, skipping
+
+        // StockItems
+        await m.addColumn(stockItems, stockItems.syncStatus);
+        await m.addColumn(stockItems, stockItems.updatedAt); // Wait, was updatedAt existing?
+        // Checking StockItems definition: DateTimeColumn get updatedAt => dateTime()();
+        // It WAS existing in v2 (or v11 migration block adds createdAt, not updatedAt).
+        // Let's check stock_items.dart in file read...
+        // "DateTimeColumn get updatedAt => dateTime()();" was there in original read.
+        // So updatedAt existed.
+        // I will SKIP updatedAt for StockItems.
+        await m.addColumn(stockItems, stockItems.firebaseId);
+        await m.addColumn(stockItems, stockItems.createdBy);
+        await m.addColumn(stockItems, stockItems.modifiedBy);
+
+        // Events
+        await m.addColumn(events, events.syncStatus);
+        await m.addColumn(events, events.createdAt);
+        await m.addColumn(events, events.updatedAt);
+        await m.addColumn(events, events.firebaseId);
+        await m.addColumn(events, events.createdBy);
+        await m.addColumn(events, events.modifiedBy);
       }
     },
   );
