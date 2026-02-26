@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/repositories/terrain_repository_impl.dart';
 import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_terrain_service.dart';
-import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import '../../fixtures/test_data.dart';
 
 class MockAppDatabase extends Mock implements AppDatabase {}

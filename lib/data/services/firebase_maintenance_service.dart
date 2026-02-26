@@ -1,5 +1,5 @@
 // filepath: lib/data/services/firebase_maintenance_service.dart
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/models/maintenance_model.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
@@ -48,7 +48,7 @@ class FirebaseMaintenanceService {
           }).toList();
         })
         .handleError((e) {
-          print('Error watching maintenances: $e');
+          debugPrint('Error watching maintenances: $e');
           return <Maintenance>[];
         });
   }

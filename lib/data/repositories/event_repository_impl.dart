@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_event.dart';
 import '../../domain/entities/sync_status.dart';
 import '../../domain/repositories/event_repository.dart';
@@ -124,7 +125,7 @@ class EventRepositoryImpl implements EventRepository {
     try {
       await _firebaseService.eventService.uploadEventToFirestore(event);
     } catch (e) {
-      print('Failed to sync event: $e');
+      debugPrint('Failed to sync event: $e');
     }
   }
 

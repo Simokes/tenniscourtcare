@@ -1,5 +1,5 @@
 // filepath: lib/data/services/firebase_stock_service.dart
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/models/stock_item_model.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
@@ -47,7 +47,7 @@ class FirebaseStockService {
           }).toList();
         })
         .handleError((e) {
-          print('Error watching stock items: $e');
+          debugPrint('Error watching stock items: $e');
           return <StockItem>[];
         });
   }
