@@ -76,7 +76,7 @@ class TestData {
     description: 'Annual tournament',
     startTime: DateTime(2025, 12, 20, 10, 0),
     endTime: DateTime(2025, 12, 20, 12, 0),
-    color: const Color(0xFF3B82F6).value,
+    color: const Color(0xFF3B82F6).toARGB32(),
     terrainIds: const [1],
     syncStatus: SyncStatus.synced,
     createdAt: DateTime(2024, 1, 1),
