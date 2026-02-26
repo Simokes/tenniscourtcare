@@ -1,12 +1,14 @@
 // Stub pour le web
-import 'dart:html' as html;
+import 'dart:js_interop';
 import 'dart:typed_data';
+import 'package:web/web.dart';
 
 void downloadOnWeb(Uint8List bytes, String filename) {
-  final blob = html.Blob([bytes], 'text/csv');
-  final url = html.Url.createObjectUrlFromBlob(blob);
-  html.AnchorElement(href: url)
-    ..setAttribute('download', filename)
-    ..click();
-  html.Url.revokeObjectUrl(url);
+  final blob = Blob([bytes.toJS].toJS, BlobPropertyBag(type: 'text/csv'));
+  final url = URL.createObjectURL(blob);
+  final anchor = HTMLAnchorElement()
+    ..href = url
+    ..download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }

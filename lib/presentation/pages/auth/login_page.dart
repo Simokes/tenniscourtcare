@@ -80,7 +80,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ? []
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -96,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: _primaryColor.withOpacity(0.1),
+                        color: _primaryColor.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -227,9 +227,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
+                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       error.toString(),
@@ -259,14 +259,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                           elevation: 0,
                         ).copyWith(
-                          backgroundColor: MaterialStateProperty.resolveWith((
+                          backgroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
-                            if (states.contains(MaterialState.hovered)) {
+                            if (states.contains(WidgetState.hovered)) {
                               return _primaryDarkColor;
                             }
-                            if (states.contains(MaterialState.disabled)) {
-                              return _primaryColor.withOpacity(0.6);
+                            if (states.contains(WidgetState.disabled)) {
+                              return _primaryColor.withValues(alpha: 0.6);
                             }
                             return _primaryColor;
                           }),
@@ -471,8 +471,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 ? const Color(0xFF334155)
                 : Colors.white,
           ).copyWith(
-            backgroundColor: MaterialStateProperty.resolveWith((states) {
-              if (states.contains(MaterialState.hovered)) {
+            backgroundColor: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.hovered)) {
                 return isDarkMode
                     ? const Color(0xFF475569)
                     : const Color(0xFFF8FAFC); // Slate-600 / Slate-50
