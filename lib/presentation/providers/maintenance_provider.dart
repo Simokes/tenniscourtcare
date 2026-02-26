@@ -26,7 +26,6 @@ final firestoreMaintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
 // FUSION
 final maintenancesProvider = StreamProvider<List<Maintenance>>((ref) async* {
   final localFuture = ref.watch(localMaintenancesProvider.future);
-  final remoteStream = ref.watch(firestoreMaintenancesProvider.future);
 
   final local = await localFuture;
   yield local;
@@ -92,7 +91,7 @@ final maintenancesByTerrainProvider = StreamProvider.family<List<Maintenance>, i
         ..sort((a, b) => b.date.compareTo(a.date)) // Sort by date desc
     ),
     loading: () => Stream.value([]),
-    error: (_, __) => Stream.value([]),
+    error: (error, stack) => Stream.value([]),
   );
 });
 
@@ -141,12 +140,6 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<List<Maintenance>>> {
 
   Future<void> updateMaintenance(Maintenance maintenance) async {
     await ref.read(updateMaintenanceProvider)(maintenance);
-  }
-
-  // Restore validation method if it was public or used internally
-  bool _validateMaintenance(Maintenance maintenance) {
-    if (maintenance.sacsMantoUtilises < 0) return false;
-    return true;
   }
 }
 

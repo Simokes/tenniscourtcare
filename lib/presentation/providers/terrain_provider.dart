@@ -8,8 +8,9 @@ import 'database_provider.dart';
 
 // Service Provider
 final firebaseSyncServiceProvider = Provider<FirebaseSyncService>((ref) {
-  // We use direct instance or could create a provider for Firestore instance
-  return FirebaseSyncService(FirebaseFirestore.instance);
+  final firestore = FirebaseFirestore.instance;
+  final db = ref.watch(databaseProvider);
+  return FirebaseSyncService(firestore, db);
 });
 
 // Repository Provider
@@ -34,7 +35,7 @@ final firestoreTerrainsProvider = StreamProvider<List<Terrain>>((ref) {
 // FUSION LOCAL + FIRESTORE
 final terrainsProvider = StreamProvider<List<Terrain>>((ref) async* {
   final localFuture = ref.watch(localTerrainsProvider.future);
-  final remoteStream = ref.watch(firestoreTerrainsProvider.future); // Use .future for first value or create broadcast
+  // Use .future for first value or create broadcast
 
   // Ideally, combineLatest but simple async* works if we listen to stream properly
   // For StreamProvider, we can just yield* ref.watch(firestoreTerrainsProvider.stream) combined

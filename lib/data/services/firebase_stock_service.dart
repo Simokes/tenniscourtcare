@@ -35,7 +35,7 @@ class FirebaseStockService {
   }
 
   /// Écouter les changements Firestore (stream temps réel)
-  Stream<List<StockItem>> watchStockItems() {
+  Stream<List<StockItem>> watchStock() {
     return _firestore
         .collection(_collectionPath)
         .snapshots()

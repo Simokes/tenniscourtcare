@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/event_repository_impl.dart';
 import '../../domain/entities/app_event.dart';
-import '../../domain/entities/maintenance.dart';
 import '../../domain/repositories/event_repository.dart';
 import 'database_provider.dart';
 import 'maintenance_provider.dart';
@@ -26,7 +25,6 @@ final firestoreEventsProvider = StreamProvider<List<AppEvent>>((ref) {
 
 final eventsProvider = StreamProvider<List<AppEvent>>((ref) async* {
   final localFuture = ref.watch(localEventsProvider.future);
-  final remoteStream = ref.watch(firestoreEventsProvider.future);
 
   final local = await localFuture;
   yield local;
