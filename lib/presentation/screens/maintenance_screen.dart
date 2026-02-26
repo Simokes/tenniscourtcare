@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/terrain_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../widgets/terrain_card.dart';
+import '../widgets/sync_status_indicator.dart';
 import 'terrain_maintenance_history_screen.dart';
 
 class MaintenanceScreen extends ConsumerWidget {
@@ -15,14 +16,18 @@ class MaintenanceScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const SliverAppBar(
-            title: Text('Maintenances'), // TODO(i18n): S.maintenancesTitle
+          SliverAppBar(
+            title: const Text('Maintenances'),
             floating: true,
             snap: true,
             expandedHeight: 120,
+            actions: const [
+              SyncStatusIndicator(collection: 'terrains'),
+              SizedBox(width: 8),
+            ],
             flexibleSpace: FlexibleSpaceBar(
               background: DecoratedBox(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -50,8 +55,6 @@ class MaintenanceScreen extends ConsumerWidget {
                 return SliverFillRemaining(
                   child: _EmptyState(
                     onAddCourt: () {
-                      // Navigate to add court screen if implemented
-                      // For now show a message
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Fonctionnalité non implémentée')),
                       );

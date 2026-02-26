@@ -10,6 +10,7 @@ import '../../providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../../domain/entities/maintenance.dart';
 import '../../../domain/entities/terrain.dart';
+import '../../../presentation/widgets/sync_status_indicator.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -53,6 +54,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         elevation: 0,
         centerTitle: false,
         actions: [
+          const SyncStatusIndicator(collection: 'events'),
           TextButton.icon(
             onPressed: () {
               setState(() {

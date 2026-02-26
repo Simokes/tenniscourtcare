@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/logic/stock_categorizer.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
+import '../../models/stock_filter.dart';
+import '../../../../presentation/widgets/sync_status_indicator.dart';
 import '../widgets/stock_item_tile.dart';
 import '../widgets/add_edit_stock_item_sheet.dart';
 
@@ -35,6 +37,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             actions: [
+              const SyncStatusIndicator(collection: 'stock'),
               IconButton(
                 icon: Icon(_isReorderMode ? Icons.check : Icons.sort),
                 tooltip: _isReorderMode ? 'Terminer' : 'Réorganiser',

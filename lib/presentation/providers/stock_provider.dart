@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/stock_repository_impl.dart';
 import '../../domain/entities/stock_item.dart';
 import '../../domain/repositories/stock_repository.dart';
+import '../../features/inventory/models/stock_filter.dart';
 import 'database_provider.dart';
 import 'terrain_provider.dart';
 
@@ -69,7 +70,43 @@ List<StockItem> _mergeStock(List<StockItem> local, List<StockItem> remote) {
 // Helper alias for UI compatibility
 final stockItemsProvider = stockProvider;
 
-// --- Restore StockNotifier ---
+// --- Filters & Search ---
+
+final stockFilterProvider = StateProvider<StockFilter>((ref) => StockFilter.all);
+final stockSearchQueryProvider = StateProvider<String>((ref) => '');
+
+final filteredStockItemsProvider = Provider<AsyncValue<List<StockItem>>>((ref) {
+  final itemsAsync = ref.watch(stockProvider);
+  final filter = ref.watch(stockFilterProvider);
+  final query = ref.watch(stockSearchQueryProvider).toLowerCase();
+
+  return itemsAsync.whenData((items) {
+    var filtered = items;
+
+    // Search
+    if (query.isNotEmpty) {
+      filtered = filtered.where((i) => i.name.toLowerCase().contains(query)).toList();
+    }
+
+    // Filter
+    switch (filter) {
+      case StockFilter.all:
+        break;
+      case StockFilter.lowStock:
+        filtered = filtered.where((i) => i.isLowOnStock).toList();
+        break;
+      case StockFilter.fixed:
+        filtered = filtered.where((i) => !i.isCustom).toList();
+        break;
+      case StockFilter.custom:
+        filtered = filtered.where((i) => i.isCustom).toList();
+        break;
+    }
+    return filtered;
+  });
+});
+
+// --- StockNotifier ---
 
 class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
   final Ref ref;
@@ -99,12 +136,17 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
     );
 
     await ref.read(updateStockItemProvider)(updated);
-
-    // Add history record logic would go here if StockHistory entity exists
   }
 
-  Future<void> reorderItems(int oldIndex, int newIndex) async {
-    // Reorder logic
+  Future<void> reorderItems(List<StockItem> items) async {
+    // Update sortOrder for each item if changed
+    for (int i = 0; i < items.length; i++) {
+      final item = items[i];
+      if (item.sortOrder != i) {
+        final updated = item.copyWith(sortOrder: i, updatedAt: DateTime.now());
+        await ref.read(updateStockItemProvider)(updated);
+      }
+    }
   }
 }
 
