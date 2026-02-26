@@ -367,11 +367,12 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     const SizedBox(height: 12),
                     terrainsAsync.when(
                       data: (terrains) {
-                        if (terrains.isEmpty)
+                        if (terrains.isEmpty) {
                           return const Text(
                             'Aucun terrain configuré.',
                             style: TextStyle(color: Colors.grey),
                           );
+                        }
                         return Wrap(
                           spacing: 8,
                           runSpacing: 8,

@@ -38,12 +38,15 @@ class ShareReportService {
     if (report.totalInterventions > 0) {
       buffer.writeln('📦 Consommation :');
       final consumption = <String>[];
-      if (report.totalSacksManto > 0)
+      if (report.totalSacksManto > 0) {
         consumption.add('${report.totalSacksManto} sacs de Manto');
-      if (report.totalSacksSottomanto > 0)
+      }
+      if (report.totalSacksSottomanto > 0) {
         consumption.add('${report.totalSacksSottomanto} sacs de Sottomanto');
-      if (report.totalSacksSilice > 0)
+      }
+      if (report.totalSacksSilice > 0) {
         consumption.add('${report.totalSacksSilice} sacs de Silice');
+      }
 
       if (consumption.isEmpty) {
         buffer.writeln('Aucune consommation de sacs.');

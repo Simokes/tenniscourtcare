@@ -228,8 +228,9 @@ class StockItemTile extends ConsumerWidget {
     if (lower.contains('balai') || lower.contains('bross')) return Icons.brush;
     if (lower.contains('manto') || lower.contains('sotto')) return Icons.layers;
     if (lower.contains('silice')) return Icons.grain;
-    if (lower.contains('eau') || lower.contains('arros'))
+    if (lower.contains('eau') || lower.contains('arros')) {
       return Icons.water_drop;
+    }
     return Icons.inventory_2;
   }
 

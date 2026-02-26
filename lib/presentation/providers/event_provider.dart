@@ -117,18 +117,21 @@ final calendarItemsProvider =
       }
 
       // If any has error, return error (priority to events)
-      if (eventsAsync.hasError)
+      if (eventsAsync.hasError) {
         return AsyncValue.error(eventsAsync.error!, eventsAsync.stackTrace!);
-      if (maintenancesAsync.hasError)
+      }
+      if (maintenancesAsync.hasError) {
         return AsyncValue.error(
           maintenancesAsync.error!,
           maintenancesAsync.stackTrace!,
         );
-      if (terrainsAsync.hasError)
+      }
+      if (terrainsAsync.hasError) {
         return AsyncValue.error(
           terrainsAsync.error!,
           terrainsAsync.stackTrace!,
         );
+      }
 
       // If we have data (even empty)
       if (eventsAsync.hasValue &&

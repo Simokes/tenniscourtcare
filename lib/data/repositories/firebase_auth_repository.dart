@@ -295,7 +295,7 @@ class FirebaseAuthRepository implements AuthRepository {
           firestoreUid: drift.Value(uid),
           name: drift.Value(name),
           passwordHash: const drift.Value('FIREBASE_AUTH'),
-          role: drift.Value(Role.admin),
+          role: const drift.Value(Role.admin),
           createdAt: drift.Value(DateTime.now()),
         ),
       );
