@@ -231,6 +231,40 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> updateUserRole(int userId, Role newRole) async {
+    try {
+      final localUser = await _db.getUserById(userId);
+      if (localUser == null) throw const UserNotFoundException();
+
+      // Use direct query to get firestoreUid from the row
+      final userRow = await (_db.select(
+        _db.users,
+      )..where((u) => u.id.equals(userId))).getSingleOrNull();
+      String? uid = userRow?.firestoreUid;
+
+      if (uid == null) {
+        final query = await _firestore
+            .collection('users')
+            .where('email', isEqualTo: localUser.email)
+            .get();
+        if (query.docs.isNotEmpty) {
+          uid = query.docs.first.id;
+        }
+      }
+
+      if (uid == null) throw const UserNotFoundException();
+
+      final callable = _functions.httpsCallable('updateUserRole');
+      await callable.call({'userId': uid, 'newRole': newRole.name});
+
+      // Update local DB
+      await _db.updateUserRole(userId, newRole);
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
   Future<void> updateUserPassword(int userId, String newPassword) async {
     try {
       final localUser = await _db.getUserById(userId);

@@ -111,6 +111,49 @@ void main() {
     expect(await repository.hasAnyUser(), isTrue);
   });
 
+  testWidgets('Integration: createAdminUser creates admin + syncs', (
+    tester,
+  ) async {
+    // Verify no admin exists initially
+    expect(await repository.hasAnyUser(), isFalse);
+
+    // Create admin via repository
+    const adminEmail = 'fresh_admin@example.com';
+    const adminName = 'Fresh Admin';
+    const adminPass = 'AdminPass123!';
+
+    final adminUser = await repository.createAdminUser(
+      email: adminEmail,
+      name: adminName,
+      password: adminPass,
+    );
+
+    // Verify user created with admin role
+    expect(adminUser.email, adminEmail);
+    expect(adminUser.role, Role.admin);
+
+    // Verify Firebase Auth user created
+    final fbUser = FirebaseAuth.instance.currentUser;
+    expect(fbUser, isNotNull);
+    expect(fbUser!.email, adminEmail);
+
+    // Verify Firestore document created
+    final fsDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(fbUser!.uid)
+        .get();
+    expect(fsDoc.exists, true);
+    expect(fsDoc['role'], 'admin');
+
+    // Verify local DB synced
+    final localAdmin = await db.getUserByFirestoreUid(fbUser.uid);
+    expect(localAdmin, isNotNull);
+    expect(localAdmin!.role, Role.admin);
+
+    // Verify hasAnyUser now returns true
+    expect(await repository.hasAnyUser(), isTrue);
+  });
+
   testWidgets('Integration: createUser (Admin) succeeds', (tester) async {
     // 1. Create admin user first (before any tests)
     const adminEmail = 'admin_create@example.com';
@@ -227,17 +270,27 @@ void main() {
     await repository.signIn(agentEmail, agentPass);
 
     // 4. Try to create user (should fail - permission denied)
-    expect(
-      () => repository.createUser(
+    // We expect an exception that wraps the Cloud Function error (likely 'permission-denied')
+    // FirebaseAuthRepository maps this to UnauthorizedException or similar.
+    // For now, we assert it's an Exception, but ideally we'd check for specific type.
+    // Since we don't have easy access to custom exceptions in test context without import,
+    // we'll check if the string representation contains something meaningful or just stick to Exception for now,
+    // but the intention is to be specific.
+    // Let's at least ensure it fails.
+    try {
+      await repository.createUser(
         email: 'another_user@example.com',
         name: 'Another User',
         password: 'Password123!',
         role: Role.agent,
-      ),
-      throwsA(
-        isA<Exception>(),
-      ), // FirebaseAuthRepository throws mapped exceptions
-    );
+      );
+      fail('Should have failed with permission denied');
+    } catch (e) {
+      // Confirm it's the expected error
+      expect(e, isA<Exception>());
+      // Optionally check for 'Permission refusée' if we import the exceptions
+      // expect(e.toString(), contains('Permission refusée'));
+    }
   });
 
   testWidgets('Integration: deleteUser removes from all places', (
@@ -360,48 +413,34 @@ void main() {
         .get();
     final promoteUid = userQuery.docs.first.id;
 
-    // Need a method to call updateRole - Wait, FirebaseAuthRepository doesn't expose public updateUserRole with Role enum for OTHERS?
-    // It has `updateUserRole(int userId, Role newRole)`? No, it has `updateUserRole` implemented?
-    // Let's check repository interface.
-    // `AuthRepository` usually has `createUser`, `deleteUser`, `updateUserPassword`.
-    // Does it have `updateUserRole`?
-    // Let's check `lib/domain/repositories/auth_repository.dart`.
-    // It has `createUser`, `deleteUser`, `updateUserPassword`.
-    // It does NOT seem to have `updateUserRole` in the interface provided in memory context earlier.
-    // Wait, the prompt asked to implement Cloud Function `updateRole`, but did I expose it in Repository?
-    // If not, I can't test it via repository.
-    // The prompt in Sprint 1.3 said: "IMPLÉMENTEZ les 4 Callable Cloud Functions... updateUserRole".
-    // But repository interface might be missing it.
-    // Let's assume for this test we call the Cloud Function directly or via a new repository method if I added it.
-    // If I didn't add it to interface, I should probably just test the Cloud Function invocation via `FirebaseFunctions`.
+    // Fetch local user to get ID
+    final localUserBefore = await db.getUserByFirestoreUid(promoteUid);
+    expect(localUserBefore, isNotNull);
 
-    // Checking `FirebaseAuthRepository` code I wrote earlier...
-    // I implemented `createUser`, `deleteUser`, `updateUserPassword`.
-    // I did NOT implement `updateUserRole` in the repository because the interface `AuthRepository` didn't have it?
-    // Let's check.
-    // If it's missing, I'll invoke the Cloud Function directly for this test to prove backend works.
+    // Call updateRole via repository
+    await repository.updateUserRole(localUserBefore!.id, Role.secretary);
 
-    final callable = FirebaseFunctions.instanceFor(
-      region: 'us-central1',
-    ).httpsCallable('updateUserRole');
-    await callable.call({'userId': promoteUid, 'newRole': 'secretary'});
+    // Verify Firestore with retry logic
+    int retries = 5;
+    DocumentSnapshot? updatedDoc;
+    while (retries > 0) {
+      updatedDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(promoteUid)
+          .get();
 
-    // Verify Firestore
-    final updatedDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(promoteUid)
-        .get();
-    expect(updatedDoc['role'], 'secretary');
+      if (updatedDoc['role'] == 'secretary') break;
 
-    // Verify Local DB (Sync might not happen until re-login or manual sync trigger,
-    // unless we listen to Firestore or have a sync mechanism.
-    // `_syncUser` happens on SignIn.
-    // So let's SignIn as that user to see if it syncs.
+      await Future.delayed(const Duration(milliseconds: 500));
+      retries--;
+    }
+    expect(
+      updatedDoc!['role'],
+      'secretary',
+      reason: 'Firestore role not updated after retries',
+    );
 
-    // Sign in as the promoted user
-    await repository.signOut(); // Sign out admin
-    await repository.signIn(promoteEmail, 'Password123!');
-
+    // Verify Local DB (should be updated immediately by repository method)
     final localUserUpdated = await db.getUserByFirestoreUid(promoteUid);
     expect(localUserUpdated!.role, Role.secretary);
 
