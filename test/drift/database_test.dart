@@ -38,10 +38,20 @@ void main() {
 
     test('getAllTerrains retourne tous les terrains', () async {
       await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Court 1',
+          type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
+        ),
       );
       await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 2', type: TerrainType.synthetique, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Court 2',
+          type: TerrainType.synthetique,
+          status: TerrainStatus.playable,
+        ),
       );
 
       final terrains = await database.getAllTerrains();
@@ -54,7 +64,12 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Court 1',
+          type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
+        ),
       );
     });
 
@@ -77,22 +92,26 @@ void main() {
       expect(retrieved.sacsMantoUtilises, 5);
     });
 
-    test('getMaintenancesForTerrain retourne les maintenances du terrain',
-        () async {
-      await database.insertMaintenance(
-        Maintenance(
-          terrainId: terrainId,
-          type: 'Nettoyage',
-          date: DateTime.now().millisecondsSinceEpoch,
-          sacsMantoUtilises: 5,
-          sacsSottomantoUtilises: 0,
-          sacsSiliceUtilises: 0,
-        ),
-      );
+    test(
+      'getMaintenancesForTerrain retourne les maintenances du terrain',
+      () async {
+        await database.insertMaintenance(
+          Maintenance(
+            terrainId: terrainId,
+            type: 'Nettoyage',
+            date: DateTime.now().millisecondsSinceEpoch,
+            sacsMantoUtilises: 5,
+            sacsSottomantoUtilises: 0,
+            sacsSiliceUtilises: 0,
+          ),
+        );
 
-      final maintenances = await database.getMaintenancesForTerrain(terrainId);
-      expect(maintenances.length, 1);
-    });
+        final maintenances = await database.getMaintenancesForTerrain(
+          terrainId,
+        );
+        expect(maintenances.length, 1);
+      },
+    );
 
     test('updateMaintenance met à jour correctement', () async {
       final id = await database.insertMaintenance(
@@ -107,10 +126,7 @@ void main() {
       );
 
       await database.updateMaintenance(
-        MaintenancesCompanion(
-          id: Value(id),
-          type: const Value('Réparation'),
-        ),
+        MaintenancesCompanion(id: Value(id), type: const Value('Réparation')),
       );
 
       final updated = await database.getMaintenanceById(id);
@@ -142,16 +158,26 @@ void main() {
 
     setUp(() async {
       terrainTerreBattueId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Terre battue', type: TerrainType.terreBattue, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Terre battue',
+          type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
+        ),
       );
       terrainSynthetiqueId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Synthétique', type: TerrainType.synthetique, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Synthétique',
+          type: TerrainType.synthetique,
+          status: TerrainStatus.playable,
+        ),
       );
     });
 
     test('watchSacsTotals réémet sur insert', () async {
       final expectedManto = 7;
-      
+
       // On utilise expectLater pour s'assurer de capturer le flux d'événements
       final expectation = expectLater(
         database.watchSacsTotals(terrainId: terrainTerreBattueId),
@@ -213,7 +239,7 @@ void main() {
 
       // La première valeur émise après les inserts devrait être 5
       final value = await stream.firstWhere((v) => v.manto > 0);
-      expect(value.manto, 5); 
+      expect(value.manto, 5);
     });
 
     test('watchSacsTotalsAllTerrains agrège plusieurs terrains', () async {
@@ -243,7 +269,9 @@ void main() {
         ),
       );
 
-      final value = await stream.firstWhere((v) => v.manto == 5 && v.silice == 8);
+      final value = await stream.firstWhere(
+        (v) => v.manto == 5 && v.silice == 8,
+      );
       expect(value.manto, 5);
       expect(value.silice, 8);
     });
@@ -254,13 +282,18 @@ void main() {
 
     setUp(() async {
       terrainId = await database.insertTerrain(
-        Terrain(id: 0, nom: 'Court 1', type: TerrainType.terreBattue, status: TerrainStatus.playable),
+        Terrain(
+          id: 0,
+          nom: 'Court 1',
+          type: TerrainType.terreBattue,
+          status: TerrainStatus.playable,
+        ),
       );
     });
 
     test('watchDailySeries groupe par jour', () async {
       final todayStart = DateUtils.startOfDay(DateTime.now());
-      
+
       // On insère deux maintenances avec EXACTEMENT le même timestamp (début de journée)
       // car le SQL groupe par la valeur brute de la colonne 'date'.
       await database.insertMaintenance(
@@ -285,11 +318,13 @@ void main() {
         ),
       );
 
-      final series = await database.watchDailySacsSeriesForTerrains(
-        terrainIds: {terrainId},
-        start: todayStart,
-        end: DateUtils.endOfDay(DateTime.now()),
-      ).firstWhere((s) => s.isNotEmpty);
+      final series = await database
+          .watchDailySacsSeriesForTerrains(
+            terrainIds: {terrainId},
+            start: todayStart,
+            end: DateUtils.endOfDay(DateTime.now()),
+          )
+          .firstWhere((s) => s.isNotEmpty);
 
       expect(series.length, 1);
       expect(series.first.manto, 8); // 5 + 3

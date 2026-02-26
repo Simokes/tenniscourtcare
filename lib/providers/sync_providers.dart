@@ -37,7 +37,6 @@ Stream<bool> isOnlineStatus(IsOnlineStatusRef ref) async* {
   }
 }
 
-
 @Riverpod(keepAlive: true)
 Stream<void> backgroundTerrainsSync(BackgroundTerrainsSyncRef ref) async* {
   final db = ref.watch(databaseProvider);
@@ -50,7 +49,9 @@ Stream<void> backgroundTerrainsSync(BackgroundTerrainsSyncRef ref) async* {
     saveToLocal: (items) async {
       await db.transaction(() async {
         for (final item in items) {
-          final existing = await (db.select(db.terrains)..where((t) => t.remoteId.equals(item.id))).getSingleOrNull();
+          final existing = await (db.select(
+            db.terrains,
+          )..where((t) => t.remoteId.equals(item.id))).getSingleOrNull();
 
           final companion = TerrainsCompanion(
             remoteId: Value(item.id),
@@ -67,20 +68,24 @@ Stream<void> backgroundTerrainsSync(BackgroundTerrainsSyncRef ref) async* {
           );
 
           if (existing != null) {
-            await (db.update(db.terrains)..where((t) => t.id.equals(existing.id))).write(companion);
+            await (db.update(
+              db.terrains,
+            )..where((t) => t.id.equals(existing.id))).write(companion);
           } else {
             await db.into(db.terrains).insert(companion);
           }
         }
       });
-    }
+    },
   );
 
   ref.onDispose(() => sub.cancel());
 }
 
 @Riverpod(keepAlive: true)
-Stream<void> backgroundReservationsSync(BackgroundReservationsSyncRef ref) async* {
+Stream<void> backgroundReservationsSync(
+  BackgroundReservationsSyncRef ref,
+) async* {
   final db = ref.watch(databaseProvider);
   final sync = ref.watch(syncServiceProvider);
   final currentUser = ref.watch(currentUserProvider);
@@ -101,7 +106,9 @@ Stream<void> backgroundReservationsSync(BackgroundReservationsSyncRef ref) async
   // If we want it to restart when `firestoreUid` becomes available, we should watch that.
 
   // Let's watch the local user row corresponding to the auth user.
-  final userRow = await (db.select(db.users)..where((u) => u.id.equals(currentUser.id))).watchSingleOrNull().first;
+  final userRow = await (db.select(
+    db.users,
+  )..where((u) => u.id.equals(currentUser.id))).watchSingleOrNull().first;
 
   // If we want this provider to rebuild when userRow changes (e.g. firestoreUid added),
   // we should use `watch` inside the body if it were a functional provider returning a value.
@@ -138,48 +145,58 @@ Stream<void> backgroundReservationsSync(BackgroundReservationsSyncRef ref) async
   final isAdmin = currentUser.role == Role.admin;
 
   if (isAdmin || firestoreUid != null) {
-      final sub = sync.syncDown<ReservationFirestoreModel>(
-        collection: 'reservations',
-        queryFn: (q) => isAdmin ? q : q.where('userId', isEqualTo: firestoreUid),
-        fromFirestore: (doc) => ReservationFirestoreModel.fromFirestore(doc),
-        getId: (item) => item.id,
-        saveToLocal: (items) async {
-           await db.transaction(() async {
-             for (final item in items) {
-               // Resolve User
-               final u = await (db.select(db.users)..where((u) => u.firestoreUid.equals(item.userId))).getSingleOrNull();
-               if (u == null) continue;
+    final sub = sync.syncDown<ReservationFirestoreModel>(
+      collection: 'reservations',
+      queryFn: (q) => isAdmin ? q : q.where('userId', isEqualTo: firestoreUid),
+      fromFirestore: (doc) => ReservationFirestoreModel.fromFirestore(doc),
+      getId: (item) => item.id,
+      saveToLocal: (items) async {
+        await db.transaction(() async {
+          for (final item in items) {
+            // Resolve User
+            final u =
+                await (db.select(db.users)
+                      ..where((u) => u.firestoreUid.equals(item.userId)))
+                    .getSingleOrNull();
+            if (u == null) continue;
 
-               // Resolve Terrain
-               final t = await (db.select(db.terrains)..where((t) => t.remoteId.equals(item.terrainId))).getSingleOrNull();
-               if (t == null) continue;
+            // Resolve Terrain
+            final t =
+                await (db.select(db.terrains)
+                      ..where((t) => t.remoteId.equals(item.terrainId)))
+                    .getSingleOrNull();
+            if (t == null) continue;
 
-               final existing = await (db.select(db.reservations)..where((r) => r.remoteId.equals(item.id))).getSingleOrNull();
+            final existing = await (db.select(
+              db.reservations,
+            )..where((r) => r.remoteId.equals(item.id))).getSingleOrNull();
 
-               final companion = ReservationsCompanion(
-                 remoteId: Value(item.id),
-                 userId: Value(u.id),
-                 terrainId: Value(t.id),
-                 date: Value(item.date),
-                 startTime: Value(item.startTime),
-                 endTime: Value(item.endTime),
-                 status: Value(item.status),
-                 notes: Value(item.notes),
-                 createdAt: Value(item.createdAt),
-                 updatedAt: Value(item.updatedAt),
-                 syncedAt: Value(DateTime.now()),
-                 isSyncPending: const Value(false),
-               );
+            final companion = ReservationsCompanion(
+              remoteId: Value(item.id),
+              userId: Value(u.id),
+              terrainId: Value(t.id),
+              date: Value(item.date),
+              startTime: Value(item.startTime),
+              endTime: Value(item.endTime),
+              status: Value(item.status),
+              notes: Value(item.notes),
+              createdAt: Value(item.createdAt),
+              updatedAt: Value(item.updatedAt),
+              syncedAt: Value(DateTime.now()),
+              isSyncPending: const Value(false),
+            );
 
-               if (existing != null) {
-                  await (db.update(db.reservations)..where((r) => r.id.equals(existing.id))).write(companion);
-               } else {
-                  await db.into(db.reservations).insert(companion);
-               }
-             }
-           });
-        }
-      );
-      ref.onDispose(() => sub.cancel());
+            if (existing != null) {
+              await (db.update(
+                db.reservations,
+              )..where((r) => r.id.equals(existing.id))).write(companion);
+            } else {
+              await db.into(db.reservations).insert(companion);
+            }
+          }
+        });
+      },
+    );
+    ref.onDispose(() => sub.cancel());
   }
 }

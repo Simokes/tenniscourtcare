@@ -33,8 +33,8 @@ class AppEvent {
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   AppEvent copyWith({
     int? id,

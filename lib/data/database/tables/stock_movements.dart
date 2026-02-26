@@ -16,10 +16,12 @@ class StockMovements extends Table {
   // Snapshot of quantity state
   IntColumn get previousQuantity => integer()();
   IntColumn get newQuantity => integer()();
-  IntColumn get quantityChange => integer()(); // Calculated for convenience query side
+  IntColumn get quantityChange =>
+      integer()(); // Calculated for convenience query side
 
   // Metadata
-  TextColumn get reason => text()(); // 'Maintenance', 'Livraison', 'Correction', 'Inventaire'
+  TextColumn get reason =>
+      text()(); // 'Maintenance', 'Livraison', 'Correction', 'Inventaire'
   TextColumn get description => text().nullable()(); // e.g. "Commande #12345"
 
   DateTimeColumn get occurredAt => dateTime().withDefault(currentDateAndTime)();

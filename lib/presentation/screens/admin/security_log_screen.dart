@@ -30,16 +30,13 @@ class SecurityLogScreen extends ConsumerWidget {
               return SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final log = logs[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: _LogItem(log: log),
-                      );
-                    },
-                    childCount: logs.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final log = logs[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _LogItem(log: log),
+                    );
+                  }, childCount: logs.length),
                 ),
               );
             },
@@ -70,7 +67,9 @@ class _LogItem extends StatelessWidget {
     } else if (action.contains('WARNING')) {
       return Colors.orange.withValues(alpha: 0.15);
     }
-    return Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+    return Theme.of(
+      context,
+    ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
   }
 
   Color _getIconColor(BuildContext context) {
@@ -114,11 +113,7 @@ class _LogItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            _getIcon(),
-            color: _getIconColor(context),
-            size: 24,
-          ),
+          Icon(_getIcon(), color: _getIconColor(context), size: 24),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -157,7 +152,8 @@ class _LogItem extends StatelessWidget {
                   Text(
                     _formatDetails(log.details),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontFamily: 'monospace', // Pour différencier les détails techniques
+                      fontFamily:
+                          'monospace', // Pour différencier les détails techniques
                       fontSize: 11,
                     ),
                   ),

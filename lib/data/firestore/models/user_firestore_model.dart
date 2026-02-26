@@ -60,7 +60,9 @@ class UserFirestoreModel {
       'name': name,
       'role': role.name,
       'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt != null
+          ? Timestamp.fromDate(updatedAt!)
+          : FieldValue.serverTimestamp(),
       'syncedAt': syncedAt != null ? Timestamp.fromDate(syncedAt!) : null,
       'profileImageUrl': profileImageUrl,
       'isActive': isActive,

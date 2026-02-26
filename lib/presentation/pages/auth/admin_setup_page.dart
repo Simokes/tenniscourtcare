@@ -38,7 +38,9 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
 
     if (password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Le mot de passe doit contenir au moins 8 caractères')),
+        const SnackBar(
+          content: Text('Le mot de passe doit contenir au moins 8 caractères'),
+        ),
       );
       return;
     }
@@ -76,17 +78,17 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
                   'Configuration Admin',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Créez le premier compte administrateur pour sécuriser l\'application.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 const SizedBox(height: 48),
 

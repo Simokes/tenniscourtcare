@@ -4,16 +4,15 @@ import 'package:flutter/material.dart';
 class MaintenanceDistributionChart extends StatefulWidget {
   final Map<String, int> distribution;
 
-  const MaintenanceDistributionChart({
-    super.key,
-    required this.distribution,
-  });
+  const MaintenanceDistributionChart({super.key, required this.distribution});
 
   @override
-  State<MaintenanceDistributionChart> createState() => _MaintenanceDistributionChartState();
+  State<MaintenanceDistributionChart> createState() =>
+      _MaintenanceDistributionChartState();
 }
 
-class _MaintenanceDistributionChartState extends State<MaintenanceDistributionChart> {
+class _MaintenanceDistributionChartState
+    extends State<MaintenanceDistributionChart> {
   int touchedIndex = -1;
 
   @override
@@ -24,7 +23,9 @@ class _MaintenanceDistributionChartState extends State<MaintenanceDistributionCh
 
     final total = widget.distribution.values.fold(0, (sum, v) => sum + v);
     final sortedKeys = widget.distribution.keys.toList()
-      ..sort((a, b) => widget.distribution[b]!.compareTo(widget.distribution[a]!));
+      ..sort(
+        (a, b) => widget.distribution[b]!.compareTo(widget.distribution[a]!),
+      );
 
     return AspectRatio(
       aspectRatio: 1.3,
@@ -45,7 +46,9 @@ class _MaintenanceDistributionChartState extends State<MaintenanceDistributionCh
                           touchedIndex = -1;
                           return;
                         }
-                        touchedIndex = pieTouchResponse.touchedSection!.touchedSectionIndex;
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!
+                            .touchedSectionIndex;
                       });
                     },
                   ),
@@ -75,14 +78,19 @@ class _MaintenanceDistributionChartState extends State<MaintenanceDistributionCh
                     Container(
                       width: isTouched ? 16 : 12,
                       height: isTouched ? 16 : 12,
-                      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: color,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '$key (${((count / total) * 100).toStringAsFixed(0)}%)',
                       style: TextStyle(
                         fontSize: isTouched ? 14 : 12,
-                        fontWeight: isTouched ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isTouched
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         color: Colors.grey.shade800,
                       ),
                     ),
@@ -97,7 +105,10 @@ class _MaintenanceDistributionChartState extends State<MaintenanceDistributionCh
     );
   }
 
-  List<PieChartSectionData> showingSections(List<String> sortedKeys, int total) {
+  List<PieChartSectionData> showingSections(
+    List<String> sortedKeys,
+    int total,
+  ) {
     return List.generate(sortedKeys.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 20.0 : 14.0;

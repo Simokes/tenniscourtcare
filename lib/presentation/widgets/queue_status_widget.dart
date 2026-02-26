@@ -10,7 +10,6 @@ class QueueStatusBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final statusAsync = ref.watch(queueStatusProvider);
     final progressAsync = ref.watch(queueProgressProvider);
-  
 
     // Listen to warnings/critical alerts
     ref.listen(queueWarningsProvider, (prev, next) {
@@ -155,10 +154,15 @@ class QueueStatusBanner extends ConsumerWidget {
                           children: [
                             Text(
                               '${error.collection} - ${error.documentId}',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 4),
-                            Text(error.error, style: const TextStyle(fontSize: 12)),
+                            Text(
+                              error.error,
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             const SizedBox(height: 4),
                             Text(
                               'Attempt ${error.retryCount}/3',
@@ -216,10 +220,7 @@ class QueueStatusBanner extends ConsumerWidget {
               Navigator.pop(ctx);
               Navigator.pop(context); // Close error dialog too
             },
-            child: const Text(
-              'Clear',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

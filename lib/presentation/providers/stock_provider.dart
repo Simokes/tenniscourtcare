@@ -40,7 +40,9 @@ final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
   };
 });
 
-final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
+final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
+  ref,
+) {
   return (StockItem item) async {
     final repo = ref.read(stockRepositoryProvider);
     await repo.updateStockItem(item);
@@ -93,8 +95,9 @@ final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
   switch (filter) {
     case StockFilter.lowStock:
       filtered = filtered.where((item) {
-        if (item.minThreshold == null) return false;
-        return item.quantity < item.minThreshold!;
+        final threshold = item.minThreshold;
+        if (threshold == null) return false;
+        return item.quantity < threshold;
       }).toList();
       break;
     case StockFilter.fixed:
@@ -115,7 +118,7 @@ final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
   }
 
   // Sort by sortOrder
-  filtered.sort((a, b) => (a.sortOrder ?? 0).compareTo(b.sortOrder ?? 0));
+  filtered.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 
   return filtered;
 });
@@ -162,6 +165,7 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
       }
     }
   }
+
   Future<void> addItem(StockItem item) async {
     final repo = ref.read(stockRepositoryProvider);
     await repo.addStockItem(item);
@@ -181,6 +185,7 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
   }
 }
 
-final stockNotifierProvider = StateNotifierProvider<StockNotifier, AsyncValue<List<StockItem>>>((ref) {
-  return StockNotifier(ref);
-});
+final stockNotifierProvider =
+    StateNotifierProvider<StockNotifier, AsyncValue<List<StockItem>>>((ref) {
+      return StockNotifier(ref);
+    });

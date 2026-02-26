@@ -53,7 +53,9 @@ class TerrainFirestoreModel {
       'pricePerHour': pricePerHour,
       'available': available,
       'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt != null
+          ? Timestamp.fromDate(updatedAt!)
+          : FieldValue.serverTimestamp(),
       'syncedAt': syncedAt != null ? Timestamp.fromDate(syncedAt!) : null,
       'imageUrl': imageUrl,
     };

@@ -33,8 +33,13 @@ class ImagePickerService {
   /// Déplace l'image du cache vers le dossier Documents de l'app
   Future<String> _saveImagePermanently(String temporaryPath) async {
     final directory = await getApplicationDocumentsDirectory();
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}_${p.basename(temporaryPath)}';
-    final permanentPath = p.join(directory.path, 'maintenance_photos', fileName);
+    final fileName =
+        '${DateTime.now().millisecondsSinceEpoch}_${p.basename(temporaryPath)}';
+    final permanentPath = p.join(
+      directory.path,
+      'maintenance_photos',
+      fileName,
+    );
 
     // Créer le dossier s'il n'existe pas
     final parentDir = Directory(p.dirname(permanentPath));

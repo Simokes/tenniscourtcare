@@ -73,42 +73,45 @@ final maintenanceTerrainCountProvider = FutureProvider<int>((ref) async {
 });
 
 /// Provider pour mettre à jour le status d'un terrain
-final updateTerrainStatusProvider = FutureProvider.family<void, (int, TerrainStatus)>((ref, params) async {
-  final (terrainId, newStatus) = params;
-  final repo = ref.read(terrainRepositoryProvider);
-  final currentTerrain = await ref.read(terrainProvider(terrainId).future);
+final updateTerrainStatusProvider =
+    FutureProvider.family<void, (int, TerrainStatus)>((ref, params) async {
+      final (terrainId, newStatus) = params;
+      final repo = ref.read(terrainRepositoryProvider);
+      final currentTerrain = await ref.read(terrainProvider(terrainId).future);
 
-  if (currentTerrain != null) {
-    final updated = currentTerrain.copyWith(
-      status: newStatus,
-      updatedAt: DateTime.now(),
-    );
-    await repo.updateTerrain(updated);
-    ref.invalidate(terrainsProvider);
-  }
-});
+      if (currentTerrain != null) {
+        final updated = currentTerrain.copyWith(
+          status: newStatus,
+          updatedAt: DateTime.now(),
+        );
+        await repo.updateTerrain(updated);
+        ref.invalidate(terrainsProvider);
+      }
+    });
 
 // Alias for compatibility if needed, or replace usages of 'terrainsProvider' with 'allTerrainsProvider'
 // But since the original file exported 'terrainsProvider', we keep it as the main merged provider.
 
 // CREATE (avec sync auto)
-final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>((ref) {
-  return (String name, TerrainType type) async {
-    final repo = ref.read(terrainRepositoryProvider);
+final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>(
+  (ref) {
+    return (String name, TerrainType type) async {
+      final repo = ref.read(terrainRepositoryProvider);
 
-    final newTerrain = Terrain(
-      id: 0, // Auto-increment handled by Drift
-      nom: name,
-      type: type,
-      status: TerrainStatus.playable,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+      final newTerrain = Terrain(
+        id: 0, // Auto-increment handled by Drift
+        nom: name,
+        type: type,
+        status: TerrainStatus.playable,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
 
-    await repo.addTerrain(newTerrain);
-    ref.invalidate(terrainsProvider);
-  };
-});
+      await repo.addTerrain(newTerrain);
+      ref.invalidate(terrainsProvider);
+    };
+  },
+);
 
 // UPDATE (avec sync auto)
 final updateTerrainProvider = Provider<Future<void> Function(Terrain)>((ref) {
@@ -150,7 +153,7 @@ List<Terrain> _mergeTerrains(List<Terrain> local, List<Terrain> remote) {
       // HOWEVER, the user prompt says: "merged[t.id] = ... else merged[t.id] = t"
       // This implies remote items have valid IDs.
       if (t.id != 0) {
-         merged[t.id] = t;
+        merged[t.id] = t;
       }
     }
   }

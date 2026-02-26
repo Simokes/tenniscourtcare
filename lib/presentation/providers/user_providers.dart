@@ -14,7 +14,8 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
   final AppDatabase _db;
   final Ref _ref;
 
-  UserManagementController(this._db, this._ref) : super(const AsyncValue.data(null));
+  UserManagementController(this._db, this._ref)
+    : super(const AsyncValue.data(null));
 
   Future<void> updateUserRole(int userId, Role newRole) async {
     state = const AsyncValue.loading();
@@ -29,6 +30,7 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final userManagementControllerProvider = StateNotifierProvider<UserManagementController, AsyncValue<void>>((ref) {
-  return UserManagementController(ref.watch(databaseProvider), ref);
-});
+final userManagementControllerProvider =
+    StateNotifierProvider<UserManagementController, AsyncValue<void>>((ref) {
+      return UserManagementController(ref.watch(databaseProvider), ref);
+    });

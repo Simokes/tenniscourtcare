@@ -32,7 +32,12 @@ class _SacksLineChartState extends State<SacksLineChart> {
     return AspectRatio(
       aspectRatio: 1.5,
       child: Padding(
-        padding: const EdgeInsets.only(right: 18, left: 12, top: 24, bottom: 12),
+        padding: const EdgeInsets.only(
+          right: 18,
+          left: 12,
+          top: 24,
+          bottom: 12,
+        ),
         child: LineChart(
           LineChartData(
             gridData: FlGridData(
@@ -41,16 +46,10 @@ class _SacksLineChartState extends State<SacksLineChart> {
               horizontalInterval: maxY / 5,
               verticalInterval: 1,
               getDrawingHorizontalLine: (value) {
-                return const FlLine(
-                  color: Color(0xffe7e8ec),
-                  strokeWidth: 1,
-                );
+                return const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1);
               },
               getDrawingVerticalLine: (value) {
-                return const FlLine(
-                  color: Color(0xffe7e8ec),
-                  strokeWidth: 1,
-                );
+                return const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1);
               },
             ),
             titlesData: FlTitlesData(
@@ -65,7 +64,8 @@ class _SacksLineChartState extends State<SacksLineChart> {
                 sideTitles: SideTitles(
                   showTitles: true,
                   reservedSize: 30,
-                  interval: (data.length / 5).ceilToDouble(), // Show fewer labels
+                  interval: (data.length / 5)
+                      .ceilToDouble(), // Show fewer labels
                   getTitlesWidget: bottomTitleWidgets,
                 ),
               ),
@@ -105,7 +105,10 @@ class _SacksLineChartState extends State<SacksLineChart> {
               // Sottomanto
               LineChartBarData(
                 spots: data.asMap().entries.map((e) {
-                  return FlSpot(e.key.toDouble(), e.value.sottomanto.toDouble());
+                  return FlSpot(
+                    e.key.toDouble(),
+                    e.value.sottomanto.toDouble(),
+                  );
                 }).toList(),
                 isCurved: true,
                 color: Colors.brown,
@@ -135,7 +138,8 @@ class _SacksLineChartState extends State<SacksLineChart> {
             ],
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
-                getTooltipColor: (touchedSpot) => Colors.blueGrey.withValues(alpha: 0.8),
+                getTooltipColor: (touchedSpot) =>
+                    Colors.blueGrey.withValues(alpha: 0.8),
                 getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                   return touchedBarSpots.map((barSpot) {
                     final flSpot = barSpot;
@@ -155,10 +159,7 @@ class _SacksLineChartState extends State<SacksLineChart> {
 
                     return LineTooltipItem(
                       '$label: ${flSpot.y.toInt()}',
-                      TextStyle(
-                        color: color,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      TextStyle(color: color, fontWeight: FontWeight.bold),
                     );
                   }).toList();
                 },
@@ -187,7 +188,15 @@ class _SacksLineChartState extends State<SacksLineChart> {
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
-    const style = TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.grey);
-    return Text(value.toInt().toString(), style: style, textAlign: TextAlign.left);
+    const style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 10,
+      color: Colors.grey,
+    );
+    return Text(
+      value.toInt().toString(),
+      style: style,
+      textAlign: TextAlign.left,
+    );
   }
 }

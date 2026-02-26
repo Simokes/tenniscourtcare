@@ -12,7 +12,9 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
 });
 
 // LOCAL
-final localMaintenancesProvider = FutureProvider<List<Maintenance>>((ref) async {
+final localMaintenancesProvider = FutureProvider<List<Maintenance>>((
+  ref,
+) async {
   final repo = ref.watch(maintenanceRepositoryProvider);
   return repo.getAllMaintenances();
 });
@@ -36,7 +38,9 @@ final maintenancesProvider = StreamProvider<List<Maintenance>>((ref) async* {
 });
 
 // CREATE
-final addMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((ref) {
+final addMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((
+  ref,
+) {
   return (Maintenance maintenance) async {
     final repo = ref.read(maintenanceRepositoryProvider);
     await repo.addMaintenance(maintenance);
@@ -45,7 +49,9 @@ final addMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((ref
 });
 
 // UPDATE
-final updateMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((ref) {
+final updateMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((
+  ref,
+) {
   return (Maintenance updated) async {
     final repo = ref.read(maintenanceRepositoryProvider);
     await repo.updateMaintenance(updated);
@@ -62,7 +68,10 @@ final deleteMaintenanceProvider = Provider<Future<void> Function(int)>((ref) {
   };
 });
 
-List<Maintenance> _mergeMaintenances(List<Maintenance> local, List<Maintenance> remote) {
+List<Maintenance> _mergeMaintenances(
+  List<Maintenance> local,
+  List<Maintenance> remote,
+) {
   final merged = <int, Maintenance>{};
 
   for (final t in local) {
@@ -83,28 +92,39 @@ List<Maintenance> _mergeMaintenances(List<Maintenance> local, List<Maintenance> 
 
 // --- Maintenance Helpers ---
 
-final maintenancesByTerrainProvider = StreamProvider.family<List<Maintenance>, int>((ref, terrainId) {
-  final allMaintenances = ref.watch(maintenancesProvider);
-  return allMaintenances.when(
-    data: (maintenances) => Stream.value(
-      maintenances.where((m) => m.terrainId == terrainId).toList()
-        ..sort((a, b) => b.date.compareTo(a.date)) // Sort by date desc
-    ),
-    loading: () => Stream.value([]),
-    error: (error, stack) => Stream.value([]),
-  );
-});
+final maintenancesByTerrainProvider =
+    StreamProvider.family<List<Maintenance>, int>((ref, terrainId) {
+      final allMaintenances = ref.watch(maintenancesProvider);
+      return allMaintenances.when(
+        data: (maintenances) => Stream.value(
+          maintenances.where((m) => m.terrainId == terrainId).toList()
+            ..sort((a, b) => b.date.compareTo(a.date)), // Sort by date desc
+        ),
+        loading: () => Stream.value([]),
+        error: (error, stack) => Stream.value([]),
+      );
+    });
 
-final lastMajorMaintenanceProvider = StreamProvider.family<Maintenance?, int>((ref, terrainId) {
-  final maintenances = ref.watch(maintenancesByTerrainProvider(terrainId)).asData?.value ?? [];
+final lastMajorMaintenanceProvider = StreamProvider.family<Maintenance?, int>((
+  ref,
+  terrainId,
+) {
+  final maintenances =
+      ref.watch(maintenancesByTerrainProvider(terrainId)).asData?.value ?? [];
   if (maintenances.isEmpty) return Stream.value(null);
 
   try {
     return Stream.value(
-      maintenances.firstWhere((m) => m.type.toLowerCase().contains('annuel') || m.type.toLowerCase().contains('rénovation'))
+      maintenances.firstWhere(
+        (m) =>
+            m.type.toLowerCase().contains('annuel') ||
+            m.type.toLowerCase().contains('rénovation'),
+      ),
     );
   } catch (e) {
-    return Stream.value(maintenances.first); // Fallback to most recent if no "major" found
+    return Stream.value(
+      maintenances.first,
+    ); // Fallback to most recent if no "major" found
   }
 });
 
@@ -133,8 +153,9 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<List<Maintenance>>> {
     // Deduct stock (restored logic placeholder)
     // Ideally this should happen in repository or service transactionally.
     // Since we are in provider layer:
-    if (maintenance.sacsMantoUtilises > 0 || maintenance.sacsSiliceUtilises > 0) {
-       // logic to decrease stock would go here
+    if (maintenance.sacsMantoUtilises > 0 ||
+        maintenance.sacsSiliceUtilises > 0) {
+      // logic to decrease stock would go here
     }
   }
 
@@ -143,6 +164,9 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<List<Maintenance>>> {
   }
 }
 
-final maintenanceNotifierProvider = StateNotifierProvider<MaintenanceNotifier, AsyncValue<List<Maintenance>>>((ref) {
-  return MaintenanceNotifier(ref);
-});
+final maintenanceNotifierProvider =
+    StateNotifierProvider<MaintenanceNotifier, AsyncValue<List<Maintenance>>>((
+      ref,
+    ) {
+      return MaintenanceNotifier(ref);
+    });

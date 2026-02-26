@@ -72,9 +72,14 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16.0),
               child: Card(
                 elevation: 1, // Minimalist elevation
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 24,
+                    horizontal: 16,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -87,7 +92,8 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                             sottomanto: totals.sottomanto,
                             silice: totals.silice,
                           ),
-                          loading: () => const Center(child: CircularProgressIndicator()),
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
                           error: (_, _) => const Center(child: Text('Erreur')),
                         ),
                       ),
@@ -106,7 +112,8 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                             sottomanto: totals.sottomanto,
                             silice: totals.silice,
                           ),
-                          loading: () => const Center(child: CircularProgressIndicator()),
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
                           error: (_, _) => const Center(child: Text('Erreur')),
                         ),
                       ),
@@ -133,137 +140,157 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
               }
 
               return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final maintenance = maintenances[index];
-                    final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
-                    final formattedDate = DateFormat('dd MMM yyyy', 'fr_FR').format(date);
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final maintenance = maintenances[index];
+                  final date = DateTime.fromMillisecondsSinceEpoch(
+                    maintenance.date,
+                  );
+                  final formattedDate = DateFormat(
+                    'dd MMM yyyy',
+                    'fr_FR',
+                  ).format(date);
 
-                    return Dismissible(
-                      key: Key('maintenance_${maintenance.id}'),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.redAccent,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20.0),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      confirmDismiss: (direction) async {
-                        return showDialog<bool>(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: const Text('Confirmer la suppression'),
-                              content: const Text(
-                                'Voulez-vous vraiment supprimer cette maintenance ?\nCette action est irréversible.',
+                  return Dismissible(
+                    key: Key('maintenance_${maintenance.id}'),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.redAccent,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: const Icon(Icons.delete, color: Colors.white),
+                    ),
+                    confirmDismiss: (direction) async {
+                      return showDialog<bool>(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Confirmer la suppression'),
+                            content: const Text(
+                              'Voulez-vous vraiment supprimer cette maintenance ?\nCette action est irréversible.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text('Annuler'),
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(false),
-                                  child: const Text('Annuler'),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
                                 ),
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(true),
-                                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                                  child: const Text('Supprimer'),
+                                child: const Text('Supprimer'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    onDismissed: (direction) async {
+                      try {
+                        await ref
+                            .read(maintenanceNotifierProvider.notifier)
+                            .deleteMaintenance(maintenance.id!, terrain.id);
+
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Maintenance supprimée'),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                        }
+                        // Refresh list to restore item if deletion failed
+                        // ignore: unused_result
+                        ref.refresh(maintenancesByTerrainProvider(terrain.id));
+                      }
+                    },
+                    child: Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      elevation: 0, // Flat look for list items
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        title: Row(
+                          children: [
+                            Text(
+                              maintenance.type,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (maintenance.imagePath != null) ...[
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => ImageViewerDialog(
+                                      imagePath: maintenance.imagePath!,
+                                    ),
+                                  );
+                                },
+                                child: Icon(
+                                  Icons.image_outlined,
+                                  size: 18,
+                                  color: Theme.of(context).primaryColor,
                                 ),
-                              ],
+                              ),
+                            ],
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 4),
+                            Text(formattedDate),
+                            if (maintenance.commentaire != null &&
+                                maintenance.commentaire!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  maintenance.commentaire!,
+                                  style: const TextStyle(
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => AddMaintenanceSheet(
+                                terrain: terrain,
+                                maintenance: maintenance,
+                              ),
                             );
                           },
-                        );
-                      },
-                      onDismissed: (direction) async {
-                        try {
-                          await ref
-                              .read(maintenanceNotifierProvider.notifier)
-                              .deleteMaintenance(maintenance.id!, terrain.id);
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Maintenance supprimée')),
-                            );
-                          }
-                        } catch (e) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Erreur: $e')),
-                            );
-                          }
-                          // Refresh list to restore item if deletion failed
-                          // ignore: unused_result
-                          ref.refresh(maintenancesByTerrainProvider(terrain.id));
-                        }
-                      },
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                        elevation: 0, // Flat look for list items
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          title: Row(
-                            children: [
-                              Text(
-                                maintenance.type,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              if (maintenance.imagePath != null) ...[
-                                const SizedBox(width: 8),
-                                GestureDetector(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => ImageViewerDialog(
-                                        imagePath: maintenance.imagePath!,
-                                      ),
-                                    );
-                                  },
-                                  child: Icon(
-                                    Icons.image_outlined,
-                                    size: 18,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 4),
-                              Text(formattedDate),
-                              if (maintenance.commentaire != null &&
-                                  maintenance.commentaire!.isNotEmpty)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 4),
-                                  child: Text(
-                                    maintenance.commentaire!,
-                                    style: const TextStyle(fontStyle: FontStyle.italic),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (_) => AddMaintenanceSheet(
-                                  terrain: terrain,
-                                  maintenance: maintenance,
-                                ),
-                              );
-                            },
-                          ),
                         ),
                       ),
-                    );
-                  },
-                  childCount: maintenances.length,
-                ),
+                    ),
+                  );
+                }, childCount: maintenances.length),
               );
             },
           ),

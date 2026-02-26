@@ -46,8 +46,12 @@ class MaintenanceFirestoreModel {
       'terrainId': terrainId,
       'type': type,
       'status': status,
-      'scheduledDate': scheduledDate != null ? Timestamp.fromDate(scheduledDate!) : null,
-      'completedDate': completedDate != null ? Timestamp.fromDate(completedDate!) : null,
+      'scheduledDate': scheduledDate != null
+          ? Timestamp.fromDate(scheduledDate!)
+          : null,
+      'completedDate': completedDate != null
+          ? Timestamp.fromDate(completedDate!)
+          : null,
       'notes': notes,
       'createdBy': createdBy,
       'createdAt': Timestamp.fromDate(createdAt),

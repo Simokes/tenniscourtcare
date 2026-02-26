@@ -32,8 +32,8 @@ class UserEntity {
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   // Copie immuable pour les mises à jour
   UserEntity copyWith({

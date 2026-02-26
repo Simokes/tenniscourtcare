@@ -12,19 +12,20 @@ class WeatherCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: () {
-         final terrains = ref.read(terrainsProvider).maybeWhen(
-           data: (list) => list,
-           orElse: () => const <Terrain>[],
-         );
+        final terrains = ref
+            .read(terrainsProvider)
+            .maybeWhen(data: (list) => list, orElse: () => const <Terrain>[]);
 
-         if (terrains.isNotEmpty) {
-           final Terrain picked = terrains.first;
-           context.push('/weather/${picked.type.name}');
-         } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Aucun terrain disponible pour la météo')),
-            );
-         }
+        if (terrains.isNotEmpty) {
+          final Terrain picked = terrains.first;
+          context.push('/weather/${picked.type.name}');
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Aucun terrain disponible pour la météo'),
+            ),
+          );
+        }
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 24),
@@ -77,11 +78,7 @@ class WeatherCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const Icon(
-                  Icons.wb_sunny,
-                  color: Colors.amber,
-                  size: 48,
-                ),
+                const Icon(Icons.wb_sunny, color: Colors.amber, size: 48),
               ],
             ),
             const SizedBox(height: 24),

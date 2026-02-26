@@ -53,8 +53,10 @@ class StockItemModel {
       category: json['category'] as String?,
       sortOrder: json['sortOrder'] as int? ?? 0,
       syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
-      createdAt: json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      createdAt:
+          json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      updatedAt:
+          json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       firebaseId: json['firebaseId'] as String?,
       createdBy: json['createdBy'] as String?,
       modifiedBy: json['modifiedBy'] as String?,

@@ -33,12 +33,18 @@ class HomeStatCard extends StatelessWidget {
     // BgColor
     Color bgColor;
     if (hasActiveAlert) {
-      bgColor = isDark ? Colors.red.withValues(alpha: 0.15) : Colors.red.shade50;
+      bgColor = isDark
+          ? Colors.red.withValues(alpha: 0.15)
+          : Colors.red.shade50;
     } else {
-      bgColor = Theme.of(context).cardTheme.color ?? (isDark ? const Color(0xFF1E1E1E) : Colors.white);
+      bgColor =
+          Theme.of(context).cardTheme.color ??
+          (isDark ? const Color(0xFF1E1E1E) : Colors.white);
     }
 
-    final iconColor = hasActiveAlert ? (isDark ? Colors.red.shade300 : Colors.red) : color;
+    final iconColor = hasActiveAlert
+        ? (isDark ? Colors.red.shade300 : Colors.red)
+        : color;
 
     return Card(
       elevation: 4,
@@ -54,7 +60,10 @@ class HomeStatCard extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [bgColor, effectiveColor.withValues(alpha: isDark ? 0.15 : 0.05)],
+              colors: [
+                bgColor,
+                effectiveColor.withValues(alpha: isDark ? 0.15 : 0.05),
+              ],
             ),
           ),
           padding: const EdgeInsets.all(12),
@@ -68,26 +77,46 @@ class HomeStatCard extends StatelessWidget {
                   Icon(icon, color: iconColor, size: 28),
                   valueAsync.when(
                     data: (val) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: hasActiveAlert
-                            ? (isDark ? Colors.red.withValues(alpha: 0.2) : Colors.white)
-                            : (isDark ? Colors.grey.withValues(alpha: 0.2) : Colors.grey.shade100),
+                            ? (isDark
+                                  ? Colors.red.withValues(alpha: 0.2)
+                                  : Colors.white)
+                            : (isDark
+                                  ? Colors.grey.withValues(alpha: 0.2)
+                                  : Colors.grey.shade100),
                         borderRadius: BorderRadius.circular(12),
-                        border: hasActiveAlert ? Border.all(color: isDark ? Colors.red.shade900 : Colors.red.shade200) : null,
+                        border: hasActiveAlert
+                            ? Border.all(
+                                color: isDark
+                                    ? Colors.red.shade900
+                                    : Colors.red.shade200,
+                              )
+                            : null,
                       ),
                       child: Text(
                         '$val',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: hasActiveAlert
-                             ? (isDark ? Colors.red.shade200 : Colors.red.shade700)
-                             : Theme.of(context).textTheme.bodyMedium?.color,
+                              ? (isDark
+                                    ? Colors.red.shade200
+                                    : Colors.red.shade700)
+                              : Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                       ),
                     ),
-                    loading: () => const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2)),
-                    error: (error, stack) => const Icon(Icons.error_outline, size: 16),
+                    loading: () => const SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    error: (error, stack) =>
+                        const Icon(Icons.error_outline, size: 16),
                   ),
                 ],
               ),

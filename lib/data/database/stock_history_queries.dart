@@ -20,10 +20,12 @@ extension StockMovementsQueries on AppDatabase {
   }) {
     // Join StockMovements with StockItems and Users
     final query = select(stockMovements).join([
-      leftOuterJoin(stockItems, stockItems.id.equalsExp(stockMovements.stockItemId)),
+      leftOuterJoin(
+        stockItems,
+        stockItems.id.equalsExp(stockMovements.stockItemId),
+      ),
       leftOuterJoin(users, users.id.equalsExp(stockMovements.userId)),
-    ])
-      ..orderBy([OrderingTerm.desc(stockMovements.occurredAt)]);
+    ])..orderBy([OrderingTerm.desc(stockMovements.occurredAt)]);
 
     if (limit != null) {
       query.limit(limit, offset: offset);

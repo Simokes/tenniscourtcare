@@ -8,14 +8,14 @@ class UserEntityModel {
   final int id;
   final String email;
   final String name;
-  final String role;         // Role.name
+  final String role; // Role.name
   final String? lastLoginAt; // ISO8601
   final String? avatarUrl;
 
   // Sync fields
   final String syncStatus;
-  final String createdAt;    // ISO8601
-  final String updatedAt;    // ISO8601
+  final String createdAt; // ISO8601
+  final String updatedAt; // ISO8601
   final String? firebaseId;
   final String? createdBy;
   final String? modifiedBy;
@@ -45,8 +45,10 @@ class UserEntityModel {
       lastLoginAt: json['lastLoginAt'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
       syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
-      createdAt: json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      createdAt:
+          json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      updatedAt:
+          json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       firebaseId: json['firebaseId'] as String?,
       createdBy: json['createdBy'] as String?,
       modifiedBy: json['modifiedBy'] as String?,

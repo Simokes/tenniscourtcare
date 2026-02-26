@@ -47,7 +47,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     _descController = TextEditingController(text: event?.description ?? '');
 
     final now = DateTime.now();
-    _startTime = event?.startTime ?? DateTime(now.year, now.month, now.day, 9, 0);
+    _startTime =
+        event?.startTime ?? DateTime(now.year, now.month, now.day, 9, 0);
     _endTime = event?.endTime ?? _startTime.add(const Duration(hours: 1));
 
     // ignore: deprecated_member_use
@@ -119,7 +120,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     final event = AppEvent(
       id: widget.eventToEdit?.id,
       title: _titleController.text.trim(),
-      description: _descController.text.trim().isEmpty ? null : _descController.text.trim(),
+      description: _descController.text.trim().isEmpty
+          ? null
+          : _descController.text.trim(),
       startTime: _startTime,
       endTime: _endTime,
       color: _selectedColor,
@@ -139,15 +142,15 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
 
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Événement enregistré')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Événement enregistré')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
       }
     }
   }
@@ -161,26 +164,34 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         title: const Text('Supprimer ?'),
         content: const Text('Voulez-vous vraiment supprimer cet événement ?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Supprimer', style: TextStyle(color: Colors.red))),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
         ],
       ),
     );
 
     if (confirm == true) {
       try {
-        await ref.read(eventRepositoryProvider).deleteEvent(widget.eventToEdit!.id!);
+        await ref
+            .read(eventRepositoryProvider)
+            .deleteEvent(widget.eventToEdit!.id!);
         if (mounted) {
           Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Événement supprimé')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Événement supprimé')));
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
         }
       }
     }
@@ -195,7 +206,11 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text(widget.eventToEdit == null ? 'Nouvel Événement' : 'Modifier l\'Événement'),
+        title: Text(
+          widget.eventToEdit == null
+              ? 'Nouvel Événement'
+              : 'Modifier l\'Événement',
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -222,7 +237,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                       label: 'Titre',
                       hint: 'Tournoi, Match, Réunion...',
                       controller: _titleController,
-                      validator: (v) => v == null || v.isEmpty ? 'Requis' : null,
+                      validator: (v) =>
+                          v == null || v.isEmpty ? 'Requis' : null,
                     ),
                     const SizedBox(height: 16),
                     PremiumTextFormField(
@@ -244,18 +260,34 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     Text(
                       'Horaires',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        Expanded(child: _buildDateTimeTile('Début', _startTime, dateFormat, timeFormat, () => _pickDateTime(true))),
+                        Expanded(
+                          child: _buildDateTimeTile(
+                            'Début',
+                            _startTime,
+                            dateFormat,
+                            timeFormat,
+                            () => _pickDateTime(true),
+                          ),
+                        ),
                         const SizedBox(width: 12),
                         Icon(Icons.arrow_forward, color: Colors.grey.shade400),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildDateTimeTile('Fin', _endTime, dateFormat, timeFormat, () => _pickDateTime(false))),
+                        Expanded(
+                          child: _buildDateTimeTile(
+                            'Fin',
+                            _endTime,
+                            dateFormat,
+                            timeFormat,
+                            () => _pickDateTime(false),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -271,9 +303,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     Text(
                       'Couleur',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SingleChildScrollView(
@@ -286,7 +318,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                             padding: const EdgeInsets.only(right: 12),
                             child: InkWell(
                               // ignore: deprecated_member_use
-                              onTap: () => setState(() => _selectedColor = color.value),
+                              onTap: () =>
+                                  setState(() => _selectedColor = color.value),
                               customBorder: const CircleBorder(),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
@@ -295,16 +328,28 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                                 decoration: BoxDecoration(
                                   color: color,
                                   shape: BoxShape.circle,
-                                  border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
-                                  boxShadow: isSelected ? [
-                                    BoxShadow(
-                                      color: color.withValues(alpha: 0.4),
-                                      blurRadius: 8,
-                                      spreadRadius: 2,
-                                    )
-                                  ] : null,
+                                  border: isSelected
+                                      ? Border.all(
+                                          color: Colors.white,
+                                          width: 3,
+                                        )
+                                      : null,
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: color.withValues(alpha: 0.4),
+                                            blurRadius: 8,
+                                            spreadRadius: 2,
+                                          ),
+                                        ]
+                                      : null,
                                 ),
-                                child: isSelected ? const Icon(Icons.check, color: Colors.white) : null,
+                                child: isSelected
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                      )
+                                    : null,
                               ),
                             ),
                           );
@@ -315,24 +360,34 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     Text(
                       'Terrains concernés',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     terrainsAsync.when(
                       data: (terrains) {
-                        if (terrains.isEmpty) return const Text('Aucun terrain configuré.', style: TextStyle(color: Colors.grey));
+                        if (terrains.isEmpty)
+                          return const Text(
+                            'Aucun terrain configuré.',
+                            style: TextStyle(color: Colors.grey),
+                          );
                         return Wrap(
                           spacing: 8,
                           runSpacing: 8,
                           children: terrains.map((terrain) {
-                            final isSelected = _selectedTerrainIds.contains(terrain.id);
+                            final isSelected = _selectedTerrainIds.contains(
+                              terrain.id,
+                            );
                             return FilterChip(
                               label: Text(terrain.nom),
                               selected: isSelected,
-                              selectedColor: Theme.of(context).colorScheme.primaryContainer,
-                              checkmarkColor: Theme.of(context).colorScheme.primary,
+                              selectedColor: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              checkmarkColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
                               onSelected: (selected) {
                                 setState(() {
                                   if (selected) {
@@ -346,8 +401,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 side: BorderSide(
                                   color: isSelected
-                                    ? Colors.transparent
-                                    : Colors.grey.shade300,
+                                      ? Colors.transparent
+                                      : Colors.grey.shade300,
                                 ),
                               ),
                             );
@@ -383,7 +438,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     DateTime dateTime,
     DateFormat dateFormat,
     DateFormat timeFormat,
-    VoidCallback onTap
+    VoidCallback onTap,
   ) {
     return InkWell(
       onTap: onTap,
@@ -398,7 +453,10 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
             const SizedBox(height: 4),
             Text(
               timeFormat.format(dateTime),

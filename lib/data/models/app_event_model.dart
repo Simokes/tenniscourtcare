@@ -7,15 +7,15 @@ class AppEventModel {
   final int? id;
   final String title;
   final String? description;
-  final String startTime;    // ISO8601
-  final String endTime;      // ISO8601
+  final String startTime; // ISO8601
+  final String endTime; // ISO8601
   final int color;
   final List<int> terrainIds;
 
   // Sync fields
   final String syncStatus;
-  final String createdAt;    // ISO8601
-  final String updatedAt;    // ISO8601
+  final String createdAt; // ISO8601
+  final String updatedAt; // ISO8601
   final String? firebaseId;
   final String? createdBy;
   final String? modifiedBy;
@@ -45,10 +45,14 @@ class AppEventModel {
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String,
       color: json['color'] as int,
-      terrainIds: (json['terrainIds'] as List<dynamic>).map((e) => e as int).toList(),
+      terrainIds: (json['terrainIds'] as List<dynamic>)
+          .map((e) => e as int)
+          .toList(),
       syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
-      createdAt: json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      createdAt:
+          json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      updatedAt:
+          json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       firebaseId: json['firebaseId'] as String?,
       createdBy: json['createdBy'] as String?,
       modifiedBy: json['modifiedBy'] as String?,

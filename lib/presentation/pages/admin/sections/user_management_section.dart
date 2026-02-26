@@ -20,7 +20,9 @@ class UserManagementSection extends ConsumerWidget {
             children: [
               Text(
                 'Utilisateurs',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: const Icon(Icons.refresh),
@@ -40,38 +42,56 @@ class UserManagementSection extends ConsumerWidget {
                   DataColumn(label: Text('Actions')),
                 ],
                 rows: users.map((user) {
-                  return DataRow(cells: [
-                    DataCell(Row(
-                      children: [
-                        CircleAvatar(child: Text(user.name.isNotEmpty ? user.name[0].toUpperCase() : '?')),
-                        const SizedBox(width: 8),
-                        Text(user.name),
-                      ],
-                    )),
-                    DataCell(Text(user.email)),
-                    DataCell(Chip(
-                      label: Text(user.role.label),
-                      backgroundColor: _getRoleColor(user.role).withValues(alpha: 0.2),
-                    )),
-                    DataCell(PopupMenuButton<Role>(
-                      onSelected: (newRole) {
-                         ref.read(userManagementControllerProvider.notifier)
-                            .updateUserRole(user.id, newRole);
-                      },
-                      itemBuilder: (context) => Role.values.map((role) {
-                        return PopupMenuItem(
-                          value: role,
-                          child: Text(role.label),
-                        );
-                      }).toList(),
-                      icon: const Icon(Icons.edit),
-                    )),
-                  ]);
+                  return DataRow(
+                    cells: [
+                      DataCell(
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              child: Text(
+                                user.name.isNotEmpty
+                                    ? user.name[0].toUpperCase()
+                                    : '?',
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(user.name),
+                          ],
+                        ),
+                      ),
+                      DataCell(Text(user.email)),
+                      DataCell(
+                        Chip(
+                          label: Text(user.role.label),
+                          backgroundColor: _getRoleColor(
+                            user.role,
+                          ).withValues(alpha: 0.2),
+                        ),
+                      ),
+                      DataCell(
+                        PopupMenuButton<Role>(
+                          onSelected: (newRole) {
+                            ref
+                                .read(userManagementControllerProvider.notifier)
+                                .updateUserRole(user.id, newRole);
+                          },
+                          itemBuilder: (context) => Role.values.map((role) {
+                            return PopupMenuItem(
+                              value: role,
+                              child: Text(role.label),
+                            );
+                          }).toList(),
+                          icon: const Icon(Icons.edit),
+                        ),
+                      ),
+                    ],
+                  );
                 }).toList(),
               ),
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+            error: (err, stack) =>
+                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

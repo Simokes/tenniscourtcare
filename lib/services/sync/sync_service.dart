@@ -23,7 +23,9 @@ class SyncService {
     final result = await _connectivity.checkConnectivity();
     _updateConnectionStatus(result);
 
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      _updateConnectionStatus,
+    );
   }
 
   void _updateConnectionStatus(ConnectivityResult result) {
@@ -94,21 +96,24 @@ class SyncService {
       query = queryFn(query);
     }
 
-    return query.snapshots().map((snapshot) {
-      return snapshot.docs.map(fromFirestore).toList();
-    }).listen((items) async {
-      // Filter out items that have pending local changes to avoid overwriting user edits
-      final pendingIds = await _getPendingDocumentIds(collection);
+    return query
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map(fromFirestore).toList();
+        })
+        .listen((items) async {
+          // Filter out items that have pending local changes to avoid overwriting user edits
+          final pendingIds = await _getPendingDocumentIds(collection);
 
-      final itemsToSave = items.where((item) {
-        final id = getId(item);
-        return !pendingIds.contains(id);
-      }).toList();
+          final itemsToSave = items.where((item) {
+            final id = getId(item);
+            return !pendingIds.contains(id);
+          }).toList();
 
-      if (itemsToSave.isNotEmpty) {
-        await saveToLocal(itemsToSave);
-      }
-    });
+          if (itemsToSave.isNotEmpty) {
+            await saveToLocal(itemsToSave);
+          }
+        });
   }
 
   /// RefreshCollection: Performs a one-time fetch from Firestore and updates local DB.
@@ -136,7 +141,6 @@ class SyncService {
       // For refresh, we generally want to update everything we fetched.
       // We rely on saveToLocal to handle conflict resolution.
       await saveToLocal(items);
-
     } catch (e) {
       debugPrint('SyncService: Failed to refresh $collection. Error: $e');
       rethrow;
@@ -144,10 +148,14 @@ class SyncService {
   }
 
   Future<Set<String>> _getPendingDocumentIds(String collection) async {
-    final rows = await (_db.selectOnly(_db.syncQueue)
-      ..addColumns([_db.syncQueue.documentId])
-      ..where(_db.syncQueue.collection.equals(collection) & _db.syncQueue.syncedAt.isNull())
-    ).get();
+    final rows =
+        await (_db.selectOnly(_db.syncQueue)
+              ..addColumns([_db.syncQueue.documentId])
+              ..where(
+                _db.syncQueue.collection.equals(collection) &
+                    _db.syncQueue.syncedAt.isNull(),
+              ))
+            .get();
 
     return rows.map((r) => r.read(_db.syncQueue.documentId)!).toSet();
   }

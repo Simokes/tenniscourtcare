@@ -50,9 +50,9 @@ class StatsScreen extends ConsumerWidget {
                     await ShareReportService.share(report);
                   } catch (e) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Erreur: $e')),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                     }
                   }
                 },
@@ -64,7 +64,8 @@ class StatsScreen extends ConsumerWidget {
                   sacksSeriesAsync.whenData((data) async {
                     await CsvExport.exportSacksSeries(
                       data: data,
-                      filename: 'stats_export_${DateTime.now().millisecondsSinceEpoch}',
+                      filename:
+                          'stats_export_${DateTime.now().millisecondsSinceEpoch}',
                       context: context,
                     );
                   });
@@ -103,8 +104,13 @@ class StatsScreen extends ConsumerWidget {
                       return Theme(
                         data: Theme.of(context).copyWith(
                           colorScheme: isDark
-                            ? ColorScheme.dark(primary: Colors.blue.shade300, onPrimary: Colors.black)
-                            : ColorScheme.light(primary: Colors.blue.shade800),
+                              ? ColorScheme.dark(
+                                  primary: Colors.blue.shade300,
+                                  onPrimary: Colors.black,
+                                )
+                              : ColorScheme.light(
+                                  primary: Colors.blue.shade800,
+                                ),
                         ),
                         child: child!,
                       );
@@ -130,8 +136,8 @@ class StatsScreen extends ConsumerWidget {
                   child: Text(
                     'Consommation Totale',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SummaryGrid(
@@ -144,9 +150,7 @@ class StatsScreen extends ConsumerWidget {
           ),
 
           // Yearly Comparison
-          const SliverToBoxAdapter(
-            child: SeasonComparisonCard(),
-          ),
+          const SliverToBoxAdapter(child: SeasonComparisonCard()),
 
           // Distribution Chart
           SliverToBoxAdapter(
@@ -158,7 +162,9 @@ class StatsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.grey.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -170,8 +176,8 @@ class StatsScreen extends ConsumerWidget {
                   Text(
                     'Répartition des Interventions',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   MaintenanceDistributionChart(distribution: distribution),
@@ -190,7 +196,9 @@ class StatsScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.3)
+                        : Colors.grey.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -202,8 +210,8 @@ class StatsScreen extends ConsumerWidget {
                   Text(
                     'Évolution de la consommation',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   sacksSeriesAsync.when(

@@ -51,15 +51,20 @@ class _TypeCard extends StatelessWidget {
 
     // Choose icon based on type (simple heuristic)
     IconData icon;
-    if (type.toLowerCase().contains('arrosage') || type.toLowerCase().contains('nettoyage')) {
+    if (type.toLowerCase().contains('arrosage') ||
+        type.toLowerCase().contains('nettoyage')) {
       icon = Icons.water_drop;
-    } else if (type.toLowerCase().contains('brossage') || type.toLowerCase().contains('balayage')) {
+    } else if (type.toLowerCase().contains('brossage') ||
+        type.toLowerCase().contains('balayage')) {
       icon = Icons.cleaning_services;
-    } else if (type.toLowerCase().contains('recharge') || type.toLowerCase().contains('silice')) {
+    } else if (type.toLowerCase().contains('recharge') ||
+        type.toLowerCase().contains('silice')) {
       icon = Icons.add_circle;
-    } else if (type.toLowerCase().contains('compactage') || type.toLowerCase().contains('nivelage')) {
+    } else if (type.toLowerCase().contains('compactage') ||
+        type.toLowerCase().contains('nivelage')) {
       icon = Icons.landscape;
-    } else if (type.toLowerCase().contains('ligne') || type.toLowerCase().contains('couture')) {
+    } else if (type.toLowerCase().contains('ligne') ||
+        type.toLowerCase().contains('couture')) {
       icon = Icons.straighten;
     } else {
       icon = Icons.build;
@@ -72,10 +77,14 @@ class _TypeCard extends StatelessWidget {
         width: 100,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+          color: isSelected
+              ? colorScheme.primaryContainer
+              : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.3),
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.outline.withValues(alpha: 0.3),
             width: 2,
           ),
           boxShadow: isSelected
@@ -84,7 +93,7 @@ class _TypeCard extends StatelessWidget {
                     color: colorScheme.primary.withValues(alpha: 0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
-                  )
+                  ),
                 ]
               : [],
         ),
@@ -94,7 +103,9 @@ class _TypeCard extends StatelessWidget {
             Icon(
               icon,
               size: 32,
-              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 8),
             Text(
@@ -105,7 +116,9 @@ class _TypeCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
+                color: isSelected
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSurface,
               ),
             ),
           ],

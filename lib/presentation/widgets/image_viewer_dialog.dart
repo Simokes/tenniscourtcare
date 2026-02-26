@@ -19,10 +19,7 @@ class ImageViewerDialog extends StatelessWidget {
             minScale: 0.5,
             maxScale: 4,
             child: Center(
-              child: Image.file(
-                File(imagePath),
-                fit: BoxFit.contain,
-              ),
+              child: Image.file(File(imagePath), fit: BoxFit.contain),
             ),
           ),
 

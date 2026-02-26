@@ -66,8 +66,10 @@ class MaintenanceModel {
       terrainGele: json['terrainGele'] as bool?,
       terrainImpraticable: json['terrainImpraticable'] as bool?,
       syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
-      createdAt: json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      createdAt:
+          json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      updatedAt:
+          json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       firebaseId: json['firebaseId'] as String?,
       createdBy: json['createdBy'] as String?,
       modifiedBy: json['modifiedBy'] as String?,
@@ -129,7 +131,9 @@ class MaintenanceModel {
       terrainId: maintenance.terrainId,
       type: maintenance.type,
       commentaire: maintenance.commentaire,
-      date: DateTime.fromMillisecondsSinceEpoch(maintenance.date).toIso8601String(),
+      date: DateTime.fromMillisecondsSinceEpoch(
+        maintenance.date,
+      ).toIso8601String(),
       sacsMantoUtilises: maintenance.sacsMantoUtilises,
       sacsSottomantoUtilises: maintenance.sacsSottomantoUtilises,
       sacsSiliceUtilises: maintenance.sacsSiliceUtilises,

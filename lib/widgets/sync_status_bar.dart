@@ -27,7 +27,10 @@ class SyncStatusBar extends ConsumerWidget {
             SizedBox(width: 8),
             Text(
               'Offline mode - changes will sync when online',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -54,7 +57,10 @@ class SyncStatusBar extends ConsumerWidget {
             const SizedBox(width: 8),
             Text(
               '$pendingCount changes waiting to sync',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

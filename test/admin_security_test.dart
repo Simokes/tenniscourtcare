@@ -18,7 +18,12 @@ class FakeAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> createUser({required String email, required String name, required String password, required Role role}) async {
+  Future<void> createUser({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
     // No-op for test
   }
 
@@ -38,7 +43,11 @@ class FakeAuthRepository implements AuthRepository {
   @override
   Future<bool> hasAnyUser() async => true;
   @override
-  Future<void> registerAdmin(String email, String name, String password) async {}
+  Future<void> registerAdmin(
+    String email,
+    String name,
+    String password,
+  ) async {}
   @override
   Future<void> requestOtp(String email) async {}
   @override
@@ -57,7 +66,14 @@ class FakeAuditRepository implements AuditRepository {
   }
 
   @override
-  Future<void> logEvent({required String action, String? email, int? userId, String? ipAddress, String? deviceInfo, Map<String, dynamic>? details}) async {
+  Future<void> logEvent({
+    required String action,
+    String? email,
+    int? userId,
+    String? ipAddress,
+    String? deviceInfo,
+    Map<String, dynamic>? details,
+  }) async {
     // No-op
   }
 
@@ -66,9 +82,16 @@ class FakeAuditRepository implements AuditRepository {
   @override
   Future<int> countRecentOtps(String email, DateTime since) async => 0;
   @override
-  Future<List<LoginAttempt>> getRecentAttempts(String email, DateTime since) async => [];
+  Future<List<LoginAttempt>> getRecentAttempts(
+    String email,
+    DateTime since,
+  ) async => [];
   @override
-  Future<void> logLoginAttempt({required String email, required bool success, String? ipAddress}) async {}
+  Future<void> logLoginAttempt({
+    required String email,
+    required bool success,
+    String? ipAddress,
+  }) async {}
 }
 
 void main() {
@@ -92,71 +115,121 @@ void main() {
   }
 
   group('Admin Providers Security', () {
-    test('adminUsersProvider throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
-      final container = createContainer(currentUser: user);
+    test(
+      'adminUsersProvider throws UnauthorizedException if user is not admin',
+      () async {
+        final user = UserEntity(
+          id: 1,
+          email: 'agent@test.com',
+          name: 'Agent',
+          role: Role.agent,
+        );
+        final container = createContainer(currentUser: user);
 
-      expect(
-        () => container.read(adminUsersProvider.future),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(
+          () => container.read(adminUsersProvider.future),
+          throwsA(isA<UnauthorizedException>()),
+        );
+      },
+    );
 
-    test('adminUsersProvider throws UnauthorizedException if user is null', () async {
-      final container = createContainer(currentUser: null);
+    test(
+      'adminUsersProvider throws UnauthorizedException if user is null',
+      () async {
+        final container = createContainer(currentUser: null);
 
-      expect(
-        () => container.read(adminUsersProvider.future),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(
+          () => container.read(adminUsersProvider.future),
+          throwsA(isA<UnauthorizedException>()),
+        );
+      },
+    );
 
-    test('securityLogsProvider throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
-      final container = createContainer(currentUser: user);
+    test(
+      'securityLogsProvider throws UnauthorizedException if user is not admin',
+      () async {
+        final user = UserEntity(
+          id: 1,
+          email: 'agent@test.com',
+          name: 'Agent',
+          role: Role.agent,
+        );
+        final container = createContainer(currentUser: user);
 
-      expect(
-        () => container.read(securityLogsProvider.future),
-        throwsA(isA<UnauthorizedException>()),
-      );
-    });
+        expect(
+          () => container.read(securityLogsProvider.future),
+          throwsA(isA<UnauthorizedException>()),
+        );
+      },
+    );
   });
 
   group('UserManagementController Security', () {
-    test('createUser throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
-      final container = createContainer(currentUser: user);
+    test(
+      'createUser throws UnauthorizedException if user is not admin',
+      () async {
+        final user = UserEntity(
+          id: 1,
+          email: 'agent@test.com',
+          name: 'Agent',
+          role: Role.agent,
+        );
+        final container = createContainer(currentUser: user);
 
-      final subscription = container.listen(userManagementControllerProvider, (p, n) {});
-      final controller = container.read(userManagementControllerProvider.notifier);
+        final subscription = container.listen(
+          userManagementControllerProvider,
+          (p, n) {},
+        );
+        final controller = container.read(
+          userManagementControllerProvider.notifier,
+        );
 
-      await controller.createUser(email: 'new@test.com', name: 'New', password: 'password', role: Role.agent);
+        await controller.createUser(
+          email: 'new@test.com',
+          name: 'New',
+          password: 'password',
+          role: Role.agent,
+        );
 
-      final state = container.read(userManagementControllerProvider);
+        final state = container.read(userManagementControllerProvider);
 
-      // AsyncError is wrapped
-      expect(state, isA<AsyncError>());
-      // Check message content
-      expect(state.asError?.error.toString(), contains('Non autorisé'));
+        // AsyncError is wrapped
+        expect(state, isA<AsyncError>());
+        // Check message content
+        expect(state.asError?.error.toString(), contains('Non autorisé'));
 
-      subscription.close();
-    });
+        subscription.close();
+      },
+    );
 
-    test('deleteUser throws UnauthorizedException if user is not admin', () async {
-      final user = UserEntity(id: 1, email: 'agent@test.com', name: 'Agent', role: Role.agent);
-      final container = createContainer(currentUser: user);
+    test(
+      'deleteUser throws UnauthorizedException if user is not admin',
+      () async {
+        final user = UserEntity(
+          id: 1,
+          email: 'agent@test.com',
+          name: 'Agent',
+          role: Role.agent,
+        );
+        final container = createContainer(currentUser: user);
 
-      final subscription = container.listen(userManagementControllerProvider, (p, n) {});
-      final controller = container.read(userManagementControllerProvider.notifier);
+        final subscription = container.listen(
+          userManagementControllerProvider,
+          (p, n) {},
+        );
+        final controller = container.read(
+          userManagementControllerProvider.notifier,
+        );
 
-      await controller.deleteUser(2);
+        await controller.deleteUser(2);
 
-      final state = container.read(userManagementControllerProvider);
+        final state = container.read(userManagementControllerProvider);
 
-      expect(state, isA<AsyncError>());
-      expect(state.asError?.error.toString(), contains('Non autorisé'));
+        expect(state, isA<AsyncError>());
+        expect(state.asError?.error.toString(), contains('Non autorisé'));
 
-      subscription.close();
-    });
+        subscription.close();
+      },
+    );
   });
 }

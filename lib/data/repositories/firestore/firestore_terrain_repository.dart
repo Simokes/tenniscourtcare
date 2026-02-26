@@ -22,7 +22,9 @@ class FirestoreTerrainRepository {
 
   Stream<List<TerrainFirestoreModel>> watchTerrains() {
     return _terrains.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => TerrainFirestoreModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => TerrainFirestoreModel.fromFirestore(doc))
+          .toList();
     });
   }
 

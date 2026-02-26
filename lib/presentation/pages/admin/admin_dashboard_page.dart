@@ -42,9 +42,21 @@ class AdminDashboardPage extends ConsumerWidget {
             // Stats Row
             const Row(
               children: [
-                Expanded(child: _StatCard(title: 'Courts', value: '4', icon: Icons.sports_tennis)),
+                Expanded(
+                  child: _StatCard(
+                    title: 'Courts',
+                    value: '4',
+                    icon: Icons.sports_tennis,
+                  ),
+                ),
                 SizedBox(width: 16),
-                Expanded(child: _StatCard(title: 'Interventions', value: '12', icon: Icons.handyman)),
+                Expanded(
+                  child: _StatCard(
+                    title: 'Interventions',
+                    value: '12',
+                    icon: Icons.handyman,
+                  ),
+                ),
                 // Assuming we fetch these numbers from a provider later
               ],
             ),
@@ -54,7 +66,6 @@ class AdminDashboardPage extends ConsumerWidget {
             const UserManagementSection(),
 
             const SizedBox(height: 24),
-
           ],
         ),
       ),
@@ -67,17 +78,26 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
 
-  const _StatCard({required this.title, required this.value, required this.icon});
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+      color: Theme.of(
+        context,
+      ).colorScheme.primaryContainer.withValues(alpha: 0.3),
       child: Column(
         children: [
           Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
           Text(title),
         ],
       ),

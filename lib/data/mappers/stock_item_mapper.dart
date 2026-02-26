@@ -64,9 +64,13 @@ class StockItemMapper {
       syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
       createdAt: driftEntity.createdAt,
       updatedAt: driftEntity.updatedAt,
-      firebaseId: driftEntity.firebaseId ?? driftEntity.remoteId, // Fallback to remoteId
+      firebaseId:
+          driftEntity.firebaseId ??
+          driftEntity.remoteId, // Fallback to remoteId
       createdBy: driftEntity.createdBy,
-      modifiedBy: driftEntity.modifiedBy ?? driftEntity.lastModifiedBy, // Fallback to lastModifiedBy
+      modifiedBy:
+          driftEntity.modifiedBy ??
+          driftEntity.lastModifiedBy, // Fallback to lastModifiedBy
     );
   }
 }
@@ -83,25 +87,25 @@ extension StockItemDriftX on db.StockItemRow {
 // Domain → Companion (Keeping for DB inserts)
 extension StockItemDomainX on domain.StockItem {
   db.StockItemsCompanion toCompanion() => db.StockItemsCompanion(
-        id: id == null ? const Value.absent() : Value(id!),
-        name: Value(name),
-        quantity: Value(quantity),
-        unit: Value(unit),
-        comment: Value(comment),
-        isCustom: Value(isCustom),
-        minThreshold: Value(minThreshold),
-        category: Value(category),
-        sortOrder: Value(sortOrder),
-        // Sync mappings
-        syncStatus: Value(syncStatus.name),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        firebaseId: Value(firebaseId),
-        remoteId: Value(firebaseId), // Fallback/Legacy
-        createdBy: Value(createdBy),
-        modifiedBy: Value(modifiedBy),
-        lastModifiedBy: Value(modifiedBy), // Fallback/Legacy
-        // Maintain isSyncPending logic for backward compatibility
-        isSyncPending: Value(syncStatus != SyncStatus.synced),
-      );
+    id: id == null ? const Value.absent() : Value(id!),
+    name: Value(name),
+    quantity: Value(quantity),
+    unit: Value(unit),
+    comment: Value(comment),
+    isCustom: Value(isCustom),
+    minThreshold: Value(minThreshold),
+    category: Value(category),
+    sortOrder: Value(sortOrder),
+    // Sync mappings
+    syncStatus: Value(syncStatus.name),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    firebaseId: Value(firebaseId),
+    remoteId: Value(firebaseId), // Fallback/Legacy
+    createdBy: Value(createdBy),
+    modifiedBy: Value(modifiedBy),
+    lastModifiedBy: Value(modifiedBy), // Fallback/Legacy
+    // Maintain isSyncPending logic for backward compatibility
+    isSyncPending: Value(syncStatus != SyncStatus.synced),
+  );
 }

@@ -33,15 +33,12 @@ class QuantitySelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text(label, style: Theme.of(context).textTheme.titleMedium),
                 Text(
                   unit,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -66,7 +63,10 @@ class QuantitySelector extends StatelessWidget {
                     child: Text(
                       '$value',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
                 ),
@@ -146,7 +146,9 @@ class _IconButton extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Icon(
             icon,
-            color: isDisabled ? colorScheme.onSurface.withValues(alpha: 0.3) : colorScheme.primary,
+            color: isDisabled
+                ? colorScheme.onSurface.withValues(alpha: 0.3)
+                : colorScheme.primary,
           ),
         ),
       ),

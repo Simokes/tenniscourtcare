@@ -6,7 +6,9 @@ import 'package:path_provider/path_provider.dart';
 
 // Imports conditionnels
 import 'dart:io' if (dart.library.html) 'dart:html' as platform;
-import 'csv_export_stub.dart' if (dart.library.html) 'csv_export_web.dart' as web_helper;
+import 'csv_export_stub.dart'
+    if (dart.library.html) 'csv_export_web.dart'
+    as web_helper;
 
 class CsvExport {
   /// Exporte les séries de sacs en CSV
@@ -36,7 +38,7 @@ class CsvExport {
     BuildContext context,
   ) async {
     final bytes = Uint8List.fromList(utf8.encode(csv));
-    
+
     if (kIsWeb) {
       // Sur web, utiliser la fonction helper
       web_helper.downloadOnWeb(bytes, filename);
@@ -48,9 +50,9 @@ class CsvExport {
     }
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Export CSV réussi')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Export CSV réussi')));
     }
   }
 
@@ -58,7 +60,7 @@ class CsvExport {
     List<({int date, int manto, int sottomanto, int silice})> data,
   ) {
     final buffer = StringBuffer();
-    
+
     // En-têtes
     buffer.writeln('Date,Manto,Sottomanto,Silice,Total');
 
@@ -67,8 +69,10 @@ class CsvExport {
       final date = DateTime.fromMillisecondsSinceEpoch(item.date);
       final dateStr = '${date.day}/${date.month}/${date.year}';
       final total = item.manto + item.sottomanto + item.silice;
-      
-      buffer.writeln('$dateStr,${item.manto},${item.sottomanto},${item.silice},$total');
+
+      buffer.writeln(
+        '$dateStr,${item.manto},${item.sottomanto},${item.silice},$total',
+      );
     }
 
     return buffer.toString();
@@ -78,7 +82,7 @@ class CsvExport {
     ({int manto, int sottomanto, int silice}) totals,
   ) {
     final buffer = StringBuffer();
-    
+
     buffer.writeln('Type,Quantité');
     buffer.writeln('Manto,${totals.manto}');
     buffer.writeln('Sottomanto,${totals.sottomanto}');

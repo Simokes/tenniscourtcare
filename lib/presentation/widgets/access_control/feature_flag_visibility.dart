@@ -19,7 +19,8 @@ class FeatureFlagVisibility extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(currentUserProvider);
-    if (user != null && PermissionResolver.isFeatureEnabled(user.role, featureFlag)) {
+    if (user != null &&
+        PermissionResolver.isFeatureEnabled(user.role, featureFlag)) {
       return child;
     }
     return fallback ?? const SizedBox.shrink();

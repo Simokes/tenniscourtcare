@@ -4,7 +4,8 @@ import 'package:drift/drift.dart';
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get uuid => text().unique()();
-  TextColumn get collection => text()(); // 'users', 'terrains', 'reservations', 'stock'
+  TextColumn get collection =>
+      text()(); // 'users', 'terrains', 'reservations', 'stock'
   TextColumn get action => text()(); // 'create', 'update', 'delete'
   TextColumn get documentId => text()();
   TextColumn get data => text()(); // JSON string

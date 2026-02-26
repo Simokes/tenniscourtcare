@@ -8,12 +8,16 @@ import 'auth_providers.dart';
 import 'security_providers.dart';
 
 // Provider pour la liste des utilisateurs (vue Admin)
-final adminUsersProvider = FutureProvider.autoDispose<List<UserEntity>>((ref) async {
+final adminUsersProvider = FutureProvider.autoDispose<List<UserEntity>>((
+  ref,
+) async {
   final currentUser = ref.watch(currentUserProvider);
 
   // 1. Permission Check
   if (currentUser == null || currentUser.role != Role.admin) {
-    throw const UnauthorizedException(message: 'Accès refusé: Réservé aux administrateurs.');
+    throw const UnauthorizedException(
+      message: 'Accès refusé: Réservé aux administrateurs.',
+    );
   }
 
   final authRepo = ref.watch(authRepositoryProvider);
@@ -31,12 +35,16 @@ final adminUsersProvider = FutureProvider.autoDispose<List<UserEntity>>((ref) as
 });
 
 // Provider pour les logs de sécurité
-final securityLogsProvider = FutureProvider.autoDispose<List<AuditLog>>((ref) async {
+final securityLogsProvider = FutureProvider.autoDispose<List<AuditLog>>((
+  ref,
+) async {
   final currentUser = ref.watch(currentUserProvider);
 
   // 1. Permission Check
   if (currentUser == null || currentUser.role != Role.admin) {
-    throw const UnauthorizedException(message: 'Accès refusé: Réservé aux administrateurs.');
+    throw const UnauthorizedException(
+      message: 'Accès refusé: Réservé aux administrateurs.',
+    );
   }
 
   final auditRepo = ref.watch(auditRepositoryProvider);
@@ -68,14 +76,21 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
     try {
       final currentUser = _ref.read(currentUserProvider);
       if (currentUser == null || currentUser.role != Role.admin) {
-        throw const UnauthorizedException(message: 'Seul un administrateur peut créer des utilisateurs.');
+        throw const UnauthorizedException(
+          message: 'Seul un administrateur peut créer des utilisateurs.',
+        );
       }
 
       final authRepo = _ref.read(authRepositoryProvider);
 
       // La méthode du repository inclut déjà la validation et l'audit logging
       // Mais on ajoute un double check ici pour la sécurité
-      await authRepo.createUser(email: email, name: name, password: password, role: role);
+      await authRepo.createUser(
+        email: email,
+        name: name,
+        password: password,
+        role: role,
+      );
 
       // Rafraîchir la liste
       _ref.invalidate(adminUsersProvider);
@@ -90,15 +105,17 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
     try {
       final currentUser = _ref.read(currentUserProvider);
       if (currentUser == null || currentUser.role != Role.admin) {
-        throw const UnauthorizedException(message: 'Seul un administrateur peut supprimer des utilisateurs.');
+        throw const UnauthorizedException(
+          message: 'Seul un administrateur peut supprimer des utilisateurs.',
+        );
       }
 
-       final authRepo = _ref.read(authRepositoryProvider);
-       // La méthode du repository inclut la validation (self-delete, last-admin) et audit
-       await authRepo.deleteUser(userId);
+      final authRepo = _ref.read(authRepositoryProvider);
+      // La méthode du repository inclut la validation (self-delete, last-admin) et audit
+      await authRepo.deleteUser(userId);
 
-       _ref.invalidate(adminUsersProvider);
-       state = const AsyncValue.data(null);
+      _ref.invalidate(adminUsersProvider);
+      state = const AsyncValue.data(null);
     } catch (e, st) {
       _handleException(e, st);
     }
@@ -109,13 +126,15 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
     try {
       final currentUser = _ref.read(currentUserProvider);
       if (currentUser == null || currentUser.role != Role.admin) {
-        throw const UnauthorizedException(message: 'Seul un administrateur peut modifier les mots de passe.');
+        throw const UnauthorizedException(
+          message: 'Seul un administrateur peut modifier les mots de passe.',
+        );
       }
 
-       final authRepo = _ref.read(authRepositoryProvider);
-       // La méthode du repository inclut la validation et audit
-       await authRepo.updateUserPassword(userId, newPassword);
-       state = const AsyncValue.data(null);
+      final authRepo = _ref.read(authRepositoryProvider);
+      // La méthode du repository inclut la validation et audit
+      await authRepo.updateUserPassword(userId, newPassword);
+      state = const AsyncValue.data(null);
     } catch (e, st) {
       _handleException(e, st);
     }
@@ -134,6 +153,10 @@ class UserManagementController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final userManagementControllerProvider = StateNotifierProvider.autoDispose<UserManagementController, AsyncValue<void>>((ref) {
-  return UserManagementController(ref);
-});
+final userManagementControllerProvider =
+    StateNotifierProvider.autoDispose<
+      UserManagementController,
+      AsyncValue<void>
+    >((ref) {
+      return UserManagementController(ref);
+    });

@@ -50,10 +50,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final backgroundColor = isDarkMode ? _backgroundDarkColor : Colors.white;
-    final cardColor = isDarkMode ? const Color(0xFF1E293B) : Colors.white; // Slate-800 for dark mode card
-    final textColor = isDarkMode ? Colors.white : const Color(0xFF0F172A); // Slate-900
-    final subtitleColor = isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B); // Slate-400/500
-    final borderColor = isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0); // Slate-600/200
+    final cardColor = isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white; // Slate-800 for dark mode card
+    final textColor = isDarkMode
+        ? Colors.white
+        : const Color(0xFF0F172A); // Slate-900
+    final subtitleColor = isDarkMode
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B); // Slate-400/500
+    final borderColor = isDarkMode
+        ? const Color(0xFF475569)
+        : const Color(0xFFE2E8F0); // Slate-600/200
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -61,7 +69,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 448), // max-w-md (approx 448px)
+            constraints: const BoxConstraints(
+              maxWidth: 448,
+            ), // max-w-md (approx 448px)
             padding: const EdgeInsets.all(24), // p-6 sm:p-10
             decoration: BoxDecoration(
               color: cardColor,
@@ -134,10 +144,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 Text(
                   'Please enter your details to sign in.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: subtitleColor,
-                  ),
+                  style: GoogleFonts.inter(fontSize: 14, color: subtitleColor),
                 ),
                 const SizedBox(height: 32),
 
@@ -172,7 +179,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     borderColor: borderColor,
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                         color: subtitleColor,
                       ),
                       onPressed: () {
@@ -189,7 +198,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: TextButton(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Please contact your administrator for password reset.')),
+                        const SnackBar(
+                          content: Text(
+                            'Please contact your administrator for password reset.',
+                          ),
+                        ),
                       );
                     },
                     style: TextButton.styleFrom(
@@ -237,24 +250,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: isLoading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                    ).copyWith(
-                      backgroundColor: MaterialStateProperty.resolveWith((states) {
-                        if (states.contains(MaterialState.hovered)) {
-                          return _primaryDarkColor;
-                        }
-                        if (states.contains(MaterialState.disabled)) {
-                          return _primaryColor.withOpacity(0.6);
-                        }
-                        return _primaryColor;
-                      }),
-                    ),
+                    style:
+                        ElevatedButton.styleFrom(
+                          backgroundColor: _primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 0,
+                        ).copyWith(
+                          backgroundColor: MaterialStateProperty.resolveWith((
+                            states,
+                          ) {
+                            if (states.contains(MaterialState.hovered)) {
+                              return _primaryDarkColor;
+                            }
+                            if (states.contains(MaterialState.disabled)) {
+                              return _primaryColor.withOpacity(0.6);
+                            }
+                            return _primaryColor;
+                          }),
+                        ),
                     child: isLoading
                         ? const SizedBox(
                             height: 20,
@@ -309,8 +325,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         isDarkMode: isDarkMode,
                         borderColor: borderColor,
                         onPressed: () {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Facebook login not implemented')),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Facebook login not implemented'),
+                            ),
                           );
                         },
                       ),
@@ -324,8 +342,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         isDarkMode: isDarkMode,
                         borderColor: borderColor,
                         onPressed: () {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Google login not implemented')),
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Google login not implemented'),
+                            ),
                           );
                         },
                       ),
@@ -349,7 +369,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     TextButton(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please contact your administrator to create an account.')),
+                          const SnackBar(
+                            content: Text(
+                              'Please contact your administrator to create an account.',
+                            ),
+                          ),
                         );
                       },
                       style: TextButton.styleFrom(
@@ -378,10 +402,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: Text(
           '© 2024 CourtCare. Premium Tennis Management.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 12,
-            color: subtitleColor,
-          ),
+          style: GoogleFonts.inter(fontSize: 12, color: subtitleColor),
         ),
       ),
     );
@@ -410,7 +431,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF94A3B8),
       ),
       filled: true,
-      fillColor: isDarkMode ? const Color(0xFF334155) : Colors.white, // Slate-700 / White
+      fillColor: isDarkMode
+          ? const Color(0xFF334155)
+          : Colors.white, // Slate-700 / White
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
@@ -434,22 +457,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }) {
     return OutlinedButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: isDarkMode ? Colors.white : const Color(0xFF334155),
-        side: BorderSide(color: borderColor),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        backgroundColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
-      ).copyWith(
-        backgroundColor: MaterialStateProperty.resolveWith((states) {
-          if (states.contains(MaterialState.hovered)) {
-            return isDarkMode ? const Color(0xFF475569) : const Color(0xFFF8FAFC); // Slate-600 / Slate-50
-          }
-          return isDarkMode ? const Color(0xFF334155) : Colors.white;
-        }),
-      ),
+      style:
+          OutlinedButton.styleFrom(
+            foregroundColor: isDarkMode
+                ? Colors.white
+                : const Color(0xFF334155),
+            side: BorderSide(color: borderColor),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            backgroundColor: isDarkMode
+                ? const Color(0xFF334155)
+                : Colors.white,
+          ).copyWith(
+            backgroundColor: MaterialStateProperty.resolveWith((states) {
+              if (states.contains(MaterialState.hovered)) {
+                return isDarkMode
+                    ? const Color(0xFF475569)
+                    : const Color(0xFFF8FAFC); // Slate-600 / Slate-50
+              }
+              return isDarkMode ? const Color(0xFF334155) : Colors.white;
+            }),
+          ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -457,10 +487,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: GoogleFonts.inter(
-              fontWeight: FontWeight.w500,
-              fontSize: 14,
-            ),
+            style: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
           ),
         ],
       ),

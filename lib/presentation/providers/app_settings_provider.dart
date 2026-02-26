@@ -9,8 +9,10 @@ class ClubLocation {
   final double longitude;
   const ClubLocation({required this.latitude, required this.longitude});
 
-  ClubLocation copyWith({double? latitude, double? longitude}) =>
-      ClubLocation(latitude: latitude ?? this.latitude, longitude: longitude ?? this.longitude);
+  ClubLocation copyWith({double? latitude, double? longitude}) => ClubLocation(
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+  );
 
   @override
   String toString() => 'ClubLocation(lat: $latitude, lon: $longitude)';
@@ -20,15 +22,9 @@ class AppSettings {
   final ClubLocation? location;
   final ThemeMode themeMode;
 
-  const AppSettings({
-    this.location,
-    this.themeMode = ThemeMode.system,
-  });
+  const AppSettings({this.location, this.themeMode = ThemeMode.system});
 
-  AppSettings copyWith({
-    ClubLocation? location,
-    ThemeMode? themeMode,
-  }) {
+  AppSettings copyWith({ClubLocation? location, ThemeMode? themeMode}) {
     return AppSettings(
       location: location ?? this.location,
       themeMode: themeMode ?? this.themeMode,
@@ -51,7 +47,9 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
   Future<void> _load() async {
     try {
       // On récupère l'instance via le FutureProvider
-      final SharedPreferences prefs = await ref.read(sharedPrefsProvider.future);
+      final SharedPreferences prefs = await ref.read(
+        sharedPrefsProvider.future,
+      );
 
       // Load Location
       final lat = prefs.getDouble(_kLat);
@@ -71,7 +69,9 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
         );
       }
 
-      state = AsyncValue.data(AppSettings(location: location, themeMode: themeMode));
+      state = AsyncValue.data(
+        AppSettings(location: location, themeMode: themeMode),
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -79,14 +79,18 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> setClubLocation(ClubLocation? loc) async {
     try {
-      final SharedPreferences prefs = await ref.read(sharedPrefsProvider.future);
+      final SharedPreferences prefs = await ref.read(
+        sharedPrefsProvider.future,
+      );
       final currentSettings = state.valueOrNull ?? const AppSettings();
 
       if (loc == null) {
         await prefs.remove(_kLat);
         await prefs.remove(_kLon);
         // Create new settings with null location, preserving current theme
-        state = AsyncValue.data(AppSettings(location: null, themeMode: currentSettings.themeMode));
+        state = AsyncValue.data(
+          AppSettings(location: null, themeMode: currentSettings.themeMode),
+        );
       } else {
         await prefs.setDouble(_kLat, loc.latitude);
         await prefs.setDouble(_kLon, loc.longitude);
@@ -104,15 +108,17 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     try {
-      final SharedPreferences prefs = await ref.read(sharedPrefsProvider.future);
+      final SharedPreferences prefs = await ref.read(
+        sharedPrefsProvider.future,
+      );
       final currentSettings = state.valueOrNull ?? const AppSettings();
 
       await prefs.setInt(_kThemeMode, mode.index);
 
       state = AsyncValue.data(currentSettings.copyWith(themeMode: mode));
     } catch (e, st) {
-       state = AsyncValue.error(e, st);
-       rethrow;
+      state = AsyncValue.error(e, st);
+      rethrow;
     }
   }
 
@@ -120,6 +126,6 @@ class AppSettingsNotifier extends StateNotifier<AsyncValue<AppSettings>> {
 }
 
 final appSettingsProvider =
-StateNotifierProvider<AppSettingsNotifier, AsyncValue<AppSettings>>(
+    StateNotifierProvider<AppSettingsNotifier, AsyncValue<AppSettings>>(
       (ref) => AppSettingsNotifier(ref),
-);
+    );

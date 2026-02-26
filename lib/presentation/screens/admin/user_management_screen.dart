@@ -25,109 +25,163 @@ class UserManagementScreen extends ConsumerWidget {
           usersAsync.when(
             data: (users) {
               if (users.isEmpty) {
-                 return const SliverFillRemaining(
-                   child: Center(child: Text('Aucun utilisateur')),
-                 );
+                return const SliverFillRemaining(
+                  child: Center(child: Text('Aucun utilisateur')),
+                );
               }
               return SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final user = users[index];
-                      final isSelf = user.id == currentUser?.id;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: PremiumCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor: isSelf
-                                        ? Theme.of(context).colorScheme.primaryContainer
-                                        : Theme.of(context).colorScheme.secondaryContainer,
-                                    child: Text(
-                                      user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                                      style: TextStyle(
-                                        color: isSelf
-                                            ? Theme.of(context).colorScheme.onPrimaryContainer
-                                            : Theme.of(context).colorScheme.onSecondaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          user.name,
-                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          user.email,
-                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final user = users[index];
+                    final isSelf = user.id == currentUser?.id;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: PremiumCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: isSelf
+                                      ? Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer
+                                      : Theme.of(
+                                          context,
+                                        ).colorScheme.secondaryContainer,
+                                  child: Text(
+                                    user.name.isNotEmpty
+                                        ? user.name[0].toUpperCase()
+                                        : '?',
+                                    style: TextStyle(
                                       color: isSelf
-                                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
-                                        : Theme.of(context).colorScheme.surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: isSelf
-                                        ? Border.all(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2))
-                                        : null,
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimaryContainer
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondaryContainer,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    child: Text(
-                                      user.role.label,
-                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: isSelf ? Theme.of(context).colorScheme.primary : null,
-                                        fontWeight: isSelf ? FontWeight.bold : null,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        user.name,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
+                                      Text(
+                                        user.email,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelf
+                                        ? Theme.of(context).colorScheme.primary
+                                              .withValues(alpha: 0.1)
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.surfaceContainerHighest,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: isSelf
+                                        ? Border.all(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary
+                                                .withValues(alpha: 0.2),
+                                          )
+                                        : null,
+                                  ),
+                                  child: Text(
+                                    user.role.label,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: isSelf
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.primary
+                                              : null,
+                                          fontWeight: isSelf
+                                              ? FontWeight.bold
+                                              : null,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (!isSelf) ...[
+                              const Divider(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton.icon(
+                                    onPressed: () => _showResetPasswordDialog(
+                                      context,
+                                      ref,
+                                      user.id,
+                                      user.name,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.lock_reset,
+                                      size: 18,
+                                    ),
+                                    label: const Text('Réinitialiser MDP'),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  TextButton.icon(
+                                    onPressed: () => _confirmDelete(
+                                      context,
+                                      ref,
+                                      user.id,
+                                      user.name,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      size: 18,
+                                    ),
+                                    label: const Text('Supprimer'),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.error,
                                     ),
                                   ),
                                 ],
                               ),
-                              if (!isSelf) ...[
-                                const Divider(height: 24),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    TextButton.icon(
-                                      onPressed: () => _showResetPasswordDialog(context, ref, user.id, user.name),
-                                      icon: const Icon(Icons.lock_reset, size: 18),
-                                      label: const Text('Réinitialiser MDP'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    TextButton.icon(
-                                      onPressed: () => _confirmDelete(context, ref, user.id, user.name),
-                                      icon: const Icon(Icons.delete_outline, size: 18),
-                                      label: const Text('Supprimer'),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Theme.of(context).colorScheme.error,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
                             ],
-                          ),
+                          ],
                         ),
-                      );
-                    },
-                    childCount: users.length,
-                  ),
+                      ),
+                    );
+                  }, childCount: users.length),
                 ),
               );
             },
@@ -176,8 +230,8 @@ class UserManagementScreen extends ConsumerWidget {
                   Text(
                     'Ajouter un membre',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   PremiumTextField(
@@ -203,9 +257,9 @@ class UserManagementScreen extends ConsumerWidget {
                   Text(
                     'Rôle',
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   SegmentedButton<Role>(
@@ -234,30 +288,40 @@ class UserManagementScreen extends ConsumerWidget {
                     child: PremiumButton(
                       label: 'Créer le compte',
                       onPressed: () async {
-                        if (nameCtrl.text.isEmpty || emailCtrl.text.isEmpty || passCtrl.text.isEmpty) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             const SnackBar(content: Text('Veuillez remplir tous les champs')),
-                           );
-                           return;
+                        if (nameCtrl.text.isEmpty ||
+                            emailCtrl.text.isEmpty ||
+                            passCtrl.text.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Veuillez remplir tous les champs'),
+                            ),
+                          );
+                          return;
                         }
 
                         try {
-                          await ref.read(userManagementControllerProvider.notifier).createUser(
-                            email: emailCtrl.text.trim(),
-                            name: nameCtrl.text.trim(),
-                            password: passCtrl.text,
-                            role: selectedRole,
-                          );
+                          await ref
+                              .read(userManagementControllerProvider.notifier)
+                              .createUser(
+                                email: emailCtrl.text.trim(),
+                                name: nameCtrl.text.trim(),
+                                password: passCtrl.text,
+                                role: selectedRole,
+                              );
                           if (context.mounted) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Utilisateur créé avec succès')),
+                              const SnackBar(
+                                content: Text('Utilisateur créé avec succès'),
+                              ),
                             );
                           }
                         } catch (e) {
-                           if (context.mounted) {
+                          if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Erreur: ${e.toString()}')),
+                              SnackBar(
+                                content: Text('Erreur: ${e.toString()}'),
+                              ),
                             );
                           }
                         }
@@ -274,12 +338,19 @@ class UserManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, int userId, String name) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    int userId,
+    String name,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Confirmer la suppression'),
-        content: Text('Êtes-vous sûr de vouloir supprimer le compte de $name ? Cette action est irréversible.'),
+        content: Text(
+          'Êtes-vous sûr de vouloir supprimer le compte de $name ? Cette action est irréversible.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -289,7 +360,9 @@ class UserManagementScreen extends ConsumerWidget {
             onPressed: () async {
               Navigator.pop(ctx);
               try {
-                await ref.read(userManagementControllerProvider.notifier).deleteUser(userId);
+                await ref
+                    .read(userManagementControllerProvider.notifier)
+                    .deleteUser(userId);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Compte de $name supprimé')),
@@ -297,13 +370,15 @@ class UserManagementScreen extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                 }
               }
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Supprimer'),
           ),
         ],
@@ -311,7 +386,12 @@ class UserManagementScreen extends ConsumerWidget {
     );
   }
 
-  void _showResetPasswordDialog(BuildContext context, WidgetRef ref, int userId, String name) {
+  void _showResetPasswordDialog(
+    BuildContext context,
+    WidgetRef ref,
+    int userId,
+    String name,
+  ) {
     final passCtrl = TextEditingController();
     showDialog(
       context: context,
@@ -342,7 +422,9 @@ class UserManagementScreen extends ConsumerWidget {
               if (passCtrl.text.isEmpty) return;
               Navigator.pop(ctx);
               try {
-                await ref.read(userManagementControllerProvider.notifier).resetPassword(userId, passCtrl.text);
+                await ref
+                    .read(userManagementControllerProvider.notifier)
+                    .resetPassword(userId, passCtrl.text);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Mot de passe mis à jour')),
@@ -350,9 +432,9 @@ class UserManagementScreen extends ConsumerWidget {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erreur: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                 }
               }
             },

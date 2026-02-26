@@ -10,7 +10,11 @@ class WeatherContext {
   final WeatherSnapshot snapshot;
   final double precipitationLast24h; // mm
   final List<DailyForecast> dailyForecasts;
-  const WeatherContext(this.snapshot, this.precipitationLast24h, {this.dailyForecasts = const []});
+  const WeatherContext(
+    this.snapshot,
+    this.precipitationLast24h, {
+    this.dailyForecasts = const [],
+  });
 }
 
 class WeatherService {
@@ -91,13 +95,15 @@ class WeatherService {
     // Requirement says "sur 3 jours". Usually implies Forecast (Tomorrow, Day+2, Day+3).
     // Or Today, Tomorrow, Day+2. Let's do Today + 3 days to be safe and let UI filter.
     for (var i = 0; i < dailyTimes.length; i++) {
-      forecasts.add(DailyForecast(
-        date: DateTime.parse(dailyTimes[i]),
-        weatherCode: dailyCodes[i].toInt(),
-        tempMax: dailyMax[i].toDouble(),
-        tempMin: dailyMin[i].toDouble(),
-        precipitationSum: dailyPrecip[i].toDouble(),
-      ));
+      forecasts.add(
+        DailyForecast(
+          date: DateTime.parse(dailyTimes[i]),
+          weatherCode: dailyCodes[i].toInt(),
+          tempMax: dailyMax[i].toDouble(),
+          tempMin: dailyMin[i].toDouble(),
+          precipitationSum: dailyPrecip[i].toDouble(),
+        ),
+      );
     }
 
     return WeatherContext(snapshot, sum24, dailyForecasts: forecasts);

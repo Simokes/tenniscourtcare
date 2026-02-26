@@ -19,16 +19,24 @@ class WeatherComputed {
   });
 }
 
-final weatherForTerrainProvider = FutureProvider.family<WeatherComputed, ({double lat, double lon, TerrainType type})>((ref, args) async {
-  final svc = ref.read(weatherServiceProvider);
-  final ctx = await svc.fetch(latitude: args.lat, longitude: args.lon);
+final weatherForTerrainProvider =
+    FutureProvider.family<
+      WeatherComputed,
+      ({double lat, double lon, TerrainType type})
+    >((ref, args) async {
+      final svc = ref.read(weatherServiceProvider);
+      final ctx = await svc.fetch(latitude: args.lat, longitude: args.lon);
 
-  final frozen = WeatherRules.isFrozen(ctx.snapshot.temperature);
-  final unplayable = WeatherRules.isUnplayable(
-    type: args.type,
-    precipitationLast24hMm: ctx.precipitationLast24h,
-    humidityPct: ctx.snapshot.humidity,
-  );
+      final frozen = WeatherRules.isFrozen(ctx.snapshot.temperature);
+      final unplayable = WeatherRules.isUnplayable(
+        type: args.type,
+        precipitationLast24hMm: ctx.precipitationLast24h,
+        humidityPct: ctx.snapshot.humidity,
+      );
 
-  return WeatherComputed(context: ctx, frozen: frozen, unplayable: unplayable);
-});
+      return WeatherComputed(
+        context: ctx,
+        frozen: frozen,
+        unplayable: unplayable,
+      );
+    });

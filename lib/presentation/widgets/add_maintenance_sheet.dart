@@ -30,7 +30,8 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<AddMaintenanceSheet> createState() => _AddMaintenanceSheetState();
+  ConsumerState<AddMaintenanceSheet> createState() =>
+      _AddMaintenanceSheetState();
 }
 
 class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
@@ -103,13 +104,19 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     if (clubLoc == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Définis d’abord les coordonnées du club dans Paramètres')),
+        const SnackBar(
+          content: Text(
+            'Définis d’abord les coordonnées du club dans Paramètres',
+          ),
+        ),
       );
       return;
     }
 
     try {
-      final computed = await ref.read(weatherForClubProvider(widget.terrain.type).future);
+      final computed = await ref.read(
+        weatherForClubProvider(widget.terrain.type).future,
+      );
       setState(() {
         _weather = computed.context.snapshot;
         _precip24h = computed.context.precipitationLast24h;
@@ -118,9 +125,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur météo: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erreur météo: $e')));
     }
   }
 
@@ -151,7 +158,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
     if (_type.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez sélectionner un type de maintenance')),
+        const SnackBar(
+          content: Text('Veuillez sélectionner un type de maintenance'),
+        ),
       );
       return;
     }
@@ -163,7 +172,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       id: widget.maintenance?.id,
       terrainId: widget.terrain.id,
       type: _type.trim(),
-      commentaire: _commentController.text.trim().isEmpty ? null : _commentController.text.trim(),
+      commentaire: _commentController.text.trim().isEmpty
+          ? null
+          : _commentController.text.trim(),
       date: _date.millisecondsSinceEpoch,
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
@@ -219,7 +230,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -227,7 +240,10 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -235,9 +251,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         widget.maintenance != null
                             ? 'Modifier la maintenance'
                             : 'Nouvelle maintenance',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     IconButton.filledTonal(
@@ -263,9 +278,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         // Type Selector
                         Text(
                           'Type d\'intervention',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
                         MaintenanceTypeSelector(
@@ -278,34 +292,47 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
                         // Date Picker Row
                         PremiumCard(
-                           padding: const EdgeInsets.all(4),
-                           child: InkWell(
+                          padding: const EdgeInsets.all(4),
+                          child: InkWell(
                             onTap: _pickDate,
                             borderRadius: BorderRadius.circular(12),
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.calendar_month, color: Colors.blueGrey),
+                                  const Icon(
+                                    Icons.calendar_month,
+                                    color: Colors.blueGrey,
+                                  ),
                                   const SizedBox(width: 12),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Date de l\'intervention',
-                                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
                                               color: Colors.grey.shade600,
                                             ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         _dateFormat.format(_date),
-                                        style: Theme.of(context).textTheme.titleMedium,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
                                       ),
                                     ],
                                   ),
                                   const Spacer(),
-                                  const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                  const Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: Colors.grey,
+                                  ),
                                 ],
                               ),
                             ),
@@ -329,9 +356,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         if (!isDur) ...[
                           Text(
                             'Matériaux utilisés',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
                         ],
@@ -341,32 +367,47 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           if (_type == 'Recharge')
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                              child: ref.watch(refillRecommendationProvider(widget.terrain.id)).when(
-                                data: (recommendation) => RefillRecommendationCard(recommendation: recommendation),
-                                loading: () => const Center(child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
-                                )),
-                                error: (err, stack) => const SizedBox.shrink(), // Silent error for cleaner UI
-                              ),
+                              child: ref
+                                  .watch(
+                                    refillRecommendationProvider(
+                                      widget.terrain.id,
+                                    ),
+                                  )
+                                  .when(
+                                    data: (recommendation) =>
+                                        RefillRecommendationCard(
+                                          recommendation: recommendation,
+                                        ),
+                                    loading: () => const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                    error: (err, stack) =>
+                                        const SizedBox.shrink(), // Silent error for cleaner UI
+                                  ),
                             ),
 
                           QuantitySelector(
                             label: 'Manto',
                             value: _sacsManto,
-                            onChanged: (val) => setState(() => _sacsManto = val),
+                            onChanged: (val) =>
+                                setState(() => _sacsManto = val),
                           ),
                           const SizedBox(height: 12),
                           QuantitySelector(
                             label: 'Sottomanto',
                             value: _sacsSottomanto,
-                            onChanged: (val) => setState(() => _sacsSottomanto = val),
+                            onChanged: (val) =>
+                                setState(() => _sacsSottomanto = val),
                           ),
                         ] else if (isSynthetique) ...[
                           QuantitySelector(
                             label: 'Silice',
                             value: _sacsSilice,
-                            onChanged: (val) => setState(() => _sacsSilice = val),
+                            onChanged: (val) =>
+                                setState(() => _sacsSilice = val),
                           ),
                         ],
 
@@ -374,18 +415,34 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outlineVariant,
+                              ),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.info_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     'Aucun matériau n\'est requis pour ce type de terrain.',
-                                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -397,9 +454,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         // Photo de preuve
                         Text(
                           'Photo de preuve',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
                         if (_imagePath != null)
@@ -409,7 +465,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                               GestureDetector(
                                 onTap: () => showDialog(
                                   context: context,
-                                  builder: (context) => ImageViewerDialog(imagePath: _imagePath!),
+                                  builder: (context) =>
+                                      ImageViewerDialog(imagePath: _imagePath!),
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
@@ -422,10 +479,16 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                 ),
                               ),
                               IconButton(
-                                onPressed: () => setState(() => _imagePath = null),
-                                icon: Icon(Icons.remove_circle, color: Theme.of(context).colorScheme.error),
+                                onPressed: () =>
+                                    setState(() => _imagePath = null),
+                                icon: Icon(
+                                  Icons.remove_circle,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
                                 style: IconButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  backgroundColor: Theme.of(
+                                    context,
+                                  ).colorScheme.surface,
                                 ),
                               ),
                             ],
@@ -439,7 +502,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                   icon: const Icon(Icons.camera_alt),
                                   label: const Text('Caméra'),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -453,7 +518,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                   icon: const Icon(Icons.photo_library),
                                   label: const Text('Galerie'),
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -477,14 +544,11 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                 ),
               ),
 
-               Padding(
+              Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: SizedBox(
                   width: double.infinity,
-                  child: PremiumButton(
-                    label: 'Enregistrer',
-                    onPressed: _save,
-                  ),
+                  child: PremiumButton(label: 'Enregistrer', onPressed: _save),
                 ),
               ),
             ],

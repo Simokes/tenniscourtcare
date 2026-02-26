@@ -41,7 +41,8 @@ class _AddTerrainScreenState extends ConsumerState<AddTerrainScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nom du terrain'),
-                validator: (v) => v == null || v.isEmpty ? 'Champ requis' : null,
+                validator: (v) =>
+                    v == null || v.isEmpty ? 'Champ requis' : null,
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<TerrainType>(
@@ -51,7 +52,9 @@ class _AddTerrainScreenState extends ConsumerState<AddTerrainScreen> {
                 items: TerrainType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,
-                    child: Text(type.displayName), // Utilise ton getter displayName
+                    child: Text(
+                      type.displayName,
+                    ), // Utilise ton getter displayName
                   );
                 }).toList(),
                 onChanged: (val) => setState(() => _selectedType = val!),

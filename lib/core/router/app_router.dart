@@ -55,10 +55,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/admin-setup',
         builder: (context, state) => const AdminSetupPage(),
@@ -80,35 +77,29 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/',
         builder: (context, state) => const HomeScreen(),
         routes: [
-           GoRoute(
+          GoRoute(
             path: 'stock-history',
             builder: (context, state) => const StockHistoryScreen(),
           ),
         ],
       ),
-      GoRoute(
-        path: '/stock',
-        builder: (context, state) => const StockScreen(),
-      ),
+      GoRoute(path: '/stock', builder: (context, state) => const StockScreen()),
       GoRoute(
         path: '/weather/:type',
         builder: (context, state) {
-            final typeStr = state.pathParameters['type'];
-            final type = TerrainType.values.firstWhere(
-              (e) => e.name == typeStr,
-              orElse: () => TerrainType.terreBattue
-            );
-            return WeatherScreen(titre: 'Météo du club', terrainType: type);
+          final typeStr = state.pathParameters['type'];
+          final type = TerrainType.values.firstWhere(
+            (e) => e.name == typeStr,
+            orElse: () => TerrainType.terreBattue,
+          );
+          return WeatherScreen(titre: 'Météo du club', terrainType: type);
         },
       ),
       GoRoute(
         path: '/maintenance',
         builder: (context, state) => const MaintenanceScreen(),
       ),
-      GoRoute(
-        path: '/stats',
-        builder: (context, state) => const StatsScreen(),
-      ),
+      GoRoute(path: '/stats', builder: (context, state) => const StatsScreen()),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
@@ -123,12 +114,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
           final terrains = ref.read(terrainsProvider).valueOrNull ?? [];
           try {
-             final terrain = terrains.firstWhere((t) => t.id == id);
-             return TerrainMaintenanceHistoryScreen(terrain: terrain);
+            final terrain = terrains.firstWhere((t) => t.id == id);
+            return TerrainMaintenanceHistoryScreen(terrain: terrain);
           } catch (e) {
-             // Fallback or Error page if terrain not found (e.g. directly accessing url)
-             // For now redirect to home or show error
-             return const AccessDeniedPage(); // Or a specific Not Found page
+            // Fallback or Error page if terrain not found (e.g. directly accessing url)
+            // For now redirect to home or show error
+            return const AccessDeniedPage(); // Or a specific Not Found page
           }
         },
       ),

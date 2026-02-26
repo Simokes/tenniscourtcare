@@ -53,7 +53,9 @@ class ReservationFirestoreModel {
       'endTime': endTime,
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt != null
+          ? Timestamp.fromDate(updatedAt!)
+          : FieldValue.serverTimestamp(),
       'syncedAt': syncedAt != null ? Timestamp.fromDate(syncedAt!) : null,
       'notes': notes,
     };

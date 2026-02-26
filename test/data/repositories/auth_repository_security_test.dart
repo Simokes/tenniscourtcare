@@ -27,7 +27,12 @@ class MockAppDatabase extends Fake implements AppDatabase {
 
 class MockTokenService extends Fake implements TokenService {
   @override
-  Future<String> createToken({required int userId, required String email, required String role, Duration expiresIn = const Duration(hours: 1)}) async {
+  Future<String> createToken({
+    required int userId,
+    required String email,
+    required String role,
+    Duration expiresIn = const Duration(hours: 1),
+  }) async {
     return 'mock.jwt.token';
   }
 }
@@ -36,7 +41,14 @@ class MockAuditRepository extends Fake implements AuditRepository {
   final List<String> logs = [];
 
   @override
-  Future<void> logEvent({required String action, String? email, int? userId, String? ipAddress, String? deviceInfo, Map<String, dynamic>? details}) async {
+  Future<void> logEvent({
+    required String action,
+    String? email,
+    int? userId,
+    String? ipAddress,
+    String? deviceInfo,
+    Map<String, dynamic>? details,
+  }) async {
     logs.add('Event: $action');
   }
 }
@@ -53,7 +65,11 @@ class MockRateLimiter extends Fake implements RateLimiter {
   }
 
   @override
-  Future<void> recordAttempt({required String email, required bool success, String? ipAddress}) async {
+  Future<void> recordAttempt({
+    required String email,
+    required bool success,
+    String? ipAddress,
+  }) async {
     records.add('$email: $success');
   }
 }
@@ -128,42 +144,60 @@ void main() {
   });
 
   group('AuthRepositoryImpl Security Tests', () {
-    test('signIn throws InvalidCredentialsException if email format is invalid', () async {
-      await expectLater(authRepo.signIn('invalid-email', 'pass'), throwsA(isA<InvalidCredentialsException>()));
-    });
+    test(
+      'signIn throws InvalidCredentialsException if email format is invalid',
+      () async {
+        await expectLater(
+          authRepo.signIn('invalid-email', 'pass'),
+          throwsA(isA<InvalidCredentialsException>()),
+        );
+      },
+    );
 
     test('signIn checks rate limiter before DB access', () async {
       mockRateLimiter.shouldLock = true;
 
-      await expectLater(authRepo.signIn('user@test.com', 'pass'), throwsA(isA<AccountLockedException>()));
+      await expectLater(
+        authRepo.signIn('user@test.com', 'pass'),
+        throwsA(isA<AccountLockedException>()),
+      );
     });
 
     test('signIn records failure and throws if user not found', () async {
       mockDb.userToReturn = null;
 
-      await expectLater(authRepo.signIn('unknown@test.com', 'pass'), throwsA(isA<InvalidCredentialsException>()));
+      await expectLater(
+        authRepo.signIn('unknown@test.com', 'pass'),
+        throwsA(isA<InvalidCredentialsException>()),
+      );
 
       expect(mockRateLimiter.records, contains('unknown@test.com: false'));
     });
 
-    test('signIn records success and generates token if credentials valid', () async {
-      // Mock user with valid hash placeholder (verification will fail but we test flow until then)
-      mockDb.userToReturn = UserRow(
-        id: 1,
-        email: 'user@test.com',
-        name: 'User',
-        passwordHash: 'invalid_hash_format', // Will fail verification
-        role: Role.agent, // Use Enum
-        isActive: true,
-        lastLoginAt: null,
-        avatarUrl: null,
-        createdAt: DateTime.now(),
-      );
+    test(
+      'signIn records success and generates token if credentials valid',
+      () async {
+        // Mock user with valid hash placeholder (verification will fail but we test flow until then)
+        mockDb.userToReturn = UserRow(
+          id: 1,
+          email: 'user@test.com',
+          name: 'User',
+          passwordHash: 'invalid_hash_format', // Will fail verification
+          role: Role.agent, // Use Enum
+          isActive: true,
+          lastLoginAt: null,
+          avatarUrl: null,
+          createdAt: DateTime.now(),
+        );
 
-      // It will throw because hash verification fails (we can't easily mock private method)
-      // But we can check that it recorded failure
-      await expectLater(authRepo.signIn('user@test.com', 'pass'), throwsA(isA<InvalidCredentialsException>()));
-      expect(mockRateLimiter.records, contains('user@test.com: false'));
-    });
+        // It will throw because hash verification fails (we can't easily mock private method)
+        // But we can check that it recorded failure
+        await expectLater(
+          authRepo.signIn('user@test.com', 'pass'),
+          throwsA(isA<InvalidCredentialsException>()),
+        );
+        expect(mockRateLimiter.records, contains('user@test.com: false'));
+      },
+    );
   });
 }

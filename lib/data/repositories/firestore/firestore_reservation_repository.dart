@@ -6,7 +6,8 @@ class FirestoreReservationRepository {
 
   FirestoreReservationRepository(this._firestore);
 
-  CollectionReference get _reservations => _firestore.collection('reservations');
+  CollectionReference get _reservations =>
+      _firestore.collection('reservations');
 
   Future<void> saveReservation(ReservationFirestoreModel reservation) async {
     await _reservations.doc(reservation.id).set(reservation.toFirestore());
@@ -20,16 +21,24 @@ class FirestoreReservationRepository {
     return null;
   }
 
-  Stream<List<ReservationFirestoreModel>> watchReservations({DateTime? start, DateTime? end}) {
+  Stream<List<ReservationFirestoreModel>> watchReservations({
+    DateTime? start,
+    DateTime? end,
+  }) {
     Query query = _reservations.orderBy('date');
     if (start != null) {
-      query = query.where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(start));
+      query = query.where(
+        'date',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+      );
     }
     if (end != null) {
       query = query.where('date', isLessThanOrEqualTo: Timestamp.fromDate(end));
     }
     return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => ReservationFirestoreModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => ReservationFirestoreModel.fromFirestore(doc))
+          .toList();
     });
   }
 

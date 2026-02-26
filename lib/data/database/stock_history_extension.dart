@@ -3,7 +3,6 @@ import 'app_database.dart';
 
 // Extension pour ajouter les fonctionnalités de traçabilité à AppDatabase
 extension StockHistoryExtension on AppDatabase {
-
   // --- Helper interne pour enregistrer un mouvement ---
   Future<void> _recordMovement({
     required int itemId,
@@ -40,7 +39,9 @@ extension StockHistoryExtension on AppDatabase {
   }) async {
     return transaction(() async {
       // 1. Get current item
-      final itemRow = await (select(stockItems)..where((t) => t.id.equals(itemId))).getSingle();
+      final itemRow = await (select(
+        stockItems,
+      )..where((t) => t.id.equals(itemId))).getSingle();
 
       if (itemRow.quantity == newQuantity) return; // No op
 

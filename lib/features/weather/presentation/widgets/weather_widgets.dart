@@ -125,9 +125,9 @@ class ForecastList extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             'Prévisions 3 jours',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
@@ -197,17 +197,11 @@ class _ForecastCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${forecast.tempMax.round()}°',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
           Text(
             '${forecast.tempMin.round()}°',
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 13,
-            ),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
           ),
           if (forecast.precipitationSum > 0.5) ...[
             const SizedBox(height: 4),
@@ -261,10 +255,7 @@ class _WeatherDetailItem extends StatelessWidget {
           child: Icon(icon, color: Colors.grey.shade600, size: 20),
         ),
         const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         Text(
           label,
           style: TextStyle(color: Colors.grey.shade500, fontSize: 11),

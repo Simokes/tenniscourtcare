@@ -8,10 +8,7 @@ class AuthState {
   final UserEntity? user;
   final bool isSetupRequired;
 
-  const AuthState({
-    this.user,
-    this.isSetupRequired = false,
-  });
+  const AuthState({this.user, this.isSetupRequired = false});
 
   @override
   bool operator ==(Object other) {
@@ -30,9 +27,10 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return FirebaseAuthRepository(db);
 });
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
-});
+final authStateProvider =
+    StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
+      return AuthNotifier(ref.watch(authRepositoryProvider));
+    });
 
 class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   final AuthRepository _repo;
@@ -46,14 +44,18 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       final hasUsers = await _repo.hasAnyUser();
 
       if (!hasUsers) {
-        state = const AsyncValue.data(AuthState(user: null, isSetupRequired: true));
+        state = const AsyncValue.data(
+          AuthState(user: null, isSetupRequired: true),
+        );
         return;
       }
 
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
     } catch (e) {
-      state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
+      state = const AsyncValue.data(
+        AuthState(user: null, isSetupRequired: false),
+      );
     }
   }
 
@@ -83,7 +85,9 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
   Future<void> signOut() async {
     await _repo.signOut();
-    state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
+    state = const AsyncValue.data(
+      AuthState(user: null, isSetupRequired: false),
+    );
   }
 }
 

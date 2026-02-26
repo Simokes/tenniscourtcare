@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../domain/entities/stock_item.dart';
 import '../../../domain/entities/refill_recommendation.dart';
 import '../../providers/stock_provider.dart';
 import '../../widgets/premium/premium_card.dart';
@@ -8,10 +7,7 @@ import '../../widgets/premium/premium_card.dart';
 class RefillRecommendationCard extends ConsumerWidget {
   final RefillRecommendation recommendation;
 
-  const RefillRecommendationCard({
-    super.key,
-    required this.recommendation,
-  });
+  const RefillRecommendationCard({super.key, required this.recommendation});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -79,7 +75,10 @@ class RefillRecommendationCard extends ConsumerWidget {
             children: [
               // Bloc nombre de sacs
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -117,40 +116,58 @@ class RefillRecommendationCard extends ConsumerWidget {
 
                     // Alerte Stock Insuffisant
                     if (isInsufficient && availableManto != null)
-                       Padding(
-                         padding: const EdgeInsets.only(bottom: 12.0),
-                         child: Row(
-                           children: [
-                             const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
-                             const SizedBox(width: 8),
-                             Expanded(
-                               child: Text(
-                                 '⚠️ Stock insuffisant pour la recharge conseillée (Dispo: $availableManto)',
-                                 style: const TextStyle(
-                                   color: Colors.red,
-                                   fontWeight: FontWeight.bold,
-                                   fontSize: 13, // Slightly larger for readability
-                                 ),
-                               ),
-                             ),
-                           ],
-                         ),
-                       ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '⚠️ Stock insuffisant pour la recharge conseillée (Dispo: $availableManto)',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize:
+                                      13, // Slightly larger for readability
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
 
                     InkWell(
-                      onTap: () => _checkStock(context, ref, recommendation.recommendedBags),
+                      onTap: () => _checkStock(
+                        context,
+                        ref,
+                        recommendation.recommendedBags,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: accentColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: accentColor.withValues(alpha: 0.5)),
+                          border: Border.all(
+                            color: accentColor.withValues(alpha: 0.5),
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.inventory_2_outlined, size: 16, color: accentColor),
+                            Icon(
+                              Icons.inventory_2_outlined,
+                              size: 16,
+                              color: accentColor,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               'Vérifier le stock',
@@ -219,12 +236,18 @@ class RefillRecommendationCard extends ConsumerWidget {
               if (missing > 0)
                 Text(
                   'Il manque $missing sacs pour suivre la recommandation.',
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
                 )
               else
                 const Text(
                   'Le stock couvre la quantité recommandée.',
-                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
             ],
           ),

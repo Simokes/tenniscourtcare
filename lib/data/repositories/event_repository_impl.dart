@@ -22,7 +22,9 @@ class EventRepositoryImpl implements EventRepository {
       query.where((t) => t.endTime.isSmallerOrEqualValue(end));
     }
 
-    return query.watch().map((rows) => rows.map((row) => _toDomain(row)).toList());
+    return query.watch().map(
+      (rows) => rows.map((row) => _toDomain(row)).toList(),
+    );
   }
 
   @override
@@ -49,7 +51,9 @@ class EventRepositoryImpl implements EventRepository {
       updatedAt: DateTime.now(),
     );
 
-    final id = await _db.into(_db.events).insert(
+    final id = await _db
+        .into(_db.events)
+        .insert(
           EventsCompanion.insert(
             title: localEvent.title,
             description: Value(localEvent.description),
@@ -82,23 +86,24 @@ class EventRepositoryImpl implements EventRepository {
       updatedAt: DateTime.now(),
     );
 
-    final result = await (_db.update(_db.events)
-          ..where((t) => t.id.equals(updatedEvent.id!)))
-        .write(
-      EventsCompanion(
-        title: Value(updatedEvent.title),
-        description: Value(updatedEvent.description),
-        startTime: Value(updatedEvent.startTime),
-        endTime: Value(updatedEvent.endTime),
-        color: Value(updatedEvent.color),
-        terrainIds: Value(updatedEvent.terrainIds),
-        // Sync fields
-        updatedAt: Value(updatedEvent.updatedAt),
-        syncStatus: Value(updatedEvent.syncStatus.name),
-        firebaseId: Value(updatedEvent.firebaseId),
-        modifiedBy: Value(updatedEvent.modifiedBy),
-      ),
-    );
+    final result =
+        await (_db.update(
+          _db.events,
+        )..where((t) => t.id.equals(updatedEvent.id!))).write(
+          EventsCompanion(
+            title: Value(updatedEvent.title),
+            description: Value(updatedEvent.description),
+            startTime: Value(updatedEvent.startTime),
+            endTime: Value(updatedEvent.endTime),
+            color: Value(updatedEvent.color),
+            terrainIds: Value(updatedEvent.terrainIds),
+            // Sync fields
+            updatedAt: Value(updatedEvent.updatedAt),
+            syncStatus: Value(updatedEvent.syncStatus.name),
+            firebaseId: Value(updatedEvent.firebaseId),
+            modifiedBy: Value(updatedEvent.modifiedBy),
+          ),
+        );
 
     if (result > 0) {
       _syncEventToFirebase(updatedEvent);
@@ -109,7 +114,9 @@ class EventRepositoryImpl implements EventRepository {
 
   @override
   Future<int> deleteEvent(int id) async {
-    final result = await (_db.delete(_db.events)..where((t) => t.id.equals(id))).go();
+    final result = await (_db.delete(
+      _db.events,
+    )..where((t) => t.id.equals(id))).go();
     return result;
   }
 

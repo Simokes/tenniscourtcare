@@ -5,10 +5,11 @@ import 'package:tenniscourtcare/data/database/stock_history_queries.dart';
 import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/widgets/premium/premium_card.dart';
 
-final stockHistoryProvider = StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.watchStockHistory(limit: 50); // Pagination could be added
-});
+final stockHistoryProvider =
+    StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {
+      final db = ref.watch(databaseProvider);
+      return db.watchStockHistory(limit: 50); // Pagination could be added
+    });
 
 class StockHistoryScreen extends ConsumerWidget {
   const StockHistoryScreen({super.key});
@@ -34,8 +35,8 @@ class StockHistoryScreen extends ConsumerWidget {
                   Text(
                     'Aucun mouvement enregistré',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Colors.grey.shade600,
-                        ),
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ],
               ),
@@ -57,12 +58,17 @@ class StockHistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHistoryItem(BuildContext context, StockMovementWithDetails item) {
+  Widget _buildHistoryItem(
+    BuildContext context,
+    StockMovementWithDetails item,
+  ) {
     final theme = Theme.of(context);
     final movement = item.movement;
     final isPositive = movement.quantityChange > 0;
     final changeColor = isPositive ? Colors.green : Colors.red;
-    final icon = isPositive ? Icons.add_circle_outline : Icons.remove_circle_outline;
+    final icon = isPositive
+        ? Icons.add_circle_outline
+        : Icons.remove_circle_outline;
 
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm', 'fr_FR');
 
@@ -150,11 +156,17 @@ class StockHistoryScreen extends ConsumerWidget {
                 if (item.userName != null)
                   Row(
                     children: [
-                      const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                      const Icon(
+                        Icons.person_outline,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         item.userName!,
-                        style: theme.textTheme.labelSmall?.copyWith(color: Colors.grey),
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.grey,
+                        ),
                       ),
                     ],
                   ),

@@ -38,14 +38,11 @@ class TokenService {
   }) async {
     if (_secretKey == null) await init();
 
-    final jwt = JWT(
-      {
-        'id': userId,
-        'email': email,
-        'role': role,
-      },
-      issuer: 'TennisCourtCare',
-    );
+    final jwt = JWT({
+      'id': userId,
+      'email': email,
+      'role': role,
+    }, issuer: 'TennisCourtCare');
 
     return jwt.sign(_secretKey!, expiresIn: expiresIn);
   }
@@ -64,7 +61,10 @@ class TokenService {
     } on JWTException catch (e) {
       throw SecurityException('Token invalide: ${e.message}');
     } catch (e) {
-      throw SecurityException('Erreur de validation du token', originalError: e);
+      throw SecurityException(
+        'Erreur de validation du token',
+        originalError: e,
+      );
     }
   }
 }

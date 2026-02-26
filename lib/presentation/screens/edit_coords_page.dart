@@ -20,8 +20,12 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
   void initState() {
     super.initState();
     final current = ref.read(appSettingsProvider).value?.location;
-    _latCtrl = TextEditingController(text: current?.latitude.toStringAsFixed(6) ?? '');
-    _lonCtrl = TextEditingController(text: current?.longitude.toStringAsFixed(6) ?? '');
+    _latCtrl = TextEditingController(
+      text: current?.latitude.toStringAsFixed(6) ?? '',
+    );
+    _lonCtrl = TextEditingController(
+      text: current?.longitude.toStringAsFixed(6) ?? '',
+    );
   }
 
   @override
@@ -96,7 +100,10 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
                   hintText: 'Ex: 43.552847',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  signed: true,
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[-0-9\.,]')),
                 ],
@@ -111,7 +118,10 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
                   hintText: 'Ex: 7.017369',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(signed: true, decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  signed: true,
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'[-0-9\.,]')),
                 ],
