@@ -24,7 +24,7 @@ Future<void> main() async {
 
       // Initialisation des locales
       await initializeDateFormatting('fr_FR', null);
-      
+
       // Initialize Firebase
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -34,10 +34,10 @@ Future<void> main() async {
       final db = AppDatabase();
       final firestore = FirebaseFirestore.instance;
       final syncService = FirebaseSyncService(firestore, db);
-      
+
       // ✅ Start initial sync
       unawaited(syncService.syncAll());
-      
+
       // ✅ Setup periodic sync (every 5 minutes)
       Timer.periodic(const Duration(minutes: 5), (_) {
         unawaited(syncService.syncAll());
@@ -96,10 +96,7 @@ class CourtCareApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('fr', 'FR'),
-        Locale('en', 'US'),
-      ],
+      supportedLocales: const [Locale('fr', 'FR'), Locale('en', 'US')],
       locale: const Locale('fr', 'FR'),
     );
   }

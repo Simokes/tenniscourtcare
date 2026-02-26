@@ -23,7 +23,7 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
 final stockProvider = FutureProvider<List<StockItem>>((ref) async {
   final repo = ref.watch(stockRepositoryProvider);
   final items = await repo.getAllStockItems();
-  
+
   debugPrint('📦 Loaded ${items.length} stock items');
   return items;
 });
@@ -34,14 +34,14 @@ final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.addStockItem(item);
-      
+
       final syncService = ref.read(firebaseSyncServiceProvider);
       await syncService.syncStock();
-      
+
       // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
-      
+
       debugPrint('✅ Item added and synced');
     } catch (e) {
       debugPrint('❌ Error adding stock: $e');
@@ -51,19 +51,21 @@ final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
 });
 
 // ✅ UPDATE STOCK ITEM WITH SYNC
-final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
+final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
+  ref,
+) {
   return (StockItem item) async {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.updateStockItem(item);
-      
+
       final syncService = ref.read(firebaseSyncServiceProvider);
       await syncService.syncStock();
-      
+
       // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
-      
+
       debugPrint('✅ Item updated and synced');
     } catch (e) {
       debugPrint('❌ Error updating stock: $e');
@@ -78,14 +80,14 @@ final deleteStockItemProvider = Provider<Future<void> Function(int)>((ref) {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.deleteStockItem(itemId);
-      
+
       final syncService = ref.read(firebaseSyncServiceProvider);
       await syncService.syncStock();
-      
+
       // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
-      
+
       debugPrint('✅ Item deleted and synced');
     } catch (e) {
       debugPrint('❌ Error deleting stock: $e');
@@ -115,7 +117,7 @@ final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
   final allItems = await ref.watch(stockProvider.future);
   final filter = ref.watch(stockFilterProvider);
   final searchQuery = ref.watch(stockSearchQueryProvider).toLowerCase();
-final stockItemsProvider = stockProvider;
+  final stockItemsProvider = stockProvider;
   var filtered = allItems;
 
   // ✅ APPLY FILTER
@@ -128,17 +130,17 @@ final stockItemsProvider = stockProvider;
       }).toList();
       debugPrint('🔴 Filtered to ${filtered.length} low stock items');
       break;
-      
+
     case StockFilter.fixed:
       filtered = filtered.where((item) => !item.isCustom).toList();
       debugPrint('📌 Filtered to ${filtered.length} fixed items');
       break;
-      
+
     case StockFilter.custom:
       filtered = filtered.where((item) => item.isCustom).toList();
       debugPrint('✏️ Filtered to ${filtered.length} custom items');
       break;
-      
+
     case StockFilter.all:
       debugPrint('📦 Showing all ${filtered.length} items');
       break;
@@ -234,35 +236,31 @@ final stockNotifierProvider =
 // --- Alert Providers ---
 
 // ✅ LOW STOCK ITEMS
-final lowStockItemsProvider = 
-  FutureProvider.autoDispose<List<StockItem>>((ref) async {
+final lowStockItemsProvider = FutureProvider.autoDispose<List<StockItem>>((
+  ref,
+) async {
   final items = await ref.watch(stockProvider.future);
-  
-  final lowStock = items
-      .where((item) {
-        final threshold = item.minThreshold;
-        if (threshold == null) return false;
-        return item.quantity < threshold;
-      })
-      .toList()
-      ..sort((a, b) => a.quantity.compareTo(b.quantity));
-  
+
+  final lowStock = items.where((item) {
+    final threshold = item.minThreshold;
+    if (threshold == null) return false;
+    return item.quantity < threshold;
+  }).toList()..sort((a, b) => a.quantity.compareTo(b.quantity));
+
   return lowStock;
 });
 
 // ✅ CRITICAL STOCK ITEMS
-final criticalStockItemsProvider = 
-  FutureProvider.autoDispose<List<StockItem>>((ref) async {
+final criticalStockItemsProvider = FutureProvider.autoDispose<List<StockItem>>((
+  ref,
+) async {
   final lowStockItems = await ref.watch(lowStockItemsProvider.future);
-  
-  return lowStockItems
-      .where((item) => item.quantity <= 5)
-      .toList();
+
+  return lowStockItems.where((item) => item.quantity <= 5).toList();
 });
 
 // ✅ LOW STOCK COUNT
-final lowStockCountProvider = 
-  FutureProvider.autoDispose<int>((ref) async {
+final lowStockCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final lowStockItems = await ref.watch(lowStockItemsProvider.future);
   return lowStockItems.length;
 });

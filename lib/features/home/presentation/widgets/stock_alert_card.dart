@@ -25,16 +25,32 @@ class StockAlertCard extends ConsumerWidget {
         final topItem = lowStockItems.first;
 
         // Colors
-        final backgroundColor = isCritical ? const Color(0xFFFEF2F2) : const Color(0xFFFEFCE8);
-        final borderColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A);
-        final iconBackgroundColor = isCritical ? const Color(0xFFEF4444) : const Color(0xFFEAB308);
-        final titleColor = isCritical ? const Color(0xFF7F1D1D) : const Color(0xFF713F12);
-        final subtitleColor = isCritical ? const Color(0xFFB91C1C) : const Color(0xFF854D0E);
-        final progressColor = isCritical ? const Color(0xFFDC2626) : const Color(0xFFCA8A04);
-        final progressBackgroundColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A);
+        final backgroundColor = isCritical
+            ? const Color(0xFFFEF2F2)
+            : const Color(0xFFFEFCE8);
+        final borderColor = isCritical
+            ? const Color(0xFFFECACA)
+            : const Color(0xFFFEF08A);
+        final iconBackgroundColor = isCritical
+            ? const Color(0xFFEF4444)
+            : const Color(0xFFEAB308);
+        final titleColor = isCritical
+            ? const Color(0xFF7F1D1D)
+            : const Color(0xFF713F12);
+        final subtitleColor = isCritical
+            ? const Color(0xFFB91C1C)
+            : const Color(0xFF854D0E);
+        final progressColor = isCritical
+            ? const Color(0xFFDC2626)
+            : const Color(0xFFCA8A04);
+        final progressBackgroundColor = isCritical
+            ? const Color(0xFFFECACA)
+            : const Color(0xFFFEF08A);
 
-        final titleText = '${lowStockItems.length} ${isCritical ? "Critical Items" : "Low Stock Items"}';
-        final subtitleText = 'Top: ${topItem.name} (${topItem.quantity}/${topItem.minThreshold} ${topItem.unit})';
+        final titleText =
+            '${lowStockItems.length} ${isCritical ? "Critical Items" : "Low Stock Items"}';
+        final subtitleText =
+            'Top: ${topItem.name} (${topItem.quantity}/${topItem.minThreshold} ${topItem.unit})';
 
         final ratio = (lowStockItems.length / safeTotal).clamp(0.0, 1.0);
 

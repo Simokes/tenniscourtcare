@@ -275,5 +275,6 @@ class RefillRecommendationCard extends ConsumerWidget {
     );
   }
 }
+
 // ✅ ALIAS FOR BACKWARD COMPATIBILITY
 final stockItemsProvider = stockProvider;

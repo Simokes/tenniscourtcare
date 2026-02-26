@@ -5,13 +5,13 @@ import 'stock_provider.dart';
 /// Identifie tous les articles dont la quantité est <= minThreshold
 final globalStockAlertProvider = FutureProvider<int>((ref) async {
   final items = await ref.watch(stockProvider.future);
-  
+
   final lowStock = items.where((item) {
     final threshold = item.minThreshold;
     if (threshold == null) return false;
     return item.quantity < threshold;
   }).length;
-  
+
   return lowStock;
 });
 
