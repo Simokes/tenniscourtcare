@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../providers/event_providers.dart';
+import '../../providers/event_provider.dart';
 import '../../providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../widgets/premium/premium_card.dart';

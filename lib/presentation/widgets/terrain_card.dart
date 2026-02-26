@@ -21,19 +21,19 @@ class TerrainCard extends ConsumerWidget {
     // Watch provider family
     final lastMajorAsync = ref.watch(lastMajorMaintenanceProvider(terrain.id));
 
-    return Card(
+    return InkWell(
+      onTap: onTap,
+      child: Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       // Look 'Premium': rounded corners, subtle shadow
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
               // Header Row
               Row(
                 children: [

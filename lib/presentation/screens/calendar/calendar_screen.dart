@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import '../../providers/event_providers.dart';
+import '../../providers/event_provider.dart';
 import 'add_edit_event_screen.dart';
 import '../../widgets/premium/premium_card.dart';
 import '../../widgets/add_maintenance_sheet.dart';
 import '../../providers/terrain_provider.dart';
+import '../../../domain/entities/app_event.dart';
+import '../../../domain/entities/maintenance.dart';
+import '../../../domain/entities/terrain.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -244,7 +247,7 @@ class _CalendarItemCard extends ConsumerWidget {
            Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject),
+                builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject as AppEvent),
               ),
             );
          } else {
@@ -258,7 +261,7 @@ class _CalendarItemCard extends ConsumerWidget {
                   backgroundColor: Colors.transparent,
                   builder: (context) => AddMaintenanceSheet(
                     terrain: terrain,
-                    maintenance: item.originalObject,
+                    maintenance: item.originalObject as Maintenance,
                   ),
                 );
               }
