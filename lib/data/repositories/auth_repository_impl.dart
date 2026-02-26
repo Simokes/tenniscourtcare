@@ -154,7 +154,7 @@ class AuthRepositoryImpl implements AuthRepository {
         role: const drift.Value(Role.admin),
         createdAt: drift.Value(now),
         updatedAt: drift.Value(now),
-        syncStatus: const drift.Value(SyncStatus.local),
+        
       ),
     );
 

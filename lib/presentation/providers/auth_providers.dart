@@ -52,22 +52,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
-    } catch (e) {
-      state = const AsyncValue.data(
-        AuthState(user: null, isSetupRequired: false),
-      );
-    }
+    } catch (e, st) {
+    // ✅ Émettre error state pour que setupStatusProvider peut réagir
+    state = AsyncValue.error(e, st);
+  }
   }
 
   Future<void> registerAdmin(String email, String name, String password) async {
     state = const AsyncValue.loading();
-    try {
-      await _repo.createAdminUser(email: email, name: name, password: password);
-      await signIn(email, password);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
+  try {
+    final user = await _repo.createAdminUser(email: email, name: name, password: password);
+      // ✅ Set state directement avec user créé
+    state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
+  } catch (e, st) {
+    state = AsyncValue.error(e, st);
   }
+}
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
