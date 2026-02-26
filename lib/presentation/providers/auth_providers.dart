@@ -62,7 +62,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   Future<void> registerAdmin(String email, String name, String password) async {
     state = const AsyncValue.loading();
     try {
-      await _repo.registerAdmin(email, name, password);
+      await _repo.createAdminUser(email: email, name: name, password: password);
       await signIn(email, password);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

@@ -2,6 +2,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../presentation/providers/auth_providers.dart';
 import '../../presentation/providers/terrain_provider.dart';
+import '../../presentation/providers/setup_providers.dart';
+import '../../domain/models/setup_status.dart';
 import '../../presentation/pages/auth/login_page.dart';
 import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
@@ -20,39 +22,51 @@ import '../../domain/entities/terrain.dart';
 import 'go_router_refresh_stream.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
-  final authNotifier = ref.read(authStateProvider.notifier);
+  // Watch the stream of setup status changes
+  final setupStatusStream = ref.watch(setupStatusProvider.stream);
 
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: GoRouterRefreshStream(authNotifier.stream),
+    refreshListenable: GoRouterRefreshStream(setupStatusStream),
     redirect: (context, state) {
-      final authState = ref.read(authStateProvider);
+      final setupStatusAsync = ref.read(setupStatusProvider);
 
-      final authStateValue = authState.value;
+      // If still loading or error, do not redirect yet (or handle error)
+      if (setupStatusAsync.isLoading) return null;
+      if (setupStatusAsync.hasError) return '/access-denied'; // Or specific error page
 
-      final isSetupRequired = authStateValue?.isSetupRequired ?? false;
-      final isLoggedIn = authStateValue?.user != null;
+      final setupStatus = setupStatusAsync.value;
+      if (setupStatus == null) return null;
 
       final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
+      final isHome = state.uri.path == '/';
 
-      if (isSetupRequired) {
-        return isSettingUp ? null : '/admin-setup';
+      switch (setupStatus) {
+        case SetupStatus.loading:
+          return null;
+
+        case SetupStatus.needsAdminSetup:
+          if (isSettingUp) return null;
+          return '/admin-setup';
+
+        case SetupStatus.needsLogin:
+          if (isLoggingIn) return null;
+          // Block access to admin setup if already set up
+          if (isSettingUp) return '/login';
+          return '/login';
+
+        case SetupStatus.authenticated:
+          // Redirect away from login/setup if authenticated
+          if (isLoggingIn || isSettingUp) {
+            return '/';
+          }
+          return null;
+
+        case SetupStatus.error:
+          if (state.uri.path == '/access-denied') return null;
+          return '/access-denied';
       }
-
-      if (isSettingUp) {
-        return '/login';
-      }
-
-      if (!isLoggedIn) {
-        return isLoggingIn ? null : '/login';
-      }
-
-      if (isLoggingIn) {
-        return '/';
-      }
-
-      return null;
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),

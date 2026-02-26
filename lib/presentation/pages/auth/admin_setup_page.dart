@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_providers.dart';
+import '../../providers/setup_providers.dart';
 import '../../widgets/premium/premium_button.dart';
 import '../../widgets/premium/premium_text_field.dart';
 
@@ -15,21 +16,24 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _register() {
+  Future<void> _register() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Veuillez remplir tous les champs')),
       );
@@ -45,7 +49,21 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
       return;
     }
 
-    ref.read(authStateProvider.notifier).registerAdmin(email, name, password);
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Les mots de passe ne correspondent pas'),
+        ),
+      );
+      return;
+    }
+
+    await ref.read(authStateProvider.notifier).registerAdmin(email, name, password);
+
+    // Invalidate providers to force re-evaluation of setup status
+    // adminExistsProvider needs to re-check DB to see the new admin
+    ref.invalidate(adminExistsProvider);
+    // setupStatusProvider watches adminExistsProvider, so it will update too
   }
 
   @override
@@ -53,9 +71,6 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
     final authState = ref.watch(authStateProvider);
     final isLoading = authState.isLoading;
     final error = authState.error;
-
-    // Si on n'est plus en "Setup Required", c'est que l'inscription a réussi
-    // Le routeur s'occupera de la redirection, mais on peut aussi afficher un succès ici.
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -110,6 +125,13 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
                   hint: '8 caractères minimum',
                   obscureText: true,
                   controller: _passwordController,
+                ),
+                const SizedBox(height: 24),
+                PremiumTextField(
+                  label: 'Confirmer le mot de passe',
+                  hint: 'Répétez le mot de passe',
+                  obscureText: true,
+                  controller: _confirmPasswordController,
                 ),
 
                 if (error != null) ...[
