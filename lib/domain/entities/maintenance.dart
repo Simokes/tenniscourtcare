@@ -1,6 +1,4 @@
 // lib/domain/entities/maintenance.dart
-import 'package:drift/drift.dart';
-import '../../data/database/app_database.dart'; // For MaintenancesCompanion
 import 'weather_snapshot.dart';
 import 'sync_status.dart';
 
