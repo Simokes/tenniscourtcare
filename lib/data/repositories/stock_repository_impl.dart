@@ -1,16 +1,15 @@
 // filepath: lib/data/repositories/stock_repository_impl.dart
 
+import 'package:collection/collection.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/repositories/stock_repository.dart';
 
 class StockRepositoryImpl implements StockRepository {
   final AppDatabase _db;
-  final FirebaseSyncService _firebaseService;
 
-  StockRepositoryImpl(this._db, this._firebaseService);
+  StockRepositoryImpl(this._db);
 
   @override
   Future<int> addStockItem(StockItem item) async {
@@ -20,10 +19,7 @@ class StockRepositoryImpl implements StockRepository {
       updatedAt: DateTime.now(),
     );
 
-    final id = await _db.insertStockItem(localItem);
-    _syncStockToFirebase(localItem.copyWith(id: id));
-
-    return id;
+    return await _db.insertStockItem(localItem);
   }
 
   @override
@@ -33,10 +29,7 @@ class StockRepositoryImpl implements StockRepository {
       updatedAt: DateTime.now(),
     );
 
-    final result = await _db.updateStockItem(updatedItem);
-    _syncStockToFirebase(updatedItem);
-
-    return result;  // updateStockItem() retourne déjà bool
+    return await _db.updateStockItem(updatedItem);
   }
 
   @override
@@ -53,18 +46,6 @@ class StockRepositoryImpl implements StockRepository {
   @override
   Future<StockItem?> getStockItemById(int id) async {
     final items = await _db.watchAllStockItems().first;
-    try {
-      return items.firstWhere((item) => item.id == id);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<void> _syncStockToFirebase(StockItem item) async {
-    try {
-      await _firebaseService.stockService.uploadStockToFirestore(item);
-    } catch (e) {
-      print('Failed to sync stock: $e');
-    }
+    return items.firstWhereOrNull((item) => item.id == id);
   }
 }

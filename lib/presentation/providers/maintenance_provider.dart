@@ -8,8 +8,7 @@ import 'terrain_provider.dart'; // for firebaseSyncServiceProvider
 // Repository Provider
 final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return MaintenanceRepositoryImpl(db, firebaseService);
+  return MaintenanceRepositoryImpl(db);
 });
 
 // LOCAL

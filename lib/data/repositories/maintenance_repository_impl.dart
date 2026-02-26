@@ -2,16 +2,14 @@
 
 import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/data/services/firebase_maintenance_service.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/repositories/maintenance_repository.dart';
 
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final AppDatabase _db;
-  final FirebaseMaintenanceService _firebaseService;
 
-  MaintenanceRepositoryImpl(this._db, this._firebaseService);
+  MaintenanceRepositoryImpl(this._db);
 
   @override
   Future<int> addMaintenance(Maintenance maintenance) async {
@@ -21,10 +19,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       updatedAt: DateTime.now(),
     );
 
-    final id = await _db.insertMaintenance(localMaintenance);
-    _syncMaintenanceToFirebase(localMaintenance.copyWith(id: id));
-
-    return id;
+    return await _db.insertMaintenance(localMaintenance);
   }
 
   @override
@@ -54,8 +49,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     );
 
     final result = await _db.updateMaintenance(companion);
-    _syncMaintenanceToFirebase(updatedMaintenance);
-
     return result > 0;
   }
 
@@ -75,11 +68,15 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     return _db.getMaintenanceById(id);
   }
 
-  Future<void> _syncMaintenanceToFirebase(Maintenance maintenance) async {
-    try {
-      await _firebaseService.uploadMaintenanceToFirestore(maintenance);
-    } catch (e) {
-      print('Failed to sync maintenance: $e');
-    }
+  @override
+  Future<List<Maintenance>> getAllMaintenances() async {
+    // Récupérer toutes les maintenances de tous les terrains
+    // À optimiser en Phase 8 avec une vraie requête
+    // Pour l'instant on retourne une liste vide pour éviter les erreurs de compilation
+    // si la méthode n'existe pas dans la DB, ou on utilise watchAllMaintenances si disponible.
+    // Le user snippet met une liste vide. Je vais essayer de remettre watchAllMaintenances().first
+    // si c'est ce qui est attendu, mais le snippet est explicite sur "allMaintenances = []".
+    // Je vais suivre le snippet pour être sûr.
+    return [];
   }
 }

@@ -7,8 +7,7 @@ import 'terrain_provider.dart';
 
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return StockRepositoryImpl(db, firebaseService);
+  return StockRepositoryImpl(db);
 });
 
 final localStockProvider = FutureProvider<List<StockItem>>((ref) async {
