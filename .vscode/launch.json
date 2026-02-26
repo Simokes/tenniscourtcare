@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "tenniscourtcare (Debug)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--dart-define=FLUTTER_APP_ENV=development"
+            ],
+            "preLaunchTask": "flutter: get packages",
+            "console": "debugConsole"
+        },
+        {
+            "name": "tenniscourtcare (Profile)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=FLUTTER_APP_ENV=staging"
+            ],
+            "console": "debugConsole"
+        },
+        {
+            "name": "tenniscourtcare (Release)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--dart-define=FLUTTER_APP_ENV=production"
+            ],
+            "console": "debugConsole"
+        },
+        {
+            "name": "tenniscourtcare (Tests)",
+            "request": "launch",
+            "type": "dart",
+            "program": "test",
+            "args": [
+                "-r",
+                "expanded"
+            ],
+            "console": "debugConsole"
+        }
+    ]
+}
