@@ -366,6 +366,50 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> updateUserRole(int userId, Role newRole) async {
+    final currentUser = await getCurrentUser();
+    if (currentUser == null || currentUser.role != Role.admin) {
+      throw const UnauthorizedException(
+        message: 'Seul un administrateur peut modifier les rôles.',
+      );
+    }
+
+    if (currentUser.id == userId) {
+      throw const ValidationException(
+        'Vous ne pouvez pas modifier votre propre rôle.',
+      );
+    }
+
+    final userToUpdate = await _db.getUserById(userId);
+    if (userToUpdate == null) {
+      throw const UserNotFoundException();
+    }
+
+    if (userToUpdate.role == Role.admin && newRole != Role.admin) {
+      final adminCount = await _db.countUsersByRole(Role.admin);
+      if (adminCount <= 1) {
+        throw const ValidationException(
+          'Impossible de retirer le rôle admin au dernier administrateur.',
+        );
+      }
+    }
+
+    await _db.updateUserRole(userId, newRole);
+
+    await _auditRepository.logEvent(
+      action: 'USER_ROLE_UPDATED',
+      email: currentUser.email,
+      userId: currentUser.id,
+      details: {
+        'target_user_id': userId,
+        'target_email': userToUpdate.email,
+        'old_role': userToUpdate.role.name,
+        'new_role': newRole.name,
+      },
+    );
+  }
+
+  @override
   Future<List<UserEntity>> getAllUsers() {
     return _db.getAllUsers();
   }
