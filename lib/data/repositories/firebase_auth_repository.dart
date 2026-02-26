@@ -267,7 +267,11 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> registerAdmin(String email, String name, String password) async {
+  Future<UserEntity> createAdminUser({
+    required String email,
+    required String name,
+    required String password,
+  }) async {
     try {
       // 1. Créer l'utilisateur dans Firebase Auth
       final userCredential = await _auth.createUserWithEmailAndPassword(
@@ -278,6 +282,7 @@ class FirebaseAuthRepository implements AuthRepository {
       final uid = userCredential.user!.uid;
 
       // 2. Créer le document admin dans Firestore
+      final now = DateTime.now();
       await _firestore.collection('users').doc(uid).set({
         'email': email,
         'firstName': name,
@@ -289,15 +294,26 @@ class FirebaseAuthRepository implements AuthRepository {
       });
 
       // 3. Sauvegarder dans la base de données locale (Drift)
-      await _db.insertUser(
+      final id = await _db.insertUser(
         UsersCompanion(
           email: drift.Value(email),
           firestoreUid: drift.Value(uid),
           name: drift.Value(name),
           passwordHash: const drift.Value('FIREBASE_AUTH'),
           role: const drift.Value(Role.admin),
-          createdAt: drift.Value(DateTime.now()),
+          createdAt: drift.Value(now),
         ),
+      );
+
+      return UserEntity(
+        id: id,
+        email: email,
+        name: name,
+        role: Role.admin,
+        createdAt: now,
+        updatedAt: now,
+        firebaseId: uid,
+        syncStatus: SyncStatus.synced,
       );
     } catch (e) {
       throw _mapFirebaseException(e);

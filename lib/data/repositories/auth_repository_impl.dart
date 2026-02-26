@@ -7,6 +7,7 @@ import 'dart:math';
 
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/entities/sync_status.dart'; // Added
 import '../../domain/enums/role.dart';
 import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
@@ -125,7 +126,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> registerAdmin(String email, String name, String password) async {
+  Future<UserEntity> createAdminUser({
+    required String email,
+    required String name,
+    required String password
+  }) async {
     // 1. Validation des entrées
     AuthValidator.validateEmail(email);
     AuthValidator.validateName(name);
@@ -139,6 +144,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     final passwordHash = await _hashPassword(password);
+    final now = DateTime.now();
 
     final userId = await _db.insertUser(
       UsersCompanion(
@@ -146,7 +152,9 @@ class AuthRepositoryImpl implements AuthRepository {
         name: drift.Value(name),
         passwordHash: drift.Value(passwordHash),
         role: const drift.Value(Role.admin),
-        createdAt: drift.Value(DateTime.now()),
+        createdAt: drift.Value(now),
+        updatedAt: drift.Value(now),
+        
       ),
     );
 
@@ -155,6 +163,16 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       userId: userId,
       details: {'name': name},
+    );
+
+    return UserEntity(
+      id: userId,
+      email: email,
+      name: name,
+      role: Role.admin,
+      createdAt: now,
+      updatedAt: now,
+      syncStatus: SyncStatus.local,
     );
   }
 

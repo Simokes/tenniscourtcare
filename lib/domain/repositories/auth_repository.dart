@@ -22,7 +22,11 @@ abstract class AuthRepository {
   Future<bool> hasAnyUser();
 
   /// Crée le premier utilisateur Administrateur.
-  Future<void> registerAdmin(String email, String name, String password);
+  Future<UserEntity> createAdminUser({
+    required String email,
+    required String name,
+    required String password,
+  });
 
   /// Crée un nouvel utilisateur (Agent ou Admin) avec hashage sécurisé.
   Future<void> createUser({
