@@ -1,25 +1,31 @@
+import 'package:flutter/material.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
+import 'package:tenniscourtcare/domain/entities/app_event.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class TestData {
-  // Terrains
+  // ============= TERRAIN TEST DATA =============
   static final testTerrain = Terrain(
     id: 1,
     nom: 'Court 1',
-    type: TerrainType.terreBattue,
+    type: TerrainType.dur,
     status: TerrainStatus.playable,
-    latitude: 45.0,
-    longitude: 5.0,
-    syncStatus: SyncStatus.local,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
+    latitude: 48.8566,
+    longitude: 2.3522,
+    photoUrl: null,
+    syncStatus: SyncStatus.synced,
+    createdAt: null,
+    updatedAt: null,
+    firebaseId: 'terrain_001',
+    createdBy: 'admin',
+    modifiedBy: 'admin',
   );
 
   static final testTerrains = [testTerrain];
 
-  // Stock Items
+  // ============= STOCK ITEM TEST DATA =============
   static final testStockItem = StockItem(
     id: 1,
     name: 'Tennis Ball',
@@ -29,27 +35,56 @@ class TestData {
     unit: 'Box',
     isCustom: false,
     sortOrder: 0,
-    syncStatus: SyncStatus.local,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
+    createdAt: null,
+    updatedAt: null,
+    syncStatus: SyncStatus.synced,
+    firebaseId: 'stock_001',
+    createdBy: 'admin',
+    modifiedBy: 'admin',
   );
 
   static final testStockItems = [testStockItem];
 
-  // Maintenance
+  // ============= MAINTENANCE TEST DATA =============
   static final testMaintenance = Maintenance(
     id: 1,
     terrainId: 1,
-    type: 'Cleaning',
-    commentaire: 'Court cleaning',
-    date: DateTime.now().millisecondsSinceEpoch,
-    sacsMantoUtilises: 0,
-    sacsSottomantoUtilises: 0,
+    type: 'Regular',
+    commentaire: 'Monthly maintenance',
+    date: 1704067200000,
+    sacsMantoUtilises: 2,
+    sacsSottomantoUtilises: 1,
     sacsSiliceUtilises: 0,
-    syncStatus: SyncStatus.local,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
+    imagePath: null,
+    weather: null,
+    terrainGele: false,
+    terrainImpraticable: false,
+    syncStatus: SyncStatus.synced,
+    createdAt: DateTime(2024, 1, 1),
+    updatedAt: DateTime(2024, 1, 1),
+    firebaseId: 'maint_001',
+    createdBy: 'admin',
+    modifiedBy: 'admin',
   );
 
   static final testMaintenances = [testMaintenance];
+
+  // ============= APP EVENT TEST DATA =============
+  static final testEvent = AppEvent(
+    id: 1,
+    title: 'Tournament',
+    description: 'Annual tournament',
+    startTime: DateTime(2025, 12, 20, 10, 0),
+    endTime: DateTime(2025, 12, 20, 12, 0),
+    color: const Color(0xFF3B82F6).value,
+    terrainIds: const [1],
+    syncStatus: SyncStatus.synced,
+    createdAt: DateTime(2024, 1, 1),
+    updatedAt: DateTime(2024, 1, 1),
+    firebaseId: 'event_001',
+    createdBy: 'admin',
+    modifiedBy: 'admin',
+  );
+
+  static final testEvents = [testEvent];
 }
