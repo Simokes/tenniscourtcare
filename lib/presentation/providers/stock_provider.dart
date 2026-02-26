@@ -1,3 +1,5 @@
+// lib/presentation/providers/stock_provider.dart
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/stock_repository_impl.dart';
 import '../../domain/entities/stock_item.dart';
@@ -189,3 +191,24 @@ final stockNotifierProvider =
     StateNotifierProvider<StockNotifier, AsyncValue<List<StockItem>>>((ref) {
       return StockNotifier(ref);
     });
+
+// --- Alert Providers ---
+
+final lowStockItemsProvider = Provider.autoDispose<AsyncValue<List<StockItem>>>((ref) {
+  final stockAsync = ref.watch(stockProvider);
+
+  return stockAsync.whenData((items) {
+    return items
+        .where((item) => item.minThreshold != null && item.quantity < item.minThreshold!)
+        .toList()
+        ..sort((a, b) => a.quantity.compareTo(b.quantity));
+  });
+});
+
+final criticalStockItemsProvider = Provider.autoDispose<AsyncValue<List<StockItem>>>((ref) {
+  final lowStockAsync = ref.watch(lowStockItemsProvider);
+
+  return lowStockAsync.whenData((items) {
+    return items.where((item) => item.quantity <= 5).toList();
+  });
+});

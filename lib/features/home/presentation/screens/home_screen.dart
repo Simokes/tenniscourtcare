@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tenniscourtcare/presentation/providers/dashboard_providers.dart';
 import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/global_stock_alert_provider.dart';
+import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -21,8 +21,12 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Providers
     final todayMaintenanceCount = ref.watch(todayMaintenanceCountProvider);
-    final stockAlertCount = ref.watch(globalStockAlertCountProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
+
+    // New Stock Provider Logic
+    final lowStockAsync = ref.watch(lowStockItemsProvider);
+    // Convert List<StockItem> to int for the carousel
+    final stockAlertCount = lowStockAsync.whenData((items) => items.length);
 
     // Calculate operational courts for the stats card
     final operationalCountAsync = terrainsAsync.whenData(
@@ -66,10 +70,10 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // 5. Stock Alert (Conditional)
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: StockAlertCard(stockAlertCount: stockAlertCount),
+              padding: EdgeInsets.only(bottom: 24),
+              child: StockAlertCard(),
             ),
           ),
 
