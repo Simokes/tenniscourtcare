@@ -1,10 +1,10 @@
 enum StockFilter {
   all,
   lowStock,
-  fixed,
+  fixed,        // ← AJOUTER (au lieu de "official")
   custom;
 
-  String get label {
+  String toDisplayString() {
     switch (this) {
       case StockFilter.all:
         return 'Tous';

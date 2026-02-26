@@ -136,7 +136,7 @@ class StockItemTile extends ConsumerWidget {
             color: colorScheme.onSurfaceVariant,
             onPressed: () {
               HapticFeedback.lightImpact();
-              ref.read(stockNotifierProvider.notifier).adjustQuantity(item, -1);
+              ref.read(stockNotifierProvider.notifier).deleteItem(item.id!);
             },
           ),
           InkWell(
@@ -168,7 +168,7 @@ class StockItemTile extends ConsumerWidget {
             color: colorScheme.primary,
             onPressed: () {
               HapticFeedback.lightImpact();
-              ref.read(stockNotifierProvider.notifier).adjustQuantity(item, 1);
+              ref.read(stockNotifierProvider.notifier).deleteItem(item.id!);
             },
           ),
         ],

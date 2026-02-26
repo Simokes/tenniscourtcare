@@ -72,38 +72,52 @@ final stockItemsProvider = stockProvider;
 
 // --- Filters & Search ---
 
-final stockFilterProvider = StateProvider<StockFilter>((ref) => StockFilter.all);
-final stockSearchQueryProvider = StateProvider<String>((ref) => '');
+final stockFilterProvider = StateProvider<StockFilter>((ref) {
+  return StockFilter.all;
+});
 
-final filteredStockItemsProvider = Provider<AsyncValue<List<StockItem>>>((ref) {
-  final itemsAsync = ref.watch(stockProvider);
+final stockSearchQueryProvider = StateProvider<String>((ref) {
+  return '';
+});
+
+final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
+  // ... le code existant ...
+
+  final allItems = await ref.watch(stockProvider.future);
   final filter = ref.watch(stockFilterProvider);
-  final query = ref.watch(stockSearchQueryProvider).toLowerCase();
+  final searchQuery = ref.watch(stockSearchQueryProvider).toLowerCase();
 
-  return itemsAsync.whenData((items) {
-    var filtered = items;
+  var filtered = allItems;
 
-    // Search
-    if (query.isNotEmpty) {
-      filtered = filtered.where((i) => i.name.toLowerCase().contains(query)).toList();
-    }
+  // Apply filter
+  switch (filter) {
+    case StockFilter.lowStock:
+      filtered = filtered.where((item) {
+        if (item.minThreshold == null) return false;
+        return item.quantity < item.minThreshold!;
+      }).toList();
+      break;
+    case StockFilter.fixed:
+      filtered = filtered.where((item) => !item.isCustom).toList();
+      break;
+    case StockFilter.custom:
+      filtered = filtered.where((item) => item.isCustom).toList();
+      break;
+    case StockFilter.all:
+      break;
+  }
 
-    // Filter
-    switch (filter) {
-      case StockFilter.all:
-        break;
-      case StockFilter.lowStock:
-        filtered = filtered.where((i) => i.isLowOnStock).toList();
-        break;
-      case StockFilter.fixed:
-        filtered = filtered.where((i) => !i.isCustom).toList();
-        break;
-      case StockFilter.custom:
-        filtered = filtered.where((i) => i.isCustom).toList();
-        break;
-    }
-    return filtered;
-  });
+  // Apply search
+  if (searchQuery.isNotEmpty) {
+    filtered = filtered
+        .where((item) => item.name.toLowerCase().contains(searchQuery))
+        .toList();
+  }
+
+  // Sort by sortOrder
+  filtered.sort((a, b) => (a.sortOrder ?? 0).compareTo(b.sortOrder ?? 0));
+
+  return filtered;
 });
 
 // --- StockNotifier ---
@@ -147,6 +161,23 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
         await ref.read(updateStockItemProvider)(updated);
       }
     }
+  }
+  Future<void> addItem(StockItem item) async {
+    final repo = ref.read(stockRepositoryProvider);
+    await repo.addStockItem(item);
+    ref.invalidate(stockProvider);
+  }
+
+  Future<void> updateItem(StockItem item) async {
+    final repo = ref.read(stockRepositoryProvider);
+    await repo.updateStockItem(item);
+    ref.invalidate(stockProvider);
+  }
+
+  Future<void> deleteItem(int id) async {
+    final repo = ref.read(stockRepositoryProvider);
+    await repo.deleteStockItem(id);
+    ref.invalidate(stockProvider);
   }
 }
 
