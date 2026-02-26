@@ -8,6 +8,7 @@ import '../widgets/add_maintenance_sheet.dart';
 import '../widgets/maintenance_stats_chart.dart';
 import '../../utils/date_utils.dart';
 import '../widgets/image_viewer_dialog.dart';
+import '../widgets/sync_status_indicator.dart';
 
 class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   final Terrain terrain;
@@ -49,6 +50,8 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
             title: Text(terrain.nom),
             pinned: true,
             actions: [
+              const SyncStatusIndicator(collection: 'maintenances'),
+              const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () {

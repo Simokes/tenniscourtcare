@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/terrain.dart';
 import '../providers/terrain_provider.dart';
-import '../providers/database_provider.dart';
+import '../widgets/sync_status_indicator.dart';
 
 class TerrainsManagementScreen extends ConsumerWidget {
   const TerrainsManagementScreen({super.key});
@@ -14,6 +14,10 @@ class TerrainsManagementScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestion des terrains'),
+        actions: const [
+          SyncStatusIndicator(collection: 'terrains'),
+          SizedBox(width: 8),
+        ],
       ),
       body: terrainsAsync.when(
         data: (terrains) {
@@ -87,7 +91,7 @@ class TerrainsManagementScreen extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(databaseProvider).deleteTerrain(terrain.id);
+      await ref.read(terrainRepositoryProvider).deleteTerrain(terrain.id);
       ref.invalidate(terrainsProvider);
     }
   }
