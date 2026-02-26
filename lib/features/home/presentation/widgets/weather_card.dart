@@ -42,7 +42,7 @@ class WeatherCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withOpacity(0.3),
+              color: Colors.blue.withValues(alpha:0.3),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -63,7 +63,7 @@ class WeatherCard extends ConsumerWidget {
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha:0.8),
                         letterSpacing: 1.5,
                       ),
                     ),
@@ -113,7 +113,7 @@ class WeatherCard extends ConsumerWidget {
           style: GoogleFonts.inter(
             fontSize: 10,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
           ),
         ),
       ],

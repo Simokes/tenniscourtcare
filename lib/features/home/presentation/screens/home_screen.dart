@@ -129,7 +129,7 @@ class HomeScreen extends ConsumerWidget {
         notchMargin: 8,
         color: Colors.white,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha: 0.1),
         elevation: 10,
         child: SizedBox(
           height: 60,
