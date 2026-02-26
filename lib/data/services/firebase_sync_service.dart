@@ -1,7 +1,7 @@
 // filepath: lib/data/services/firebase_sync_service.dart
 
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
@@ -75,7 +75,7 @@ class FirebaseSyncService {
       }
       _updateStatus('terrains', SyncStatus.synced);
     } catch (e) {
-      print('Sync Terrains Error: $e');
+      debugPrint('Sync Terrains Error: $e');
       _updateStatus('terrains', SyncStatus.error);
     }
   }
@@ -112,7 +112,7 @@ class FirebaseSyncService {
       }
       _updateStatus('maintenances', SyncStatus.synced);
     } catch (e) {
-      print('Sync Maintenances Error: $e');
+      debugPrint('Sync Maintenances Error: $e');
       _updateStatus('maintenances', SyncStatus.error);
     }
   }
@@ -134,7 +134,7 @@ class FirebaseSyncService {
       }
       _updateStatus('stock', SyncStatus.synced);
     } catch (e) {
-      print('Sync Stock Error: $e');
+      debugPrint('Sync Stock Error: $e');
       _updateStatus('stock', SyncStatus.error);
     }
   }
@@ -192,7 +192,7 @@ class FirebaseSyncService {
       }
       _updateStatus('events', SyncStatus.synced);
     } catch (e) {
-      print('Sync Events Error: $e');
+      debugPrint('Sync Events Error: $e');
       _updateStatus('events', SyncStatus.error);
     }
   }

@@ -30,7 +30,7 @@ class StatsCarousel extends ConsumerWidget {
             value: operationalTerrainsCount.when(
               data: (list) => '${list.length}/20', // Placeholder total
               loading: () => '-',
-              error: (_, __) => '!',
+              error: (_, _) => '!',
             ),
             label: 'Operational',
             onTap: () {
@@ -45,7 +45,7 @@ class StatsCarousel extends ConsumerWidget {
             value: todayMaintenanceCount.when(
               data: (val) => '$val',
               loading: () => '-',
-              error: (_, __) => '!',
+              error: (_, _) => '!',
             ),
             label: 'Maintenance',
             onTap: () {
@@ -60,7 +60,7 @@ class StatsCarousel extends ConsumerWidget {
             value: stockAlertCount.when(
               data: (val) => '$val',
               loading: () => '-',
-              error: (_, __) => '!',
+              error: (_, _) => '!',
             ),
             label: 'Low Stocks',
             onTap: () {

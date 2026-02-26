@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../domain/entities/terrain.dart';
 import '../../domain/entities/sync_status.dart';
 import '../../domain/repositories/terrain_repository.dart';
@@ -78,7 +80,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
     try {
       await _firebaseService.terrainService.uploadTerrainToFirestore(terrain);
     } catch (e) {
-      print('Failed to sync terrain: $e');
+      debugPrint('Failed to sync terrain: $e');
       // Ne pas throw - l'utilisateur a déjà le LOCAL
     }
   }
@@ -92,7 +94,7 @@ class TerrainRepositoryImpl implements TerrainRepository {
       // I'll leave it as a comment or simple call if available.
       // await _firebaseService.terrainService.deleteTerrain(id);
     } catch (e) {
-      print('Failed to delete terrain from remote: $e');
+      debugPrint('Failed to delete terrain from remote: $e');
     }
   }
 }

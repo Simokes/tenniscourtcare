@@ -61,7 +61,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   }
 
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
-    return await _db.getMaintenancesForTerrain(terrainId);
+    return _db.getMaintenancesForTerrain(terrainId);
   }
 
   @override

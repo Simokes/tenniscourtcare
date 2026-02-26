@@ -1,5 +1,5 @@
 // filepath: lib/data/services/firebase_terrain_service.dart
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/models/terrain_model.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
@@ -47,7 +47,7 @@ class FirebaseTerrainService {
           }).toList();
         })
         .handleError((e) {
-          print('Error watching terrains: $e');
+          debugPrint('Error watching terrains: $e');
           return <Terrain>[];
         });
   }

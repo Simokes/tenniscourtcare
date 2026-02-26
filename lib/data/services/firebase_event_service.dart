@@ -1,5 +1,5 @@
 // filepath: lib/data/services/firebase_event_service.dart
-
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/models/app_event_model.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
@@ -47,7 +47,7 @@ class FirebaseEventService {
           }).toList();
         })
         .handleError((e) {
-          print('Error watching events: $e');
+          debugPrint('Error watching events: $e');
           return <AppEvent>[];
         });
   }

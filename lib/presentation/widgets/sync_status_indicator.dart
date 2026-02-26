@@ -21,7 +21,7 @@ class SyncStatusIndicator extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const Icon(Icons.error_outline, color: Colors.grey),
+      error: (_, _) => const Icon(Icons.error_outline, color: Colors.grey),
     );
   }
 

@@ -19,7 +19,7 @@ class StockRepositoryImpl implements StockRepository {
       updatedAt: DateTime.now(),
     );
 
-    return await _db.insertStockItem(localItem);
+    return  _db.insertStockItem(localItem);
   }
 
   @override
@@ -29,7 +29,7 @@ class StockRepositoryImpl implements StockRepository {
       updatedAt: DateTime.now(),
     );
 
-    return await _db.updateStockItem(updatedItem);
+    return _db.updateStockItem(updatedItem);
   }
 
   @override
@@ -40,7 +40,7 @@ class StockRepositoryImpl implements StockRepository {
 
   @override
   Future<List<StockItem>> getAllStockItems() async {
-    return await _db.watchAllStockItems().first;
+    return _db.watchAllStockItems().first;
   }
 
   @override
