@@ -39,6 +39,9 @@ abstract class AuthRepository {
   /// Supprime un utilisateur par son ID.
   Future<void> deleteUser(int userId);
 
+  /// Met à jour le rôle d'un utilisateur.
+  Future<void> updateUserRole(int userId, Role newRole);
+
   /// Met à jour le mot de passe d'un utilisateur (reset).
   Future<void> updateUserPassword(int userId, String newPassword);
 

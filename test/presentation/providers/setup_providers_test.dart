@@ -52,6 +52,10 @@ class StalledAuthRepository implements AuthRepository {
       throw UnimplementedError();
 
   @override
+  Future<void> updateUserRole(int userId, Role newRole) =>
+      throw UnimplementedError();
+
+  @override
   Future<bool> verifyOtp(String email, String code) =>
       throw UnimplementedError();
 }

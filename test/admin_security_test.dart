@@ -37,6 +37,11 @@ class FakeAuthRepository implements AuthRepository {
     // No-op for test
   }
 
+  @override
+  Future<void> updateUserRole(int userId, Role newRole) async {
+    // No-op for test
+  }
+
   // Other methods required by interface but not used in this specific test scope
   @override
   Future<UserEntity?> getCurrentUser() async => null;

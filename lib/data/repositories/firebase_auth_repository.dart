@@ -173,7 +173,21 @@ class FirebaseAuthRepository implements AuthRepository {
       });
 
       // CRITICAL: Get UID from response
-      final uid = result.data['uid'] as String;
+      if (result.data is! Map) {
+        throw const ValidationException(
+          'Erreur serveur: Réponse invalide (format incorrect).',
+        );
+      }
+
+      // Cast to map to access fields safely
+      final data = result.data as Map;
+      final uid = data['uid'] as String?;
+
+      if (uid == null || uid.isEmpty) {
+        throw const ValidationException(
+          'Erreur serveur: UID manquant dans la réponse.',
+        );
+      }
 
       // Sync local DB
       // Check if user exists first (by firestore_uid)
@@ -225,6 +239,40 @@ class FirebaseAuthRepository implements AuthRepository {
       }
 
       await _db.deleteUser(userId);
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> updateUserRole(int userId, Role newRole) async {
+    try {
+      final localUser = await _db.getUserById(userId);
+      if (localUser == null) throw const UserNotFoundException();
+
+      // Use direct query to get firestoreUid from the row
+      final userRow = await (_db.select(
+        _db.users,
+      )..where((u) => u.id.equals(userId))).getSingleOrNull();
+      String? uid = userRow?.firestoreUid;
+
+      if (uid == null) {
+        final query = await _firestore
+            .collection('users')
+            .where('email', isEqualTo: localUser.email)
+            .get();
+        if (query.docs.isNotEmpty) {
+          uid = query.docs.first.id;
+        }
+      }
+
+      if (uid == null) throw const UserNotFoundException();
+
+      final callable = _functions.httpsCallable('updateUserRole');
+      await callable.call({'userId': uid, 'newRole': newRole.name});
+
+      // Update local DB
+      await _db.updateUserRole(userId, newRole);
     } catch (e) {
       throw _mapFirebaseException(e);
     }
