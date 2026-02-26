@@ -117,7 +117,6 @@ final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
   final allItems = await ref.watch(stockProvider.future);
   final filter = ref.watch(stockFilterProvider);
   final searchQuery = ref.watch(stockSearchQueryProvider).toLowerCase();
-  final stockItemsProvider = stockProvider;
   var filtered = allItems;
 
   // ✅ APPLY FILTER

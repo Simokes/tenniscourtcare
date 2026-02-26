@@ -40,7 +40,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
-      final isHome = state.uri.path == '/';
+      
 
       switch (setupStatus) {
         case SetupStatus.loading:
