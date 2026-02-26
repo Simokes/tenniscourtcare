@@ -20,7 +20,9 @@ class MaintenanceMapper {
       sacsSottomantoUtilises: model.sacsSottomantoUtilises,
       sacsSiliceUtilises: model.sacsSiliceUtilises,
       imagePath: model.imagePath,
-      weather: model.weather != null ? WeatherSnapshot.fromJson(model.weather!) : null,
+      weather: model.weather != null
+          ? WeatherSnapshot.fromJson(model.weather!)
+          : null,
       terrainGele: model.terrainGele,
       terrainImpraticable: model.terrainImpraticable,
       syncStatus: SyncStatus.fromString(model.syncStatus),
@@ -73,8 +75,8 @@ class MaintenanceMapper {
       terrainGele: null,
       terrainImpraticable: null,
       syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
-      createdAt: driftEntity.createdAt ?? DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
-      updatedAt: driftEntity.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
+      createdAt: driftEntity.createdAt,
+      updatedAt: driftEntity.updatedAt,
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,
@@ -109,7 +111,7 @@ extension MaintenanceDomainX on Maintenance {
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       firebaseId: Value(firebaseId),
-        remoteId: Value(firebaseId), // Fallback
+      remoteId: Value(firebaseId), // Fallback
       createdBy: Value(createdBy),
       modifiedBy: Value(modifiedBy),
     );

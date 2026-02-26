@@ -6,16 +6,16 @@ import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 class TerrainModel {
   final int id;
   final String nom;
-  final String type;         // TerrainType.name
-  final String status;       // TerrainStatus.name
+  final String type; // TerrainType.name
+  final String status; // TerrainStatus.name
   final double? latitude;
   final double? longitude;
   final String? photoUrl;
 
   // Sync fields
   final String syncStatus;
-  final String createdAt;    // ISO8601
-  final String updatedAt;    // ISO8601
+  final String createdAt; // ISO8601
+  final String updatedAt; // ISO8601
   final String? firebaseId;
   final String? createdBy;
   final String? modifiedBy;
@@ -47,8 +47,10 @@ class TerrainModel {
       longitude: json['longitude'] as double?,
       photoUrl: json['photoUrl'] as String?,
       syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
-      createdAt: json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
-      updatedAt: json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      createdAt:
+          json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      updatedAt:
+          json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       firebaseId: json['firebaseId'] as String?,
       createdBy: json['createdBy'] as String?,
       modifiedBy: json['modifiedBy'] as String?,

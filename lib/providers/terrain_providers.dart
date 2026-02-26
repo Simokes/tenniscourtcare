@@ -19,15 +19,15 @@ Stream<List<dom.Terrain>> terrainsStream(TerrainsStreamRef ref) {
 
   final db = ref.watch(databaseProvider);
 
-  return db.select(db.terrains)
-      .watch()
-      .map((rows) {
-        return rows
-          .where((row) => row.available) // Filter on Drift Row
-          .map((r) => r.toDomain())
-          .toList()
-          ..sort((a, b) => a.nom.compareTo(b.nom)); // Sort on Domain Entity which has 'nom'
-      });
+  return db.select(db.terrains).watch().map((rows) {
+    return rows
+        .where((row) => row.available) // Filter on Drift Row
+        .map((r) => r.toDomain())
+        .toList()
+      ..sort(
+        (a, b) => a.nom.compareTo(b.nom),
+      ); // Sort on Domain Entity which has 'nom'
+  });
 }
 
 @Riverpod()
@@ -55,10 +55,14 @@ Future<void> refreshTerrains(RefreshTerrainsRef ref) async {
             imageUrl: Value(item.imageUrl),
           );
 
-          final existing = await (db.select(db.terrains)..where((t) => t.remoteId.equals(item.id))).getSingleOrNull();
+          final existing = await (db.select(
+            db.terrains,
+          )..where((t) => t.remoteId.equals(item.id))).getSingleOrNull();
 
           if (existing != null) {
-            await (db.update(db.terrains)..where((t) => t.id.equals(existing.id))).write(companion);
+            await (db.update(
+              db.terrains,
+            )..where((t) => t.id.equals(existing.id))).write(companion);
           } else {
             await db.into(db.terrains).insert(companion);
           }

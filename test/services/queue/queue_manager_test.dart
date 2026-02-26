@@ -127,18 +127,20 @@ void main() {
 
   test('retryFailedItems resets retry count', () async {
     // 1. Manually insert a failed item
-    await db.into(db.syncQueue).insert(
-      SyncQueueCompanion.insert(
-        uuid: 'failed-uuid',
-        collection: 'test',
-        action: 'create',
-        documentId: 'doc3',
-        data: '{}',
-        timestamp: DateTime.now(),
-        retryCount: const Value(3), // Max retries
-        lastError: const Value('Old Error'),
-      ),
-    );
+    await db
+        .into(db.syncQueue)
+        .insert(
+          SyncQueueCompanion.insert(
+            uuid: 'failed-uuid',
+            collection: 'test',
+            action: 'create',
+            documentId: 'doc3',
+            data: '{}',
+            timestamp: DateTime.now(),
+            retryCount: const Value(3), // Max retries
+            lastError: const Value('Old Error'),
+          ),
+        );
 
     // 2. Configure success
     mockSyncService.setShouldFail(false);
@@ -155,8 +157,18 @@ void main() {
   });
 
   test('clearQueue removes all pending items', () async {
-    await queueManager.queueChange(collection: 'c1', action: 'create', documentId: 'd1', data: {});
-    await queueManager.queueChange(collection: 'c2', action: 'create', documentId: 'd2', data: {});
+    await queueManager.queueChange(
+      collection: 'c1',
+      action: 'create',
+      documentId: 'd1',
+      data: {},
+    );
+    await queueManager.queueChange(
+      collection: 'c2',
+      action: 'create',
+      documentId: 'd2',
+      data: {},
+    );
 
     expect(await queueManager.getQueueSize(), 2);
 

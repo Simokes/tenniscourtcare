@@ -41,11 +41,17 @@ void main() {
     ''');
 
     // Create other tables needed to avoid schema mismatch errors if drift checks all tables
-    rawDb.execute('CREATE TABLE terrains (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, court_type TEXT NOT NULL, is_covered INTEGER NOT NULL, maintenance_schedule TEXT);');
-    rawDb.execute('CREATE TABLE maintenances (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, terrain_id INTEGER NOT NULL, type TEXT NOT NULL, date INTEGER NOT NULL, commentaire TEXT, sacs_manto_utilises INTEGER NOT NULL DEFAULT 0, sacs_sottomanto_utilises INTEGER NOT NULL DEFAULT 0, sacs_silice_utilises INTEGER NOT NULL DEFAULT 0);');
+    rawDb.execute(
+      'CREATE TABLE terrains (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, court_type TEXT NOT NULL, is_covered INTEGER NOT NULL, maintenance_schedule TEXT);',
+    );
+    rawDb.execute(
+      'CREATE TABLE maintenances (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, terrain_id INTEGER NOT NULL, type TEXT NOT NULL, date INTEGER NOT NULL, commentaire TEXT, sacs_manto_utilises INTEGER NOT NULL DEFAULT 0, sacs_sottomanto_utilises INTEGER NOT NULL DEFAULT 0, sacs_silice_utilises INTEGER NOT NULL DEFAULT 0);',
+    );
 
     // Insert a dummy stock item
-    rawDb.execute("INSERT INTO stock_items (name, quantity, unit, is_custom, updated_at) VALUES ('Test Item', 10, 'pcs', 0, 1234567890)");
+    rawDb.execute(
+      "INSERT INTO stock_items (name, quantity, unit, is_custom, updated_at) VALUES ('Test Item', 10, 'pcs', 0, 1234567890)",
+    );
 
     rawDb.dispose();
 

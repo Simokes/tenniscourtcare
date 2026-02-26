@@ -22,22 +22,18 @@ class CourtListSliver extends ConsumerWidget {
         return SliverPadding(
           padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final terrain = terrains[index];
-                return _buildCourtItem(context, terrain);
-              },
-              childCount: terrains.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final terrain = terrains[index];
+              return _buildCourtItem(context, terrain);
+            }, childCount: terrains.length),
           ),
         );
       },
       loading: () => const SliverToBoxAdapter(
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, s) => SliverToBoxAdapter(
-        child: Center(child: Text('Error: $e')),
-      ),
+      error: (e, s) =>
+          SliverToBoxAdapter(child: Center(child: Text('Error: $e'))),
     );
   }
 

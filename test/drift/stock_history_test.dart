@@ -39,7 +39,9 @@ void main() {
     );
 
     // 3. Verify Stock Update
-    final updatedItem = await (database.select(database.stockItems)..where((t) => t.id.equals(itemId))).getSingle();
+    final updatedItem = await (database.select(
+      database.stockItems,
+    )..where((t) => t.id.equals(itemId))).getSingle();
     expect(updatedItem.quantity, 90);
 
     // 4. Verify History

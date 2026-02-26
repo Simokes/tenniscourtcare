@@ -40,21 +40,26 @@ class FirebaseEventService {
         .collection(_collectionPath)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        final model = AppEventModel.fromJson(data);
-        return model.toDomain();
-      }).toList();
-    }).handleError((e) {
-      print('Error watching events: $e');
-      return <AppEvent>[];
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            final model = AppEventModel.fromJson(data);
+            return model.toDomain();
+          }).toList();
+        })
+        .handleError((e) {
+          print('Error watching events: $e');
+          return <AppEvent>[];
+        });
   }
 
   /// Récupérer les events non-syncés
   Future<List<AppEvent>> getUnsyncedEvents(List<AppEvent> allEvents) async {
     return allEvents
-        .where((e) => e.syncStatus == SyncStatus.local || e.syncStatus == SyncStatus.error)
+        .where(
+          (e) =>
+              e.syncStatus == SyncStatus.local ||
+              e.syncStatus == SyncStatus.error,
+        )
         .toList();
   }
 

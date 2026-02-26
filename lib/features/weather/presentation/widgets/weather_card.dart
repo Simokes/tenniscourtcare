@@ -67,9 +67,9 @@ class WeatherCard extends StatelessWidget {
               Text(
                 'Conditions météo',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
               IconButton(
                 onPressed: onRefresh,
@@ -146,14 +146,8 @@ class _WeatherItem extends StatelessWidget {
       children: [
         Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
         const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }
@@ -169,14 +163,8 @@ class _WeatherDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
   }

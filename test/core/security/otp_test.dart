@@ -39,12 +39,18 @@ class MockAppDatabase extends Fake implements AppDatabase {
   Future<void> deleteOtp(int id) async {}
 
   @override
-  Future<int> countRecentOtps(String email, DateTime since) async => recentOtpCount;
+  Future<int> countRecentOtps(String email, DateTime since) async =>
+      recentOtpCount;
 }
 
 class MockTokenService extends Fake implements TokenService {
   @override
-  Future<String> createToken({required int userId, required String email, required String role, Duration expiresIn = const Duration(hours: 1)}) async {
+  Future<String> createToken({
+    required int userId,
+    required String email,
+    required String role,
+    Duration expiresIn = const Duration(hours: 1),
+  }) async {
     return 'mock.jwt.token';
   }
 }
@@ -54,7 +60,14 @@ class MockAuditRepository extends Fake implements AuditRepository {
   int otpCount = 0;
 
   @override
-  Future<void> logEvent({required String action, String? email, int? userId, String? ipAddress, String? deviceInfo, Map<String, dynamic>? details}) async {
+  Future<void> logEvent({
+    required String action,
+    String? email,
+    int? userId,
+    String? ipAddress,
+    String? deviceInfo,
+    Map<String, dynamic>? details,
+  }) async {
     logs.add('Event: $action');
   }
 
@@ -82,8 +95,11 @@ class MockRateLimiter extends RateLimiter {
   }
 
   @override
-  Future<void> recordAttempt({required String email, required bool success, String? ipAddress}) async {}
-
+  Future<void> recordAttempt({
+    required String email,
+    required bool success,
+    String? ipAddress,
+  }) async {}
 }
 
 class MockSecureStorage extends Fake implements FlutterSecureStorage {
@@ -91,17 +107,42 @@ class MockSecureStorage extends Fake implements FlutterSecureStorage {
 
   // Implemented with dynamics to skip type checks
   @override
-  Future<void> write({required String key, required String? value, dynamic iOptions, dynamic aOptions, dynamic lOptions, dynamic webOptions, dynamic mOptions, dynamic wOptions}) async {
+  Future<void> write({
+    required String key,
+    required String? value,
+    dynamic iOptions,
+    dynamic aOptions,
+    dynamic lOptions,
+    dynamic webOptions,
+    dynamic mOptions,
+    dynamic wOptions,
+  }) async {
     if (value != null) storage[key] = value;
   }
 
   @override
-  Future<String?> read({required String key, dynamic iOptions, dynamic aOptions, dynamic lOptions, dynamic webOptions, dynamic mOptions, dynamic wOptions}) async {
+  Future<String?> read({
+    required String key,
+    dynamic iOptions,
+    dynamic aOptions,
+    dynamic lOptions,
+    dynamic webOptions,
+    dynamic mOptions,
+    dynamic wOptions,
+  }) async {
     return storage[key];
   }
 
   @override
-  Future<void> delete({required String key, dynamic iOptions, dynamic aOptions, dynamic lOptions, dynamic webOptions, dynamic mOptions, dynamic wOptions}) async {
+  Future<void> delete({
+    required String key,
+    dynamic iOptions,
+    dynamic aOptions,
+    dynamic lOptions,
+    dynamic webOptions,
+    dynamic mOptions,
+    dynamic wOptions,
+  }) async {
     storage.remove(key);
   }
 }
@@ -183,7 +224,10 @@ void main() {
 
       // Let's try to add a small delay to ensure distinct timestamps just in case, or debug.
       await Future.delayed(const Duration(milliseconds: 10));
-      await expectLater(authRepo.requestOtp(email), throwsA(isA<AccountLockedException>()));
+      await expectLater(
+        authRepo.requestOtp(email),
+        throwsA(isA<AccountLockedException>()),
+      );
     });
 
     test('requestOtp generates 6-digit numeric code', () async {
@@ -198,25 +242,25 @@ void main() {
     });
 
     test('verifyOtp returns false if no valid OTP found', () async {
-       mockDb.otpToReturn = null;
-       final result = await authRepo.verifyOtp('user@test.com', '123456');
-       expect(result, false);
+      mockDb.otpToReturn = null;
+      final result = await authRepo.verifyOtp('user@test.com', '123456');
+      expect(result, false);
     });
 
     test('verifyOtp returns false if hash mismatch', () async {
       // Create a record with a known hash (but we can't easily generate valid PBKDF2 hash for test without real crypto util)
       // So we will just use a dummy hash string that won't match '123456'
-       mockDb.otpToReturn = OtpRecord(
-         id: 1,
-         email: 'user@test.com',
-         hashedOtp: 'dummy_hash',
-         expiresAt: DateTime.now().add(const Duration(minutes: 5)),
-         createdAt: DateTime.now(),
-         userId: null
-       );
+      mockDb.otpToReturn = OtpRecord(
+        id: 1,
+        email: 'user@test.com',
+        hashedOtp: 'dummy_hash',
+        expiresAt: DateTime.now().add(const Duration(minutes: 5)),
+        createdAt: DateTime.now(),
+        userId: null,
+      );
 
-       final result = await authRepo.verifyOtp('user@test.com', '123456');
-       expect(result, false);
+      final result = await authRepo.verifyOtp('user@test.com', '123456');
+      expect(result, false);
     });
 
     // We can't easily test "returns true" without generating a valid hash corresponding to '123456'

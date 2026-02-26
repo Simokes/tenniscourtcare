@@ -58,7 +58,8 @@ class WeatherScreen extends ConsumerWidget {
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.white),
-                onPressed: () => ref.refresh(weatherForClubProvider(terrainType)),
+                onPressed: () =>
+                    ref.refresh(weatherForClubProvider(terrainType)),
               ),
             ],
           ),
@@ -92,15 +93,21 @@ class WeatherScreen extends ConsumerWidget {
                           color: Colors.white.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: data.unplayable ? Colors.red.shade200 : Colors.green.shade200,
+                            color: data.unplayable
+                                ? Colors.red.shade200
+                                : Colors.green.shade200,
                             width: 2,
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
-                              data.unplayable ? Icons.cancel : Icons.check_circle,
-                              color: data.unplayable ? Colors.red : Colors.green,
+                              data.unplayable
+                                  ? Icons.cancel
+                                  : Icons.check_circle,
+                              color: data.unplayable
+                                  ? Colors.red
+                                  : Colors.green,
                               size: 32,
                             ),
                             const SizedBox(width: 16),
@@ -109,16 +116,21 @@ class WeatherScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    data.unplayable ? 'Terrain Impraticable' : 'Terrain Jouable',
+                                    data.unplayable
+                                        ? 'Terrain Impraticable'
+                                        : 'Terrain Jouable',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: data.unplayable ? Colors.red.shade900 : Colors.green.shade900,
+                                      color: data.unplayable
+                                          ? Colors.red.shade900
+                                          : Colors.green.shade900,
                                       fontSize: 16,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    data.reason ?? 'Conditions optimales pour le jeu.',
+                                    data.reason ??
+                                        'Conditions optimales pour le jeu.',
                                     style: TextStyle(
                                       color: Colors.grey.shade800,
                                       fontSize: 13,

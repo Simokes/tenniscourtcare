@@ -34,7 +34,11 @@ class DashboardColors extends ThemeExtension<DashboardColors> {
       return this;
     }
     return DashboardColors(
-      maintenanceColor: Color.lerp(maintenanceColor, other.maintenanceColor, t)!,
+      maintenanceColor: Color.lerp(
+        maintenanceColor,
+        other.maintenanceColor,
+        t,
+      )!,
       stockColor: Color.lerp(stockColor, other.stockColor, t)!,
       weatherColor: Color.lerp(weatherColor, other.weatherColor, t)!,
       statsColor: Color.lerp(statsColor, other.statsColor, t)!,

@@ -13,7 +13,8 @@ class AddEditStockItemSheet extends ConsumerStatefulWidget {
   const AddEditStockItemSheet({super.key, this.item});
 
   @override
-  ConsumerState<AddEditStockItemSheet> createState() => _AddEditStockItemSheetState();
+  ConsumerState<AddEditStockItemSheet> createState() =>
+      _AddEditStockItemSheetState();
 }
 
 class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
@@ -80,7 +81,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
       }
     }
   }
@@ -122,15 +125,19 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
 
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Text(
-                        widget.item == null ? 'Nouvel Article' : 'Modifier Article',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        widget.item == null
+                            ? 'Nouvel Article'
+                            : 'Modifier Article',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     IconButton.filledTonal(
@@ -155,9 +162,8 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                         // Category Selector
                         Text(
                           'Groupe',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 12),
                         CategorySelector(
@@ -180,7 +186,8 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                             filled: true,
                             fillColor: Colors.grey.shade50,
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Requis' : null,
+                          validator: (v) =>
+                              (v == null || v.isEmpty) ? 'Requis' : null,
                           onSaved: (v) => _name = v!.trim(),
                         ),
 
@@ -194,8 +201,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                               child: QuantitySelector(
                                 label: 'Quantité',
                                 value: _quantity,
-                                unit: _unit, // just for display label in selector
-                                onChanged: (val) => setState(() => _quantity = val),
+                                unit:
+                                    _unit, // just for display label in selector
+                                onChanged: (val) =>
+                                    setState(() => _quantity = val),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -226,10 +235,14 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            suffixIcon: const Icon(Icons.notifications_outlined),
+                            suffixIcon: const Icon(
+                              Icons.notifications_outlined,
+                            ),
                           ),
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           onSaved: (v) => _minThreshold = int.tryParse(v ?? ''),
                         ),
 
@@ -258,7 +271,13 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('Enregistrer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          child: const Text(
+                            'Enregistrer',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 24),
                       ],

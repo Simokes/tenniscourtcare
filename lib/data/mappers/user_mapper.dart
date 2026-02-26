@@ -12,12 +12,15 @@ extension UserMapper on UserRow {
       lastLoginAt: lastLoginAt,
       avatarUrl: avatarUrl,
       // Sync mappings
-      createdAt: createdAt, // Table has withDefault(currentDateAndTime) so it should be non-null in Row
+      createdAt:
+          createdAt, // Table has withDefault(currentDateAndTime) so it should be non-null in Row
       updatedAt: updatedAt ?? createdAt,
       firebaseId: firestoreUid ?? remoteId,
       createdBy: null,
       modifiedBy: null,
-      syncStatus: (firestoreUid != null || remoteId != null) ? SyncStatus.synced : SyncStatus.local,
+      syncStatus: (firestoreUid != null || remoteId != null)
+          ? SyncStatus.synced
+          : SyncStatus.local,
     );
   }
 }

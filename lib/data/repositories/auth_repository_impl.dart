@@ -133,7 +133,9 @@ class AuthRepositoryImpl implements AuthRepository {
 
     final hasUsers = await hasAnyUser();
     if (hasUsers) {
-      throw const SecurityException("L'initialisation de l'administrateur a déjà été effectuée.");
+      throw const SecurityException(
+        "L'initialisation de l'administrateur a déjà été effectuée.",
+      );
     }
 
     final passwordHash = await _hashPassword(password);
@@ -234,7 +236,9 @@ class AuthRepositoryImpl implements AuthRepository {
   }) async {
     final currentUser = await getCurrentUser();
     if (currentUser == null || currentUser.role != Role.admin) {
-      throw const UnauthorizedException(message: 'Seul un administrateur peut créer des utilisateurs.');
+      throw const UnauthorizedException(
+        message: 'Seul un administrateur peut créer des utilisateurs.',
+      );
     }
 
     try {
@@ -282,11 +286,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> deleteUser(int userId) async {
     final currentUser = await getCurrentUser();
     if (currentUser == null || currentUser.role != Role.admin) {
-      throw const UnauthorizedException(message: 'Seul un administrateur peut supprimer des utilisateurs.');
+      throw const UnauthorizedException(
+        message: 'Seul un administrateur peut supprimer des utilisateurs.',
+      );
     }
 
     if (currentUser.id == userId) {
-      throw const ValidationException('Vous ne pouvez pas supprimer votre propre compte.');
+      throw const ValidationException(
+        'Vous ne pouvez pas supprimer votre propre compte.',
+      );
     }
 
     final userToDelete = await _db.getUserById(userId);
@@ -295,10 +303,12 @@ class AuthRepositoryImpl implements AuthRepository {
     }
 
     if (userToDelete.role == Role.admin) {
-       final adminCount = await _db.countUsersByRole(Role.admin);
-       if (adminCount <= 1) {
-         throw const ValidationException('Impossible de supprimer le dernier administrateur.');
-       }
+      final adminCount = await _db.countUsersByRole(Role.admin);
+      if (adminCount <= 1) {
+        throw const ValidationException(
+          'Impossible de supprimer le dernier administrateur.',
+        );
+      }
     }
 
     await _db.deleteUser(userId);
@@ -315,7 +325,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> updateUserPassword(int userId, String newPassword) async {
     final currentUser = await getCurrentUser();
     if (currentUser == null || currentUser.role != Role.admin) {
-      throw const UnauthorizedException(message: 'Seul un administrateur peut modifier les mots de passe.');
+      throw const UnauthorizedException(
+        message: 'Seul un administrateur peut modifier les mots de passe.',
+      );
     }
 
     try {
@@ -369,7 +381,6 @@ class AuthRepositoryImpl implements AuthRepository {
         return null;
       }
       return user;
-
     } on SessionExpiredException {
       await signOut();
       throw const SessionExpiredException(); // UI should handle redirect
@@ -433,7 +444,10 @@ class AuthRepositoryImpl implements AuthRepository {
       // Pas d'OTP valide trouvé (expiré ou inexistant)
       // Log failed attempt via RateLimiter?
       // Maybe simple log for now.
-      await _auditRepository.logEvent(action: 'OTP_VERIFY_FAILED', email: email);
+      await _auditRepository.logEvent(
+        action: 'OTP_VERIFY_FAILED',
+        email: email,
+      );
       return false;
     }
 
@@ -444,10 +458,16 @@ class AuthRepositoryImpl implements AuthRepository {
       // 3. Consommer l'OTP
       await _db.deleteOtp(otpRecord.id);
 
-      await _auditRepository.logEvent(action: 'OTP_VERIFY_SUCCESS', email: email);
+      await _auditRepository.logEvent(
+        action: 'OTP_VERIFY_SUCCESS',
+        email: email,
+      );
       return true;
     } else {
-      await _auditRepository.logEvent(action: 'OTP_VERIFY_FAILED', email: email);
+      await _auditRepository.logEvent(
+        action: 'OTP_VERIFY_FAILED',
+        email: email,
+      );
       return false;
     }
   }

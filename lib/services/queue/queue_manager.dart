@@ -25,7 +25,7 @@ class QueueManager {
   Timer? _retryTimer;
 
   QueueManager(this._db, this._syncService) {
-     // Start periodic retry check
+    // Start periodic retry check
     _retryTimer = Timer.periodic(
       QueueConfig.retryCheckInterval,
       (_) => processScheduledRetries(),
@@ -39,22 +39,25 @@ class QueueManager {
     required String documentId,
     required Map<String, dynamic> data,
   }) async {
-    final uuid = '${DateTime.now().millisecondsSinceEpoch}-${math.Random().nextInt(10000)}';
+    final uuid =
+        '${DateTime.now().millisecondsSinceEpoch}-${math.Random().nextInt(10000)}';
 
-    await _db.into(_db.syncQueue).insert(
-      SyncQueueCompanion(
-        uuid: Value(uuid),
-        collection: Value(collection),
-        action: Value(action),
-        documentId: Value(documentId),
-        data: Value(jsonEncode(data)),
-        timestamp: Value(DateTime.now()),
-        syncedAt: const Value(null),
-        retryCount: const Value(0),
-        lastError: const Value(null),
-        nextRetryAt: const Value(null),
-      ),
-    );
+    await _db
+        .into(_db.syncQueue)
+        .insert(
+          SyncQueueCompanion(
+            uuid: Value(uuid),
+            collection: Value(collection),
+            action: Value(action),
+            documentId: Value(documentId),
+            data: Value(jsonEncode(data)),
+            timestamp: Value(DateTime.now()),
+            syncedAt: const Value(null),
+            retryCount: const Value(0),
+            lastError: const Value(null),
+            nextRetryAt: const Value(null),
+          ),
+        );
 
     debugPrint('QueueManager: Queued $action on $collection:$documentId');
     await _notifyQueueUpdated();
@@ -72,11 +75,14 @@ class QueueManager {
   Future<void> processScheduledRetries() async {
     try {
       final now = DateTime.now();
-      final readyItems = await (_db.select(_db.syncQueue)
-        ..where((q) => q.syncedAt.isNull() &
-                     q.nextRetryAt.isNotNull() &
-                     q.nextRetryAt.isSmallerOrEqualValue(now)))
-        .get();
+      final readyItems =
+          await (_db.select(_db.syncQueue)..where(
+                (q) =>
+                    q.syncedAt.isNull() &
+                    q.nextRetryAt.isNotNull() &
+                    q.nextRetryAt.isSmallerOrEqualValue(now),
+              ))
+              .get();
 
       if (readyItems.isNotEmpty) {
         debugPrint(
@@ -92,9 +98,9 @@ class QueueManager {
   Future<void> _deduplicateQueue() async {
     try {
       // Get all pending items grouped by collection+documentId
-      final allItems = await (_db.select(_db.syncQueue)
-        ..where((q) => q.syncedAt.isNull()))
-        .get();
+      final allItems = await (_db.select(
+        _db.syncQueue,
+      )..where((q) => q.syncedAt.isNull())).get();
 
       final Map<String, List<SyncQueueItem>> grouped = {};
       for (final item in allItems) {
@@ -117,15 +123,19 @@ class QueueManager {
             final keepId = items.firstWhere((i) => i.action == 'delete').id;
             for (final item in items) {
               if (item.id != keepId) {
-                await (_db.delete(_db.syncQueue)..where((q) => q.id.equals(item.id))).go();
+                await (_db.delete(
+                  _db.syncQueue,
+                )..where((q) => q.id.equals(item.id))).go();
                 removed++;
               }
             }
           } else {
             // Keep only latest create/update
-            
+
             for (final item in items.skip(1)) {
-              await (_db.delete(_db.syncQueue)..where((q) => q.id.equals(item.id))).go();
+              await (_db.delete(
+                _db.syncQueue,
+              )..where((q) => q.id.equals(item.id))).go();
               removed++;
             }
           }
@@ -144,24 +154,25 @@ class QueueManager {
     try {
       // Map error to business logic
       final isTerrainUnavailable =
-        error.toLowerCase().contains('terrain') ||
-        error.toLowerCase().contains('not available');
+          error.toLowerCase().contains('terrain') ||
+          error.toLowerCase().contains('not available');
 
       final isDoubleBooking =
-        error.toLowerCase().contains('booking') ||
-        error.toLowerCase().contains('conflict');
+          error.toLowerCase().contains('booking') ||
+          error.toLowerCase().contains('conflict');
 
       final isServerError =
-        error.toLowerCase().contains('500') ||
-        error.toLowerCase().contains('502') ||
-        error.toLowerCase().contains('503');
+          error.toLowerCase().contains('500') ||
+          error.toLowerCase().contains('502') ||
+          error.toLowerCase().contains('503');
 
       if (isTerrainUnavailable) {
         // Delete reservation
         if (item.collection == 'reservations') {
-          await (_db.delete(_db.reservations)
-            ..where((r) => r.id.equals(int.parse(item.documentId)))) // assuming documentId matches local id string
-            .go();
+          await (_db.delete(_db.reservations)..where(
+                (r) => r.id.equals(int.parse(item.documentId)),
+              )) // assuming documentId matches local id string
+              .go();
 
           debugPrint(
             'QueueManager: Conflict handled - Reservation cancelled: ${item.documentId}',
@@ -216,14 +227,17 @@ class QueueManager {
       final now = DateTime.now();
 
       // Get items ready to sync (check nextRetryAt)
-      final items = await (_db.select(_db.syncQueue)
-        ..where((q) =>
-          q.syncedAt.isNull() &
-          (q.nextRetryAt.isNull() | q.nextRetryAt.isSmallerOrEqualValue(now)) &
-          q.retryCount.isSmallerThanValue(QueueConfig.maxRetries)
-        )
-        ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
-        .get();
+      final items =
+          await (_db.select(_db.syncQueue)
+                ..where(
+                  (q) =>
+                      q.syncedAt.isNull() &
+                      (q.nextRetryAt.isNull() |
+                          q.nextRetryAt.isSmallerOrEqualValue(now)) &
+                      q.retryCount.isSmallerThanValue(QueueConfig.maxRetries),
+                )
+                ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+              .get();
 
       if (items.isEmpty) {
         _isFlushing = false;
@@ -241,46 +255,50 @@ class QueueManager {
 
           if (error == null) {
             // Success
-            await (_db.update(_db.syncQueue)..where((t) => t.id.equals(item.id)))
-              .write(
-                 SyncQueueCompanion(
-                    syncedAt: Value(DateTime.now()),
-                    retryCount: const Value(0),
-                    lastError: const Value(null),
-                    nextRetryAt: const Value(null),
-                 )
-              );
+            await (_db.update(
+              _db.syncQueue,
+            )..where((t) => t.id.equals(item.id))).write(
+              SyncQueueCompanion(
+                syncedAt: Value(DateTime.now()),
+                retryCount: const Value(0),
+                lastError: const Value(null),
+                nextRetryAt: const Value(null),
+              ),
+            );
 
             // Delete from queue after sync
-            await (_db.delete(_db.syncQueue)
-              ..where((q) => q.id.equals(item.id)))
-              .go();
+            await (_db.delete(
+              _db.syncQueue,
+            )..where((q) => q.id.equals(item.id))).go();
 
             synced++;
-            debugPrint('QueueManager: Synced ${item.collection}:${item.documentId}');
+            debugPrint(
+              'QueueManager: Synced ${item.collection}:${item.documentId}',
+            );
           } else {
             // Failure - check for conflict
             final shouldSkip = await _handleConflict(item, error);
 
             if (shouldSkip) {
               // Delete from queue (conflict resolved)
-              await (_db.delete(_db.syncQueue)
-                ..where((q) => q.id.equals(item.id)))
-                .go();
+              await (_db.delete(
+                _db.syncQueue,
+              )..where((q) => q.id.equals(item.id))).go();
               synced++;
             } else {
               // Retry with backoff
               final newRetryCount = item.retryCount + 1;
               final nextRetry = _calculateNextRetryAt(newRetryCount);
 
-              await (_db.update(_db.syncQueue)..where((t) => t.id.equals(item.id)))
-                .write(
-                  SyncQueueCompanion(
-                    retryCount: Value(newRetryCount),
-                    lastError: Value(error),
-                    nextRetryAt: Value(nextRetry),
-                  )
-                );
+              await (_db.update(
+                _db.syncQueue,
+              )..where((t) => t.id.equals(item.id))).write(
+                SyncQueueCompanion(
+                  retryCount: Value(newRetryCount),
+                  lastError: Value(error),
+                  nextRetryAt: Value(nextRetry),
+                ),
+              );
 
               failed++;
               debugPrint(
@@ -308,27 +326,28 @@ class QueueManager {
 
   // C) getQueueSize() - Count pending items
   Future<int> getQueueSize() async {
-    final count = await (_db.selectOnly(_db.syncQueue)
-      ..addColumns([_db.syncQueue.id.count()])
-      ..where(_db.syncQueue.syncedAt.isNull())
-    ).getSingle();
+    final count =
+        await (_db.selectOnly(_db.syncQueue)
+              ..addColumns([_db.syncQueue.id.count()])
+              ..where(_db.syncQueue.syncedAt.isNull()))
+            .getSingle();
     return count.read(_db.syncQueue.id.count()) ?? 0;
   }
 
   // D) getPendingItems() - Get details
   Future<List<SyncQueueItem>> getPendingItems() async {
     return (_db.select(_db.syncQueue)
-      ..where((t) => t.syncedAt.isNull())
-      ..orderBy([(t) => OrderingTerm.asc(t.timestamp)])
-    ).get();
+          ..where((t) => t.syncedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.timestamp)]))
+        .get();
   }
 
   // E) retryFailedItems() - Retry items that failed
   Future<void> retryFailedItems() async {
     // Reset retryCount to 0 for all failed items (even maxed ones, to allow retry)
-    await (_db.update(_db.syncQueue)
-      ..where((t) => t.lastError.isNotNull())
-    ).write(
+    await (_db.update(
+      _db.syncQueue,
+    )..where((t) => t.lastError.isNotNull())).write(
       const SyncQueueCompanion(
         retryCount: Value(0),
         lastError: Value(null),
@@ -366,7 +385,12 @@ class QueueManager {
         action = SyncAction.update; // Default safety
       }
 
-      await _syncService.sendToCloud(item.collection, item.documentId, data, action);
+      await _syncService.sendToCloud(
+        item.collection,
+        item.documentId,
+        data,
+        action,
+      );
       return null; // Success
     } catch (e) {
       return e.toString(); // Failure

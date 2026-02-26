@@ -17,9 +17,7 @@ class SyncStatusIndicator extends ConsumerWidget {
         final status = statusMap[collection] ?? SyncStatus.local;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Center(
-            child: _buildIndicator(status, context),
-          ),
+          child: Center(child: _buildIndicator(status, context)),
         );
       },
       loading: () => const SizedBox.shrink(),
@@ -35,7 +33,7 @@ class SyncStatusIndicator extends ConsumerWidget {
           child: Icon(Icons.cloud_off, color: Colors.grey.shade400, size: 20),
         );
       case SyncStatus.syncing:
-        return Tooltip(
+        return const Tooltip(
           message: 'Synchronisation en cours...',
           child: SizedBox(
             width: 16,

@@ -69,8 +69,8 @@ Future<QueueStatus> queueStatus(QueueStatusRef ref) async {
 
   final failedCount = items.where((i) => i.retryCount > 0).length;
   final status = count == 0
-    ? QueueStatusType.idle
-    : failedCount > 0
+      ? QueueStatusType.idle
+      : failedCount > 0
       ? QueueStatusType.partialFailure
       : QueueStatusType.syncing;
 
@@ -93,14 +93,16 @@ Future<List<QueueError>> queueErrors(QueueErrorsRef ref) async {
   final items = await ref.watch(pendingQueueItemsProvider.future);
 
   return items
-    .where((i) => i.lastError != null && i.lastError!.isNotEmpty)
-    .map((i) => QueueError(
-      documentId: i.documentId,
-      collection: i.collection,
-      error: i.lastError!,
-      retryCount: i.retryCount,
-    ))
-    .toList();
+      .where((i) => i.lastError != null && i.lastError!.isNotEmpty)
+      .map(
+        (i) => QueueError(
+          documentId: i.documentId,
+          collection: i.collection,
+          error: i.lastError!,
+          retryCount: i.retryCount,
+        ),
+      )
+      .toList();
 }
 
 @Riverpod(keepAlive: true)

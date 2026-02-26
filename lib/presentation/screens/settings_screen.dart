@@ -99,7 +99,8 @@ class SettingsScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const UserManagementScreen()),
+                            builder: (_) => const UserManagementScreen(),
+                          ),
                         );
                       },
                     ),
@@ -112,7 +113,8 @@ class SettingsScreen extends ConsumerWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const SecurityLogScreen()),
+                            builder: (_) => const SecurityLogScreen(),
+                          ),
                         );
                       },
                     ),
@@ -124,12 +126,13 @@ class SettingsScreen extends ConsumerWidget {
               SettingsSection(
                 title: 'Application',
                 children: [
-                   settingsAsync.when(
+                  settingsAsync.when(
                     data: (settings) => SettingsTile(
                       icon: Icons.brightness_6,
                       title: 'Apparence',
                       subtitle: _getThemeLabel(settings.themeMode),
-                      onTap: () => _showThemeSelector(context, ref, settings.themeMode),
+                      onTap: () =>
+                          _showThemeSelector(context, ref, settings.themeMode),
                     ),
                     loading: () => const SizedBox.shrink(),
                     error: (context, index) => const SizedBox.shrink(),
@@ -154,9 +157,13 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Exporter les données',
                     subtitle: 'Format CSV',
                     onTap: () {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Allez dans l\'écran Statistiques pour exporter')),
-                        );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Allez dans l\'écran Statistiques pour exporter',
+                          ),
+                        ),
+                      );
                     },
                   ),
                   const Divider(height: 1, indent: 56),
@@ -170,7 +177,9 @@ class SettingsScreen extends ConsumerWidget {
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Attention'),
-                          content: const Text('Voulez-vous vraiment tout effacer ? Cette action est irréversible.'),
+                          content: const Text(
+                            'Voulez-vous vraiment tout effacer ? Cette action est irréversible.',
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
@@ -180,7 +189,10 @@ class SettingsScreen extends ConsumerWidget {
                               onPressed: () {
                                 Navigator.pop(ctx);
                               },
-                              child: const Text('Effacer', style: TextStyle(color: Colors.red)),
+                              child: const Text(
+                                'Effacer',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ),
                           ],
                         ),
@@ -199,13 +211,17 @@ class SettingsScreen extends ConsumerWidget {
                     icon: Icons.logout,
                     title: 'Déconnexion',
                     subtitle: 'Quitter la session actuelle',
-                    iconColor: isDark ? Colors.orange.shade300 : Colors.orange.shade800,
+                    iconColor: isDark
+                        ? Colors.orange.shade300
+                        : Colors.orange.shade800,
                     onTap: () {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
                           title: const Text('Déconnexion'),
-                          content: const Text('Voulez-vous vraiment vous déconnecter ?'),
+                          content: const Text(
+                            'Voulez-vous vraiment vous déconnecter ?',
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(ctx),
@@ -234,7 +250,9 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       Icons.sports_tennis,
                       size: 48,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.2),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -266,7 +284,11 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showThemeSelector(BuildContext context, WidgetRef ref, ThemeMode currentMode) {
+  void _showThemeSelector(
+    BuildContext context,
+    WidgetRef ref,
+    ThemeMode currentMode,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -287,27 +309,39 @@ class SettingsScreen extends ConsumerWidget {
               ListTile(
                 leading: const Icon(Icons.brightness_auto),
                 title: const Text('Système'),
-                trailing: currentMode == ThemeMode.system ? const Icon(Icons.check, color: Colors.green) : null,
+                trailing: currentMode == ThemeMode.system
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
                 onTap: () {
-                  ref.read(appSettingsProvider.notifier).setThemeMode(ThemeMode.system);
+                  ref
+                      .read(appSettingsProvider.notifier)
+                      .setThemeMode(ThemeMode.system);
                   Navigator.pop(ctx);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.light_mode),
                 title: const Text('Clair'),
-                trailing: currentMode == ThemeMode.light ? const Icon(Icons.check, color: Colors.green) : null,
+                trailing: currentMode == ThemeMode.light
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
                 onTap: () {
-                  ref.read(appSettingsProvider.notifier).setThemeMode(ThemeMode.light);
+                  ref
+                      .read(appSettingsProvider.notifier)
+                      .setThemeMode(ThemeMode.light);
                   Navigator.pop(ctx);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.dark_mode),
                 title: const Text('Sombre'),
-                trailing: currentMode == ThemeMode.dark ? const Icon(Icons.check, color: Colors.green) : null,
+                trailing: currentMode == ThemeMode.dark
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
                 onTap: () {
-                  ref.read(appSettingsProvider.notifier).setThemeMode(ThemeMode.dark);
+                  ref
+                      .read(appSettingsProvider.notifier)
+                      .setThemeMode(ThemeMode.dark);
                   Navigator.pop(ctx);
                 },
               ),

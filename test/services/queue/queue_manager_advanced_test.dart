@@ -54,12 +54,13 @@ void main() {
 
       // 2. Manually set nextRetryAt to future (10s later)
       final futureTime = DateTime.now().add(const Duration(seconds: 10));
-      await (db.update(db.syncQueue)..where((t) => t.id.equals(item.id)))
-        .write(SyncQueueCompanion(
+      await (db.update(db.syncQueue)..where((t) => t.id.equals(item.id))).write(
+        SyncQueueCompanion(
           nextRetryAt: Value(futureTime),
           lastError: const Value('Error'),
           retryCount: const Value(1),
-        ));
+        ),
+      );
 
       // 3. Process retries
       await queueManager.processScheduledRetries();
@@ -69,10 +70,9 @@ void main() {
 
       // 5. Update nextRetryAt to past
       final pastTime = DateTime.now().subtract(const Duration(seconds: 1));
-      await (db.update(db.syncQueue)..where((t) => t.id.equals(item.id)))
-        .write(SyncQueueCompanion(
-          nextRetryAt: Value(pastTime),
-        ));
+      await (db.update(db.syncQueue)..where((t) => t.id.equals(item.id))).write(
+        SyncQueueCompanion(nextRetryAt: Value(pastTime)),
+      );
 
       // 6. Process retries
       await queueManager.processScheduledRetries();
@@ -83,11 +83,26 @@ void main() {
 
     test('Deduplication removes redundant items', () async {
       // 1. Create
-      await queueManager.queueChange(collection: 'col', action: 'create', documentId: 'docA', data: {});
+      await queueManager.queueChange(
+        collection: 'col',
+        action: 'create',
+        documentId: 'docA',
+        data: {},
+      );
       // 2. Update
-      await queueManager.queueChange(collection: 'col', action: 'update', documentId: 'docA', data: {'u': 1});
+      await queueManager.queueChange(
+        collection: 'col',
+        action: 'update',
+        documentId: 'docA',
+        data: {'u': 1},
+      );
       // 3. Delete
-      await queueManager.queueChange(collection: 'col', action: 'delete', documentId: 'docA', data: {});
+      await queueManager.queueChange(
+        collection: 'col',
+        action: 'delete',
+        documentId: 'docA',
+        data: {},
+      );
 
       final items = await queueManager.getPendingItems();
 
@@ -99,37 +114,41 @@ void main() {
 
     test('Conflict handling: Reservation cancellation', () async {
       // Mock sync service to return conflict error
-      when(syncService.sendToCloud(any, any, any, any))
-          .thenAnswer((_) async => throw Exception('Terrain not available'));
-
+      when(
+        syncService.sendToCloud(any, any, any, any),
+      ).thenAnswer((_) async => throw Exception('Terrain not available'));
 
       // Create a reservation locally
-      final resId = await db.into(db.reservations).insert(
-        ReservationsCompanion.insert(
-          userId: 1,
-          terrainId: 1,
-          startTime: '10:00',
-          endTime: '11:00',
-          status: 'pending',
-          createdAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
-          date: DateTime.now(),
-        )
-      );
+      final resId = await db
+          .into(db.reservations)
+          .insert(
+            ReservationsCompanion.insert(
+              userId: 1,
+              terrainId: 1,
+              startTime: '10:00',
+              endTime: '11:00',
+              status: 'pending',
+              createdAt: Value(DateTime.now()),
+              updatedAt: Value(DateTime.now()),
+              date: DateTime.now(),
+            ),
+          );
 
       // Queue the creation
       await queueManager.queueChange(
         collection: 'reservations',
         action: 'create',
         documentId: resId.toString(),
-        data: {}
+        data: {},
       );
 
       // Flush
       await queueManager.flushQueue();
 
       // Verify reservation deleted locally
-      final res = await (db.select(db.reservations)..where((r) => r.id.equals(resId))).getSingleOrNull();
+      final res = await (db.select(
+        db.reservations,
+      )..where((r) => r.id.equals(resId))).getSingleOrNull();
       expect(res, isNull);
 
       // Verify queue item removed (handled)
@@ -138,33 +157,40 @@ void main() {
     });
 
     test('Warning streams', () async {
-       // Insert 55 items
-       for (int i = 0; i < 55; i++) {
-         await db.into(db.syncQueue).insert(
-            SyncQueueCompanion(
-              uuid: Value('uuid-$i'),
-              collection: const Value('col'),
-              action: const Value('create'),
-              documentId: Value('doc$i'),
-              data: const Value('{}'),
-              timestamp: Value(DateTime.now()),
-            )
-         );
-       }
+      // Insert 55 items
+      for (int i = 0; i < 55; i++) {
+        await db
+            .into(db.syncQueue)
+            .insert(
+              SyncQueueCompanion(
+                uuid: Value('uuid-$i'),
+                collection: const Value('col'),
+                action: const Value('create'),
+                documentId: Value('doc$i'),
+                data: const Value('{}'),
+                timestamp: Value(DateTime.now()),
+              ),
+            );
+      }
 
-       bool warningReceived = false;
-       final sub = queueManager.onQueueWarning.listen((count) {
-         if (count >= 50) warningReceived = true;
-       });
+      bool warningReceived = false;
+      final sub = queueManager.onQueueWarning.listen((count) {
+        if (count >= 50) warningReceived = true;
+      });
 
-       // Trigger check by adding one more
-       await queueManager.queueChange(collection: 'c', action: 'a', documentId: 'd', data: {});
+      // Trigger check by adding one more
+      await queueManager.queueChange(
+        collection: 'c',
+        action: 'a',
+        documentId: 'd',
+        data: {},
+      );
 
-       // Allow stream to propagate
-       await Future.delayed(const Duration(milliseconds: 100));
+      // Allow stream to propagate
+      await Future.delayed(const Duration(milliseconds: 100));
 
-       expect(warningReceived, true);
-       await sub.cancel();
+      expect(warningReceived, true);
+      await sub.cancel();
     });
   });
 }

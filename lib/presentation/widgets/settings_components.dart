@@ -41,9 +41,7 @@ class SettingsSection extends StatelessWidget {
             ],
           ),
           clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );

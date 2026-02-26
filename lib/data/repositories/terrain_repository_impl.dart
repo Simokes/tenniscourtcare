@@ -85,12 +85,12 @@ class TerrainRepositoryImpl implements TerrainRepository {
 
   Future<void> _deleteTerrainFromFirebase(int id) async {
     try {
-       // We might need the firebaseId to delete from Firestore.
-       // If the repo doesn't have it, we might need to fetch it first.
-       // But assuming we have the ID, let's see if the service handles it.
-       // The user didn't explicitly ask for delete sync code in the example, but it's good practice.
-       // I'll leave it as a comment or simple call if available.
-       // await _firebaseService.terrainService.deleteTerrain(id);
+      // We might need the firebaseId to delete from Firestore.
+      // If the repo doesn't have it, we might need to fetch it first.
+      // But assuming we have the ID, let's see if the service handles it.
+      // The user didn't explicitly ask for delete sync code in the example, but it's good practice.
+      // I'll leave it as a comment or simple call if available.
+      // await _firebaseService.terrainService.deleteTerrain(id);
     } catch (e) {
       print('Failed to delete terrain from remote: $e');
     }

@@ -15,10 +15,7 @@ class DashboardHeader extends ConsumerWidget {
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
-        child: Container(
-          color: Colors.grey.shade50,
-          height: 1.0,
-        ),
+        child: Container(color: Colors.grey.shade50, height: 1.0),
       ),
       title: Row(
         children: [
@@ -72,7 +69,7 @@ class DashboardHeader extends ConsumerWidget {
           padding: const EdgeInsets.only(right: 16.0),
           child: InkWell(
             onTap: () {
-               context.push('/settings');
+              context.push('/settings');
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -82,7 +79,9 @@ class DashboardHeader extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey.shade200),
                 image: const DecorationImage(
-                  image: NetworkImage('https://lh3.googleusercontent.com/aida-public/AB6AXuAveFTSG7Js3Qh4mtwLcHsfwK8QNddL4vXcQtIvhtpXk5AwV6j6qm0KixzDkPknwONgawW4mXxxtFVhuoa9FOmiRARuEz4K1IXo8ftAfzWsASMydFoF-Q925MS2RXZFouHki-i9FEOf5AycGUnFcD9aPyDUd4HTI6A5CEmkQ1j0ki4dRCGVplnxyVlRZnsIFRJShl51WAVdYv8zfkQOd-WLJUizBTKCeiMYlhcjgUj4hq39Tq-s2D4wc_8ToiYfCh1DB7ws5sRU9Q_q'),
+                  image: NetworkImage(
+                    'https://lh3.googleusercontent.com/aida-public/AB6AXuAveFTSG7Js3Qh4mtwLcHsfwK8QNddL4vXcQtIvhtpXk5AwV6j6qm0KixzDkPknwONgawW4mXxxtFVhuoa9FOmiRARuEz4K1IXo8ftAfzWsASMydFoF-Q925MS2RXZFouHki-i9FEOf5AycGUnFcD9aPyDUd4HTI6A5CEmkQ1j0ki4dRCGVplnxyVlRZnsIFRJShl51WAVdYv8zfkQOd-WLJUizBTKCeiMYlhcjgUj4hq39Tq-s2D4wc_8ToiYfCh1DB7ws5sRU9Q_q',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -101,7 +100,8 @@ class PulsingDot extends StatefulWidget {
   State<PulsingDot> createState() => _PulsingDotState();
 }
 
-class _PulsingDotState extends State<PulsingDot> with SingleTickerProviderStateMixin {
+class _PulsingDotState extends State<PulsingDot>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 

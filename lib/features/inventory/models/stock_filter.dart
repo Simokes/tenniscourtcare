@@ -1,7 +1,7 @@
 enum StockFilter {
   all,
   lowStock,
-  fixed,        // ← AJOUTER (au lieu de "official")
+  fixed, // ← AJOUTER (au lieu de "official")
   custom;
 
   String toDisplayString() {

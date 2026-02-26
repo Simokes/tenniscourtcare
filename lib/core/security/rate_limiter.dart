@@ -52,7 +52,10 @@ class RateLimiter {
     if (consecutiveFailures >= maxAttempts) {
       // Sync memory with DB state to avoid DB hits on next immediate retry
       // We populate memory with the timestamps of these failures
-      final recentFailures = dbAttempts.take(consecutiveFailures).map((a) => a.timestamp).toList();
+      final recentFailures = dbAttempts
+          .take(consecutiveFailures)
+          .map((a) => a.timestamp)
+          .toList();
       _memoryAttempts[email] = recentFailures;
 
       throw AccountLockedException(
@@ -64,9 +67,17 @@ class RateLimiter {
 
   /// Records an attempt (success or failure).
   /// [success] indicates if the login was successful.
-  Future<void> recordAttempt({required String email, required bool success, String? ipAddress}) async {
+  Future<void> recordAttempt({
+    required String email,
+    required bool success,
+    String? ipAddress,
+  }) async {
     // Always log to DB for audit and Tier 2 tracking
-    await _auditRepository.logLoginAttempt(email: email, success: success, ipAddress: ipAddress);
+    await _auditRepository.logLoginAttempt(
+      email: email,
+      success: success,
+      ipAddress: ipAddress,
+    );
 
     if (success) {
       // Clear failures on success
@@ -117,7 +128,9 @@ class RateLimiter {
     if (memoryReqs != null) {
       final recent = memoryReqs.where((t) => t.isAfter(cutoff)).toList();
       if (recent.length >= maxOtpRequests) {
-        throw const AccountLockedException('Trop de demandes de code. Veuillez patienter 10 minutes.');
+        throw const AccountLockedException(
+          'Trop de demandes de code. Veuillez patienter 10 minutes.',
+        );
       }
       // Clean memory
       _memoryOtpRequests[email] = recent;
@@ -127,15 +140,17 @@ class RateLimiter {
     // We count actual OTP records created recently
     final dbCount = await _auditRepository.countRecentOtps(email, cutoff);
     if (dbCount >= maxOtpRequests) {
-       // Sync memory
-       final reqs = _memoryOtpRequests[email] ?? [];
-       // We don't have exact timestamps from count, so just fill with 'now' to block locally
-       while(reqs.length < maxOtpRequests) {
-         reqs.add(now);
-       }
-       _memoryOtpRequests[email] = reqs;
+      // Sync memory
+      final reqs = _memoryOtpRequests[email] ?? [];
+      // We don't have exact timestamps from count, so just fill with 'now' to block locally
+      while (reqs.length < maxOtpRequests) {
+        reqs.add(now);
+      }
+      _memoryOtpRequests[email] = reqs;
 
-       throw const AccountLockedException('Trop de demandes de code. Veuillez patienter 10 minutes.');
+      throw const AccountLockedException(
+        'Trop de demandes de code. Veuillez patienter 10 minutes.',
+      );
     }
   }
 

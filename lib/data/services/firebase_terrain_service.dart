@@ -38,23 +38,28 @@ class FirebaseTerrainService {
         .collection(_collectionPath)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        // Ensure ID is set from doc ID if missing (though model has it)
-        // actually model.fromJson handles data.
-        final model = TerrainModel.fromJson(data);
-        return model.toDomain();
-      }).toList();
-    }).handleError((e) {
-      print('Error watching terrains: $e');
-      return <Terrain>[];
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            // Ensure ID is set from doc ID if missing (though model has it)
+            // actually model.fromJson handles data.
+            final model = TerrainModel.fromJson(data);
+            return model.toDomain();
+          }).toList();
+        })
+        .handleError((e) {
+          print('Error watching terrains: $e');
+          return <Terrain>[];
+        });
   }
 
   /// Récupérer les terrains non-syncés (filtrage local)
   Future<List<Terrain>> getUnsyncedTerrains(List<Terrain> allTerrains) async {
     return allTerrains
-        .where((t) => t.syncStatus == SyncStatus.local || t.syncStatus == SyncStatus.error)
+        .where(
+          (t) =>
+              t.syncStatus == SyncStatus.local ||
+              t.syncStatus == SyncStatus.error,
+        )
         // Including error status to retry? Prompt template said: .where((t) => t.syncStatus == SyncStatus.local)
         // I will stick to template but usually error should also be retried.
         // Template: .where((t) => t.syncStatus == SyncStatus.local)

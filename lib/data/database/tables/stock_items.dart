@@ -17,7 +17,8 @@ class StockItems extends Table {
   RealColumn get unitPrice => real().nullable()();
   TextColumn get lastModifiedBy => text().nullable()();
   DateTimeColumn get syncedAt => dateTime().nullable()();
-  BoolColumn get isSyncPending => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSyncPending =>
+      boolean().withDefault(const Constant(false))();
 
   // Sync fields
   TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();

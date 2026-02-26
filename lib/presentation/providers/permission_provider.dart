@@ -9,7 +9,10 @@ final userPermissionsProvider = Provider<List<Permission>>((ref) {
   return PermissionResolver.getPermissionsForRole(user.role);
 });
 
-final hasPermissionProvider = Provider.family<bool, Permission>((ref, permission) {
+final hasPermissionProvider = Provider.family<bool, Permission>((
+  ref,
+  permission,
+) {
   final permissions = ref.watch(userPermissionsProvider);
   return permissions.contains(permission);
 });

@@ -21,10 +21,10 @@ enum TerrainType {
 }
 
 enum TerrainStatus {
-  playable,      // 🟢 Jouable - prêt à jouer
-  maintenance,   // 🔵 Maintenance - en entretien
-  unavailable,   // ❌ Non jouable - fermé/endommagé
-  frozen;        // 🥶 Gelé - gelé/pluie/neige
+  playable, // 🟢 Jouable - prêt à jouer
+  maintenance, // 🔵 Maintenance - en entretien
+  unavailable, // ❌ Non jouable - fermé/endommagé
+  frozen; // 🥶 Gelé - gelé/pluie/neige
 
   String get displayName {
     switch (this) {
@@ -42,13 +42,13 @@ enum TerrainStatus {
   Color get color {
     switch (this) {
       case TerrainStatus.playable:
-        return const Color(0xFF10B981);  // Vert
+        return const Color(0xFF10B981); // Vert
       case TerrainStatus.maintenance:
-        return const Color(0xFF0EA5E9);  // Bleu ciel
+        return const Color(0xFF0EA5E9); // Bleu ciel
       case TerrainStatus.unavailable:
-        return const Color(0xFF6B7280);  // Gris
+        return const Color(0xFF6B7280); // Gris
       case TerrainStatus.frozen:
-        return const Color(0xFF3B82F6);  // Bleu
+        return const Color(0xFF3B82F6); // Bleu
     }
   }
 
@@ -99,8 +99,8 @@ class Terrain {
     this.firebaseId,
     this.createdBy,
     this.modifiedBy,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   // Computed property for backwards compatibility / utility
   bool get isUnderMaintenance => status == TerrainStatus.maintenance;

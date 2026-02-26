@@ -24,16 +24,16 @@ class TerrainCard extends ConsumerWidget {
     return InkWell(
       onTap: onTap,
       child: Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      // Look 'Premium': rounded corners, subtle shadow
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 2,
+        // Look 'Premium': rounded corners, subtle shadow
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               // Header Row
               Row(
                 children: [
@@ -45,13 +45,13 @@ class TerrainCard extends ConsumerWidget {
                       children: [
                         Text(
                           terrain.nom,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
                           terrain.type.displayName,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
@@ -74,9 +74,9 @@ class TerrainCard extends ConsumerWidget {
               Text(
                 'Dernière grosse intervention :',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: Theme.of(context).colorScheme.outline,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 6),
 
@@ -85,7 +85,7 @@ class TerrainCard extends ConsumerWidget {
                   if (maintenance == null) {
                     return Row(
                       children: [
-                         Icon(
+                        Icon(
                           Icons.info_outline,
                           size: 16,
                           color: Theme.of(context).colorScheme.outline,
@@ -101,7 +101,9 @@ class TerrainCard extends ConsumerWidget {
                       ],
                     );
                   }
-                  final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+                  final date = DateTime.fromMillisecondsSinceEpoch(
+                    maintenance.date,
+                  );
                   // Ensure date formatting is initialized in main or handle locale
                   // Assuming default locale or system
                   final formattedDate = DateFormat.yMMMd('fr_FR').format(date);

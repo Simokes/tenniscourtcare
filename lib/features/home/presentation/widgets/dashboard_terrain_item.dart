@@ -44,7 +44,9 @@ class DashboardTerrainItem extends StatelessWidget {
             const SizedBox(height: 6),
             Consumer(
               builder: (context, ref, _) {
-                final healthAsync = ref.watch(terrainHealthProvider(terrain.id));
+                final healthAsync = ref.watch(
+                  terrainHealthProvider(terrain.id),
+                );
                 return healthAsync.when(
                   data: (state) => TerrainHealthGauge(
                     score: state.score,

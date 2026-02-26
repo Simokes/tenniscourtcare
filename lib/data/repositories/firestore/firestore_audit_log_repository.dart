@@ -10,14 +10,19 @@ class FirestoreAuditLogRepository {
 
   Future<void> logAction(AuditLogFirestoreModel log) async {
     if (log.id.isEmpty) {
-       await _auditLogs.add(log.toFirestore());
+      await _auditLogs.add(log.toFirestore());
     } else {
-       await _auditLogs.doc(log.id).set(log.toFirestore());
+      await _auditLogs.doc(log.id).set(log.toFirestore());
     }
   }
 
   Future<List<AuditLogFirestoreModel>> getRecentLogs({int limit = 50}) async {
-    final query = await _auditLogs.orderBy('timestamp', descending: true).limit(limit).get();
-    return query.docs.map((doc) => AuditLogFirestoreModel.fromFirestore(doc)).toList();
+    final query = await _auditLogs
+        .orderBy('timestamp', descending: true)
+        .limit(limit)
+        .get();
+    return query.docs
+        .map((doc) => AuditLogFirestoreModel.fromFirestore(doc))
+        .toList();
   }
 }

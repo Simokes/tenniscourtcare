@@ -48,7 +48,7 @@ class EventMapper {
   // Drift Entity → Domain Entity
   static AppEvent fromDriftEntity(db.EventRow driftEntity) {
     return AppEvent(
-      id: driftEntity.id ?? 0,
+      id: driftEntity.id,
       title: driftEntity.title,
       description: driftEntity.description,
       startTime: driftEntity.startTime,
@@ -56,8 +56,8 @@ class EventMapper {
       color: driftEntity.color,
       terrainIds: driftEntity.terrainIds,
       syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
-      createdAt: driftEntity.createdAt ?? DateTime.now(),
-      updatedAt: driftEntity.updatedAt ?? DateTime.now(),
+      createdAt: driftEntity.createdAt,
+      updatedAt: driftEntity.updatedAt,
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,
@@ -76,21 +76,20 @@ extension EventDriftX on db.EventRow {
 
 // Domain → Companion (Keeping for DB inserts)
 extension AppEventDomainX on AppEvent {
-  db.EventsCompanion toCompanion({bool includeId = true}) =>
-      db.EventsCompanion(
-        id: includeId && id != null ? Value(id!) : const Value.absent(),
-        title: Value(title),
-        description: Value(description),
-        startTime: Value(startTime),
-        endTime: Value(endTime),
-        color: Value(color),
-        terrainIds: Value(terrainIds),
-        // Sync mappings
-        syncStatus: Value(syncStatus.name),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        firebaseId: Value(firebaseId),
-        createdBy: Value(createdBy),
-        modifiedBy: Value(modifiedBy),
-      );
+  db.EventsCompanion toCompanion({bool includeId = true}) => db.EventsCompanion(
+    id: includeId && id != null ? Value(id!) : const Value.absent(),
+    title: Value(title),
+    description: Value(description),
+    startTime: Value(startTime),
+    endTime: Value(endTime),
+    color: Value(color),
+    terrainIds: Value(terrainIds),
+    // Sync mappings
+    syncStatus: Value(syncStatus.name),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    firebaseId: Value(firebaseId),
+    createdBy: Value(createdBy),
+    modifiedBy: Value(modifiedBy),
+  );
 }

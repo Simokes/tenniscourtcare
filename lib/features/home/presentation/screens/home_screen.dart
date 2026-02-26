@@ -26,7 +26,8 @@ class HomeScreen extends ConsumerWidget {
 
     // Calculate operational courts for the stats card
     final operationalCountAsync = terrainsAsync.whenData(
-      (terrains) => terrains.where((t) => t.status == TerrainStatus.playable).toList(),
+      (terrains) =>
+          terrains.where((t) => t.status == TerrainStatus.playable).toList(),
     );
 
     return Scaffold(
@@ -136,7 +137,10 @@ class HomeScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(Icons.dashboard_rounded, color: Color(0xFF003580)),
+                icon: const Icon(
+                  Icons.dashboard_rounded,
+                  color: Color(0xFF003580),
+                ),
                 onPressed: () {
                   // Already on Home
                 },
@@ -149,7 +153,10 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(width: 40), // Spacer for FAB
               IconButton(
-                icon: Icon(Icons.calendar_today_rounded, color: Colors.grey.shade400),
+                icon: Icon(
+                  Icons.calendar_today_rounded,
+                  color: Colors.grey.shade400,
+                ),
                 onPressed: () {
                   // Schedule - placeholder
                 },

@@ -74,14 +74,23 @@ class TerrainsManagementScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _confirmDelete(BuildContext context, WidgetRef ref, Terrain terrain) async {
+  Future<void> _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    Terrain terrain,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Supprimer le terrain ?'),
-        content: Text('Voulez-vous vraiment supprimer "${terrain.nom}" ? Cette action est irréversible.'),
+        content: Text(
+          'Voulez-vous vraiment supprimer "${terrain.nom}" ? Cette action est irréversible.',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
@@ -97,13 +106,14 @@ class TerrainsManagementScreen extends ConsumerWidget {
   }
 
   void _showAddTerrainDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => const _TerrainDialog(),
-    );
+    showDialog(context: context, builder: (context) => const _TerrainDialog());
   }
 
-  void _showEditTerrainDialog(BuildContext context, WidgetRef ref, Terrain terrain) {
+  void _showEditTerrainDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Terrain terrain,
+  ) {
     showDialog(
       context: context,
       builder: (context) => _TerrainDialog(terrain: terrain),
@@ -145,7 +155,9 @@ class _TerrainDialogState extends State<_TerrainDialog> {
             children: [
               TextFormField(
                 initialValue: _name,
-                decoration: const InputDecoration(labelText: 'Nom du court (ex: Court 1)'),
+                decoration: const InputDecoration(
+                  labelText: 'Nom du court (ex: Court 1)',
+                ),
                 validator: (v) => (v == null || v.isEmpty) ? 'Requis' : null,
                 onSaved: (v) => _name = v!,
               ),
@@ -154,14 +166,18 @@ class _TerrainDialogState extends State<_TerrainDialog> {
                 initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Surface'),
                 items: TerrainType.values
-                    .map((t) => DropdownMenuItem(
-                          value: t,
-                          child: Text(t == TerrainType.terreBattue
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: Text(
+                          t == TerrainType.terreBattue
                               ? 'Terre battue'
                               : t == TerrainType.synthetique
-                                  ? 'Synthétique'
-                                  : 'Dur'),
-                        ))
+                              ? 'Synthétique'
+                              : 'Dur',
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (v) => setState(() => _type = v!),
               ),
@@ -169,7 +185,10 @@ class _TerrainDialogState extends State<_TerrainDialog> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
           TextButton(
             onPressed: () async {
               if (!_formKey.currentState!.validate()) return;

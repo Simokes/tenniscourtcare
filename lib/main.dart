@@ -13,31 +13,30 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
-  runZonedGuarded<Future<void>>(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded<Future<void>>(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialisation des locales pour intl (fr_FR)
-    await initializeDateFormatting('fr_FR', null);
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    runApp(
-      const ProviderScope(
-        child: CourtCareApp(),
-      ),
-    );
-  }, (error, stack) {
-    // Gestionnaire d'erreurs globales
-    // Dans le futur, on pourrait intégrer Sentry ou Firebase Crashlytics ici.
-    if (kDebugMode) {
-      debugPrint('ERREUR NON GÉRÉE: $error');
-      debugPrint('STACKTRACE: $stack');
-    } else {
-      // En production, on pourrait logger dans un fichier ou envoyer vers un service
-      // Pour l'instant, on évite le crash silencieux complet en loggant a minima si possible
-      debugPrint('Erreur critique capturée: $error');
-    }
-  });
+      // Initialisation des locales pour intl (fr_FR)
+      await initializeDateFormatting('fr_FR', null);
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      runApp(const ProviderScope(child: CourtCareApp()));
+    },
+    (error, stack) {
+      // Gestionnaire d'erreurs globales
+      // Dans le futur, on pourrait intégrer Sentry ou Firebase Crashlytics ici.
+      if (kDebugMode) {
+        debugPrint('ERREUR NON GÉRÉE: $error');
+        debugPrint('STACKTRACE: $stack');
+      } else {
+        // En production, on pourrait logger dans un fichier ou envoyer vers un service
+        // Pour l'instant, on évite le crash silencieux complet en loggant a minima si possible
+        debugPrint('Erreur critique capturée: $error');
+      }
+    },
+  );
 }
 
 class CourtCareApp extends ConsumerWidget {

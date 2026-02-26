@@ -1,11 +1,11 @@
 // lib/domain/entities/weather_snapshot.dart
 
 class WeatherSnapshot {
-  final double temperature;     // °C
-  final double precipitation;   // mm instantanée (au pas horaire)
-  final int humidity;           // %
-  final double windSpeed;       // km/h
-  final int weatherCode;        // code Open‑Meteo
+  final double temperature; // °C
+  final double precipitation; // mm instantanée (au pas horaire)
+  final int humidity; // %
+  final double windSpeed; // km/h
+  final int weatherCode; // code Open‑Meteo
 
   const WeatherSnapshot({
     required this.temperature,
@@ -32,12 +32,12 @@ class WeatherSnapshot {
   }
 
   Map<String, dynamic> toJson() => {
-        'temperature': temperature,
-        'precipitation': precipitation,
-        'humidity': humidity,
-        'windSpeed': windSpeed,
-        'weatherCode': weatherCode,
-      };
+    'temperature': temperature,
+    'precipitation': precipitation,
+    'humidity': humidity,
+    'windSpeed': windSpeed,
+    'weatherCode': weatherCode,
+  };
 
   factory WeatherSnapshot.fromJson(Map<String, dynamic> json) {
     return WeatherSnapshot(

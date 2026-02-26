@@ -58,18 +58,27 @@ class StockItemTile extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: isLow ? colorScheme.errorContainer : colorScheme.primaryContainer,
+        color: isLow
+            ? colorScheme.errorContainer
+            : colorScheme.primaryContainer,
         shape: BoxShape.circle,
       ),
       child: Icon(
         icon,
-        color: isLow ? colorScheme.onErrorContainer : colorScheme.onPrimaryContainer,
+        color: isLow
+            ? colorScheme.onErrorContainer
+            : colorScheme.onPrimaryContainer,
         size: 20,
       ),
     );
   }
 
-  Widget _buildItemDetails(ThemeData theme, ColorScheme colorScheme, bool isLow, String timeAgo) {
+  Widget _buildItemDetails(
+    ThemeData theme,
+    ColorScheme colorScheme,
+    bool isLow,
+    String timeAgo,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -78,7 +87,9 @@ class StockItemTile extends ConsumerWidget {
             Flexible(
               child: Text(
                 item.name,
-                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -122,7 +133,11 @@ class StockItemTile extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuantityControl(BuildContext context, WidgetRef ref, ColorScheme colorScheme) {
+  Widget _buildQuantityControl(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme colorScheme,
+  ) {
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
@@ -152,12 +167,17 @@ class StockItemTile extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: item.isLowOnStock ? colorScheme.error : colorScheme.onSurface,
+                      color: item.isLowOnStock
+                          ? colorScheme.error
+                          : colorScheme.onSurface,
                     ),
                   ),
                   Text(
                     item.unit,
-                    style: TextStyle(fontSize: 10, color: colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -176,7 +196,11 @@ class StockItemTile extends ConsumerWidget {
     );
   }
 
-  Widget _quantityButton({required IconData icon, required Color color, required VoidCallback onPressed}) {
+  Widget _quantityButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
     return IconButton(
       icon: Icon(icon, size: 18),
       padding: const EdgeInsets.all(8),
@@ -204,7 +228,8 @@ class StockItemTile extends ConsumerWidget {
     if (lower.contains('balai') || lower.contains('bross')) return Icons.brush;
     if (lower.contains('manto') || lower.contains('sotto')) return Icons.layers;
     if (lower.contains('silice')) return Icons.grain;
-    if (lower.contains('eau') || lower.contains('arros')) return Icons.water_drop;
+    if (lower.contains('eau') || lower.contains('arros'))
+      return Icons.water_drop;
     return Icons.inventory_2;
   }
 
@@ -251,12 +276,11 @@ class StockItemTile extends ConsumerWidget {
   void _handleDialogSubmit(BuildContext context, WidgetRef ref, String value) {
     final newValue = int.tryParse(value);
     if (newValue != null && newValue >= 0) {
-      ref.read(stockNotifierProvider.notifier).updateItem(
-        item.copyWith(
-          quantity: newValue,
-          updatedAt: DateTime.now(),
-        ),
-      );
+      ref
+          .read(stockNotifierProvider.notifier)
+          .updateItem(
+            item.copyWith(quantity: newValue, updatedAt: DateTime.now()),
+          );
     }
     Navigator.pop(context);
   }

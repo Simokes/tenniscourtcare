@@ -22,7 +22,9 @@ class FirestoreStockRepository {
 
   Stream<List<StockFirestoreModel>> watchStockItems() {
     return _stock.orderBy('name').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => StockFirestoreModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => StockFirestoreModel.fromFirestore(doc))
+          .toList();
     });
   }
 

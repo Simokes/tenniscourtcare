@@ -1,0 +1,123 @@
+     1	// filepath: lib/data/mappers/maintenance_mapper.dart
+     2
+     3	import 'package:drift/drift.dart';
+     4	import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+     5	import 'package:tenniscourtcare/data/models/maintenance_model.dart';
+     6	import 'package:tenniscourtcare/domain/entities/maintenance.dart';
+     7	import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+     8	import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+     9
+    10	class MaintenanceMapper {
+    11	  // Model → Domain Entity
+    12	  static Maintenance toDomain(MaintenanceModel model) {
+    13	    return Maintenance(
+    14	      id: model.id,
+    15	      terrainId: model.terrainId,
+    16	      type: model.type,
+    17	      commentaire: model.commentaire,
+    18	      date: DateTime.parse(model.date).millisecondsSinceEpoch,
+    19	      sacsMantoUtilises: model.sacsMantoUtilises,
+    20	      sacsSottomantoUtilises: model.sacsSottomantoUtilises,
+    21	      sacsSiliceUtilises: model.sacsSiliceUtilises,
+    22	      imagePath: model.imagePath,
+    23	      weather: model.weather != null
+    24	          ? WeatherSnapshot.fromJson(model.weather!)
+    25	          : null,
+    26	      terrainGele: model.terrainGele,
+    27	      terrainImpraticable: model.terrainImpraticable,
+    28	      syncStatus: SyncStatus.fromString(model.syncStatus),
+    29	      createdAt: DateTime.parse(model.createdAt),
+    30	      updatedAt: DateTime.parse(model.updatedAt),
+    31	      firebaseId: model.firebaseId,
+    32	      createdBy: model.createdBy,
+    33	      modifiedBy: model.modifiedBy,
+    34	    );
+    35	  }
+    36
+    37	  // Domain Entity → Model
+    38	  static MaintenanceModel toModel(Maintenance domain) {
+    39	    return MaintenanceModel(
+    40	      id: domain.id,
+    41	      terrainId: domain.terrainId,
+    42	      type: domain.type,
+    43	      commentaire: domain.commentaire,
+    44	      date: DateTime.fromMillisecondsSinceEpoch(domain.date).toIso8601String(),
+    45	      sacsMantoUtilises: domain.sacsMantoUtilises,
+    46	      sacsSottomantoUtilises: domain.sacsSottomantoUtilises,
+    47	      sacsSiliceUtilises: domain.sacsSiliceUtilises,
+    48	      imagePath: domain.imagePath,
+    49	      weather: domain.weather?.toJson(),
+    50	      terrainGele: domain.terrainGele,
+    51	      terrainImpraticable: domain.terrainImpraticable,
+    52	      syncStatus: domain.syncStatus.name,
+    53	      createdAt: domain.createdAt.toIso8601String(),
+    54	      updatedAt: domain.updatedAt.toIso8601String(),
+    55	      firebaseId: domain.firebaseId,
+    56	      createdBy: domain.createdBy,
+    57	      modifiedBy: domain.modifiedBy,
+    58	    );
+    59	  }
+    60
+    61	  // Drift Entity → Domain Entity
+    62	  static Maintenance fromDriftEntity(db.MaintenanceRow driftEntity) {
+    63	    return Maintenance(
+    64	      id: driftEntity.id,
+    65	      terrainId: driftEntity.terrainId,
+    66	      type: driftEntity.type,
+    67	      commentaire: driftEntity.commentaire,
+    68	      date: driftEntity.date,
+    69	      sacsMantoUtilises: driftEntity.sacsMantoUtilises,
+    70	      sacsSottomantoUtilises: driftEntity.sacsSottomantoUtilises,
+    71	      sacsSiliceUtilises: driftEntity.sacsSiliceUtilises,
+    72	      imagePath: driftEntity.imagePath,
+    73	      // Weather and flags are not stored in SQLite currently
+    74	      weather: null,
+    75	      terrainGele: null,
+    76	      terrainImpraticable: null,
+    77	      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
+    78	      createdAt:
+    79	          driftEntity.createdAt ??
+    80	          DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
+    81	      updatedAt:
+    82	          driftEntity.updatedAt ??
+    83	          DateTime.fromMillisecondsSinceEpoch(driftEntity.date),
+    84	      firebaseId: driftEntity.firebaseId,
+    85	      createdBy: driftEntity.createdBy,
+    86	      modifiedBy: driftEntity.modifiedBy,
+    87	    );
+    88	  }
+    89	}
+    90
+    91	// Extensions for compatibility
+    92	extension MaintenanceModelX on MaintenanceModel {
+    93	  Maintenance toDomain() => MaintenanceMapper.toDomain(this);
+    94	}
+    95
+    96	extension MaintenanceDriftX on db.MaintenanceRow {
+    97	  Maintenance toDomain() => MaintenanceMapper.fromDriftEntity(this);
+    98	}
+    99
+   100	// Domain → Companion (Keeping for DB inserts)
+   101	extension MaintenanceDomainX on Maintenance {
+   102	  db.MaintenancesCompanion toCompanion() {
+   103	    return db.MaintenancesCompanion(
+   104	      id: id != null ? Value(id!) : const Value.absent(),
+   105	      terrainId: Value(terrainId),
+   106	      type: Value(type),
+   107	      date: Value(date),
+   108	      commentaire: Value(commentaire),
+   109	      sacsMantoUtilises: Value(sacsMantoUtilises),
+   110	      sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
+   111	      sacsSiliceUtilises: Value(sacsSiliceUtilises),
+   112	      imagePath: Value(imagePath),
+   113	      // Sync mappings
+   114	      syncStatus: Value(syncStatus.name),
+   115	      createdAt: Value(createdAt),
+   116	      updatedAt: Value(updatedAt),
+   117	      firebaseId: Value(firebaseId),
+   118	      remoteId: Value(firebaseId), // Fallback
+   119	      createdBy: Value(createdBy),
+   120	      modifiedBy: Value(modifiedBy),
+   121	    );
+   122	  }
+   123	}

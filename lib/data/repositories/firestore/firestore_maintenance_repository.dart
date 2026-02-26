@@ -6,7 +6,8 @@ class FirestoreMaintenanceRepository {
 
   FirestoreMaintenanceRepository(this._firestore);
 
-  CollectionReference get _maintenances => _firestore.collection('maintenances');
+  CollectionReference get _maintenances =>
+      _firestore.collection('maintenances');
 
   Future<void> saveMaintenance(MaintenanceFirestoreModel maintenance) async {
     await _maintenances.doc(maintenance.id).set(maintenance.toFirestore());
@@ -20,13 +21,17 @@ class FirestoreMaintenanceRepository {
     return null;
   }
 
-  Stream<List<MaintenanceFirestoreModel>> watchMaintenances({String? terrainId}) {
+  Stream<List<MaintenanceFirestoreModel>> watchMaintenances({
+    String? terrainId,
+  }) {
     Query query = _maintenances.orderBy('scheduledDate', descending: true);
     if (terrainId != null) {
       query = query.where('terrainId', isEqualTo: terrainId);
     }
     return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => MaintenanceFirestoreModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => MaintenanceFirestoreModel.fromFirestore(doc))
+          .toList();
     });
   }
 

@@ -24,26 +24,28 @@ import '../../domain/entities/user_entity.dart' as domu;
 import '../../domain/enums/role.dart';
 import '../../utils/date_utils.dart' as cc;
 
-import '../mappers/terrain_mapper.dart'; 
+import '../mappers/terrain_mapper.dart';
 import '../mappers/stock_item_mapper.dart';
 import '../mappers/user_mapper.dart';
 import '../mappers/maintenance_mapper.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [
-  Terrains,
-  Maintenances,
-  StockItems,
-  Users,
-  Events,
-  StockMovements,
-  AuditLogs,
-  LoginAttempts,
-  OtpRecords,
-  Reservations,
-  SyncQueue
-])
+@DriftDatabase(
+  tables: [
+    Terrains,
+    Maintenances,
+    StockItems,
+    Users,
+    Events,
+    StockMovements,
+    AuditLogs,
+    LoginAttempts,
+    OtpRecords,
+    Reservations,
+    SyncQueue,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
@@ -149,7 +151,7 @@ class AppDatabase extends _$AppDatabase {
         await m.deleteTable(syncQueue.actualTableName);
         await m.createTable(syncQueue);
       }
-        
+
       if (from < 15) {
         // Removed UNIQUE constraint from firebaseUid column
         // (Done in table definition, no SQL migration needed)
@@ -179,7 +181,10 @@ class AppDatabase extends _$AppDatabase {
 
         // StockItems
         await m.addColumn(stockItems, stockItems.syncStatus);
-        await m.addColumn(stockItems, stockItems.updatedAt); // Wait, was updatedAt existing?
+        await m.addColumn(
+          stockItems,
+          stockItems.updatedAt,
+        ); // Wait, was updatedAt existing?
         // Checking StockItems definition: DateTimeColumn get updatedAt => dateTime()();
         // It WAS existing in v2 (or v11 migration block adds createdAt, not updatedAt).
         // Let's check stock_items.dart in file read...
@@ -204,15 +209,71 @@ class AppDatabase extends _$AppDatabase {
   Future<void> _seedStockItems() async {
     final now = DateTime.now();
     final items = [
-      doms.StockItem(name: 'Manto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Sottomanto', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 5, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Silice', quantity: 0, unit: 'sacs', isCustom: false, minThreshold: 10, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Balles', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 24, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Filets', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 1, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Peinture', quantity: 0, unit: 'L', isCustom: false, minThreshold: 5, updatedAt: now, createdAt: now),
-      doms.StockItem(name: 'Balais', quantity: 0, unit: 'pcs', isCustom: false, minThreshold: 2, updatedAt: now, createdAt: now),
+      doms.StockItem(
+        name: 'Manto',
+        quantity: 0,
+        unit: 'sacs',
+        isCustom: false,
+        minThreshold: 10,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Sottomanto',
+        quantity: 0,
+        unit: 'sacs',
+        isCustom: false,
+        minThreshold: 5,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Silice',
+        quantity: 0,
+        unit: 'sacs',
+        isCustom: false,
+        minThreshold: 10,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Balles',
+        quantity: 0,
+        unit: 'pcs',
+        isCustom: false,
+        minThreshold: 24,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Filets',
+        quantity: 0,
+        unit: 'pcs',
+        isCustom: false,
+        minThreshold: 1,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Peinture',
+        quantity: 0,
+        unit: 'L',
+        isCustom: false,
+        minThreshold: 5,
+        updatedAt: now,
+        createdAt: now,
+      ),
+      doms.StockItem(
+        name: 'Balais',
+        quantity: 0,
+        unit: 'pcs',
+        isCustom: false,
+        minThreshold: 2,
+        updatedAt: now,
+        createdAt: now,
+      ),
     ];
-    
+
     await batch((b) {
       b.insertAll(stockItems, items.map((i) => i.toCompanion()).toList());
     });
@@ -221,23 +282,31 @@ class AppDatabase extends _$AppDatabase {
   // ========== USERS ==========
 
   Future<domu.UserEntity?> getUserByEmail(String email) async {
-    final row = await (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+    final row = await (select(
+      users,
+    )..where((u) => u.email.equals(email))).getSingleOrNull();
     return row?.toDomain();
   }
 
   Future<domu.UserEntity?> getUserByFirestoreUid(String uid) async {
-    final row = await (select(users)..where((u) => u.firestoreUid.equals(uid))).getSingleOrNull();
+    final row = await (select(
+      users,
+    )..where((u) => u.firestoreUid.equals(uid))).getSingleOrNull();
     return row?.toDomain();
   }
 
   Future<domu.UserEntity?> getUserById(int id) async {
-    final row = await (select(users)..where((u) => u.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      users,
+    )..where((u) => u.id.equals(id))).getSingleOrNull();
     return row?.toDomain();
   }
 
   // Cette méthode retourne le UserRow complet (avec hash) pour la vérification du mot de passe
   Future<UserRow?> getUserRowByEmail(String email) async {
-    return (select(users)..where((u) => u.email.equals(email))).getSingleOrNull();
+    return (select(
+      users,
+    )..where((u) => u.email.equals(email))).getSingleOrNull();
   }
 
   Future<List<domu.UserEntity>> getAllUsers() async {
@@ -262,16 +331,19 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> countUsersByRole(Role role) async {
-    final count = await (selectOnly(users)
-      ..addColumns([users.id.count()])
-      ..where(users.role.equals(role.name))
-    ).getSingle();
+    final count =
+        await (selectOnly(users)
+              ..addColumns([users.id.count()])
+              ..where(users.role.equals(role.name)))
+            .getSingle();
     return count.read(users.id.count()) ?? 0;
   }
 
   Future<int> countUsers() async {
-     final count = await (selectOnly(users)..addColumns([users.id.count()])).getSingle();
-     return count.read(users.id.count()) ?? 0;
+    final count = await (selectOnly(
+      users,
+    )..addColumns([users.id.count()])).getSingle();
+    return count.read(users.id.count()) ?? 0;
   }
 
   Future<int> deleteUser(int userId) {
@@ -292,9 +364,9 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<AuditLog>> getRecentAuditLogs({int limit = 100}) {
     return (select(auditLogs)
-      ..orderBy([(l) => OrderingTerm.desc(l.timestamp)])
-      ..limit(limit)
-    ).get();
+          ..orderBy([(l) => OrderingTerm.desc(l.timestamp)])
+          ..limit(limit))
+        .get();
   }
 
   Future<int> insertLoginAttempt(LoginAttemptsCompanion attempt) {
@@ -303,14 +375,22 @@ class AppDatabase extends _$AppDatabase {
 
   // Clean up old attempts (helper for rate limiter)
   Future<void> cleanOldLoginAttempts(DateTime cutoff) async {
-    await (delete(loginAttempts)..where((a) => a.timestamp.isSmallerThanValue(cutoff))).go();
+    await (delete(
+      loginAttempts,
+    )..where((a) => a.timestamp.isSmallerThanValue(cutoff))).go();
   }
 
-  Future<List<LoginAttempt>> getRecentLoginAttempts(String email, DateTime since) async {
+  Future<List<LoginAttempt>> getRecentLoginAttempts(
+    String email,
+    DateTime since,
+  ) async {
     return (select(loginAttempts)
-      ..where((a) => a.email.equals(email) & a.timestamp.isBiggerOrEqualValue(since))
-      ..orderBy([(a) => OrderingTerm.desc(a.timestamp)])
-    ).get();
+          ..where(
+            (a) =>
+                a.email.equals(email) & a.timestamp.isBiggerOrEqualValue(since),
+          )
+          ..orderBy([(a) => OrderingTerm.desc(a.timestamp)]))
+        .get();
   }
 
   // ========== OTP Management ==========
@@ -322,10 +402,14 @@ class AppDatabase extends _$AppDatabase {
   Future<OtpRecord?> getLatestValidOtp(String email) async {
     // Return latest OTP that is NOT expired
     return (select(otpRecords)
-      ..where((o) => o.email.equals(email) & o.expiresAt.isBiggerThan(currentDateAndTime))
-      ..orderBy([(o) => OrderingTerm.desc(o.createdAt)])
-      ..limit(1)
-    ).getSingleOrNull();
+          ..where(
+            (o) =>
+                o.email.equals(email) &
+                o.expiresAt.isBiggerThan(currentDateAndTime),
+          )
+          ..orderBy([(o) => OrderingTerm.desc(o.createdAt)])
+          ..limit(1))
+        .getSingleOrNull();
   }
 
   Future<void> deleteOtp(int id) async {
@@ -333,10 +417,14 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<int> countRecentOtps(String email, DateTime since) async {
-    final count = await (selectOnly(otpRecords)
-      ..addColumns([otpRecords.id.count()])
-      ..where(otpRecords.email.equals(email) & otpRecords.createdAt.isBiggerOrEqualValue(since))
-    ).getSingle();
+    final count =
+        await (selectOnly(otpRecords)
+              ..addColumns([otpRecords.id.count()])
+              ..where(
+                otpRecords.email.equals(email) &
+                    otpRecords.createdAt.isBiggerOrEqualValue(since),
+              ))
+            .getSingle();
 
     return count.read(otpRecords.id.count()) ?? 0;
   }
@@ -371,22 +459,28 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== MAINTENANCES AVEC STOCK ==========
 
-  Future<void> insertMaintenanceWithStockCheck(domm.Maintenance m, {int? userId}) async {
+  Future<void> insertMaintenanceWithStockCheck(
+    domm.Maintenance m, {
+    int? userId,
+  }) async {
     return transaction(() async {
       // 1. Récupérer les items de stock
       final stockList = await select(stockItems).get();
-      
+
       Future<void> checkAndDec(String name, int used) async {
         if (used <= 0) return;
         final itemRow = stockList.firstWhere(
           (i) => i.name.toLowerCase() == name.toLowerCase(),
-          orElse: () => throw Exception("Article de stock '$name' introuvable."),
+          orElse: () =>
+              throw Exception("Article de stock '$name' introuvable."),
         );
-        
+
         if (itemRow.quantity < used) {
-          throw Exception('Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).');
+          throw Exception(
+            'Stock insuffisant pour $name (${itemRow.quantity} disponibles, $used requis).',
+          );
         }
-        
+
         final newQty = itemRow.quantity - used;
 
         // Mise à jour de la quantité en base
@@ -424,12 +518,15 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Future<void> deleteMaintenanceWithStockRestoration(int maintenanceId, {int? userId}) async {
+  Future<void> deleteMaintenanceWithStockRestoration(
+    int maintenanceId, {
+    int? userId,
+  }) async {
     return transaction(() async {
       // 1. Récupérer la maintenance à supprimer
-      final maintenance = await (select(maintenances)
-            ..where((m) => m.id.equals(maintenanceId)))
-          .getSingleOrNull();
+      final maintenance = await (select(
+        maintenances,
+      )..where((m) => m.id.equals(maintenanceId))).getSingleOrNull();
 
       if (maintenance == null) {
         throw Exception('Maintenance introuvable');
@@ -477,8 +574,9 @@ class AppDatabase extends _$AppDatabase {
       await restoreStock('Silice', maintenance.sacsSiliceUtilises);
 
       // 4. Supprimer la maintenance
-      await (delete(maintenances)..where((m) => m.id.equals(maintenanceId)))
-          .go();
+      await (delete(
+        maintenances,
+      )..where((m) => m.id.equals(maintenanceId))).go();
     });
   }
 
@@ -492,9 +590,9 @@ class AppDatabase extends _$AppDatabase {
 
     return transaction(() async {
       // 1. Récupérer l'ancienne maintenance
-      final oldMaintenance = await (select(maintenances)
-            ..where((m) => m.id.equals(newMaintenance.id!)))
-          .getSingleOrNull();
+      final oldMaintenance = await (select(
+        maintenances,
+      )..where((m) => m.id.equals(newMaintenance.id!))).getSingleOrNull();
 
       if (oldMaintenance == null) {
         throw Exception('Maintenance originale introuvable');
@@ -522,7 +620,9 @@ class AppDatabase extends _$AppDatabase {
           }
         }
 
-        final newQty = itemRow.quantity - diff; // diff positif = consommation = moins de stock
+        final newQty =
+            itemRow.quantity -
+            diff; // diff positif = consommation = moins de stock
 
         // Mise à jour du stock
         await (update(stockItems)..where((t) => t.id.equals(itemRow.id))).write(
@@ -538,7 +638,9 @@ class AppDatabase extends _$AppDatabase {
             stockItemId: Value(itemRow.id),
             previousQuantity: Value(itemRow.quantity),
             newQuantity: Value(newQty),
-            quantityChange: Value(-diff), // diff positif = conso = changement négatif
+            quantityChange: Value(
+              -diff,
+            ), // diff positif = conso = changement négatif
             reason: const Value('Correction'),
             description: Value('Modif maintenance #${newMaintenance.id}'),
             userId: Value(userId),
@@ -623,8 +725,7 @@ class AppDatabase extends _$AppDatabase {
 
   /// Mettre à jour le status d'un terrain
   Future<bool> updateTerrainStatus(int terrainId, String newStatus) {
-    return (update(terrains)
-          ..where((t) => t.id.equals(terrainId)))
+    return (update(terrains)..where((t) => t.id.equals(terrainId)))
         .write(TerrainsCompanion(status: Value(newStatus)))
         .then((rows) => rows > 0);
   }

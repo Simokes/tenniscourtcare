@@ -9,7 +9,11 @@ final maintenanceTypesDistributionProvider = Provider<Map<String, int>>((ref) {
     data: (series) {
       final Map<String, int> distribution = {};
       for (final item in series) {
-        distribution.update(item.type, (value) => value + item.count, ifAbsent: () => item.count);
+        distribution.update(
+          item.type,
+          (value) => value + item.count,
+          ifAbsent: () => item.count,
+        );
       }
       return distribution;
     },
@@ -19,22 +23,23 @@ final maintenanceTypesDistributionProvider = Provider<Map<String, int>>((ref) {
 });
 
 /// Aggregates the sacks series into global totals for the selected period.
-final sacksTotalsForPeriodProvider = Provider<({int manto, int sottomanto, int silice})>((ref) {
-  final seriesAsync = ref.watch(sacksSeriesProvider);
+final sacksTotalsForPeriodProvider =
+    Provider<({int manto, int sottomanto, int silice})>((ref) {
+      final seriesAsync = ref.watch(sacksSeriesProvider);
 
-  return seriesAsync.when(
-    data: (series) {
-      int manto = 0;
-      int sottomanto = 0;
-      int silice = 0;
-      for (final item in series) {
-        manto += item.manto;
-        sottomanto += item.sottomanto;
-        silice += item.silice;
-      }
-      return (manto: manto, sottomanto: sottomanto, silice: silice);
-    },
-    loading: () => (manto: 0, sottomanto: 0, silice: 0),
-    error: (context, index) => (manto: 0, sottomanto: 0, silice: 0),
-  );
-});
+      return seriesAsync.when(
+        data: (series) {
+          int manto = 0;
+          int sottomanto = 0;
+          int silice = 0;
+          for (final item in series) {
+            manto += item.manto;
+            sottomanto += item.sottomanto;
+            silice += item.silice;
+          }
+          return (manto: manto, sottomanto: sottomanto, silice: silice);
+        },
+        loading: () => (manto: 0, sottomanto: 0, silice: 0),
+        error: (context, index) => (manto: 0, sottomanto: 0, silice: 0),
+      );
+    });

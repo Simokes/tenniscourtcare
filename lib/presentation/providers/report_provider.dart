@@ -39,8 +39,9 @@ final reportProvider = FutureProvider<PeriodReport>((ref) async {
   int mostMaintainedCount = 0;
 
   if (terrainCounts.isNotEmpty) {
-    final entry =
-        terrainCounts.entries.reduce((a, b) => a.value > b.value ? a : b);
+    final entry = terrainCounts.entries.reduce(
+      (a, b) => a.value > b.value ? a : b,
+    );
     mostMaintainedName = terrainMap[entry.key] ?? 'Inconnu';
     mostMaintainedCount = entry.value;
   }

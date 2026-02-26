@@ -16,18 +16,18 @@ class MaintenanceScreen extends ConsumerWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            title: const Text('Maintenances'),
+          const SliverAppBar(
+            title: Text('Maintenances'),
             floating: true,
             snap: true,
             expandedHeight: 120,
-            actions: const [
+            actions: [
               SyncStatusIndicator(collection: 'terrains'),
               SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: DecoratedBox(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -56,7 +56,9 @@ class MaintenanceScreen extends ConsumerWidget {
                   child: _EmptyState(
                     onAddCourt: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Fonctionnalité non implémentée')),
+                        const SnackBar(
+                          content: Text('Fonctionnalité non implémentée'),
+                        ),
                       );
                     },
                   ),
@@ -64,38 +66,35 @@ class MaintenanceScreen extends ConsumerWidget {
               }
 
               return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final terrain = terrains[index];
-                    return TerrainCard(
-                      terrain: terrain,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                TerrainMaintenanceHistoryScreen(terrain: terrain),
-                          ),
-                        );
-                      },
-                      onAddMaintenance: () async {
-                        final success = await showModalBottomSheet<bool>(
-                          context: context,
-                          useSafeArea: true,
-                          isScrollControlled: true,
-                          showDragHandle: true,
-                          builder: (_) => AddMaintenanceSheet(terrain: terrain),
-                        );
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final terrain = terrains[index];
+                  return TerrainCard(
+                    terrain: terrain,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              TerrainMaintenanceHistoryScreen(terrain: terrain),
+                        ),
+                      );
+                    },
+                    onAddMaintenance: () async {
+                      final success = await showModalBottomSheet<bool>(
+                        context: context,
+                        useSafeArea: true,
+                        isScrollControlled: true,
+                        showDragHandle: true,
+                        builder: (_) => AddMaintenanceSheet(terrain: terrain),
+                      );
 
-                        if (success == true && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Maintenance ajoutée')),
-                          );
-                        }
-                      },
-                    );
-                  },
-                  childCount: terrains.length,
-                ),
+                      if (success == true && context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Maintenance ajoutée')),
+                        );
+                      }
+                    },
+                  );
+                }, childCount: terrains.length),
               );
             },
           ),
@@ -130,7 +129,10 @@ class _EmptyState extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: const Text('Ajouter un terrain'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
             ),
           ],

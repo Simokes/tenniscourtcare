@@ -32,15 +32,17 @@ class UpcomingEventsList extends ConsumerWidget {
               Text(
                 'Prochains Événements',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade800,
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const CalendarScreen(),
+                    ),
                   );
                 },
                 style: TextButton.styleFrom(
@@ -66,7 +68,10 @@ class UpcomingEventsList extends ConsumerWidget {
                     child: Center(
                       child: Text(
                         'Aucun événement prévu prochainement.',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
@@ -78,14 +83,21 @@ class UpcomingEventsList extends ConsumerWidget {
               children: upcoming.map((item) => _EventItem(item: item)).toList(),
             );
           },
-          loading: () => const Center(child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: CircularProgressIndicator(),
-          )),
-          error: (err, stack) => Center(child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
-          )),
+          loading: () => const Center(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Erreur: $err',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -109,8 +121,10 @@ class _EventItem extends ConsumerWidget {
         onTap: () async {
           if (isMaintenance) {
             // Edit Maintenance
-             if (item.terrainId != null) {
-              final terrain = await ref.read(terrainProvider(item.terrainId!).future);
+            if (item.terrainId != null) {
+              final terrain = await ref.read(
+                terrainProvider(item.terrainId!).future,
+              );
               if (terrain != null && context.mounted) {
                 showModalBottomSheet(
                   context: context,
@@ -128,7 +142,8 @@ class _EventItem extends ConsumerWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject),
+                builder: (context) =>
+                    AddEditEventScreen(eventToEdit: item.originalObject),
               ),
             );
           }
@@ -157,32 +172,53 @@ class _EventItem extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               item.title,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                           if (isMaintenance)
-                            const Icon(Icons.build_circle, size: 16, color: Colors.orange),
+                            const Icon(
+                              Icons.build_circle,
+                              size: 16,
+                              color: Colors.orange,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.access_time, size: 14, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.access_time,
+                            size: 14,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             dateFormat.format(item.startTime),
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                           if (item.location != null) ...[
                             const SizedBox(width: 12),
-                            Icon(Icons.location_on, size: 14, color: Colors.grey.shade500),
+                            Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: Colors.grey.shade500,
+                            ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 item.location!,
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),

@@ -15,14 +15,10 @@ class AppTheme {
       cardTheme: CardThemeData(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: Colors.white,
       ),
-      extensions: const [
-        DashboardColors.light,
-      ],
+      extensions: const [DashboardColors.light],
     );
   }
 
@@ -39,18 +35,14 @@ class AppTheme {
       cardTheme: CardThemeData(
         surfaceTintColor: Colors.transparent,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: const Color(0xFF1E1E1E),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF121212),
         surfaceTintColor: Colors.transparent,
       ),
-      extensions: const [
-        DashboardColors.dark,
-      ],
+      extensions: const [DashboardColors.dark],
     );
   }
 }

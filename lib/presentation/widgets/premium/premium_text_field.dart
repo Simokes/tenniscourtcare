@@ -28,9 +28,9 @@ class PremiumTextField extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 8),
         TextField(
@@ -42,7 +42,9 @@ class PremiumTextField extends StatelessWidget {
             hintText: hint,
             errorText: errorText,
             filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+            fillColor: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -54,7 +56,10 @@ class PremiumTextField extends StatelessWidget {
                 width: 2,
               ),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
             suffixIcon: suffixIcon,
           ),
         ),

@@ -40,21 +40,28 @@ class FirebaseStockService {
         .collection(_collectionPath)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        final model = StockItemModel.fromJson(data);
-        return model.toDomain();
-      }).toList();
-    }).handleError((e) {
-      print('Error watching stock items: $e');
-      return <StockItem>[];
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            final model = StockItemModel.fromJson(data);
+            return model.toDomain();
+          }).toList();
+        })
+        .handleError((e) {
+          print('Error watching stock items: $e');
+          return <StockItem>[];
+        });
   }
 
   /// Récupérer les items de stock non-syncés
-  Future<List<StockItem>> getUnsyncedStockItems(List<StockItem> allItems) async {
+  Future<List<StockItem>> getUnsyncedStockItems(
+    List<StockItem> allItems,
+  ) async {
     return allItems
-        .where((i) => i.syncStatus == SyncStatus.local || i.syncStatus == SyncStatus.error)
+        .where(
+          (i) =>
+              i.syncStatus == SyncStatus.local ||
+              i.syncStatus == SyncStatus.error,
+        )
         .toList();
   }
 

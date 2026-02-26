@@ -9,7 +9,6 @@ import '../../widgets/add_maintenance_sheet.dart';
 import '../../providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../../domain/entities/maintenance.dart';
-import '../../../domain/entities/terrain.dart';
 import '../../../presentation/widgets/sync_status_indicator.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
@@ -48,7 +47,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text('Calendrier', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        title: const Text(
+          'Calendrier',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -78,7 +80,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(24),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -116,10 +120,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 if (!itemsAsync.hasValue) return [];
                 final items = itemsAsync.value!;
                 final startOfDay = DateTime(day.year, day.month, day.day);
-                final endOfDay = startOfDay.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+                final endOfDay = startOfDay
+                    .add(const Duration(days: 1))
+                    .subtract(const Duration(milliseconds: 1));
 
                 return items.where((item) {
-                  return item.startTime.isBefore(endOfDay) && item.endTime.isAfter(startOfDay);
+                  return item.startTime.isBefore(endOfDay) &&
+                      item.endTime.isAfter(startOfDay);
                 }).toList();
               },
               calendarStyle: CalendarStyle(
@@ -131,7 +138,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   shape: BoxShape.circle,
                 ),
                 todayDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
                   shape: BoxShape.circle,
                 ),
                 todayTextStyle: TextStyle(
@@ -143,7 +152,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -160,9 +171,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ),
                 formatButtonTextStyle: const TextStyle(fontSize: 12),
                 titleCentered: true,
-                titleTextStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                leftChevronIcon: const Icon(Icons.chevron_left, color: Colors.black87),
-                rightChevronIcon: const Icon(Icons.chevron_right, color: Colors.black87),
+                titleTextStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                leftChevronIcon: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.black87,
+                ),
+                rightChevronIcon: const Icon(
+                  Icons.chevron_right,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
@@ -173,11 +193,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Expanded(
             child: itemsAsync.when(
               data: (allItems) {
-                final startOfDay = DateTime(_selectedDay.year, _selectedDay.month, _selectedDay.day);
-                final endOfDay = startOfDay.add(const Duration(days: 1)).subtract(const Duration(milliseconds: 1));
+                final startOfDay = DateTime(
+                  _selectedDay.year,
+                  _selectedDay.month,
+                  _selectedDay.day,
+                );
+                final endOfDay = startOfDay
+                    .add(const Duration(days: 1))
+                    .subtract(const Duration(milliseconds: 1));
 
                 final selectedItems = allItems.where((item) {
-                  return item.startTime.isBefore(endOfDay) && item.endTime.isAfter(startOfDay);
+                  return item.startTime.isBefore(endOfDay) &&
+                      item.endTime.isAfter(startOfDay);
                 }).toList();
 
                 if (selectedItems.isEmpty) {
@@ -185,11 +212,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.event_busy, size: 64, color: Colors.grey.shade300),
+                        Icon(
+                          Icons.event_busy,
+                          size: 64,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun événement ce jour.',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 16),
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 16,
+                          ),
                         ),
                       ],
                     ),
@@ -197,7 +231,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 }
 
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   itemCount: selectedItems.length,
                   itemBuilder: (context, index) {
                     final item = selectedItems[index];
@@ -215,9 +252,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AddEditEventScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const AddEditEventScreen()),
           );
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -245,30 +280,34 @@ class _CalendarItemCard extends ConsumerWidget {
     return PremiumCard(
       padding: EdgeInsets.zero,
       onTap: () async {
-         if (!isMaintenance) {
-           Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddEditEventScreen(eventToEdit: item.originalObject as AppEvent),
+        if (!isMaintenance) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditEventScreen(
+                eventToEdit: item.originalObject as AppEvent,
               ),
+            ),
+          );
+        } else {
+          // Fetch terrain and open maintenance sheet
+          if (item.terrainId != null) {
+            final terrain = await ref.read(
+              terrainProvider(item.terrainId!).future,
             );
-         } else {
-            // Fetch terrain and open maintenance sheet
-            if (item.terrainId != null) {
-              final terrain = await ref.read(terrainProvider(item.terrainId!).future);
-              if (terrain != null && context.mounted) {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) => AddMaintenanceSheet(
-                    terrain: terrain,
-                    maintenance: item.originalObject as Maintenance,
-                  ),
-                );
-              }
+            if (terrain != null && context.mounted) {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => AddMaintenanceSheet(
+                  terrain: terrain,
+                  maintenance: item.originalObject as Maintenance,
+                ),
+              );
             }
-         }
+          }
+        }
       },
       child: IntrinsicHeight(
         child: Row(
@@ -296,31 +335,47 @@ class _CalendarItemCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             item.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                         if (isMaintenance)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: Colors.orange.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: const Text(
                               'Maintenance',
-                              style: TextStyle(fontSize: 10, color: Colors.orange, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                       ],
                     ),
                     const SizedBox(height: 8),
-                    if (item.description != null && item.description!.isNotEmpty)
+                    if (item.description != null &&
+                        item.description!.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
                           item.description!,
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                          ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -328,22 +383,38 @@ class _CalendarItemCard extends ConsumerWidget {
                     const Divider(height: 16),
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 14, color: Colors.grey.shade500),
+                        Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey.shade500,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           isLongEvent
-                            ? 'Toute la journée'
-                            : '${dateFormat.format(item.startTime)} - ${dateFormat.format(item.endTime)}',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                              ? 'Toute la journée'
+                              : '${dateFormat.format(item.startTime)} - ${dateFormat.format(item.endTime)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                         if (item.location != null) ...[
                           const SizedBox(width: 16),
-                          Icon(Icons.location_on, size: 14, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               item.location!,
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

@@ -19,7 +19,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
       updatedAt: DateTime.now(),
     );
 
-    return await _db.insertMaintenance(localMaintenance);
+    return _db.insertMaintenance(localMaintenance);
   }
 
   @override
@@ -31,7 +31,9 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
     // Créer MaintenancesCompanion manuellement
     final companion = MaintenancesCompanion(
-      id: updatedMaintenance.id != null ? Value(updatedMaintenance.id!) : const Value.absent(),
+      id: updatedMaintenance.id != null
+          ? Value(updatedMaintenance.id!)
+          : const Value.absent(),
       terrainId: Value(updatedMaintenance.terrainId),
       type: Value(updatedMaintenance.type),
       commentaire: Value(updatedMaintenance.commentaire),
@@ -58,7 +60,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     return result > 0;
   }
 
-  @override
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
     return await _db.getMaintenancesForTerrain(terrainId);
   }

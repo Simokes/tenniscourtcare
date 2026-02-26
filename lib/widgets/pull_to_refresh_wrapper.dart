@@ -20,9 +20,9 @@ class PullToRefreshWrapper extends StatelessWidget {
           await onRefresh();
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Refresh failed: $e')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Refresh failed: $e')));
           }
           rethrow;
         }

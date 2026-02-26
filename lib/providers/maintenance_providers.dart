@@ -20,9 +20,9 @@ Stream<List<dom.Maintenance>> maintenanceStream(MaintenanceStreamRef ref) {
 
     // Sort rows (Drift rows have createdAt)
     filtered.sort((a, b) {
-      // Use createdAt if available, else fallback to date (epoch)
-      final dateA = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(a.date);
-      final dateB = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(b.date);
+      // Use createdAt
+      final dateA = a.createdAt;
+      final dateB = b.createdAt;
       return dateB.compareTo(dateA); // DESC
     });
 

@@ -15,9 +15,7 @@ void main() {
     setUp(() async {
       database = AppDatabase(NativeDatabase.memory());
       container = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWithValue(database),
-        ],
+        overrides: [databaseProvider.overrideWithValue(database)],
       );
 
       terrainId = await database.insertTerrain(
@@ -68,9 +66,7 @@ void main() {
     setUp(() {
       database = AppDatabase(NativeDatabase.memory());
       container = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWithValue(database),
-        ],
+        overrides: [databaseProvider.overrideWithValue(database)],
       );
     });
 
@@ -79,18 +75,17 @@ void main() {
       await database.close();
     });
 
-    test('sacksSeriesProvider ne dépend pas directement de terrainsProvider async',
-        () {
-      // Le provider utilise _terrainIdsProvider qui est synchrone
-      // et gère le cas où terrainsProvider est en loading
-      final provider = sacksSeriesProvider;
-      expect(provider, isNotNull);
+    test(
+      'sacksSeriesProvider ne dépend pas directement de terrainsProvider async',
+      () {
+        // Le provider utilise _terrainIdsProvider qui est synchrone
+        // et gère le cas où terrainsProvider est en loading
+        final provider = sacksSeriesProvider;
+        expect(provider, isNotNull);
 
-      // On vérifie qu'on peut lire sans erreur
-      expect(
-        () => container.read(provider),
-        returnsNormally,
-      );
-    });
+        // On vérifie qu'on peut lire sans erreur
+        expect(() => container.read(provider), returnsNormally);
+      },
+    );
   });
 }

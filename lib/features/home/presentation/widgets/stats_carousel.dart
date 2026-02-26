@@ -49,7 +49,7 @@ class StatsCarousel extends ConsumerWidget {
             ),
             label: 'Maintenance',
             onTap: () {
-               context.push('/maintenance');
+              context.push('/maintenance');
             },
           ),
           const SizedBox(width: 12),
@@ -64,7 +64,7 @@ class StatsCarousel extends ConsumerWidget {
             ),
             label: 'Low Stocks',
             onTap: () {
-               context.push('/stock');
+              context.push('/stock');
             },
           ),
         ],

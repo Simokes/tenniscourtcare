@@ -52,10 +52,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               background: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      Colors.orange.shade800,
-                      Colors.orange.shade500,
-                    ],
+                    colors: [Colors.orange.shade800, Colors.orange.shade500],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -105,9 +102,13 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                             borderRadius: BorderRadius.circular(30),
                             borderSide: BorderSide.none,
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
                         ),
-                        onChanged: (v) => ref.read(stockSearchQueryProvider.notifier).state = v,
+                        onChanged: (v) =>
+                            ref.read(stockSearchQueryProvider.notifier).state =
+                                v,
                       ),
               ),
             ),
@@ -118,32 +119,43 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             SliverToBoxAdapter(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   children: [
                     _FilterChip(
                       label: 'Tous',
                       isSelected: currentFilter == StockFilter.all,
-                      onTap: () => ref.read(stockFilterProvider.notifier).state = StockFilter.all,
+                      onTap: () =>
+                          ref.read(stockFilterProvider.notifier).state =
+                              StockFilter.all,
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: 'En alerte',
                       isSelected: currentFilter == StockFilter.lowStock,
                       isAlert: true,
-                      onTap: () => ref.read(stockFilterProvider.notifier).state = StockFilter.lowStock,
+                      onTap: () =>
+                          ref.read(stockFilterProvider.notifier).state =
+                              StockFilter.lowStock,
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Fixes',
                       isSelected: currentFilter == StockFilter.fixed,
-                      onTap: () => ref.read(stockFilterProvider.notifier).state = StockFilter.fixed,
+                      onTap: () =>
+                          ref.read(stockFilterProvider.notifier).state =
+                              StockFilter.fixed,
                     ),
                     const SizedBox(width: 8),
                     _FilterChip(
                       label: 'Personnalisés',
                       isSelected: currentFilter == StockFilter.custom,
-                      onTap: () => ref.read(stockFilterProvider.notifier).state = StockFilter.custom,
+                      onTap: () =>
+                          ref.read(stockFilterProvider.notifier).state =
+                              StockFilter.custom,
                     ),
                   ],
                 ),
@@ -188,89 +200,98 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 if (!order.contains(key)) order.add(key);
               }
 
-              final activeCategories = order.where((k) => groups.containsKey(k)).toList();
+              final activeCategories = order
+                  .where((k) => groups.containsKey(k))
+                  .toList();
 
               if (_isReorderMode) {
                 return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= activeCategories.length) return null;
-                      final key = activeCategories[index];
-                      final groupItems = groups[key]!;
-
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _StockGroupHeader(title: key),
-                          ReorderableListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: groupItems.length,
-                            onReorder: (oldIndex, newIndex) {
-                              if (oldIndex < newIndex) newIndex -= 1;
-                              final item = groupItems.removeAt(oldIndex);
-                              groupItems.insert(newIndex, item);
-
-                              ref.read(stockNotifierProvider.notifier).reorderItems(groupItems);
-                            },
-                            itemBuilder: (context, i) {
-                              final item = groupItems[i];
-                              return Card(
-                                key: ValueKey('reorder_${item.id ?? i}'),
-                                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                child: ListTile(
-                                  leading: const Icon(Icons.drag_handle),
-                                  title: Text(item.name),
-                                  trailing: Text('${item.quantity} ${item.unit}'),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      );
-                    },
-                    childCount: activeCategories.length,
-                  ),
-                );
-              }
-
-              return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
+                  delegate: SliverChildBuilderDelegate((context, index) {
                     if (index >= activeCategories.length) return null;
                     final key = activeCategories[index];
                     final groupItems = groups[key]!;
 
                     return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _StockGroupHeader(title: key),
-                        ...groupItems.map((item) => StockItemTile(item: item)),
+                        ReorderableListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: groupItems.length,
+                          onReorder: (oldIndex, newIndex) {
+                            if (oldIndex < newIndex) newIndex -= 1;
+                            final item = groupItems.removeAt(oldIndex);
+                            groupItems.insert(newIndex, item);
+
+                            ref
+                                .read(stockNotifierProvider.notifier)
+                                .reorderItems(groupItems);
+                          },
+                          itemBuilder: (context, i) {
+                            final item = groupItems[i];
+                            return Card(
+                              key: ValueKey('reorder_${item.id ?? i}'),
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              child: ListTile(
+                                leading: const Icon(Icons.drag_handle),
+                                title: Text(item.name),
+                                trailing: Text('${item.quantity} ${item.unit}'),
+                              ),
+                            );
+                          },
+                        ),
                         const SizedBox(height: 16),
                       ],
                     );
-                  },
-                  childCount: activeCategories.length,
-                ),
+                  }, childCount: activeCategories.length),
+                );
+              }
+
+              return SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index >= activeCategories.length) return null;
+                  final key = activeCategories[index];
+                  final groupItems = groups[key]!;
+
+                  return Column(
+                    children: [
+                      _StockGroupHeader(title: key),
+                      ...groupItems.map((item) => StockItemTile(item: item)),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                }, childCount: activeCategories.length),
               );
             },
-            loading: () => const SliverFillRemaining(hasScrollBody: false, child: Center(child: CircularProgressIndicator())),
-            error: (e, s) => SliverFillRemaining(hasScrollBody: false, child: Center(child: Text('Erreur: $e'))),
+            loading: () => const SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, s) => SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(child: Text('Erreur: $e')),
+            ),
           ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
-      floatingActionButton: !_isReorderMode ? FloatingActionButton.extended(
-        onPressed: () => showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => const AddEditStockItemSheet(),
-        ),
-        icon: const Icon(Icons.add),
-        label: const Text('Ajouter'),
-        backgroundColor: Colors.orange.shade700,
-      ) : null,
+      floatingActionButton: !_isReorderMode
+          ? FloatingActionButton.extended(
+              onPressed: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => const AddEditStockItemSheet(),
+              ),
+              icon: const Icon(Icons.add),
+              label: const Text('Ajouter'),
+              backgroundColor: Colors.orange.shade700,
+            )
+          : null,
     );
   }
 }

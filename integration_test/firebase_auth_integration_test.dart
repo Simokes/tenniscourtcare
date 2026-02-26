@@ -18,16 +18,21 @@ void main() {
   late AppDatabase db;
 
   setUpAll(() async {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
 
     // Connect to emulators
-    const host = 'localhost'; // Use 10.0.2.2 for Android Emulator if not using reverse proxy
+    const host =
+        'localhost'; // Use 10.0.2.2 for Android Emulator if not using reverse proxy
     try {
       await FirebaseAuth.instance.useAuthEmulator(host, 9099);
       FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
       FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
     } catch (e) {
-      debugPrint('Emulators might already be configured or failed to connect: $e');
+      debugPrint(
+        'Emulators might already be configured or failed to connect: $e',
+      );
     }
   });
 
@@ -52,47 +57,58 @@ void main() {
     await Future.delayed(const Duration(milliseconds: 500));
 
     final auditLog = await FirebaseFirestore.instance
-      .collection('audit_logs')
-      .where('action', isEqualTo: action)
-      .where('targetUserId', isEqualTo: targetUserId)
-      .get();
+        .collection('audit_logs')
+        .where('action', isEqualTo: action)
+        .where('targetUserId', isEqualTo: targetUserId)
+        .get();
 
-    expect(auditLog.docs.isNotEmpty, true, reason: 'Audit log for $action not found');
-    expect(auditLog.docs.first['performedBy'], performedByUserId, reason: 'PerformedBy mismatch');
+    expect(
+      auditLog.docs.isNotEmpty,
+      true,
+      reason: 'Audit log for $action not found',
+    );
+    expect(
+      auditLog.docs.first['performedBy'],
+      performedByUserId,
+      reason: 'PerformedBy mismatch',
+    );
     expect(auditLog.docs.first['timestamp'], isNotNull);
   }
 
-  testWidgets('Integration: SignIn syncs firestore_uid and creates local user', (tester) async {
-    const email = 'sync_test_secure@example.com';
-    const password = 'StrongPassword123!';
+  testWidgets(
+    'Integration: SignIn syncs firestore_uid and creates local user',
+    (tester) async {
+      const email = 'sync_test_secure@example.com';
+      const password = 'StrongPassword123!';
 
-    try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code != 'email-already-in-use') rethrow;
-    }
+      try {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code != 'email-already-in-use') rethrow;
+      }
 
-    final user = await repository.signIn(email, password);
+      final user = await repository.signIn(email, password);
 
-    expect(user, isNotNull);
-    expect(user!.email, email);
+      expect(user, isNotNull);
+      expect(user!.email, email);
 
-    final fUser = FirebaseAuth.instance.currentUser;
-    expect(fUser, isNotNull);
+      final fUser = FirebaseAuth.instance.currentUser;
+      expect(fUser, isNotNull);
 
-    final localUser = await db.getUserByFirestoreUid(fUser!.uid);
-    expect(localUser, isNotNull);
-    expect(localUser!.email, email);
-    expect(localUser.role, Role.agent);
-  });
+      final localUser = await db.getUserByFirestoreUid(fUser!.uid);
+      expect(localUser, isNotNull);
+      expect(localUser!.email, email);
+      expect(localUser.role, Role.agent);
+    },
+  );
 
   testWidgets('Integration: hasAnyUser returns correct state', (tester) async {
-      expect(await repository.hasAnyUser(), isFalse);
-      await repository.signIn('test_has_user_secure@example.com', 'Password123!');
-      expect(await repository.hasAnyUser(), isTrue);
+    expect(await repository.hasAnyUser(), isFalse);
+    await repository.signIn('test_has_user_secure@example.com', 'Password123!');
+    expect(await repository.hasAnyUser(), isTrue);
   });
 
   testWidgets('Integration: createUser (Admin) succeeds', (tester) async {
@@ -102,12 +118,15 @@ void main() {
 
     UserCredential cred;
     try {
-       cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: adminEmail,
         password: adminPass,
       );
-    } on FirebaseAuthException catch(_) {
-       cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: adminEmail, password: adminPass);
+    } on FirebaseAuthException catch (_) {
+      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPass,
+      );
     }
 
     final adminUser = cred.user!;
@@ -118,14 +137,14 @@ void main() {
     // the Cloud Functions emulator respects Firestore changes -> Custom Claims trigger.
     // Our `onUpdateUser` trigger updates claims. So setting role=admin in Firestore should trigger it.
     await FirebaseFirestore.instance
-      .collection('users')
-      .doc(adminUser.uid)
-      .set({
-        'uid': adminUser.uid,
-        'email': adminEmail,
-        'role': 'admin',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        .collection('users')
+        .doc(adminUser.uid)
+        .set({
+          'uid': adminUser.uid,
+          'email': adminEmail,
+          'role': 'admin',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
     // Wait for Trigger to propagate claims (can take a second in emulator)
     await Future.delayed(const Duration(seconds: 2));
@@ -151,9 +170,9 @@ void main() {
     // 5. Verify user created in Firebase Auth (we can't easily check auth list from client sdk)
     // But we can try to sign in with it or check Firestore
     final userInFirestoreQuery = await FirebaseFirestore.instance
-      .collection('users')
-      .where('email', isEqualTo: newUserEmail)
-      .get();
+        .collection('users')
+        .where('email', isEqualTo: newUserEmail)
+        .get();
 
     expect(userInFirestoreQuery.docs.isNotEmpty, true);
     final newUserId = userInFirestoreQuery.docs.first.id;
@@ -182,21 +201,24 @@ void main() {
         email: agentEmail,
         password: agentPass,
       );
-    } on FirebaseAuthException catch(_) {
-      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: agentEmail, password: agentPass);
+    } on FirebaseAuthException catch (_) {
+      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: agentEmail,
+        password: agentPass,
+      );
     }
 
     final agentUser = cred.user!;
 
     await FirebaseFirestore.instance
-      .collection('users')
-      .doc(agentUser.uid)
-      .set({
-        'uid': agentUser.uid,
-        'email': agentEmail,
-        'role': 'agent',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        .collection('users')
+        .doc(agentUser.uid)
+        .set({
+          'uid': agentUser.uid,
+          'email': agentEmail,
+          'role': 'agent',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
     // Wait for potential trigger (though irrelevant for permission denied)
     await Future.delayed(const Duration(seconds: 1));
@@ -212,32 +234,42 @@ void main() {
         password: 'Password123!',
         role: Role.agent,
       ),
-      throwsA(isA<Exception>()), // FirebaseAuthRepository throws mapped exceptions
+      throwsA(
+        isA<Exception>(),
+      ), // FirebaseAuthRepository throws mapped exceptions
     );
   });
 
-  testWidgets('Integration: deleteUser removes from all places', (tester) async {
+  testWidgets('Integration: deleteUser removes from all places', (
+    tester,
+  ) async {
     const adminEmail = 'admin_delete@example.com';
     const adminPass = 'AdminPass123!';
 
     // Create admin
     UserCredential cred;
     try {
-       cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: adminEmail,
         password: adminPass,
       );
-    } on FirebaseAuthException catch(_) {
-       cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: adminEmail, password: adminPass);
+    } on FirebaseAuthException catch (_) {
+      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPass,
+      );
     }
     final adminUser = cred.user!;
 
-    await FirebaseFirestore.instance.collection('users').doc(adminUser.uid).set({
-        'uid': adminUser.uid,
-        'email': adminEmail,
-        'role': 'admin',
-        'createdAt': FieldValue.serverTimestamp(),
-    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(adminUser.uid)
+        .set({
+          'uid': adminUser.uid,
+          'email': adminEmail,
+          'role': 'admin',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
     await Future.delayed(const Duration(seconds: 2));
     await adminUser.getIdToken(true);
@@ -253,7 +285,10 @@ void main() {
       role: Role.agent,
     );
 
-    final userQuery = await FirebaseFirestore.instance.collection('users').where('email', isEqualTo: deleteEmail).get();
+    final userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: deleteEmail)
+        .get();
     final deleteUid = userQuery.docs.first.id;
     final localUserBefore = await db.getUserByFirestoreUid(deleteUid);
     expect(localUserBefore, isNotNull);
@@ -262,7 +297,10 @@ void main() {
     await repository.deleteUser(localUserBefore!.id);
 
     // Verify Firestore deletion
-    final userInFirestore = await FirebaseFirestore.instance.collection('users').doc(deleteUid).get();
+    final userInFirestore = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(deleteUid)
+        .get();
     expect(userInFirestore.exists, false);
 
     // Verify Local deletion
@@ -273,27 +311,35 @@ void main() {
     await verifyAuditLog('USER_DELETED', deleteUid, adminUser.uid);
   });
 
-  testWidgets('Integration: updateRole changes role everywhere', (tester) async {
+  testWidgets('Integration: updateRole changes role everywhere', (
+    tester,
+  ) async {
     const adminEmail = 'admin_role@example.com';
     const adminPass = 'AdminPass123!';
 
     UserCredential cred;
     try {
-       cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: adminEmail,
         password: adminPass,
       );
-    } on FirebaseAuthException catch(_) {
-       cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: adminEmail, password: adminPass);
+    } on FirebaseAuthException catch (_) {
+      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPass,
+      );
     }
     final adminUser = cred.user!;
 
-    await FirebaseFirestore.instance.collection('users').doc(adminUser.uid).set({
-        'uid': adminUser.uid,
-        'email': adminEmail,
-        'role': 'admin',
-        'createdAt': FieldValue.serverTimestamp(),
-    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(adminUser.uid)
+        .set({
+          'uid': adminUser.uid,
+          'email': adminEmail,
+          'role': 'admin',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
     await Future.delayed(const Duration(seconds: 2));
     await adminUser.getIdToken(true);
@@ -308,9 +354,11 @@ void main() {
       role: Role.agent,
     );
 
-    final userQuery = await FirebaseFirestore.instance.collection('users').where('email', isEqualTo: promoteEmail).get();
+    final userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: promoteEmail)
+        .get();
     final promoteUid = userQuery.docs.first.id;
-
 
     // Need a method to call updateRole - Wait, FirebaseAuthRepository doesn't expose public updateUserRole with Role enum for OTHERS?
     // It has `updateUserRole(int userId, Role newRole)`? No, it has `updateUserRole` implemented?
@@ -333,14 +381,16 @@ void main() {
     // Let's check.
     // If it's missing, I'll invoke the Cloud Function directly for this test to prove backend works.
 
-    final callable = FirebaseFunctions.instanceFor(region: 'us-central1').httpsCallable('updateUserRole');
-    await callable.call({
-        'userId': promoteUid,
-        'newRole': 'secretary'
-    });
+    final callable = FirebaseFunctions.instanceFor(
+      region: 'us-central1',
+    ).httpsCallable('updateUserRole');
+    await callable.call({'userId': promoteUid, 'newRole': 'secretary'});
 
     // Verify Firestore
-    final updatedDoc = await FirebaseFirestore.instance.collection('users').doc(promoteUid).get();
+    final updatedDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(promoteUid)
+        .get();
     expect(updatedDoc['role'], 'secretary');
 
     // Verify Local DB (Sync might not happen until re-login or manual sync trigger,
@@ -365,21 +415,27 @@ void main() {
 
     UserCredential cred;
     try {
-       cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      cred = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: adminEmail,
         password: adminPass,
       );
-    } on FirebaseAuthException catch(_) {
-       cred = await FirebaseAuth.instance.signInWithEmailAndPassword(email: adminEmail, password: adminPass);
+    } on FirebaseAuthException catch (_) {
+      cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: adminEmail,
+        password: adminPass,
+      );
     }
     final adminUser = cred.user!;
 
-    await FirebaseFirestore.instance.collection('users').doc(adminUser.uid).set({
-        'uid': adminUser.uid,
-        'email': adminEmail,
-        'role': 'admin',
-        'createdAt': FieldValue.serverTimestamp(),
-    });
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(adminUser.uid)
+        .set({
+          'uid': adminUser.uid,
+          'email': adminEmail,
+          'role': 'admin',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
     await Future.delayed(const Duration(seconds: 2));
     await adminUser.getIdToken(true);
     await repository.signIn(adminEmail, adminPass);
@@ -392,7 +448,10 @@ void main() {
       role: Role.agent,
     );
 
-    final userQuery = await FirebaseFirestore.instance.collection('users').where('email', isEqualTo: userEmail).get();
+    final userQuery = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: userEmail)
+        .get();
     final userUid = userQuery.docs.first.id;
     final localUser = await db.getUserByFirestoreUid(userUid);
 
@@ -401,30 +460,39 @@ void main() {
 
     // Verify old password fails
     try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(email: userEmail, password: 'OldPassword123!');
-        fail('Should have failed with wrong password');
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: userEmail,
+        password: 'OldPassword123!',
+      );
+      fail('Should have failed with wrong password');
     } catch (e) {
-        expect(e, isA<FirebaseAuthException>());
+      expect(e, isA<FirebaseAuthException>());
     }
 
     // Verify new password works
-    await FirebaseAuth.instance.signInWithEmailAndPassword(email: userEmail, password: 'NewPassword123!');
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: userEmail,
+      password: 'NewPassword123!',
+    );
 
     // Verify Audit Log
     await verifyAuditLog('PASSWORD_RESET', userUid, adminUser.uid);
   });
 
   testWidgets('Integration: Error handling - wrong password', (tester) async {
-     const email = 'error_test@example.com';
-     const pass = 'CorrectPass123!';
-     try {
-       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
-     } catch (_) {}
+    const email = 'error_test@example.com';
+    const pass = 'CorrectPass123!';
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: pass,
+      );
+    } catch (_) {}
 
-     expect(
-       () => repository.signIn(email, 'WrongPass123!'),
-       throwsA(isA<Exception>()),
-     );
+    expect(
+      () => repository.signIn(email, 'WrongPass123!'),
+      throwsA(isA<Exception>()),
+    );
   });
 
   testWidgets('Integration: Error handling - user not found', (tester) async {

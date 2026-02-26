@@ -17,9 +17,7 @@ void main() {
     setUp(() async {
       database = AppDatabase(NativeDatabase.memory());
       container = ProviderContainer(
-        overrides: [
-          databaseProvider.overrideWithValue(database),
-        ],
+        overrides: [databaseProvider.overrideWithValue(database)],
       );
 
       // Initialiser le stock pour éviter les erreurs "Stock insuffisant"
@@ -98,11 +96,13 @@ void main() {
 
       expect(
         () => notifier.addMaintenance(maintenance),
-        throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains('silice'),
-        )),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('silice'),
+          ),
+        ),
       );
     });
 
@@ -120,11 +120,13 @@ void main() {
 
       expect(
         () => notifier.addMaintenance(maintenance),
-        throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains('Recharge'),
-        )),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('Recharge'),
+          ),
+        ),
       );
     });
 

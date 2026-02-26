@@ -13,10 +13,8 @@ class SeasonComparisonCard extends ConsumerWidget {
     return comparisonAsync.when(
       data: (state) => _buildCard(context, state),
       loading: () => const SizedBox.shrink(), // Ou un placeholder
-      error: (err, stack) => SizedBox(
-        height: 100,
-        child: Center(child: Text('Erreur: $err')),
-      ),
+      error: (err, stack) =>
+          SizedBox(height: 100, child: Center(child: Text('Erreur: $err'))),
     );
   }
 
@@ -31,8 +29,18 @@ class SeasonComparisonCard extends ConsumerWidget {
     // Données pour le graphique
     final groups = [
       _makeGroupData(0, state.dataNMinus1.manto, state.dataN.manto, mantoColor),
-      _makeGroupData(1, state.dataNMinus1.sottomanto, state.dataN.sottomanto, sottoColor),
-      _makeGroupData(2, state.dataNMinus1.silice, state.dataN.silice, siliceColor),
+      _makeGroupData(
+        1,
+        state.dataNMinus1.sottomanto,
+        state.dataN.sottomanto,
+        sottoColor,
+      ),
+      _makeGroupData(
+        2,
+        state.dataNMinus1.silice,
+        state.dataN.silice,
+        siliceColor,
+      ),
     ];
 
     // Calcul du max Y pour l'échelle
@@ -53,7 +61,9 @@ class SeasonComparisonCard extends ConsumerWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -64,16 +74,16 @@ class SeasonComparisonCard extends ConsumerWidget {
         children: [
           Text(
             'Comparaison Saisonnière',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             state.message,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                ),
+              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+            ),
           ),
           const SizedBox(height: 24),
           AspectRatio(
@@ -83,14 +93,23 @@ class SeasonComparisonCard extends ConsumerWidget {
                 maxY: maxY,
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
-                    getTooltipColor: (group) => Colors.blueGrey.withValues(alpha: 0.8),
+                    getTooltipColor: (group) =>
+                        Colors.blueGrey.withValues(alpha: 0.8),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      final String yearLabel = rodIndex == 0 ? '${state.yearN - 1}' : '${state.yearN}';
+                      final String yearLabel = rodIndex == 0
+                          ? '${state.yearN - 1}'
+                          : '${state.yearN}';
                       String material = '';
                       switch (groupIndex) {
-                        case 0: material = 'Manto'; break;
-                        case 1: material = 'Sottomanto'; break;
-                        case 2: material = 'Silice'; break;
+                        case 0:
+                          material = 'Manto';
+                          break;
+                        case 1:
+                          material = 'Sottomanto';
+                          break;
+                        case 2:
+                          material = 'Silice';
+                          break;
                       }
                       return BarTooltipItem(
                         '$material ($yearLabel)\n',
@@ -177,7 +196,9 @@ class SeasonComparisonCard extends ConsumerWidget {
                   drawVerticalLine: false,
                   horizontalInterval: maxY / 5,
                   getDrawingHorizontalLine: (value) => FlLine(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).dividerColor.withValues(alpha: 0.1),
                     strokeWidth: 1,
                   ),
                 ),
@@ -190,9 +211,19 @@ class SeasonComparisonCard extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegendItem(context, Colors.grey, 'Année N-1 (${state.yearN - 1})', isLight: true),
+              _buildLegendItem(
+                context,
+                Colors.grey,
+                'Année N-1 (${state.yearN - 1})',
+                isLight: true,
+              ),
               const SizedBox(width: 24),
-              _buildLegendItem(context, isDark ? Colors.grey.shade400 : Colors.grey.shade800, 'Année N (${state.yearN})', isLight: false),
+              _buildLegendItem(
+                context,
+                isDark ? Colors.grey.shade400 : Colors.grey.shade800,
+                'Année N (${state.yearN})',
+                isLight: false,
+              ),
             ],
           ),
         ],
@@ -227,7 +258,12 @@ class SeasonComparisonCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildLegendItem(BuildContext context, Color color, String text, {required bool isLight}) {
+  Widget _buildLegendItem(
+    BuildContext context,
+    Color color,
+    String text, {
+    required bool isLight,
+  }) {
     return Row(
       children: [
         Container(

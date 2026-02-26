@@ -59,7 +59,8 @@ class _CategoryCard extends StatelessWidget {
       icon = Icons.layers;
     } else if (category.toLowerCase().contains('entretien')) {
       icon = Icons.cleaning_services;
-    } else if (category.toLowerCase().contains('fourniture') || category.toLowerCase().contains('maintenance')) {
+    } else if (category.toLowerCase().contains('fourniture') ||
+        category.toLowerCase().contains('maintenance')) {
       icon = Icons.build;
     } else {
       icon = Icons.category;
@@ -74,10 +75,14 @@ class _CategoryCard extends StatelessWidget {
           width: 100,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isSelected ? colorScheme.secondaryContainer : colorScheme.surface,
+            color: isSelected
+                ? colorScheme.secondaryContainer
+                : colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? colorScheme.secondary : colorScheme.outline.withValues(alpha: 0.3),
+              color: isSelected
+                  ? colorScheme.secondary
+                  : colorScheme.outline.withValues(alpha: 0.3),
               width: 2,
             ),
           ),
@@ -87,7 +92,9 @@ class _CategoryCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 28,
-                color: isSelected ? colorScheme.secondary : colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? colorScheme.secondary
+                    : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 8),
               Text(
@@ -98,7 +105,9 @@ class _CategoryCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? colorScheme.onSecondaryContainer : colorScheme.onSurface,
+                  color: isSelected
+                      ? colorScheme.onSecondaryContainer
+                      : colorScheme.onSurface,
                 ),
               ),
             ],

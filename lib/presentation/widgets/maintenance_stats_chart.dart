@@ -26,9 +26,9 @@ class MaintenanceStatsChart extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -95,8 +95,8 @@ class MaintenanceStatsChart extends StatelessWidget {
                   Text(
                     '$total',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     'Sacs',
@@ -115,9 +115,12 @@ class MaintenanceStatsChart extends StatelessWidget {
             runSpacing: 4,
             alignment: WrapAlignment.center,
             children: [
-              if (manto > 0) const _LegendItem(color: Colors.orange, text: 'Manto'),
-              if (sottomanto > 0) const _LegendItem(color: Colors.brown, text: 'Sotto'),
-              if (silice > 0) const _LegendItem(color: Colors.blue, text: 'Silice'),
+              if (manto > 0)
+                const _LegendItem(color: Colors.orange, text: 'Manto'),
+              if (sottomanto > 0)
+                const _LegendItem(color: Colors.brown, text: 'Sotto'),
+              if (silice > 0)
+                const _LegendItem(color: Colors.blue, text: 'Silice'),
             ],
           )
         else

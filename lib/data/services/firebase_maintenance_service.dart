@@ -41,21 +41,28 @@ class FirebaseMaintenanceService {
         .collection(_collectionPath)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        final model = MaintenanceModel.fromJson(data);
-        return model.toDomain();
-      }).toList();
-    }).handleError((e) {
-      print('Error watching maintenances: $e');
-      return <Maintenance>[];
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            final model = MaintenanceModel.fromJson(data);
+            return model.toDomain();
+          }).toList();
+        })
+        .handleError((e) {
+          print('Error watching maintenances: $e');
+          return <Maintenance>[];
+        });
   }
 
   /// Récupérer les maintenances non-syncés
-  Future<List<Maintenance>> getUnsyncedMaintenances(List<Maintenance> allMaintenances) async {
+  Future<List<Maintenance>> getUnsyncedMaintenances(
+    List<Maintenance> allMaintenances,
+  ) async {
     return allMaintenances
-        .where((m) => m.syncStatus == SyncStatus.local || m.syncStatus == SyncStatus.error)
+        .where(
+          (m) =>
+              m.syncStatus == SyncStatus.local ||
+              m.syncStatus == SyncStatus.error,
+        )
         .toList();
   }
 
