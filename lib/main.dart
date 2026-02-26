@@ -7,33 +7,59 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
+import 'presentation/providers/stock_provider.dart';
+import 'presentation/providers/database_provider.dart'; // ✅ IMPORT
 import 'providers/queue_providers.dart';
 import 'presentation/widgets/queue_status_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tenniscourtcare/data/database/app_database.dart';
+import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      // Initialisation des locales pour intl (fr_FR)
+      // Initialisation des locales
       await initializeDateFormatting('fr_FR', null);
+      
+      // Initialize Firebase
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      runApp(const ProviderScope(child: CourtCareApp()));
+
+      // ✅ Initialize Database & Sync Service
+      final db = AppDatabase();
+      final firestore = FirebaseFirestore.instance;
+      final syncService = FirebaseSyncService(firestore, db);
+      
+      // ✅ Start initial sync
+      unawaited(syncService.syncAll());
+      
+      // ✅ Setup periodic sync (every 5 minutes)
+      Timer.periodic(const Duration(minutes: 5), (_) {
+        unawaited(syncService.syncAll());
+      });
+
+      runApp(
+        ProviderScope(
+          overrides: [
+            // ✅ Override providers with actual instances
+            databaseProvider.overrideWithValue(db),
+            firebaseSyncServiceProvider.overrideWithValue(syncService),
+          ],
+          child: const CourtCareApp(),
+        ),
+      );
     },
     (error, stack) {
-      // Gestionnaire d'erreurs globales
-      // Dans le futur, on pourrait intégrer Sentry ou Firebase Crashlytics ici.
       if (kDebugMode) {
-        debugPrint('ERREUR NON GÉRÉE: $error');
-        debugPrint('STACKTRACE: $stack');
+        debugPrint('❌ ERREUR NON GÉRÉE: $error');
+        debugPrint('📍 STACKTRACE: $stack');
       } else {
-        // En production, on pourrait logger dans un fichier ou envoyer vers un service
-        // Pour l'instant, on évite le crash silencieux complet en loggant a minima si possible
-        debugPrint('Erreur critique capturée: $error');
+        debugPrint('⚠️ Erreur critique capturée: $error');
       }
     },
   );
@@ -48,7 +74,6 @@ class CourtCareApp extends ConsumerWidget {
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeMode = settingsAsync.valueOrNull?.themeMode ?? ThemeMode.system;
 
-    // Initialize background retry check
     ref.watch(scheduleRetryCheckProvider);
 
     return MaterialApp.router(
@@ -73,9 +98,9 @@ class CourtCareApp extends ConsumerWidget {
       ],
       supportedLocales: const [
         Locale('fr', 'FR'),
-        Locale('en', 'US'), // Optional fallback
+        Locale('en', 'US'),
       ],
-      locale: const Locale('fr', 'FR'), // Force French locale
+      locale: const Locale('fr', 'FR'),
     );
   }
 }

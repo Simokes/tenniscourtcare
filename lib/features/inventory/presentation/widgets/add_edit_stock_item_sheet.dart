@@ -25,6 +25,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
   String? _comment;
   int? _minThreshold;
   late String _category;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -50,9 +51,11 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
+    setState(() => _isSaving = true);
+
     try {
       if (widget.item == null) {
-        // Create
+        // ✅ CREATE with sync
         final newItem = StockItem(
           name: _name,
           quantity: _quantity,
@@ -64,9 +67,24 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           createdAt: DateTime.now(),
           category: _category,
         );
+        
+        // Add item to database
         await ref.read(stockNotifierProvider.notifier).addItem(newItem);
+        
+        // ✅ SYNC TO FIREBASE
+        await ref.read(syncStockProvider.future);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Article ajouté et synchronisé'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
       } else {
-        // Update
+        // ✅ UPDATE with sync
         final updated = widget.item!.copyWith(
           name: _name,
           quantity: _quantity,
@@ -76,15 +94,90 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           updatedAt: DateTime.now(),
           category: _category,
         );
+        
+        // Update item in database
         await ref.read(stockNotifierProvider.notifier).updateItem(updated);
+        
+        // ✅ SYNC TO FIREBASE
+        await ref.read(syncStockProvider.future);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Article mis à jour et synchronisé'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
       }
-      if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erreur: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  // ✅ DELETE ITEM
+  Future<void> _deleteItem() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer l\'article?'),
+        content: const Text('Cette action est irréversible.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      if (widget.item?.id != null) {
+        // Delete from database
+        await ref.read(stockNotifierProvider.notifier).deleteItem(widget.item!.id!);
+        
+        // ✅ SYNC TO FIREBASE
+        await ref.read(syncStockProvider.future);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Article supprimé et synchronisé'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ Erreur: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -141,7 +234,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                       ),
                     ),
                     IconButton.filledTonal(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -189,6 +282,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                           validator: (v) =>
                               (v == null || v.isEmpty) ? 'Requis' : null,
                           onSaved: (v) => _name = v!.trim(),
+                          enabled: !_isSaving,
                         ),
 
                         const SizedBox(height: 16),
@@ -201,10 +295,12 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                               child: QuantitySelector(
                                 label: 'Quantité',
                                 value: _quantity,
-                                unit:
-                                    _unit, // just for display label in selector
-                                onChanged: (val) =>
-                                    setState(() => _quantity = val),
+                                unit: _unit,
+                                onChanged: (val) {
+                                  if (!_isSaving) {
+                                    setState(() => _quantity = val);
+                                  }
+                                },
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -219,6 +315,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                                   ),
                                 ),
                                 onSaved: (v) => _unit = v?.trim() ?? 'pcs',
+                                enabled: !_isSaving,
                               ),
                             ),
                           ],
@@ -244,6 +341,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                             FilteringTextInputFormatter.digitsOnly,
                           ],
                           onSaved: (v) => _minThreshold = int.tryParse(v ?? ''),
+                          enabled: !_isSaving,
                         ),
 
                         const SizedBox(height: 16),
@@ -259,26 +357,63 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                           ),
                           maxLines: 2,
                           onSaved: (v) => _comment = v?.trim(),
+                          enabled: !_isSaving,
                         ),
 
                         const SizedBox(height: 32),
 
+                        // Save Button
                         FilledButton(
-                          onPressed: _save,
+                          onPressed: _isSaving ? null : _save,
                           style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Enregistrer',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                          child: _isSaving
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        AlwaysStoppedAnimation(Colors.white),
+                                  ),
+                                )
+                              : const Text(
+                                  'Enregistrer',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                        ),
+
+                        // ✅ DELETE BUTTON
+                        if (widget.item != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: OutlinedButton(
+                              onPressed: _isSaving ? null : _deleteItem,
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.red),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Supprimer',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+
                         const SizedBox(height: 24),
                       ],
                     ),

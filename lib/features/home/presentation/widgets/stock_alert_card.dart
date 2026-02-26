@@ -10,7 +10,7 @@ class StockAlertCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lowStockAsync = ref.watch(lowStockItemsProvider);
-    final criticalStockAsync = ref.watch(criticalStockItemsProvider);
+    final criticalAsync = ref.watch(criticalStockItemsProvider);
     final allStockAsync = ref.watch(stockProvider);
 
     return lowStockAsync.when(
@@ -18,21 +18,20 @@ class StockAlertCard extends ConsumerWidget {
         if (lowStockItems.isEmpty) return const SizedBox.shrink();
 
         final totalItemsCount = allStockAsync.asData?.value.length ?? 1;
-        // Avoid division by zero
         final safeTotal = totalItemsCount == 0 ? 1 : totalItemsCount;
 
-        final criticalItemsCount = criticalStockAsync.asData?.value.length ?? 0;
+        final criticalItemsCount = criticalAsync.asData?.value.length ?? 0;
         final isCritical = criticalItemsCount > 0;
         final topItem = lowStockItems.first;
 
         // Colors
-        final backgroundColor = isCritical ? const Color(0xFFFEF2F2) : const Color(0xFFFEFCE8); // Red 50 vs Yellow 50
-        final borderColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A); // Red 200 vs Yellow 200
-        final iconBackgroundColor = isCritical ? const Color(0xFFEF4444) : const Color(0xFFEAB308); // Red 500 vs Yellow 500
-        final titleColor = isCritical ? const Color(0xFF7F1D1D) : const Color(0xFF713F12); // Red 900 vs Yellow 900
-        final subtitleColor = isCritical ? const Color(0xFFB91C1C) : const Color(0xFF854D0E); // Red 700 vs Yellow 800
-        final progressColor = isCritical ? const Color(0xFFDC2626) : const Color(0xFFCA8A04); // Red 600 vs Yellow 600
-        final progressBackgroundColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A); // Red 200 vs Yellow 200
+        final backgroundColor = isCritical ? const Color(0xFFFEF2F2) : const Color(0xFFFEFCE8);
+        final borderColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A);
+        final iconBackgroundColor = isCritical ? const Color(0xFFEF4444) : const Color(0xFFEAB308);
+        final titleColor = isCritical ? const Color(0xFF7F1D1D) : const Color(0xFF713F12);
+        final subtitleColor = isCritical ? const Color(0xFFB91C1C) : const Color(0xFF854D0E);
+        final progressColor = isCritical ? const Color(0xFFDC2626) : const Color(0xFFCA8A04);
+        final progressBackgroundColor = isCritical ? const Color(0xFFFECACA) : const Color(0xFFFEF08A);
 
         final titleText = '${lowStockItems.length} ${isCritical ? "Critical Items" : "Low Stock Items"}';
         final subtitleText = 'Top: ${topItem.name} (${topItem.quantity}/${topItem.minThreshold} ${topItem.unit})';
