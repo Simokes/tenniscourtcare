@@ -173,7 +173,21 @@ class FirebaseAuthRepository implements AuthRepository {
       });
 
       // CRITICAL: Get UID from response
-      final uid = result.data['uid'] as String;
+      if (result.data is! Map) {
+        throw const ValidationException(
+          'Erreur serveur: Réponse invalide (format incorrect).',
+        );
+      }
+
+      // Cast to map to access fields safely
+      final data = result.data as Map;
+      final uid = data['uid'] as String?;
+
+      if (uid == null || uid.isEmpty) {
+        throw const ValidationException(
+          'Erreur serveur: UID manquant dans la réponse.',
+        );
+      }
 
       // Sync local DB
       // Check if user exists first (by firestore_uid)
