@@ -22,7 +22,6 @@ final firestoreStockProvider = StreamProvider<List<StockItem>>((ref) {
 
 final stockProvider = StreamProvider<List<StockItem>>((ref) async* {
   final localFuture = ref.watch(localStockProvider.future);
-  final remoteStream = ref.watch(firestoreStockProvider.future);
 
   final local = await localFuture;
   yield local;

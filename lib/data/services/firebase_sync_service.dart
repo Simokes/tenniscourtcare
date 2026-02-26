@@ -190,4 +190,10 @@ class FirebaseSyncService {
       _updateStatus('events', SyncStatus.error);
     }
   }
+
+  // Public getters pour accès externe (repositories, providers)
+  FirebaseTerrainService get terrainService => _terrainService;
+  FirebaseMaintenanceService get maintenanceService => _maintenanceService;
+  FirebaseStockService get stockService => _stockService;
+  FirebaseEventService get eventService => _eventService;
 }
