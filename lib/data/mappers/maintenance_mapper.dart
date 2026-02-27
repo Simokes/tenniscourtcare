@@ -2,6 +2,7 @@
 
 import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/maintenance_model.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
@@ -95,25 +96,22 @@ extension MaintenanceDriftX on db.MaintenanceRow {
 
 // Domain → Companion (Keeping for DB inserts)
 extension MaintenanceDomainX on Maintenance {
-  db.MaintenancesCompanion toCompanion() {
-    return db.MaintenancesCompanion(
-      id: id != null ? Value(id!) : const Value.absent(),
-      terrainId: Value(terrainId),
-      type: Value(type),
-      date: Value(date),
-      commentaire: Value(commentaire),
-      sacsMantoUtilises: Value(sacsMantoUtilises),
-      sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
-      sacsSiliceUtilises: Value(sacsSiliceUtilises),
-      imagePath: Value(imagePath),
-      // Sync mappings
-      syncStatus: Value(syncStatus.name),
-      createdAt: Value(createdAt),
-      updatedAt: Value(updatedAt),
-      firebaseId: Value(firebaseId),
-      remoteId: Value(firebaseId), // Fallback
-      createdBy: Value(createdBy),
-      modifiedBy: Value(modifiedBy),
-    );
-  }
+  MaintenancesCompanion toCompanion() => MaintenancesCompanion(
+    id: id == null ? const Value.absent() : Value(id!),
+    terrainId: Value(terrainId),
+    type: Value(type),
+    commentaire: Value(commentaire),
+    date: Value(date),
+    sacsMantoUtilises: Value(sacsMantoUtilises),
+    sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
+    sacsSiliceUtilises: Value(sacsSiliceUtilises),
+    imagePath: Value(imagePath),
+    remoteId: Value(firebaseId),
+    syncStatus: Value(syncStatus.name),
+    createdAt: Value(createdAt),
+    updatedAt: Value(updatedAt),
+    firebaseId: Value(firebaseId),
+    createdBy: Value(createdBy),
+    modifiedBy: Value(modifiedBy),
+  );
 }
