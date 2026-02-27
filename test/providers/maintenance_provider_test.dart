@@ -81,7 +81,7 @@ void main() {
       await container.read(maintenanceNotifierProvider).when(
         data: (_) async {},
         loading: () async {},
-        error: (_, __) async {},
+        error: (_, _) async {},
       );
       
       expect(container.read(maintenanceNotifierProvider).hasValue, true);
