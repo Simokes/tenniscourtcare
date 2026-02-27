@@ -15,20 +15,8 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
 final localMaintenancesProvider = FutureProvider<List<Maintenance>>((
   ref,
 ) async {
-  // Use watchMaintenancesInRange(0, max) from DB directly via repository if available,
-  // but MaintenanceRepositoryImpl.getAllMaintenances() returns [] per previous file read.
-  // However, the Service uses `_db.watchMaintenancesInRange(0, 9999999999).first`.
-  // Let's rely on the repository, but if it returns empty, we might need to fix the repository
-  // or access DB directly.
-  // The user prompt shows `getAllMaintenances()` in repository returns empty list.
-  // BUT the user prompt for `FirebaseSyncService` uses `watchMaintenancesInRange`.
-  // To get *actual* data in UI, we should probably access DB directly or fix repository.
-  // Given the "Finalizing FirebaseSyncService" context, I will stick to what the user provided in `maintenance_provider.dart` prompt:
-  // "final repo = ref.watch(maintenanceRepositoryProvider); return repo.getAllMaintenances();"
-  // If `getAllMaintenances` is empty, then local provider is empty.
-  // I will follow the user provided code structure.
-  final repo = ref.watch(maintenanceRepositoryProvider);
-  return repo.getAllMaintenances();
+  final db = ref.watch(databaseProvider);
+  return await db.watchMaintenancesInRange(0, 9999999999).first;
 });
 
 // FIRESTORE

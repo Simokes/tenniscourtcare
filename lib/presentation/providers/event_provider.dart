@@ -16,8 +16,8 @@ final eventRepositoryProvider = Provider<EventRepository>((ref) {
 });
 
 final localEventsProvider = FutureProvider<List<AppEvent>>((ref) async {
-  final repo = ref.watch(eventRepositoryProvider);
-  return repo.getEvents();
+  final db = ref.watch(databaseProvider);
+  return await db.watchAllEvents().first;
 });
 
 final firestoreEventsProvider = StreamProvider<List<AppEvent>>((ref) {
