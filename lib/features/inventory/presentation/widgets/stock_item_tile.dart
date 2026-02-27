@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
 import 'add_edit_stock_item_sheet.dart';
@@ -13,200 +12,111 @@ class StockItemTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    // Logic extracted to local variables for clarity
+  
+   
     final isLow = item.isLowOnStock;
-    final timeAgo = _formatUpdatedAt(item.updatedAt);
     final iconData = _getIconForName(item.name);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          // Use error color if low, otherwise a subtle border for definition
-          color: isLow
-              ? colorScheme.error.withValues(alpha: 0.5)
-              : colorScheme.outlineVariant.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: InkWell(
-        onTap: () => _openEditSheet(context),
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              _buildLeadingIcon(colorScheme, iconData, isLow),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _buildItemDetails(theme, colorScheme, isLow, timeAgo),
-              ),
-              _buildQuantityControl(context, ref, colorScheme),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLeadingIcon(ColorScheme colorScheme, IconData icon, bool isLow) {
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: isLow
-            ? colorScheme.errorContainer
-            : colorScheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        color: isLow
-            ? colorScheme.onErrorContainer
-            : colorScheme.onPrimaryContainer,
-        size: 20,
-      ),
-    );
-  }
-
-  Widget _buildItemDetails(
-    ThemeData theme,
-    ColorScheme colorScheme,
-    bool isLow,
-    String timeAgo,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return InkWell(
+      onTap: () => _openEditSheet(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
           children: [
-            Flexible(
-              child: Text(
-                item.name,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
+            // Icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isLow ? Colors.red.shade100 : Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                iconData,
+                color: isLow ? Colors.red.shade600 : Colors.blue.shade800,
+                size: 24,
               ),
             ),
-            if (isLow) _buildLowStockBadge(theme, colorScheme),
-          ],
-        ),
-        if (item.comment?.isNotEmpty ?? false)
-          Text(
-            item.comment!,
-            style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        Text(
-          'Màj $timeAgo',
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.disabledColor,
-            fontSize: 10,
-          ),
-        ),
-      ],
-    );
-  }
+            const SizedBox(width: 16),
 
-  Widget _buildLowStockBadge(ThemeData theme, ColorScheme colorScheme) {
-    return Container(
-      margin: const EdgeInsets.only(left: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: colorScheme.error,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        'BAS',
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: colorScheme.onError,
-          fontWeight: FontWeight.bold,
-          fontSize: 10,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuantityControl(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme colorScheme,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _quantityButton(
-            icon: Icons.remove,
-            color: colorScheme.onSurfaceVariant,
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              ref.read(stockNotifierProvider.notifier).deleteItem(item.id!);
-            },
-          ),
-          InkWell(
-            onTap: () => _showQuantityDialog(context, ref),
-            borderRadius: BorderRadius.circular(4),
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 44),
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            // Text Info
+            Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
+                    item.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isLow ? Colors.red.shade800 : Colors.grey.shade900,
+                    ),
+                  ),
+                  if (item.comment != null && item.comment!.isNotEmpty)
+                    Text(
+                      item.comment!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isLow
+                            ? Colors.red.shade400
+                            : Colors.grey.shade500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    )
+                  else if (isLow)
+                    Text(
+                      'Stock Critique',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.red.shade600,
+                      ),
+                    )
+                  else
+                    Text(
+                      item.category ?? 'Autre',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // Quantity Input
+            Container(
+              width: 70,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isLow ? Colors.red.shade200 : Colors.grey.shade300,
+                ),
+              ),
+              child: InkWell(
+                onTap: () => _showQuantityDialog(context, ref),
+                borderRadius: BorderRadius.circular(8),
+                child: Center(
+                  child: Text(
                     '${item.quantity}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: item.isLowOnStock
-                          ? colorScheme.error
-                          : colorScheme.onSurface,
+                      color: isLow
+                          ? Colors.red.shade600
+                          : Theme.of(context).primaryColor,
                     ),
                   ),
-                  Text(
-                    item.unit,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-          _quantityButton(
-            icon: Icons.add,
-            color: colorScheme.primary,
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              ref.read(stockNotifierProvider.notifier).deleteItem(item.id!);
-            },
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _quantityButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return IconButton(
-      icon: Icon(icon, size: 18),
-      padding: const EdgeInsets.all(8),
-      constraints: const BoxConstraints(),
-      color: color,
-      onPressed: onPressed,
     );
   }
 
@@ -231,16 +141,9 @@ class StockItemTile extends ConsumerWidget {
     if (lower.contains('eau') || lower.contains('arros')) {
       return Icons.water_drop;
     }
+    if (lower.contains('chaux')) return Icons.grass;
+    if (lower.contains('algicide')) return Icons.science;
     return Icons.inventory_2;
-  }
-
-  String _formatUpdatedAt(DateTime dt) {
-    final now = DateTime.now();
-    final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return "à l'instant";
-    if (diff.inMinutes < 60) return 'il y a ${diff.inMinutes}m';
-    if (diff.inHours < 24) return 'il y a ${diff.inHours}h';
-    return DateFormat('dd/MM').format(dt);
   }
 
   void _showQuantityDialog(BuildContext context, WidgetRef ref) {
