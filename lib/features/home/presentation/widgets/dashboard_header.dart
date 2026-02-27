@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});
@@ -45,21 +46,7 @@ class DashboardHeader extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Row(
-                children: [
-                  const PulsingDot(),
-                  const SizedBox(width: 4),
-                  Text(
-                    'DATA SYNCHRONIZED',
-                    style: GoogleFonts.inter(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade400,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
+              const SyncStatusIndicator(mode: SyncIndicatorMode.compact),
             ],
           ),
         ],
@@ -93,46 +80,3 @@ class DashboardHeader extends ConsumerWidget {
   }
 }
 
-class PulsingDot extends StatefulWidget {
-  const PulsingDot({super.key});
-
-  @override
-  State<PulsingDot> createState() => _PulsingDotState();
-}
-
-class _PulsingDotState extends State<PulsingDot>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-    _animation = Tween<double>(begin: 0.5, end: 1.0).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _animation,
-      child: Container(
-        width: 8,
-        height: 8,
-        decoration: const BoxDecoration(
-          color: Color(0xFF10B981),
-          shape: BoxShape.circle,
-        ),
-      ),
-    );
-  }
-}

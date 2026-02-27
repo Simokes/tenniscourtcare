@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tenniscourtcare/domain/logic/stock_categorizer.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
+import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
 import '../widgets/stock_item_tile.dart';
 import '../widgets/add_edit_stock_item_sheet.dart';
 import '../widgets/stock_alert_section.dart';
@@ -90,6 +91,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           ),
           Row(
             children: [
+              const SyncStatusIndicator(mode: SyncIndicatorMode.minimal),
+              const SizedBox(width: 8),
               IconButton(
                 onPressed: () {
                   // Check if the route exists as a top-level route or nested.

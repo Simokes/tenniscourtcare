@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:tenniscourtcare/data/database/stock_history_queries.dart';
 import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/widgets/premium/premium_card.dart';
+import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
 
 final stockHistoryProvider =
     StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {
@@ -22,6 +23,10 @@ class StockHistoryScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Journal des Stocks'),
         centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showSyncDetails(context),
+        child: const Icon(Icons.sync),
       ),
       body: historyAsync.when(
         data: (movements) {
@@ -54,6 +59,27 @@ class StockHistoryScreen extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, stack) => Center(child: Text('Erreur: $err')),
+      ),
+    );
+  }
+
+  void _showSyncDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              'État de synchronisation',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            SyncStatusIndicator(mode: SyncIndicatorMode.detailed),
+            SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
