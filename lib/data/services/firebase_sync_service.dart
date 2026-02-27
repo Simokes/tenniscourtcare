@@ -8,6 +8,10 @@ import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/stock_item_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/terrain_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/event_mapper.dart';
+import 'package:tenniscourtcare/data/models/terrain_model.dart';
+import 'package:tenniscourtcare/data/models/maintenance_model.dart';
+import 'package:tenniscourtcare/data/models/stock_item_model.dart';
+import 'package:tenniscourtcare/data/models/app_event_model.dart';
 import 'package:tenniscourtcare/data/services/firebase_event_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_maintenance_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_stock_service.dart';
@@ -73,6 +77,175 @@ class FirebaseSyncService {
     _syncStatusController.add(current);
   }
 
+  // ============================================================================
+  // PULL METHODS (NEW) - Sync from Firestore to local Drift DB
+  // ============================================================================
+
+  /// Pull terrains from Firestore and save to local Drift DB
+  Future<void> _pullTerrains() async {
+    try {
+      debugPrint('⬇️ FirebaseSync: Pulling terrains from Firestore...');
+
+      final snapshot = await _firestore.collection('terrains').get();
+
+      for (final doc in snapshot.docs) {
+        try {
+          final model = TerrainModel.fromFirestore(doc);
+
+          // Find local record by firebaseId
+          final localRow = await (_db.select(_db.terrains)..where((t) => t.firebaseId.equals(doc.id))).getSingleOrNull();
+
+          if (localRow != null) {
+            // Update existing if not local-only changes
+            if (localRow.syncStatus != SyncStatus.local.name) {
+               // Cloud wins
+               final companion = model.toDomain().toCompanion(includeId: true).copyWith(
+                 id: drift.Value(localRow.id), // Bind local ID
+                 syncStatus: drift.Value(SyncStatus.synced.name),
+               );
+               await _db.update(_db.terrains).replace(companion);
+            }
+          } else {
+            // Insert new
+            final companion = model.toDomain().toCompanion(includeId: false).copyWith(
+               syncStatus: drift.Value(SyncStatus.synced.name),
+               remoteId: drift.Value(doc.id),
+               firebaseId: drift.Value(doc.id),
+            );
+            await _db.into(_db.terrains).insert(companion);
+          }
+        } catch (e) {
+          debugPrint('❌ Failed to save terrain ${doc.id}: $e');
+        }
+      }
+      debugPrint('✅ FirebaseSync: Terrains pulled (${snapshot.docs.length})');
+    } catch (e, st) {
+      debugPrint('❌ _pullTerrains error: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// Pull maintenances from Firestore and save to local Drift DB
+  Future<void> _pullMaintenances() async {
+    try {
+      debugPrint('⬇️ FirebaseSync: Pulling maintenances from Firestore...');
+
+      final snapshot = await _firestore.collection('maintenance').get();
+
+      for (final doc in snapshot.docs) {
+        try {
+          final model = MaintenanceModel.fromFirestore(doc);
+
+          final localRow = await (_db.select(_db.maintenances)..where((t) => t.firebaseId.equals(doc.id))).getSingleOrNull();
+
+          if (localRow != null) {
+            if (localRow.syncStatus != SyncStatus.local.name) {
+               final companion = model.toDomain().toCompanion().copyWith(
+                 id: drift.Value(localRow.id),
+                 syncStatus: drift.Value(SyncStatus.synced.name),
+               );
+               await _db.update(_db.maintenances).replace(companion);
+            }
+          } else {
+            final companion = model.toDomain().toCompanion().copyWith(
+               id: const drift.Value.absent(), // Force auto-increment (model has id=0)
+               syncStatus: drift.Value(SyncStatus.synced.name),
+               remoteId: drift.Value(doc.id),
+               firebaseId: drift.Value(doc.id),
+            );
+            await _db.into(_db.maintenances).insert(companion);
+          }
+        } catch (e) {
+          debugPrint('❌ Failed to save maintenance ${doc.id}: $e');
+        }
+      }
+      debugPrint('✅ FirebaseSync: Maintenances pulled (${snapshot.docs.length})');
+    } catch (e, st) {
+      debugPrint('❌ _pullMaintenances error: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// Pull stock items from Firestore and save to local Drift DB
+  Future<void> _pullStock() async {
+    try {
+      debugPrint('⬇️ FirebaseSync: Pulling stock from Firestore...');
+
+      final snapshot = await _firestore.collection('stock').get();
+
+      for (final doc in snapshot.docs) {
+        try {
+          final model = StockItemModel.fromFirestore(doc);
+
+          final localRow = await (_db.select(_db.stockItems)..where((t) => t.firebaseId.equals(doc.id))).getSingleOrNull();
+
+          if (localRow != null) {
+            if (localRow.syncStatus != SyncStatus.local.name) {
+               final companion = model.toDomain().toCompanion().copyWith(
+                 id: drift.Value(localRow.id),
+                 syncStatus: drift.Value(SyncStatus.synced.name),
+               );
+               await _db.update(_db.stockItems).replace(companion);
+            }
+          } else {
+            final companion = model.toDomain().toCompanion().copyWith(
+               id: const drift.Value.absent(), // Force auto-increment
+               syncStatus: drift.Value(SyncStatus.synced.name),
+               remoteId: drift.Value(doc.id),
+               firebaseId: drift.Value(doc.id),
+            );
+            await _db.into(_db.stockItems).insert(companion);
+          }
+        } catch (e) {
+          debugPrint('❌ Failed to save stock ${doc.id}: $e');
+        }
+      }
+      debugPrint('✅ FirebaseSync: Stock pulled (${snapshot.docs.length})');
+    } catch (e, st) {
+      debugPrint('❌ _pullStock error: $e\n$st');
+      rethrow;
+    }
+  }
+
+  /// Pull events from Firestore and save to local Drift DB
+  Future<void> _pullEvents() async {
+    try {
+      debugPrint('⬇️ FirebaseSync: Pulling events from Firestore...');
+
+      final snapshot = await _firestore.collection('events').get();
+
+      for (final doc in snapshot.docs) {
+        try {
+          final model = AppEventModel.fromFirestore(doc);
+
+          final localRow = await (_db.select(_db.events)..where((t) => t.firebaseId.equals(doc.id))).getSingleOrNull();
+
+          if (localRow != null) {
+            if (localRow.syncStatus != SyncStatus.local.name) {
+               final companion = model.toDomain().toCompanion(includeId: true).copyWith(
+                 id: drift.Value(localRow.id),
+                 syncStatus: drift.Value(SyncStatus.synced.name),
+               );
+               await _db.update(_db.events).replace(companion);
+            }
+          } else {
+            final companion = model.toDomain().toCompanion(includeId: false).copyWith(
+               syncStatus: drift.Value(SyncStatus.synced.name),
+               firebaseId: drift.Value(doc.id),
+            );
+            await _db.into(_db.events).insert(companion);
+          }
+        } catch (e) {
+          debugPrint('❌ Failed to save event ${doc.id}: $e');
+        }
+      }
+      debugPrint('✅ FirebaseSync: Events pulled (${snapshot.docs.length})');
+    } catch (e, st) {
+      debugPrint('❌ _pullEvents error: $e\n$st');
+      rethrow;
+    }
+  }
+
   /// Sync all entities with Firebase
   ///
   /// Called when:
@@ -80,14 +253,34 @@ class FirebaseSyncService {
   /// - User manually triggers sync
   /// - App startup (if network available)
   Future<void> syncAll() async {
-    debugPrint('🔄 FirebaseSyncService: Starting full sync...');
-    await Future.wait([
-      syncTerrains(),
-      syncMaintenances(),
-      syncStock(),
-      syncEvents(),
-    ]);
-    debugPrint('✅ FirebaseSyncService: Full sync complete');
+    try {
+      debugPrint('🔄 FirebaseSyncService: Starting full bidirectional sync...');
+
+      // STEP 1: PULL from Firestore to Drift (Cloud Wins)
+      debugPrint('📥 FirebaseSyncService: Phase 1 - Pulling from Firestore...');
+      await Future.wait([
+        _pullTerrains(),
+        _pullMaintenances(),
+        _pullStock(),
+        _pullEvents(),
+      ]);
+      debugPrint('✅ FirebaseSyncService: Pull complete');
+
+      // STEP 2: PUSH from Drift to Firestore (local changes)
+      debugPrint('📤 FirebaseSyncService: Phase 2 - Pushing to Firestore...');
+      await Future.wait([
+        syncTerrains(),
+        syncMaintenances(),
+        syncStock(),
+        syncEvents(),
+      ]);
+      debugPrint('✅ FirebaseSyncService: Push complete');
+
+      debugPrint('✅ FirebaseSyncService: Full sync complete');
+    } catch (e, st) {
+      debugPrint('❌ FirebaseSyncService.syncAll error: $e\n$st');
+      rethrow;
+    }
   }
 
   /// ✅ Sync terrains: Upload local changes to Firebase

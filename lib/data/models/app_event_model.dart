@@ -1,5 +1,6 @@
 // filepath: lib/data/models/app_event_model.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
@@ -35,6 +36,14 @@ class AppEventModel {
     this.createdBy,
     this.modifiedBy,
   });
+
+  /// Firestore → Model
+  factory AppEventModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    data['id'] = 0; // Local ID
+    data['firebaseId'] = doc.id;
+    return AppEventModel.fromJson(data);
+  }
 
   /// JSON → Model
   factory AppEventModel.fromJson(Map<String, dynamic> json) {

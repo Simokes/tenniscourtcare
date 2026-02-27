@@ -1,5 +1,6 @@
 // filepath: lib/data/models/maintenance_model.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
@@ -49,6 +50,14 @@ class MaintenanceModel {
     this.createdBy,
     this.modifiedBy,
   });
+
+  /// Firestore → Model
+  factory MaintenanceModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    data['id'] = 0; // Local ID (placeholder)
+    data['firebaseId'] = doc.id;
+    return MaintenanceModel.fromJson(data);
+  }
 
   /// JSON → Model
   factory MaintenanceModel.fromJson(Map<String, dynamic> json) {
