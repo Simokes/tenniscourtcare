@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:tenniscourtcare/core/router/app_router.dart';
 import 'package:tenniscourtcare/domain/entities/user_entity.dart';
@@ -73,8 +73,6 @@ class MockAuthRepository extends Mock implements AuthRepository {
 class MockAuthNotifier extends AuthNotifier {
   MockAuthNotifier() : super(MockAuthRepository());
 
-  @override
-  Future<void> _init() async {}
 
   void setAuthState(AsyncValue<AuthState> newState) {
     state = newState;
