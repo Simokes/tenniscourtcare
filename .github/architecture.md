@@ -1,12 +1,13 @@
+
 # ARCHITECTURE.md
 
 ## 1. Architecture Pattern
 
-**Pattern:** Clean Architecture + MVVM (via Riverpod)
+**Pattern:** Clean Architecture + MVVM (via Riverpod) + Offline-First
 
 **Layers:**
 - **Domain:** Business logic, entities, abstract repositories
-- **Data:** Database (Drift/SQLite), Cloud (Firestore), repositories implementation, mappers
+- **Data:** Database (Drift/SQLite), Cloud (Firestore), repositories implementation, mappers, sync services
 - **Presentation:** UI (screens, widgets), state management (Riverpod providers), navigation (GoRouter)
 - **Infrastructure:** External service adapters (image picker, share service, weather service)
 
@@ -16,11 +17,7 @@
 
 ## 2. Layer Organization
 
-### 2.1 Domain Layer (
-
-domain
-
-)
+### 2.1 Domain Layer (domain)
 
 **Responsibility:** Pure business logic, NO framework dependencies
 
@@ -29,9 +26,9 @@ domain
 domain/
 ├── entities/          # @immutable data classes (StockItem, User, Terrain, etc)
 ├── repositories/      # Abstract interfaces (StockRepository, AuthRepository, etc)
-├── enums/            # Role, Permission, FeatureFlag
+├── enums/            # Role, Permission, FeatureFlag, SyncStatus
 ├── logic/            # Business services (PermissionResolver, StockCategorizer)
-├── models/           # Domain-specific models (QueueStatus, QueueError, QueueProgress)
+├── models/           # Domain-specific models (QueueStatus, QueueError, QueueProgress, SetupStatus)
 └── services/         # Domain services (WeatherRules)
 ```
 
@@ -39,32 +36,36 @@ domain/
 - Entities: `@immutable`, `copyWith()`, `==`, `hashCode`, `toString()`
 - Repositories: Abstract classes only (NO implementation)
 - No imports of: Drift, Firestore, Flutter, Riverpod
-- All entities must have `id`, `createdAt`, `updatedAt` fields (for sync)
+- All entities MUST have: `id`, `remoteId` (String?, for Firestore mapping), `createdAt`, `updatedAt`, `syncStatus` fields
 
-**Example entity:**
+**Key entities with sync support:**
 ```dart
 @immutable
 class StockItem {
-  final int? id;
+  final int? id;                          // Local DB ID (auto-increment)
+  final String? remoteId;                 // Firestore doc ID (nullable until synced)
   final String name;
   final int quantity;
-  final SyncStatus syncStatus;
+  final SyncStatus syncStatus;            // local | syncing | synced | error
   final DateTime createdAt;
   final DateTime updatedAt;
-  // ...
+  final String? lastModifiedBy;           // For conflict resolution
+  
   StockItem copyWith({...}) { }
   @override bool operator ==(Object other) { }
   @override int get hashCode { }
 }
 ```
 
+**Enums:**
+```dart
+enum SyncStatus { local, syncing, synced, error }
+enum SetupStatus { loading, needsAdminSetup, needsLogin, authenticated, error }
+```
+
 ---
 
-### 2.2 Data Layer (
-
-data
-
-)
+### 2.2 Data Layer (data)
 
 **Responsibility:** Data persistence, cloud sync, data transformation
 
@@ -72,67 +73,110 @@ data
 ```
 data/
 ├── database/              # Drift/SQLite (local source of truth)
-│   ├── app_database.dart  # @DriftDatabase with all tables
+│   ├── app_database.dart  # @DriftDatabase with all tables (v14)
 │   ├── tables/            # Table definitions (UsersTable, StockItemsTable, etc)
-│   └── queries/           # Custom queries, extensions
+│   │   └── [name]_table.dart
+│   └── queries/           # Custom queries, extensions, watch methods
 │
-├── firestore/             # Cloud schema models (Firestore targets)
+├── firestore/             # Cloud schema models
 │   └── models/            # FirebaseStockModel, FirebaseTerrainModel, etc
 │
 ├── repositories/          # Repository implementations
 │   ├── [entity]_repository_impl.dart
 │   └── firestore/         # Firestore-specific repos (optional)
 │
-├── services/              # Firebase services (sync, batch ops)
-│   └── firebase_sync_service.dart
+├── services/              # Firebase services (sync, batch ops, auth)
+│   ├── firebase_sync_service.dart      # NEW: Handles Drift ↔ Firestore sync
+│   ├── firebase_[entity]_service.dart
+│   └── firebase_auth_service.dart
 │
 └── mappers/              # Entity ↔ Model ↔ DTO conversions
-    └── [entity]_mapper.dart
+    ├── [entity]_mapper.dart
+    └── Extensions with toCompanion() for Drift operations
 ```
 
 **Rules:**
 - Repositories: Implement domain interfaces, never export them directly
 - Drift: Single instance (singleton via databaseProvider in Presentation layer)
 - Mappers: Convert domain entities ↔ local models ↔ Firestore models
+  - Include `toCompanion()` extension for Drift INSERT/UPDATE
+  - Map `remoteId` ↔ Firestore docId
 - Services: Handle Firebase operations (sync, batch writes, auth)
+- Sync: Unidirectional (Drift → Firestore), with upsert on conflict
 - NO UI imports (Flutter, Riverpod)
+
+**FirebaseSyncService pattern:**
+```dart
+class FirebaseSyncService {
+  final AppDatabase _db;
+  final FirebaseFirestore _firestore;
+  
+  // Per-entity sync status (BehaviorSubject)
+  final _syncStatus = BehaviorSubject<Map<String, SyncStatus>>();
+  
+  Future<void> syncAll() async {
+    await Future.wait([
+      syncUsers(),           // NEW: Admin user creation, password sync
+      syncTerrains(),
+      syncMaintenances(),
+      syncStock(),
+      syncEvents(),
+    ]);
+  }
+  
+  // Each entity method:
+  // 1. Get pending local changes
+  // 2. Upsert to Firestore (with onConflict: DoUpdate)
+  // 3. Update local syncStatus
+  // 4. Emit status change
+}
+```
 
 **Example repository:**
 ```dart
 class StockRepositoryImpl implements StockRepository {
   final AppDatabase _db;
+  final FirebaseSyncService _syncService;
 
   @override
   Future<List<StockItem>> getAllStockItems() async {
-    return _db.watchAllStockItems().first;
+    return _db.watchAllStockItems().first;  // Always read from local DB
+  }
+  
+  @override
+  Future<void> addStockItem(StockItem item) async {
+    // 1. Insert to Drift (optimistic)
+    await _db.into(_db.stockItems).insert(item.toCompanion());
+    
+    // 2. Trigger sync (async, no await)
+    _syncService.syncStock();
   }
 }
 ```
 
 ---
 
-### 2.3 Presentation Layer (
+### 2.3 Presentation Layer (presentation)
 
-presentation
-
-)
-
-**Responsibility:** UI, state management, navigation
+**Responsibility:** UI, state management, navigation, routing logic
 
 **Composition:**
 ```
 presentation/
 ├── providers/           # Riverpod state management
-│   ├── auth_providers.dart
-│   ├── stock_provider.dart
-│   ├── terrain_provider.dart
-│   ├── database_provider.dart  # Singleton Drift instance
+│   ├── core_providers.dart              # databaseProvider, repositoryProviders
+│   ├── auth_providers.dart              # authStateProvider, currentUserProvider
+│   ├── setup_status_provider.dart       # NEW: setupStatusProvider (combines auth + adminExists)
+│   ├── [domain]_provider.dart           # stockProvider, terrainProvider, etc
+│   ├── [domain]_fusion_provider.dart    # NEW: Merged local + remote data
+│   ├── database_provider.dart           # Singleton Drift instance
+│   ├── sync_status_provider.dart        # syncStatusProvider (watch sync progress)
 │   └── [domain]_provider.dart
 │
-├── pages/              # Top-level pages (full-screen)
+├── pages/              # Top-level pages (full-screen, root routes)
 │   ├── auth/
 │   │   ├── login_page.dart
-│   │   └── admin_setup_page.dart
+│   │   └── admin_setup_page.dart        # NEW: First-launch admin creation
 │   ├── admin/
 │   │   └── admin_dashboard_page.dart
 │   └── error/
@@ -145,7 +189,7 @@ presentation/
 │
 ├── widgets/           # Reusable UI components
 │   ├── sync_status_indicator.dart
-│   ├── queue_status_widget.dart
+│   ├── queue_status_widget.dart        # NEW: Shows queue progress + retry UI
 │   ├── access_control/
 │   │   ├── permission_visibility.dart
 │   │   ├── role_visibility.dart
@@ -163,14 +207,11 @@ presentation/
 - Widgets: NO business logic, pure presentation
 - Access control: Use `PermissionVisibility`, `RoleVisibility` wrappers
 - Error handling: AsyncValue.when() for loading/error/data states
+- NEW: setupStatusProvider gates all routing (setup → login → home flow)
 
 ---
 
-### 2.4 Features Layer (
-
-features
-
-)
+### 2.4 Features Layer (features)
 
 **Responsibility:** Feature-specific screens, widgets, models
 
@@ -204,23 +245,19 @@ features/
 
 ---
 
-### 2.5 Core Layer (
+### 2.5 Core Layer (core)
 
-core
-
-)
-
-**Responsibility:** Shared infrastructure, configuration
+**Responsibility:** Shared infrastructure, configuration, routing, security
 
 **Composition:**
 ```
 core/
 ├── config/
 │   ├── app_config.dart       # API keys, URLs, constants
-│   └── queue_config.dart     # Sync/queue settings
+│   └── queue_config.dart     # Sync/queue settings (retry count, backoff)
 │
 ├── router/
-│   ├── app_router.dart       # GoRouter setup + redirect logic
+│   ├── app_router.dart       # GoRouter setup + redirect logic (NEW: setupStatusProvider gate)
 │   └── go_router_refresh_stream.dart
 │
 ├── security/
@@ -237,6 +274,7 @@ core/
 - NO domain/data imports in core (unidirectional)
 - Exceptions: Define custom exceptions here
 - Theme: Material theme only (no dark theme variants in config)
+- Router: NEW gateway pattern (setupStatusProvider redirects)
 
 ---
 
@@ -255,9 +293,9 @@ core/
 
 **Data** (can import domain):
 ```dart
-✅ import 'package:drift/'; 
+✅ import 'package:drift/';
 ✅ import 'package:cloud_firestore/';
-✅ import '../domain/'; 
+✅ import '../domain/';
 ❌ NEVER: import 'package:flutter_riverpod/';
 ❌ NEVER: import 'presentation/';
 ```
@@ -274,9 +312,13 @@ core/
 ### 3.2 Provider Dependency Chain
 
 ```
-authStateProvider (StateNotifierProvider)
-  ↓ depends on
-authRepositoryProvider (Provider)
+setupStatusProvider (FutureProvider<SetupStatus>)
+  ├─ adminExistsProvider (FutureProvider<bool>)
+  │   ↓ queries Drift users table
+  └─ authStateProvider (StateNotifierProvider)
+      ↓ watches Firebase Auth state
+      ↓ depends on
+authRepositoryProvider (Provider<AuthRepository>)
   ↓ depends on
 databaseProvider (Provider - singleton)
   ↓ depends on
@@ -291,28 +333,33 @@ AppDatabase (Drift)
 
 ### 4.1 Provider Types
 
-| Type | Use case | Lifespan |
-|------|----------|----------|
-| `Provider<T>` | Synchronous, immutable | App lifetime |
-| `FutureProvider<T>` | Async, single-shot (no state) | Until invalidated |
-| `StateProvider<T>` | Mutable UI state (filter, search) | Until invalidated |
-| `StateNotifierProvider<N, T>` | Complex state + mutations | App lifetime |
-| `StreamProvider<T>` | Real-time data (deprecated, migrate to FutureProvider + listener) | Until invalidated |
+| Type | Use case | Lifespan | New Pattern |
+|------|----------|----------|-------------|
+| `Provider<T>` | Synchronous, immutable | App lifetime | Service singletons |
+| `FutureProvider<T>` | Async, single-shot (no state) | Until invalidated | Data providers |
+| `StateProvider<T>` | Mutable UI state (filter, search) | Until invalidated | UI state only |
+| `StateNotifierProvider<N, T>` | Complex state + mutations | App lifetime | Auth state, forms |
+| `StreamProvider<T>` | Real-time data | Until invalidated | (DEPRECATED, use FutureProvider) |
+| `FusionProvider` | Merged local + remote | Until invalidated | NEW: Offline-first pattern |
 
 **Rules:**
 - Default: `FutureProvider` for async data
 - Use `StateNotifierProvider` only for: Auth state, Cart/form state
 - NEVER: `Provider` for async operations (use `FutureProvider`)
 - NEVER: Mix `StreamProvider` and `FutureProvider` for same data
+- NEW: Use `FusionProvider` pattern for offline-first (merge Drift + Firestore)
 
 ---
 
 ### 4.2 Provider Naming Convention
 
 ```dart
-// Data providers
+// Data providers (Drift local)
 final stockProvider = FutureProvider<List<StockItem>>(...);
 final terrainProvider = FutureProvider<List<Terrain>>(...);
+
+// Fusion providers (merged local + remote) - NEW
+final stockFusionProvider = FutureProvider<List<StockItem>>(...); // Merges local + Firestore
 
 // Filtered/computed providers
 final filteredStockItemsProvider = FutureProvider<List<StockItem>>(...);
@@ -328,7 +375,7 @@ final updateStockItemProvider = Provider<Future<void> Function(StockItem)>(...);
 
 // Notifier providers (complex state)
 final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>(...);
-final stockNotifierProvider = StateNotifierProvider<StockNotifier, AsyncValue<List<StockItem>>>(...);
+final setupStatusProvider = FutureProvider<SetupStatus>(...);  // NEW: Setup flow gate
 
 // Singleton services
 final databaseProvider = Provider<AppDatabase>(...);
@@ -337,6 +384,9 @@ final firebaseSyncServiceProvider = Provider<FirebaseSyncService>(...);
 // Derived providers
 final isAuthenticatedProvider = Provider<bool>(...);
 final currentUserProvider = Provider<UserEntity?>(...);
+
+// Sync status
+final syncStatusProvider = StreamProvider<Map<String, SyncStatus>>(...);  // NEW: Per-entity sync
 ```
 
 **Rules:**
@@ -345,6 +395,8 @@ final currentUserProvider = Provider<UserEntity?>(...);
 - Suffix: `_notifier` for StateNotifierProvider
 - Suffix: `_service` for service singletons
 - Suffix: `_filter`, `_search`, `_query` for state providers
+- Suffix: `_fusion` for merged local + remote data (NEW)
+- Suffix: `_status` for sync/state status (NEW)
 
 ---
 
@@ -355,6 +407,7 @@ final currentUserProvider = Provider<UserEntity?>(...);
 final databaseProvider = Provider<AppDatabase>(...);
 final authRepositoryProvider = Provider<AuthRepository>(...);
 final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>(...);
+final setupStatusProvider = FutureProvider<SetupStatus>(...);  // NEW: Not auto-dispose
 ```
 
 **Auto-dispose (memory efficient):**
@@ -368,6 +421,7 @@ final filteredStockItemsProvider = FutureProvider<List<StockItem>>(...); // NO a
 - Data lists: NO autoDispose (watched by UI continuously)
 - Derived/filtered data: autoDispose if created on-demand
 - Rarely-watched providers: autoDispose
+- Setup/auth: NO autoDispose (critical app state)
 
 ---
 
@@ -382,6 +436,9 @@ ref.invalidate(filteredStockItemsProvider); // Refresh filtered view
 // Cascade invalidation
 ref.invalidate(lowStockItemsProvider);      // Auto-refreshes if dependent
 
+// NEW: After setup completion
+ref.invalidate(setupStatusProvider);        // Trigger re-check (admin created → login needed)
+
 // Exception: Never invalidate state providers
 // ❌ ref.invalidate(stockFilterProvider);  // NO - breaks UI state
 ```
@@ -391,6 +448,7 @@ ref.invalidate(lowStockItemsProvider);      // Auto-refreshes if dependent
 - Dependent providers auto-invalidate
 - NEVER invalidate StateProviders manually (use .state = instead)
 - Always invalidate in try/catch, not just on success
+- NEW: Invalidate setupStatusProvider after admin creation
 
 ---
 
@@ -433,6 +491,11 @@ Exception (base)
 │   ├── PermissionDeniedException
 │   ├── RateLimitException
 │   └── TokenExpiredException
+│
+├── SyncException (NEW - data layer)
+│   ├── OfflineException
+│   ├── ConflictException
+│   └── SyncTimeoutException
 │
 └── Domain-specific exceptions (per domain)
     └── (defined in domain/repositories/)
@@ -591,26 +654,43 @@ final filteredStockProvider = FutureProvider<List<StockItem>>((ref) async {
 
 ### 7.1 Router Setup
 
-**File:** 
-
-app_router.dart
-
-
+**File:** `app_router.dart`
 
 **Pattern:**
 ```dart
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: GoRouterRefreshStream(ref.read(authStateProvider.notifier).stream),
+    refreshListenable: GoRouterRefreshStream(
+      ref.read(setupStatusProvider.notifier).stream  // NEW: Watch setup status
+    ),
     redirect: (context, state) {
-      final authState = ref.read(authStateProvider).value;
-      // Conditional routing logic
+      final setupStatus = ref.read(setupStatusProvider).value;
+      
+      // NEW: Setup gate - priority 1
+      if (setupStatus == SetupStatus.needsAdminSetup) {
+        return state.uri.path == '/admin-setup' ? null : '/admin-setup';
+      }
+      
+      // Priority 2: Login required
+      if (setupStatus == SetupStatus.needsLogin) {
+        return state.uri.path == '/login' ? null : '/login';
+      }
+      
+      // Priority 3: Authenticated - prevent re-login
+      if (setupStatus == SetupStatus.authenticated) {
+        if (state.uri.path == '/login' || state.uri.path == '/admin-setup') {
+          return '/';
+        }
+      }
+      
+      return null;
     },
     routes: [
+      GoRoute(path: '/admin-setup', builder: ...),  // NEW: Admin creation
       GoRoute(path: '/login', builder: ...),
       GoRoute(path: '/', builder: ..., routes: [
-        GoRoute(path: 'nested', builder: ...),
+        GoRoute(path: 'stock', builder: ...),
       ]),
     ],
   );
@@ -619,43 +699,46 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
 **Rules:**
 - Single GoRouter instance (via provider)
-- Redirect logic: Check auth state, role, setup status
-- refreshListenable: Watch auth state changes
+- Redirect logic: Check setup status → auth → role → data availability
+- refreshListenable: Watch setupStatusProvider (NEW: instead of just authState)
 - Routes: Declarative, hierarchical
 
 ---
 
-### 7.2 Routing Rules
+### 7.2 Setup Flow Routing (NEW)
 
-**Conditional routing (redirect):**
-```dart
-redirect: (context, state) {
-  final isSetupRequired = authState.isSetupRequired;
-  final isLoggedIn = authState.user != null;
-  
-  // Priority 1: Setup required
-  if (isSetupRequired) {
-    return state.uri.path == '/admin-setup' ? null : '/admin-setup';
-  }
-  
-  // Priority 2: Not logged in
-  if (!isLoggedIn) {
-    return state.uri.path == '/login' ? null : '/login';
-  }
-  
-  // Priority 3: Logged in, prevent re-login
-  if (state.uri.path == '/login') {
-    return '/';
-  }
-  
-  return null; // No redirect
-}
+**Priority order:**
+1. **Setup Required** → `/admin-setup` (no admin in DB)
+2. **Login Required** → `/login` (admin exists, user not logged in)
+3. **Authenticated** → `/` (home)
+
+**Flow:**
 ```
-
-**Rules:**
-- Redirect priorities: setup > login > role checks > data availability
-- Prevent loop redirects (check current path before redirecting)
-- Return null = no redirect, or return new path
+App Start (no data)
+  ↓
+setupStatusProvider checks:
+  ├─ adminExistsProvider (query Drift users table for any admin)
+  └─ authStateProvider (Firebase Auth state)
+  ↓
+SetupStatus emitted:
+  ├─ needsAdminSetup   → Redirect to /admin-setup
+  ├─ needsLogin        → Redirect to /login
+  ├─ authenticated     → Stay at / or destination
+  └─ error             → Show error page
+  ↓
+AdminSetupPage:
+  1. User enters email + password + confirm password
+  2. On submit: FirebaseAuthRepository.createAdminUser()
+     a. Firebase Auth: createUserWithEmailAndPassword()
+     b. Drift: INSERT user (role: 'admin')
+  3. ref.invalidate(setupStatusProvider) → Re-check
+  4. Router detects adminExists → Redirects to /login
+  ↓
+LoginPage:
+  1. User enters credentials
+  2. On submit: FirebaseAuthRepository.signIn()
+  3. Router detects authenticated → Redirects to /
+```
 
 ---
 
@@ -722,25 +805,25 @@ GoRoute(
 lib/
 ├── core/
 │   ├── config/           # Constants, app config
-│   ├── router/           # Navigation
+│   ├── router/           # Navigation (NEW: setupStatusProvider gate)
 │   ├── security/         # Auth, exceptions
 │   └── theme/            # UI theme
 │
 ├── domain/
 │   ├── entities/         # Data models (@immutable)
 │   ├── repositories/     # Abstract interfaces
-│   ├── enums/           # Role, Permission
+│   ├── enums/           # Role, Permission, SyncStatus, SetupStatus
 │   ├── logic/           # Domain services
-│   └── models/          # Domain-specific models
+│   └── models/          # Domain-specific models (QueueStatus, SetupStatus)
 │
 ├── data/
-│   ├── database/        # Drift/SQLite
+│   ├── database/        # Drift/SQLite (v14)
 │   │   └── tables/
 │   ├── firestore/       # Cloud models
 │   │   └── models/
 │   ├── repositories/    # Implementations
-│   ├── mappers/         # Entity converters
-│   └── services/        # Firebase services
+│   ├── mappers/         # Entity converters (with toCompanion())
+│   └── services/        # Firebase services (NEW: firebase_sync_service.dart)
 │
 ├── features/
 │   ├── [feature]/
@@ -748,18 +831,18 @@ lib/
 │   │   │   ├── screens/
 │   │   │   └── widgets/
 │   │   ├── models/      # Feature-specific models
-│   │   └── infrastructure/ # Feature services
+│   │   └── infrastructure/
 │   └── [feature]/...
 │
 ├── presentation/
-│   ├── providers/       # Riverpod state
-│   ├── pages/          # Full-screen pages
+│   ├── providers/       # Riverpod state (NEW: setup_status_provider.dart)
+│   ├── pages/          # Full-screen pages (NEW: admin_setup_page.dart)
 │   ├── screens/        # Nested screens
-│   ├── widgets/        # Reusable components
+│   ├── widgets/        # Reusable components (NEW: queue_status_widget.dart)
 │   └── utils/          # Helpers
 │
 ├── services/
-│   ├── queue/          # Queue management
+│   ├── queue/          # Queue management (NEW: exponential backoff, deduplication)
 │   └── sync/           # Sync orchestration
 │
 ├── infrastructure/     # External adapters
@@ -772,25 +855,15 @@ lib/
 
 | Category | Pattern | Example |
 |----------|---------|---------|
-| Entity | `[name].dart` | 
-
-stock_item.dart
-
- |
+| Entity | `[name].dart` | `stock_item.dart` |
 | Repository (interface) | `[name]_repository.dart` | `stock_repository.dart` |
-| Repository (impl) | `[name]_repository_impl.dart` | 
-
-stock_repository_impl.dart
-
- |
-| Provider | `[name]_provider.dart` | 
-
-stock_provider.dart
-
- |
+| Repository (impl) | `[name]_repository_impl.dart` | `stock_repository_impl.dart` |
+| Provider | `[name]_provider.dart` | `stock_provider.dart` |
+| Setup Provider (NEW) | `setup_status_provider.dart` | `setup_status_provider.dart` |
+| Sync Service (NEW) | `firebase_sync_service.dart` | `firebase_sync_service.dart` |
 | Screen | `[name]_screen.dart` | `stock_screen.dart` |
 | Widget | `[name]_widget.dart` | `stock_item_tile.dart` |
-| Page | `[name]_page.dart` | `login_page.dart` |
+| Page | `[name]_page.dart` | `admin_setup_page.dart` |
 | Service | `[name]_service.dart` | `firebase_sync_service.dart` |
 | Mapper | `[name]_mapper.dart` | `stock_item_mapper.dart` |
 | Model | `[name]_model.dart` | `stock_item_model.dart` |
@@ -850,61 +923,179 @@ analyzer:
 
 ### 10.1 Drift as Source of Truth
 
-**Rule:** Drift (local SQLite) is primary source, Firestore is backup
+**Rule:** Drift (local SQLite) is primary source of truth, Firestore is backup/sync target
 
-**Flow:**
-1. User mutation → Write to Drift immediately
-2. SyncQueue entry created (operation: CREATE/UPDATE/DELETE)
-3. On network available → Push to Firestore
-4. Firestore write success → Update SyncQueue status: SUCCESS
+**Write Flow:**
+1. User mutation → Write to Drift immediately (optimistic)
+2. Drift transaction commits
+3. Entity syncStatus: `local`
+4. FirebaseSyncService triggered (async, no await)
+5. If network available → Push to Firestore
+6. Firestore write success → Update entity syncStatus: `synced`
+7. If network down → Entity stays syncStatus: `local`
+8. On network restore → Auto-retry with exponential backoff
+
+**Read Flow:**
+1. Always read from Drift (local DB)
+2. Get latest data (up-to-date, even offline)
+3. Display syncStatus indicator for unsync data
+4. Optional: Show "syncing..." for pending operations
 
 **Rules:**
-- Writes: Always to Drift first (optimistic)
-- Reads: Always from Drift
-- Sync: Drift → Firestore (unidirectional, currently)
-- No pull from Firestore yet (planned)
+- Writes: Always to Drift first (optimistic update, no await for Firestore)
+- Reads: Always from Drift (source of truth)
+- Sync: Drift → Firestore (one-directional, for now)
+- No pull from Firestore yet (planned for multi-device sync)
+- Upsert: Use `onConflict: DoUpdate` to prevent UNIQUE errors
 
 ---
 
-### 10.2 SyncQueue Management
+### 10.2 FirebaseSyncService (NEW)
 
-**Trigger sync:**
+**Architecture:**
 ```dart
-final syncStockProvider = FutureProvider<void>((ref) async {
-  final syncService = ref.watch(firebaseSyncServiceProvider);
-  await syncService.syncStock();
-});
-
-// In UI:
-ElevatedButton(
-  onPressed: () => ref.refresh(syncStockProvider),
-  child: Text('Sync now'),
-);
+class FirebaseSyncService {
+  final AppDatabase _db;
+  final FirebaseFirestore _firestore;
+  
+  // Stream per-entity sync status
+  final _syncStatus = BehaviorSubject<Map<String, SyncStatus>>();
+  
+  // Main sync entry point
+  Future<void> syncAll() async {
+    // Sync in parallel
+    await Future.wait([
+      syncUsers(),           // NEW: Admin user sync
+      syncTerrains(),
+      syncMaintenances(),
+      syncStock(),
+      syncEvents(),
+    ]);
+  }
+  
+  // Per-entity method pattern:
+  Future<void> syncStock() async {
+    _updateStatus('stock', SyncStatus.syncing);
+    try {
+      // 1. Get local items with syncStatus != synced
+      final pendingItems = await _db.getUnsyncedStockItems();
+      
+      // 2. Upsert to Firestore
+      final batch = _firestore.batch();
+      for (final item in pendingItems) {
+        final docRef = item.remoteId != null
+          ? _firestore.collection('stock').doc(item.remoteId)
+          : _firestore.collection('stock').doc();  // Auto-ID if new
+        
+        batch.set(
+          docRef,
+          item.toFirebaseModel().toJson(),
+          SetOptions(merge: true),
+        );
+      }
+      await batch.commit();
+      
+      // 3. Update local syncStatus
+      for (final item in pendingItems) {
+        await _db.update(item.copyWith(syncStatus: SyncStatus.synced));
+      }
+      
+      _updateStatus('stock', SyncStatus.synced);
+    } catch (e, st) {
+      debugPrint('❌ FirebaseSyncService: Sync Error: $e\n$st');
+      _updateStatus('stock', SyncStatus.error);
+      rethrow;
+    }
+  }
+}
 ```
 
-**Rules:**
-- Manual sync: Via provider invalidation
-- Auto sync: Timer in 
-
-main.dart
-
- (every 5 min)
-- Network change: Trigger sync on connectivity change
-- Invalidate data providers after sync success
+**Triggers:**
+- Automatic: Timer (every 5 minutes)
+- Network change: Connectivity+ plugin
+- Manual: User taps "Sync now" button
 
 ---
 
 ### 10.3 Offline Behavior
 
-**Offline scenario:**
-- Writes: Queued in SyncQueue (status: PENDING)
-- Reads: Served from Drift (stale data warning optional)
-- Sync: Retried on network restore (exponential backoff)
+**Offline scenario (no network):**
+- Writes: Queued in Drift with syncStatus: `local`
+- Reads: Served from Drift (no lag)
+- Sync: Waits for network restore
+- UI: Shows "Offline" indicator (QueueStatusBanner)
+- User experience: Seamless (no errors shown)
+
+**On network restore:**
+- Auto-detect: Connectivity+ plugin
+- Trigger sync: FirebaseSyncService.syncAll()
+- Retry logic: Exponential backoff (1s, 2s, 4s, 8s... max 30s)
+- Max retries: 3 per batch
+- On success: Update syncStatus, notify UI
+- On failure: Mark as error, show retry button
+
+**Queue Management:**
+- Max items: 1000 (alert user if exceeded)
+- Deduplication: Skip if same operation pending
+- Ordering: FIFO per entity type
+- Cleanup: Remove on success, mark as error on failure
 
 **Rules:**
-- No error shown to user (seamless offline)
-- SyncQueue backup visible (via QueueStatusBanner)
-- Max queue size: 1000 items (user alerted if exceeded)
+- No error shown to user for sync failures (seamless)
+- SyncQueue status visible in QueueStatusBanner
+- Max queue size: 1000 items
+- User alerted if exceeded
+
+---
+
+### 10.4 Conflict Resolution
+
+**Scenario:**
+```
+Local:   Terrain(id=1, name="Court A", updatedAt=2024-01-01T10:00)
+Remote:  Terrain(id=1, name="Court B", updatedAt=2024-01-01T11:00)
+```
+
+**Strategy: LAST-WRITE-WINS**
+- Compare `updatedAt` timestamps
+- Remote wins if newer (11:00 > 10:00)
+- Local data overwritten
+
+**Implementation (in mapper):**
+```dart
+Terrain _mergeTerrainData(Terrain remote, Terrain? local) {
+  if (local == null) return remote;
+  
+  if (remote.updatedAt.isAfter(local.updatedAt)) {
+    return remote;  // Remote wins
+  }
+  return local;     // Local wins
+}
+```
+
+**Upsert with conflict resolution:**
+```dart
+await _db.into(_db.terrains).insert(
+  terrain.toCompanion(includeId: true),
+  onConflict: drift.DoUpdate(
+    (old) {
+      // Merge logic: keep local if newer
+      return old.updatedAt.isAfter(terrain.updatedAt)
+        ? const Partial()  // Keep old (local)
+        : TerrainsCompanion(
+            name: Value(terrain.name),
+            syncStatus: Value(SyncStatus.synced.name),
+            updatedAt: Value(DateTime.now()),
+          );
+    },
+  ),
+);
+```
+
+**Rules:**
+- Strategy: LAST-WRITE-WINS (timestamp-based)
+- Manual resolution: Not implemented yet (future)
+- Test conflicts: Unit tests required
 
 ---
 
@@ -919,9 +1110,10 @@ test
  directory (mirror lib structure)
 
 **Coverage required:**
-- Domain: Business logic, validators, permission resolver
-- Repositories: Drift queries, error handling
-- Providers: State transitions, invalidation
+- Domain: Business logic, validators, permission resolver, SetupStatus logic
+- Repositories: Drift queries, Firestore conversions, error handling
+- Providers: State transitions, invalidation, setup status flow
+- Sync service: Upsert logic, conflict resolution, retry logic
 
 **Pattern:**
 ```dart
@@ -929,10 +1121,22 @@ test('StockItem.isLowOnStock returns true when quantity <= minThreshold', () {
   final item = StockItem(quantity: 5, minThreshold: 10, ...);
   expect(item.isLowOnStock, isTrue);
 });
+
+test('SetupStatus is needsAdminSetup when no admin exists', () async {
+  // Mock adminExistsProvider to return false
+  final result = await ref.read(setupStatusProvider.future);
+  expect(result, SetupStatus.needsAdminSetup);
+});
+
+test('FirebaseSyncService upserts stock with onConflict', () async {
+  // Mock Firestore, Drift
+  await syncService.syncStock();
+  // Verify batch.set called with SetOptions(merge: true)
+});
 ```
 
 **Rules:**
-- Test: Domain logic, repository contracts, provider logic
+- Test: Domain logic, repository contracts, provider logic, sync logic
 - Mock: Drift (use in-memory), Firestore (mock service)
 - Assert: Single assertion per test (when possible)
 
@@ -945,22 +1149,51 @@ test
  directory
 
 **Coverage required:**
-- Critical screens: StockScreen, LoginPage, AdminDashboard
+- Critical screens: AdminSetupPage, LoginPage, AdminDashboard, StockScreen
 - Error states: AsyncValue.error handling
 - Permissions: Access control widgets
+- Setup flow: Router redirects
 
 **Pattern:**
 ```dart
-testWidgets('StockScreen shows error on load failure', (tester) async {
+testWidgets('AdminSetupPage shows confirm password field', (tester) async {
+  await tester.pumpWidget(
+    ProviderScope(child: AdminSetupPage()),
+  );
+  expect(find.byType(PremiumTextField), findsWidgets);
+  expect(find.byKey(Key('confirmPasswordField')), findsOneWidget);
+});
+
+testWidgets('LoginPage redirects to home on success', (tester) async {
+  // Override authStateProvider
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [stockProvider.overrideWithValue(AsyncValue.error(exception, st))],
-      child: StockScreen(),
+      overrides: [
+        authStateProvider.overrideWithValue(
+          AsyncValue.data(AuthState(user: testUser, isSetupRequired: false))
+        ),
+      ],
+      child: MyApp(),
     ),
   );
-  expect(find.byType(ErrorWidget), findsOneWidget);
+  // Verify router navigates to /
 });
 ```
+
+---
+
+### 11.3 Integration Tests
+
+**Where:** 
+
+integration_test
+
+ directory
+
+**Coverage required:**
+- Full app flow: Splash → AdminSetup → Login → Home
+- Sync flow: Offline → Online → Sync
+- Error recovery: Network timeout → Retry
 
 ---
 
@@ -970,76 +1203,204 @@ testWidgets('StockScreen shows error on load failure', (tester) async {
 
 **Current version:** v14
 
+**Recent changes (v13→v14):**
+- Added `remoteId` (String?) to all entity tables (for Firestore sync)
+- Added `syncStatus` (String, enum: local|syncing|synced|error) to all entity tables
+- Added `lastModifiedBy` (String?) for conflict resolution
+
 **Migration path:**
 ```dart
 // In app_database.dart
 @DriftDatabase(
   version: 14,
-  // All tables declared
+  tables: [
+    UsersTable,
+    TerrainsTable,
+    MaintenancesTable,
+    StockItemsTable,
+    EventsTable,
+    ReservationsTable,
+    StockMovementsTable,
+    AuditLogsTable,
+    LoginAttemptsTable,
+    OtpRecordsTable,
+    SyncQueueTable,
+  ],
 )
+class AppDatabase extends _$AppDatabase {
+  AppDatabase() : super(_openConnection());
+  
+  @override
+  int get schemaVersion => 14;
+  
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (Migrator m) => m.createAll(),
+    onUpgrade: (Migrator m, int from, int to) async {
+      if (from < 14) {
+        // Add remoteId, syncStatus, lastModifiedBy columns
+        await m.addColumn(terrains, terrains.remoteId);
+        await m.addColumn(terrains, terrains.syncStatus);
+        await m.addColumn(terrains, terrains.lastModifiedBy);
+        // ... repeat for all tables
+      }
+    },
+  );
+}
 ```
 
 **Rules:**
 - Version incremented on schema change
 - Migrations auto-applied on app launch
-- Migrations: Create migration file for v14+
+- Backwards compatible (nullable columns for new fields)
 
 ### 12.2 Sync Queue Transactions
 
-**Pattern:**
+**Pattern (batch max 500 ops):**
 ```dart
-Future<void> syncStock() async {
-  final batch = firestore.batch();
+Future<void> syncWithBatching() async {
+  const batchSize = 500;
+  final allOps = await _db.getAllPendingSyncOps();
   
-  // Get pending operations
-  final queue = await _db.getSyncQueueByStatus(SyncQueueStatus.pending);
-  
-  // Add to batch (max 500)
-  for (final op in queue.take(500)) {
-    // batch.set(...) or batch.update(...)
+  for (int i = 0; i < allOps.length; i += batchSize) {
+    final batch = _firestore.batch();
+    final ops = allOps.sublist(i, min(i + batchSize, allOps.length));
+    
+    for (final op in ops) {
+      // batch.set(...) or batch.update(...)
+    }
+    
+    await batch.commit();
+    
+    // Update status after successful commit
+    for (final op in ops) {
+      await _db.updateSyncStatus(op.id, SyncStatus.synced);
+    }
   }
-  
-  // Commit transaction
-  await batch.commit();
-  
-  // Update SyncQueue status
-  await _db.updateSyncQueueStatus(op.id, SyncQueueStatus.success);
 }
 ```
 
 **Rules:**
 - Transactions: Max 500 operations per batch
 - Atomicity: All-or-nothing per batch
-- Status tracking: Update SyncQueue before/after
+- Status tracking: Update SyncQueue after successful commit
+- Retry: Failed batches marked as error, retried on next sync
 
 ---
 
-## 13. Checklist for New Features
+## 13. Security & Auth
+
+### 13.1 Authentication Flow (NEW: Firebase + Admin Setup)
+
+**Flow:**
+```
+First Launch (no admin):
+  ↓
+setupStatusProvider → adminExistsProvider queries Drift
+  → No admin found
+  → SetupStatus: needsAdminSetup
+  → Router redirect to /admin-setup
+  ↓
+AdminSetupPage:
+  1. User enters: email, password, confirm password
+  2. Validation: passwords match, email valid
+  3. Submit:
+     a. FirebaseAuthRepository.createAdminUser(email, password)
+     b. Firebase Auth: createUserWithEmailAndPassword()
+     c. Drift: INSERT user with role='admin'
+     d. Return UserEntity
+  4. Success: ref.invalidate(setupStatusProvider)
+  5. Router detects: adminExists=true → SetupStatus: needsLogin
+  6. Auto-redirect to /login
+  ↓
+LoginPage:
+  1. User enters: email, password
+  2. Submit: FirebaseAuthRepository.signIn(email, password)
+  3. Firebase Auth: signInWithEmailAndPassword()
+  4. authStateProvider emits: user != null
+  5. setupStatusProvider: authenticated
+  6. Router redirect to /home
+```
+
+**Auth Architecture:**
+- Firebase Auth: Primary auth (email/password)
+- Drift users table: Local profile + role
+- JWT tokens: Stored in SecureStorage (for offline validation)
+- Rate limiting: LoginAttempts table + RateLimiter service
+
+**Rules:**
+- Admin creation: Only on first launch (no admin in DB)
+- Email: Unique (enforced by Firebase Auth)
+- Password: Min 8 chars, validated before submit
+- Session: Firebase token, refreshed on app resume
+- Logout: Clears Drift user, revokes Firebase token
+
+---
+
+### 13.2 Authorization & Permissions
+
+**Role-based access control:**
+```dart
+enum Role { admin, manager, user }
+
+// Permission resolver
+class PermissionResolver {
+  bool canManageUsers(UserEntity user) => user.role == Role.admin;
+  bool canEditTerrain(UserEntity user) => user.role == Role.admin || user.role == Role.manager;
+  bool canViewStats(UserEntity user) => true;  // All roles
+}
+
+// Usage in router
+GoRoute(
+  path: '/admin',
+  redirect: (context, state) {
+    final user = ref.read(currentUserProvider);
+    if (!PermissionResolver().canManageUsers(user)) {
+      return '/access-denied';
+    }
+    return null;
+  },
+);
+
+// Usage in UI
+PermissionVisibility(
+  permission: Permission.manageUsers,
+  child: AdminButton(),
+);
+```
+
+---
+
+## 14. Checklist for New Features
 
 When implementing new domain entity:
 
 - [ ] Create domain entity (`domain/entities/[name].dart`)
   - @immutable, copyWith, ==, hashCode, toString
-  - id, createdAt, updatedAt fields
+  - id, remoteId, syncStatus, createdAt, updatedAt fields
   
 - [ ] Create repository interface (`domain/repositories/[name]_repository.dart`)
   - Abstract methods (CRUD)
   
 - [ ] Create Drift table (`data/database/tables/[name]_table.dart`)
-  - All fields mapped
+  - All fields mapped, including remoteId, syncStatus
   
 - [ ] Create repository impl (`data/repositories/[name]_repository_impl.dart`)
   - Implement interface
   - Handle Drift queries
+  - Trigger sync after mutations
   
 - [ ] Create mapper (`data/mappers/[name]_mapper.dart`)
   - Entity ↔ local model ↔ Firestore model
+  - Include `toCompanion()` extension for Drift INSERT/UPDATE
+  - Map `remoteId` ↔ Firestore docId
   
 - [ ] Create provider (`presentation/providers/[name]_provider.dart`)
-  - FutureProvider for reading
-  - Provider<Function> for actions
+  - FutureProvider for reading (from Drift)
+  - Provider<Function> for actions (mutation + sync)
   - StateProvider for filters (if applicable)
   - Invalidation logic
+  - NEW: Fusion provider (merged local + remote) if multi-device sync planned
   
 - [ ] Create screen (`features/[feature]/presentation/screens/[name]_screen.dart`)
   - Use AsyncValue.when()
@@ -1049,16 +1410,44 @@ When implementing new domain entity:
   - Pure presentation
   - NO business logic
   
+- [ ] Update Firestore security rules (`firestore.rules`)
+  - Define read/write permissions for collection
+  
 - [ ] Add routing (`core/router/app_router.dart`)
   - New route
   - Access checks
   
+- [ ] Add FirebaseSyncService support (`data/services/firebase_sync_service.dart`)
+  - Add sync[Entity]() method
+  - Add to syncAll()
+  
 - [ ] Add tests (`test/...`)
-  - Repository tests
+  - Repository tests (Drift + sync)
   - Provider tests
   - Widget tests (critical screens)
 
 ---
 
-**Last updated:** 2024
-**Valid for:** Flutter 3.x, Dart 3.x, Riverpod 2.4.x, Drift 2.13.x
+## 15. Known Issues & Future Work
+
+### 15.1 Current Limitations
+
+- **Pull from Firestore:** Not yet implemented (one-way sync only)
+- **Manual conflict resolution:** Uses LAST-WRITE-WINS only
+- **Multi-device sync:** Not yet supported
+- **Offline search:** Limited (local data only)
+
+### 15.2 Planned Improvements
+
+- [ ] Bi-directional sync (Drift ↔ Firestore)
+- [ ] Custom conflict resolution UI
+- [ ] Multi-device sync support
+- [ ] Firestore real-time listeners (StreamProvider)
+- [ ] Background sync service
+
+---
+
+**Last updated:** 2024 (v14 schema, Firebase sync, Admin setup flow)
+**Valid for:** Flutter 3.x, Dart 3.x, Riverpod 2.4.x, Drift 2.13.x, Firebase 4.x
+```
+
