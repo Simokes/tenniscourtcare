@@ -29,6 +29,7 @@ import '../mappers/terrain_mapper.dart';
 import '../mappers/stock_item_mapper.dart';
 import '../mappers/user_mapper.dart';
 import '../mappers/maintenance_mapper.dart';
+import '../mappers/event_mapper.dart'; // ✅ IMPORT Added
 
 part 'app_database.g.dart';
 

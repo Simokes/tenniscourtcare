@@ -16,6 +16,7 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
+import 'package:connectivity_plus/connectivity_plus.dart'; // ✅ IMPORT
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(
@@ -41,6 +42,19 @@ Future<void> main() async {
       // ✅ Setup periodic sync (every 5 minutes)
       Timer.periodic(const Duration(minutes: 5), (_) {
         unawaited(syncService.syncAll());
+      });
+
+      // ✅ Listen for network changes to trigger sync
+      Connectivity().onConnectivityChanged.listen((result) {
+        // Compatibility for connectivity_plus < 6.0 which returns single result
+        // or >= 6.0 which returns List.
+        // Based on error "The method 'any' isn't defined for the type 'ConnectivityResult'",
+        // 'result' is treated as ConnectivityResult (single).
+        // So we treat it as single.
+        if (result != ConnectivityResult.none) {
+          debugPrint('🌐 Network restored, triggering sync...');
+          unawaited(syncService.syncAll());
+        }
       });
 
       runApp(
