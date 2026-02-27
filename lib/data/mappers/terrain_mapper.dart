@@ -2,7 +2,7 @@
 
 import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
-import 'package:tenniscourtcare/data/database/app_database.dart';
+
 import 'package:tenniscourtcare/data/models/terrain_model.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
