@@ -77,6 +77,13 @@ void main() {
 
       await notifier.addMaintenance(maintenance);
 
+      // Wait for the provider state to update
+      await container.read(maintenanceNotifierProvider).when(
+        data: (_) async {},
+        loading: () async {},
+        error: (_, __) async {},
+      );
+      
       expect(container.read(maintenanceNotifierProvider).hasValue, true);
       final count = await database.getMaintenanceCount(terrainTerreBattueId);
       expect(count, 1);
