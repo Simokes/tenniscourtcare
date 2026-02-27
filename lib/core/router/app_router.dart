@@ -1,9 +1,9 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../presentation/providers/auth_providers.dart';
-import '../../presentation/providers/terrain_provider.dart';
-import '../../presentation/providers/setup_providers.dart';
-import '../../domain/models/setup_status.dart';
+import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
+import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
+import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import '../../presentation/pages/auth/login_page.dart';
 import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
@@ -23,49 +23,52 @@ import 'go_router_refresh_stream.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   // Watch the stream of setup status changes
-  final setupStatusStream = ref.watch(setupStatusProvider.stream);
+  final setupStatusStream = ref.watch(setupStatusStreamProvider);
 
   return GoRouter(
     initialLocation: '/',
-    refreshListenable: GoRouterRefreshStream(setupStatusStream),
+    refreshListenable: GoRouterRefreshStream(
+      setupStatusStream.when(
+        data: (status) => Stream.value(status),
+        loading: () => Stream.value(SetupStatus.loading),
+        error: (error, st) => Stream.value(SetupStatus.error),
+      ),
+    ),
     redirect: (context, state) {
       final setupStatusAsync = ref.read(setupStatusProvider);
 
-      // If still loading or error, do not redirect yet (or handle error)
-      if (setupStatusAsync.isLoading) return null;
-      if (setupStatusAsync.hasError) return '/access-denied'; // Or specific error page
+      // If still loading or error, handle appropriately
+      if (setupStatusAsync.isLoading && !setupStatusAsync.hasValue) return null;
+      if (setupStatusAsync.hasError) return '/access-denied';
 
       final setupStatus = setupStatusAsync.value;
       if (setupStatus == null) return null;
 
       final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
-      
+      final isAccessDenied = state.uri.path == '/access-denied';
 
       switch (setupStatus) {
         case SetupStatus.loading:
           return null;
 
         case SetupStatus.needsAdminSetup:
-          if (isSettingUp) return null;
-          return '/admin-setup';
+          if (!isSettingUp) return '/admin-setup';
+          return null;
 
         case SetupStatus.needsLogin:
-          if (isLoggingIn) return null;
-          // Block access to admin setup if already set up
-          if (isSettingUp) return '/login';
-          return '/login';
+          if (!isLoggingIn) return '/login';
+          return null;
 
         case SetupStatus.authenticated:
-          // Redirect away from login/setup if authenticated
           if (isLoggingIn || isSettingUp) {
             return '/';
           }
           return null;
 
         case SetupStatus.error:
-          if (state.uri.path == '/access-denied') return null;
-          return '/access-denied';
+          if (!isAccessDenied) return '/access-denied';
+          return null;
       }
     },
     routes: [
@@ -131,9 +134,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             final terrain = terrains.firstWhere((t) => t.id == id);
             return TerrainMaintenanceHistoryScreen(terrain: terrain);
           } catch (e) {
-            // Fallback or Error page if terrain not found (e.g. directly accessing url)
-            // For now redirect to home or show error
-            return const AccessDeniedPage(); // Or a specific Not Found page
+            return const AccessDeniedPage();
           }
         },
       ),
