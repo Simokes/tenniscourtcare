@@ -85,7 +85,7 @@ class SettingsScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(16),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
                 const Divider(height: 1, indent: 56),
                 settingsAsync.when(
@@ -109,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
                     );
                   },
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                 ),
               ],
             ),
