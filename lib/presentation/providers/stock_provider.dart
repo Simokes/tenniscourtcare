@@ -1,18 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../data/repositories/stock_repository_impl.dart';
-import '../../data/services/firebase_sync_service.dart';
 import '../../domain/entities/stock_item.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../features/inventory/models/stock_filter.dart';
 import 'database_provider.dart';
-
-// ✅ FIREBASE SYNC SERVICE PROVIDER
-final firebaseSyncServiceProvider = Provider<FirebaseSyncService>((ref) {
-  final db = ref.watch(databaseProvider);
-  return FirebaseSyncService(FirebaseFirestore.instance, db);
-});
+import 'sync_status_provider.dart';
 
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
   final db = ref.watch(databaseProvider);

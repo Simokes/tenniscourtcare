@@ -21,6 +21,7 @@ import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
 import '../../domain/entities/stock_item.dart' as doms;
 import '../../domain/entities/user_entity.dart' as domu;
+import '../../domain/entities/app_event.dart';
 import '../../domain/enums/role.dart';
 import '../../utils/date_utils.dart' as cc;
 
@@ -787,6 +788,14 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> deleteMaintenance(int id) {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
+  }
+
+  // ========== EVENTS ==========
+
+  Stream<List<AppEvent>> watchAllEvents() {
+    return select(events).watch().map(
+      (rows) => rows.map((r) => r.toDomain()).toList(),
+    );
   }
 
   // ========== WATCHERS & AGRÉGATIONS ==========

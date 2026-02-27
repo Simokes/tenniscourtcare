@@ -4,9 +4,6 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/data/mappers/terrain_mapper.dart';
-import 'package:tenniscourtcare/data/mappers/stock_item_mapper.dart';
-import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
 import 'package:tenniscourtcare/data/services/firebase_event_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_maintenance_service.dart';
 import 'package:tenniscourtcare/data/services/firebase_stock_service.dart';
@@ -14,7 +11,13 @@ import 'package:tenniscourtcare/data/services/firebase_terrain_service.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 /// Service responsible for syncing local Drift database with Firebase.
-/// Offline-first: uploads local changes, updates sync status to "synced".
+/// Implements offline-first: writes to Drift first, then syncs to Firestore.
+///
+/// Sync flow:
+/// 1. User mutation → Write to Drift (optimistic)
+/// 2. Check network → If online, push to Firebase
+/// 3. Firebase success → Update sync_status to "synced"
+/// 4. Firebase failure → Keep sync_status as "local" (retry on network restore)
 class FirebaseSyncService {
   final AppDatabase _db;
   final FirebaseFirestore _firestore;
@@ -24,7 +27,8 @@ class FirebaseSyncService {
   late final FirebaseStockService _stockService;
   late final FirebaseEventService _eventService;
 
-  /// Stream controller for sync status of each entity type
+  /// Stream controller for real-time sync status updates
+  /// Maps entity type → current SyncStatus
   final BehaviorSubject<Map<String, SyncStatus>> _syncStatusController =
       BehaviorSubject.seeded({
     'terrains': SyncStatus.local,
@@ -40,7 +44,17 @@ class FirebaseSyncService {
     _eventService = FirebaseEventService(_firestore);
   }
 
-  /// Watch sync status changes
+  /// Watch sync status changes for all entities
+  ///
+  /// Usage:
+  /// ```dart
+  /// final syncStatus = ref.watch(syncStatusProvider);
+  /// syncStatus.when(
+  ///   data: (status) => SyncStatusBanner(status: status),
+  ///   loading: () => SizedBox.shrink(),
+  ///   error: (e, st) => SizedBox.shrink(),
+  /// );
+  /// ```
   Stream<Map<String, SyncStatus>> watchSyncStatus() =>
       _syncStatusController.stream;
 
@@ -56,19 +70,34 @@ class FirebaseSyncService {
   }
 
   /// Sync all entities with Firebase
+  ///
+  /// Called when:
+  /// - Network connectivity restored
+  /// - User manually triggers sync
+  /// - App startup (if network available)
   Future<void> syncAll() async {
-    debugPrint('🔄 Starting full sync...');
+    debugPrint('🔄 FirebaseSyncService: Starting full sync...');
     await Future.wait([
       syncTerrains(),
       syncMaintenances(),
       syncStock(),
       syncEvents(),
     ]);
-    debugPrint('✅ Full sync complete');
+    debugPrint('✅ FirebaseSyncService: Full sync complete');
   }
 
-  /// ✅ Sync terrains with Firebase
-  /// Uploads local terrains, then marks as synced
+  /// ✅ Sync terrains: Upload local changes to Firebase
+  ///
+  /// Flow:
+  /// 1. Get all local terrains with sync_status == "local"
+  /// 2. For each unsynced terrain:
+  ///    a. Upload to Firebase
+  ///    b. Update local record: sync_status = "synced"
+  /// 3. Update stream status
+  ///
+  /// Errors:
+  /// - Firebase upload failure → Keeps sync_status as "local" (retried on next sync)
+  /// - Database error → Propagates to caller via rethrow
   Future<void> syncTerrains() async {
     _updateStatus('terrains', SyncStatus.syncing);
     try {
@@ -77,13 +106,15 @@ class FirebaseSyncService {
           .where((t) => t.syncStatus == SyncStatus.local)
           .toList();
 
-      debugPrint('⏳ Syncing ${unsynced.length} terrains...');
+      debugPrint(
+          '⏳ FirebaseSyncService: Syncing ${unsynced.length} terrains...');
 
       for (final terrain in unsynced) {
         // Upload to Firebase
         await _terrainService.uploadTerrainToFirestore(terrain);
 
-        // ✅ Upsert: INSERT if new, UPDATE if exists
+        // ✅ Upsert to Drift: INSERT if new, UPDATE if exists
+        // This fixes UNIQUE constraint error by using onConflict
         await _db.into(_db.terrains).insert(
           terrain.toCompanion(includeId: true),
           onConflict: drift.DoUpdate(
@@ -95,34 +126,38 @@ class FirebaseSyncService {
         );
       }
       _updateStatus('terrains', SyncStatus.synced);
-      debugPrint('✅ Terrains synced successfully');
+      debugPrint('✅ FirebaseSyncService: Terrains synced successfully');
     } catch (e, st) {
-      debugPrint('❌ Sync Terrains Error: $e\n$st');
+      debugPrint('❌ FirebaseSyncService: Sync Terrains Error: $e\n$st');
       _updateStatus('terrains', SyncStatus.error);
       rethrow;
     }
   }
 
-  /// ✅ Sync maintenances with Firebase
-  /// Uploads local maintenances, then marks as synced
+  /// ✅ Sync maintenances: Upload local changes to Firebase
+  ///
+  /// Note: watchMaintenancesInRange(0, 9999999999) gets ALL maintenances
+  /// (No better method available in current AppDatabase)
   Future<void> syncMaintenances() async {
     _updateStatus('maintenances', SyncStatus.syncing);
     try {
+      // Get all maintenances from Drift
       final allMaintenances = await _db.watchMaintenancesInRange(0, 9999999999)
-          .first; // Get all maintenances
+          .first; // Convert Stream to single Future
 
       final unsynced = allMaintenances
           .where((m) => m.syncStatus == SyncStatus.local)
           .toList();
 
-      debugPrint('⏳ Syncing ${unsynced.length} maintenances...');
+      debugPrint(
+          '⏳ FirebaseSyncService: Syncing ${unsynced.length} maintenances...');
 
       for (final maintenance in unsynced) {
         // Upload to Firebase
         await _maintenanceService
             .uploadMaintenanceToFirestore(maintenance);
 
-        // ✅ Upsert: INSERT if new, UPDATE if exists
+        // ✅ Upsert to Drift: INSERT if new, UPDATE if exists
         await _db.into(_db.maintenances).insert(
           maintenance.toCompanion(),
           onConflict: drift.DoUpdate(
@@ -134,16 +169,15 @@ class FirebaseSyncService {
         );
       }
       _updateStatus('maintenances', SyncStatus.synced);
-      debugPrint('✅ Maintenances synced successfully');
+      debugPrint('✅ FirebaseSyncService: Maintenances synced successfully');
     } catch (e, st) {
-      debugPrint('❌ Sync Maintenances Error: $e\n$st');
+      debugPrint('❌ FirebaseSyncService: Sync Maintenances Error: $e\n$st');
       _updateStatus('maintenances', SyncStatus.error);
       rethrow;
     }
   }
 
-  /// ✅ Sync stock items with Firebase
-  /// Uploads local stock items, then marks as synced
+  /// ✅ Sync stock items: Upload local changes to Firebase
   Future<void> syncStock() async {
     _updateStatus('stock', SyncStatus.syncing);
     try {
@@ -151,13 +185,14 @@ class FirebaseSyncService {
       final unsynced =
           allStock.where((s) => s.syncStatus == SyncStatus.local).toList();
 
-      debugPrint('⏳ Syncing ${unsynced.length} stock items...');
+      debugPrint(
+          '⏳ FirebaseSyncService: Syncing ${unsynced.length} stock items...');
 
       for (final item in unsynced) {
         // Upload to Firebase
         await _stockService.uploadStockItemToFirestore(item);
 
-        // ✅ Upsert: INSERT if new, UPDATE if exists
+        // ✅ Upsert to Drift: INSERT if new, UPDATE if exists
         await _db.into(_db.stockItems).insert(
           item.toCompanion(),
           onConflict: drift.DoUpdate(
@@ -169,34 +204,32 @@ class FirebaseSyncService {
         );
       }
       _updateStatus('stock', SyncStatus.synced);
-      debugPrint('✅ Stock items synced successfully');
+      debugPrint('✅ FirebaseSyncService: Stock items synced successfully');
     } catch (e, st) {
-      debugPrint('❌ Sync Stock Error: $e\n$st');
+      debugPrint('❌ FirebaseSyncService: Sync Stock Error: $e\n$st');
       _updateStatus('stock', SyncStatus.error);
       rethrow;
     }
   }
 
-  /// ✅ Sync events with Firebase
-  /// Uploads local events, then marks as synced
+  /// ✅ Sync events: Upload local changes to Firebase
   Future<void> syncEvents() async {
     _updateStatus('events', SyncStatus.syncing);
     try {
-      // Note: Events watchers use _db.watchAllEvents() if available,
-      // otherwise use the stream watcher below as fallback
       final allEvents = await _db.watchAllEvents().first;
       final unsynced =
           allEvents.where((e) => e.syncStatus == SyncStatus.local).toList();
 
-      debugPrint('⏳ Syncing ${unsynced.length} events...');
+      debugPrint(
+          '⏳ FirebaseSyncService: Syncing ${unsynced.length} events...');
 
       for (final event in unsynced) {
         // Upload to Firebase
         await _eventService.uploadEventToFirestore(event);
 
-        // ✅ Upsert: INSERT if new, UPDATE if exists
+        // ✅ Upsert to Drift: INSERT if new, UPDATE if exists
         await _db.into(_db.events).insert(
-          event.toCompanion(),
+          event.toCompanion(includeId: true),
           onConflict: drift.DoUpdate(
             (old) => EventsCompanion(
               syncStatus: drift.Value(SyncStatus.synced.name),
@@ -206,9 +239,9 @@ class FirebaseSyncService {
         );
       }
       _updateStatus('events', SyncStatus.synced);
-      debugPrint('✅ Events synced successfully');
+      debugPrint('✅ FirebaseSyncService: Events synced successfully');
     } catch (e, st) {
-      debugPrint('❌ Sync Events Error: $e\n$st');
+      debugPrint('❌ FirebaseSyncService: Sync Events Error: $e\n$st');
       _updateStatus('events', SyncStatus.error);
       rethrow;
     }
