@@ -103,7 +103,7 @@ void main() {
       );
 
       // Keep alive
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -129,7 +129,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -162,7 +162,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -192,7 +192,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -218,7 +218,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -253,7 +253,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -289,7 +289,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -327,7 +327,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
@@ -360,7 +360,7 @@ void main() {
         ],
       );
 
-      container.listen(setupStatusProvider, (_, __) {});
+      container.listen(setupStatusProvider, (_, _) {});
 
       final router = container.read(goRouterProvider);
       await container.read(setupStatusProvider.future);
