@@ -21,6 +21,8 @@ import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
 import '../../domain/entities/stock_item.dart' as doms;
 import '../../domain/entities/user_entity.dart' as domu;
+import '../../domain/entities/app_event.dart';
+import '../../domain/entities/sync_status.dart'; // ✅ IMPORT Added
 import '../../domain/enums/role.dart';
 import '../../utils/date_utils.dart' as cc;
 
@@ -28,6 +30,7 @@ import '../mappers/terrain_mapper.dart';
 import '../mappers/stock_item_mapper.dart';
 import '../mappers/user_mapper.dart';
 import '../mappers/maintenance_mapper.dart';
+import '../mappers/event_mapper.dart';
 
 part 'app_database.g.dart';
 
@@ -789,6 +792,14 @@ class AppDatabase extends _$AppDatabase {
     return (delete(maintenances)..where((m) => m.id.equals(id))).go();
   }
 
+  // ========== EVENTS ==========
+
+  Stream<List<AppEvent>> watchAllEvents() {
+    return select(events).watch().map(
+      (rows) => rows.map((r) => r.toDomain()).toList(),
+    );
+  }
+
   // ========== WATCHERS & AGRÉGATIONS ==========
 
   Stream<({int manto, int sottomanto, int silice})> watchSacsTotals({
@@ -1102,6 +1113,29 @@ class AppDatabase extends _$AppDatabase {
               ..where(maintenances.terrainId.equals(terrainId)))
             .getSingle();
     return result.read(maintenances.id.count()) ?? 0;
+  }
+}
+
+extension EventRowDomainX on EventRow {
+  AppEvent toDomain() {
+    return AppEvent(
+      id: id,
+      title: title,
+      description: description,
+      startTime: startTime,
+      endTime: endTime,
+      color: color,
+      terrainIds: terrainIds,
+      syncStatus: SyncStatus.values.firstWhere(
+        (e) => e.name == syncStatus,
+        orElse: () => SyncStatus.local,
+      ),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      firebaseId: firebaseId,
+      createdBy: createdBy,
+      modifiedBy: modifiedBy,
+    );
   }
 }
 

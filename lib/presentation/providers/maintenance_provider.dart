@@ -3,7 +3,7 @@ import '../../data/repositories/maintenance_repository_impl.dart';
 import '../../domain/entities/maintenance.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import 'database_provider.dart';
-import 'terrain_provider.dart'; // for firebaseSyncServiceProvider
+import 'sync_status_provider.dart'; // for firebaseSyncServiceProvider
 
 // Repository Provider
 final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
@@ -12,11 +12,9 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
 });
 
 // LOCAL
-final localMaintenancesProvider = FutureProvider<List<Maintenance>>((
-  ref,
-) async {
-  final repo = ref.watch(maintenanceRepositoryProvider);
-  return repo.getAllMaintenances();
+final localMaintenancesProvider = FutureProvider<List<Maintenance>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.watchMaintenancesInRange(0, 9999999999).first;
 });
 
 // FIRESTORE

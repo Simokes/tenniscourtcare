@@ -1,7 +1,8 @@
 // filepath: lib/data/mappers/event_mapper.dart
 
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/app_event_model.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
@@ -70,26 +71,32 @@ extension AppEventModelX on AppEventModel {
   AppEvent toDomain() => EventMapper.toDomain(this);
 }
 
-extension EventDriftX on db.EventRow {
-  AppEvent toDomain() => EventMapper.fromDriftEntity(this);
-}
-
 // Domain → Companion (Keeping for DB inserts)
-extension AppEventDomainX on AppEvent {
-  db.EventsCompanion toCompanion({bool includeId = true}) => db.EventsCompanion(
-    id: includeId && id != null ? Value(id!) : const Value.absent(),
-    title: Value(title),
-    description: Value(description),
-    startTime: Value(startTime),
-    endTime: Value(endTime),
-    color: Value(color),
-    terrainIds: Value(terrainIds),
-    // Sync mappings
-    syncStatus: Value(syncStatus.name),
-    createdAt: Value(createdAt),
-    updatedAt: Value(updatedAt),
-    firebaseId: Value(firebaseId),
-    createdBy: Value(createdBy),
-    modifiedBy: Value(modifiedBy),
-  );
+extension AppEventMapperX on AppEvent {
+  db.EventsCompanion toCompanion({bool includeId = true}) {
+    return db.EventsCompanion(
+      id: includeId && id != null ? drift.Value(id!) : const drift.Value.absent(),
+      title: drift.Value(title),
+      description: description == null
+          ? const drift.Value.absent()
+          : drift.Value(description),
+      startTime: drift.Value(startTime),
+      endTime: drift.Value(endTime),
+      color: drift.Value(color),
+      terrainIds: drift.Value(terrainIds),
+      // Sync mappings
+      syncStatus: drift.Value(syncStatus.name),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      firebaseId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      createdBy: createdBy == null
+          ? const drift.Value.absent()
+          : drift.Value(createdBy),
+      modifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+    );
+  }
 }

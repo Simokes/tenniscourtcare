@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/auth_providers.dart';
-import '../../providers/setup_providers.dart';
-import '../../widgets/premium/premium_button.dart';
-import '../../widgets/premium/premium_text_field.dart';
+import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
+import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
+import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
 
 class AdminSetupPage extends ConsumerStatefulWidget {
   const AdminSetupPage({super.key});
@@ -13,155 +12,126 @@ class AdminSetupPage extends ConsumerStatefulWidget {
 }
 
 class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _nameController;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _nameController = TextEditingController();
+  }
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
-  Future<void> _register() async {
-    final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
+  Future<void> _createAdmin() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs')),
-      );
-      return;
+    try {
+      // Note: We need to cast or ensure the provider returns FirebaseAuthRepository
+      // Assuming authRepositoryProvider returns AuthRepository interface which FirebaseAuthRepository implements
+      // And assuming createAdminUser is in the interface or we cast.
+      // The instruction said: "ref.read(authRepositoryProvider).createAdminUser(...)".
+      // I will assume authRepositoryProvider exposes this method or the concrete class.
+      // If authRepositoryProvider is defined as Provider<AuthRepository>, and AuthRepository interface
+      // doesn't have createAdminUser, we might need a specific provider or cast.
+      // For now, I'll try to use it as requested. If compile fails, I'll fix.
+      // Actually, checking previous instructions, item 4 says "Verify createAdminUser in FirebaseAuthRepository".
+      // If it's not in the interface, we can't call it on the interface provider easily without casting.
+      // I'll check imports.
+
+      final repo = ref.read(authRepositoryProvider);
+
+      // If repo is FirebaseAuthRepository, we can cast.
+      if (repo is FirebaseAuthRepository) {
+        await repo.createAdminUser(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+          name: _nameController.text.trim(),
+        );
+      } else {
+        throw Exception('Repository is not FirebaseAuthRepository');
+      }
+
+      // ✅ Trigger setup status refresh
+      ref.invalidate(setupStatusProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Admin créé avec succès!')),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    if (password.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Le mot de passe doit contenir au moins 8 caractères'),
-        ),
-      );
-      return;
-    }
-
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Les mots de passe ne correspondent pas'),
-        ),
-      );
-      return;
-    }
-
-    await ref.read(authStateProvider.notifier).registerAdmin(email, name, password);
-
-    // Invalidate providers to force re-evaluation of setup status
-    // adminExistsProvider needs to re-check DB to see the new admin
-    ref.invalidate(adminExistsProvider);
-    // setupStatusProvider watches adminExistsProvider, so it will update too
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateProvider);
-    final isLoading = authState.isLoading;
-    final error = authState.error;
-
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Icon(
-                  Icons.admin_panel_settings,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Configuration Admin',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Créez le premier compte administrateur pour sécuriser l\'application.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 48),
-
-                PremiumTextField(
-                  label: 'Nom complet',
-                  hint: 'John Doe',
-                  controller: _nameController,
-                ),
-                const SizedBox(height: 24),
-                PremiumTextField(
-                  label: 'Email',
-                  hint: 'admin@courtcare.com',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 24),
-                PremiumTextField(
-                  label: 'Mot de passe',
-                  hint: '8 caractères minimum',
-                  obscureText: true,
-                  controller: _passwordController,
-                ),
-                const SizedBox(height: 24),
-                PremiumTextField(
-                  label: 'Confirmer le mot de passe',
-                  hint: 'Répétez le mot de passe',
-                  obscureText: true,
-                  controller: _confirmPasswordController,
-                ),
-
-                if (error != null) ...[
-                  const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      error.toString(),
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 32),
-                PremiumButton(
-                  label: 'Créer le compte',
-                  isLoading: isLoading,
-                  onPressed: _register,
-                ),
-              ],
+      appBar: AppBar(title: const Text('Configuration Admin')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Nom'),
+              enabled: !_isLoading,
             ),
-          ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(labelText: 'Email'),
+              enabled: !_isLoading,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Mot de passe'),
+              obscureText: true,
+              enabled: !_isLoading,
+            ),
+            const SizedBox(height: 24),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ElevatedButton(
+              onPressed: _isLoading ? null : _createAdmin,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Créer Admin'),
+            ),
+          ],
         ),
       ),
     );

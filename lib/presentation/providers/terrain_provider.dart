@@ -1,17 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/terrain_repository_impl.dart';
-import '../../data/services/firebase_sync_service.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/repositories/terrain_repository.dart';
 import 'database_provider.dart';
-
-// Service Provider
-final firebaseSyncServiceProvider = Provider<FirebaseSyncService>((ref) {
-  final firestore = FirebaseFirestore.instance;
-  final db = ref.watch(databaseProvider);
-  return FirebaseSyncService(firestore, db);
-});
+import 'sync_status_provider.dart';
 
 // Repository Provider
 final terrainRepositoryProvider = Provider<TerrainRepository>((ref) {
@@ -35,13 +27,7 @@ final firestoreTerrainsProvider = StreamProvider<List<Terrain>>((ref) {
 // FUSION LOCAL + FIRESTORE
 final terrainsProvider = StreamProvider<List<Terrain>>((ref) async* {
   final localFuture = ref.watch(localTerrainsProvider.future);
-  // Use .future for first value or create broadcast
 
-  // Ideally, combineLatest but simple async* works if we listen to stream properly
-  // For StreamProvider, we can just yield* ref.watch(firestoreTerrainsProvider.stream) combined
-  // But here we need to mix with local future.
-
-  // Better pattern:
   final local = await localFuture;
   yield local; // Yield local first for instant UI
 
@@ -89,9 +75,6 @@ final updateTerrainStatusProvider =
       }
     });
 
-// Alias for compatibility if needed, or replace usages of 'terrainsProvider' with 'allTerrainsProvider'
-// But since the original file exported 'terrainsProvider', we keep it as the main merged provider.
-
 // CREATE (avec sync auto)
 final addTerrainProvider = Provider<Future<void> Function(String, TerrainType)>(
   (ref) {
@@ -132,29 +115,25 @@ List<Terrain> _mergeTerrains(List<Terrain> local, List<Terrain> remote) {
   }
 
   // Fusionner avec les remotes (LAST-WRITE-WINS)
-  // Note: Remote items might not have local ID mapped yet.
-  // Real implementation needs robust ID mapping (e.g. via firebaseId column in local DB).
-  // Here we assume simple merge logic as requested.
   for (final t in remote) {
     // Try to find local match by firebaseId or ID
-    // If remote has no local ID, it's tricky to map to 'int' key of map.
-    // We skip complex reconciliation for this task and focus on the requested pattern.
-    // If remote item has matching ID (which implies we synced it UP before), we merge.
+    // Note: In a real scenario, we'd map by firebaseId.
+    // Here we assume ID consistency or merge based on ID if present.
+    // If ID is 0 or null from remote (unlikely if mapped correctly), we might skip or append.
+    // For this implementation, we prioritize local ID match if available.
+
+    // Check if we have a local item with same ID
     if (merged.containsKey(t.id)) {
       final existing = merged[t.id]!;
-      merged[t.id] = existing.updatedAt.isAfter(t.updatedAt) ? existing : t;
-    } else {
-      // New from remote. We can't easily add to Map<int, Terrain> if ID is 0/null.
-      // In a real app, we'd insert into local DB first, then yield the new full list.
-      // For this stream provider, we might just append if we want to show it.
-      // But since the map key is int, we can't add it without a valid local ID.
-      // We will ignore remote-only items that are not in local DB for this specific "merge" function
-      // unless we change the return type or logic.
-      // HOWEVER, the user prompt says: "merged[t.id] = ... else merged[t.id] = t"
-      // This implies remote items have valid IDs.
-      if (t.id != 0) {
+      // Use remote if it's newer
+      if (t.updatedAt.isAfter(existing.updatedAt)) {
         merged[t.id] = t;
       }
+    } else {
+       // Remote only item. If ID > 0, include it.
+       if (t.id != 0) {
+         merged[t.id] = t;
+       }
     }
   }
 

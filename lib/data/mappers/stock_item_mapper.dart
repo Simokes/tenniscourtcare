@@ -1,9 +1,11 @@
 // filepath: lib/data/mappers/stock_item_mapper.dart
 
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/stock_item_model.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart' as domain;
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class StockItemMapper {
@@ -85,27 +87,43 @@ extension StockItemDriftX on db.StockItemRow {
 }
 
 // Domain → Companion (Keeping for DB inserts)
-extension StockItemDomainX on domain.StockItem {
-  db.StockItemsCompanion toCompanion() => db.StockItemsCompanion(
-    id: id == null ? const Value.absent() : Value(id!),
-    name: Value(name),
-    quantity: Value(quantity),
-    unit: Value(unit),
-    comment: Value(comment),
-    isCustom: Value(isCustom),
-    minThreshold: Value(minThreshold),
-    category: Value(category),
-    sortOrder: Value(sortOrder),
-    // Sync mappings
-    syncStatus: Value(syncStatus.name),
-    createdAt: Value(createdAt),
-    updatedAt: Value(updatedAt),
-    firebaseId: Value(firebaseId),
-    remoteId: Value(firebaseId), // Fallback/Legacy
-    createdBy: Value(createdBy),
-    modifiedBy: Value(modifiedBy),
-    lastModifiedBy: Value(modifiedBy), // Fallback/Legacy
-    // Maintain isSyncPending logic for backward compatibility
-    isSyncPending: Value(syncStatus != SyncStatus.synced),
-  );
+extension StockItemMapperX on StockItem {
+  db.StockItemsCompanion toCompanion() {
+    return db.StockItemsCompanion(
+      id: id == null ? const drift.Value.absent() : drift.Value(id!),
+      name: drift.Value(name),
+      quantity: drift.Value(quantity),
+      unit: drift.Value(unit),
+      comment: comment == null
+          ? const drift.Value.absent()
+          : drift.Value(comment),
+      isCustom: drift.Value(isCustom),
+      minThreshold: minThreshold == null
+          ? const drift.Value.absent()
+          : drift.Value(minThreshold),
+      category: category == null
+          ? const drift.Value.absent()
+          : drift.Value(category),
+      sortOrder: drift.Value(sortOrder),
+      syncStatus: drift.Value(syncStatus.name),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      firebaseId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      createdBy: createdBy == null
+          ? const drift.Value.absent()
+          : drift.Value(createdBy),
+      modifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+      remoteId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      lastModifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+      isSyncPending: drift.Value(syncStatus != SyncStatus.synced),
+    );
+  }
 }

@@ -6,6 +6,7 @@ import '../../domain/entities/terrain.dart'; // Needed
 import '../../domain/repositories/event_repository.dart';
 import 'database_provider.dart';
 import 'maintenance_provider.dart';
+import 'sync_status_provider.dart';
 import 'terrain_provider.dart';
 
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
@@ -14,9 +15,9 @@ final eventRepositoryProvider = Provider<EventRepository>((ref) {
   return EventRepositoryImpl(db, firebaseService);
 });
 
-final localEventsProvider = FutureProvider<List<AppEvent>>((ref) async {
-  final repo = ref.watch(eventRepositoryProvider);
-  return repo.getEvents();
+final localEventsProvider = FutureProvider<List<AppEvent>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.watchAllEvents().first;
 });
 
 final firestoreEventsProvider = StreamProvider<List<AppEvent>>((ref) {
