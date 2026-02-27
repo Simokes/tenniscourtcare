@@ -71,10 +71,6 @@ extension AppEventModelX on AppEventModel {
   AppEvent toDomain() => EventMapper.toDomain(this);
 }
 
-extension EventDriftX on db.EventRow {
-  AppEvent toDomain() => EventMapper.fromDriftEntity(this);
-}
-
 // Domain → Companion (Keeping for DB inserts)
 extension AppEventMapperX on AppEvent {
   db.EventsCompanion toCompanion({bool includeId = true}) {
@@ -101,29 +97,6 @@ extension AppEventMapperX on AppEvent {
       modifiedBy: modifiedBy == null
           ? const drift.Value.absent()
           : drift.Value(modifiedBy),
-    );
-  }
-}
-
-extension EventRowMapperX on EventRow {
-  AppEvent toDomain() {
-    return AppEvent(
-      id: id,
-      title: title, // changed from titre to title
-      description: description,
-      startTime: startTime, // changed from dateDebut to startTime
-      endTime: endTime, // changed from dateFin to endTime
-      color: color,
-      terrainIds: terrainIds, // changed from [terrainId!] to terrainIds (list)
-      syncStatus: SyncStatus.values.firstWhere(
-        (e) => e.name == syncStatus,
-        orElse: () => SyncStatus.local,
-      ),
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-      firebaseId: firebaseId,
-      createdBy: createdBy,
-      modifiedBy: modifiedBy,
     );
   }
 }
