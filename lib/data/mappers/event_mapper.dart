@@ -1,7 +1,9 @@
 // filepath: lib/data/mappers/event_mapper.dart
 
+import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/app_event_model.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
@@ -75,21 +77,54 @@ extension EventDriftX on db.EventRow {
 }
 
 // Domain → Companion (Keeping for DB inserts)
-extension AppEventDomainX on AppEvent {
-  db.EventsCompanion toCompanion({bool includeId = true}) => db.EventsCompanion(
-    id: includeId && id != null ? Value(id!) : const Value.absent(),
-    title: Value(title),
-    description: Value(description),
-    startTime: Value(startTime),
-    endTime: Value(endTime),
-    color: Value(color),
-    terrainIds: Value(terrainIds),
-    // Sync mappings
-    syncStatus: Value(syncStatus.name),
-    createdAt: Value(createdAt),
-    updatedAt: Value(updatedAt),
-    firebaseId: Value(firebaseId),
-    createdBy: Value(createdBy),
-    modifiedBy: Value(modifiedBy),
-  );
+extension AppEventMapperX on AppEvent {
+  db.EventsCompanion toCompanion({bool includeId = true}) {
+    return db.EventsCompanion(
+      id: includeId && id != null ? drift.Value(id!) : const drift.Value.absent(),
+      title: drift.Value(title),
+      description: description == null
+          ? const drift.Value.absent()
+          : drift.Value(description),
+      startTime: drift.Value(startTime),
+      endTime: drift.Value(endTime),
+      color: drift.Value(color),
+      terrainIds: drift.Value(terrainIds),
+      // Sync mappings
+      syncStatus: drift.Value(syncStatus.name),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      firebaseId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      createdBy: createdBy == null
+          ? const drift.Value.absent()
+          : drift.Value(createdBy),
+      modifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+    );
+  }
+}
+
+extension EventRowMapperX on EventRow {
+  AppEvent toDomain() {
+    return AppEvent(
+      id: id,
+      title: title, // changed from titre to title
+      description: description,
+      startTime: startTime, // changed from dateDebut to startTime
+      endTime: endTime, // changed from dateFin to endTime
+      color: color,
+      terrainIds: terrainIds, // changed from [terrainId!] to terrainIds (list)
+      syncStatus: SyncStatus.values.firstWhere(
+        (e) => e.name == syncStatus,
+        orElse: () => SyncStatus.local,
+      ),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      firebaseId: firebaseId,
+      createdBy: createdBy,
+      modifiedBy: modifiedBy,
+    );
+  }
 }

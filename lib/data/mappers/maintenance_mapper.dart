@@ -1,5 +1,6 @@
 // filepath: lib/data/mappers/maintenance_mapper.dart
 
+import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 import 'package:tenniscourtcare/data/database/app_database.dart';
@@ -95,23 +96,37 @@ extension MaintenanceDriftX on db.MaintenanceRow {
 }
 
 // Domain → Companion (Keeping for DB inserts)
-extension MaintenanceDomainX on Maintenance {
-  MaintenancesCompanion toCompanion() => MaintenancesCompanion(
-    id: id == null ? const Value.absent() : Value(id!),
-    terrainId: Value(terrainId),
-    type: Value(type),
-    commentaire: Value(commentaire),
-    date: Value(date),
-    sacsMantoUtilises: Value(sacsMantoUtilises),
-    sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
-    sacsSiliceUtilises: Value(sacsSiliceUtilises),
-    imagePath: Value(imagePath),
-    remoteId: Value(firebaseId),
-    syncStatus: Value(syncStatus.name),
-    createdAt: Value(createdAt),
-    updatedAt: Value(updatedAt),
-    firebaseId: Value(firebaseId),
-    createdBy: Value(createdBy),
-    modifiedBy: Value(modifiedBy),
-  );
+extension MaintenanceMapperX on Maintenance {
+  MaintenancesCompanion toCompanion() {
+    return MaintenancesCompanion(
+      id: id == null ? const drift.Value.absent() : drift.Value(id!),
+      terrainId: drift.Value(terrainId),
+      type: drift.Value(type),
+      commentaire: commentaire == null
+          ? const drift.Value.absent()
+          : drift.Value(commentaire),
+      date: drift.Value(date),
+      sacsMantoUtilises: drift.Value(sacsMantoUtilises),
+      sacsSottomantoUtilises: drift.Value(sacsSottomantoUtilises),
+      sacsSiliceUtilises: drift.Value(sacsSiliceUtilises),
+      imagePath: imagePath == null
+          ? const drift.Value.absent()
+          : drift.Value(imagePath),
+      remoteId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      syncStatus: drift.Value(syncStatus.name),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      firebaseId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      createdBy: createdBy == null
+          ? const drift.Value.absent()
+          : drift.Value(createdBy),
+      modifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+    );
+  }
 }

@@ -12,11 +12,9 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
 });
 
 // LOCAL
-final localMaintenancesProvider = FutureProvider<List<Maintenance>>((
-  ref,
-) async {
+final localMaintenancesProvider = FutureProvider<List<Maintenance>>((ref) {
   final db = ref.watch(databaseProvider);
-  return await db.watchMaintenancesInRange(0, 9999999999).first;
+  return db.watchMaintenancesInRange(0, 9999999999).first;
 });
 
 // FIRESTORE

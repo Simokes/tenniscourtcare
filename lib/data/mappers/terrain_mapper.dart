@@ -1,7 +1,9 @@
 // filepath: lib/data/mappers/terrain_mapper.dart
 
+import 'package:drift/drift.dart' as drift;
 import 'package:drift/drift.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
+import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/terrain_model.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
@@ -83,21 +85,32 @@ extension TerrainDriftX on db.TerrainRow {
 }
 
 // Domain → Companion (Keeping for DB inserts)
-extension TerrainDomainX on Terrain {
-  db.TerrainsCompanion toCompanion({bool includeId = true}) =>
-      db.TerrainsCompanion(
-        id: includeId ? Value(id) : const Value.absent(),
-        nom: Value(nom),
-        type: Value(type.index),
-        status: Value(status.name),
-        imageUrl: photoUrl != null ? Value(photoUrl) : const Value.absent(),
-        // Sync mappings
-        syncStatus: Value(syncStatus.name),
-        createdAt: Value(createdAt),
-        updatedAt: Value(updatedAt),
-        firebaseId: Value(firebaseId),
-        remoteId: Value(firebaseId), // Fallback
-        createdBy: Value(createdBy),
-        modifiedBy: Value(modifiedBy),
-      );
+extension TerrainMapperX on Terrain {
+  db.TerrainsCompanion toCompanion({bool includeId = false}) {
+    return db.TerrainsCompanion(
+      id: includeId && id != 0 ? drift.Value(id) : const drift.Value.absent(),
+      nom: drift.Value(nom),
+      type: drift.Value(type.index), // Assuming index for enum in DB
+      status: drift.Value(status.name),
+      imageUrl: photoUrl == null
+          ? const drift.Value.absent()
+          : drift.Value(photoUrl),
+      syncStatus: drift.Value(syncStatus.name),
+      firebaseId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+      createdAt: drift.Value(createdAt),
+      updatedAt: drift.Value(updatedAt),
+      createdBy: createdBy == null
+          ? const drift.Value.absent()
+          : drift.Value(createdBy),
+      modifiedBy: modifiedBy == null
+          ? const drift.Value.absent()
+          : drift.Value(modifiedBy),
+      // Mapped remoteId fallback if needed
+      remoteId: firebaseId == null
+          ? const drift.Value.absent()
+          : drift.Value(firebaseId),
+    );
+  }
 }

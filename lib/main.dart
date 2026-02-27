@@ -7,8 +7,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
-import 'presentation/providers/stock_provider.dart';
 import 'presentation/providers/database_provider.dart'; // ✅ IMPORT
+import 'presentation/providers/sync_status_provider.dart'; // ✅ IMPORT
 import 'providers/queue_providers.dart';
 import 'presentation/widgets/queue_status_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
