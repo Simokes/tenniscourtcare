@@ -1,15 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/user_entity.dart';
-import '../../domain/enums/role.dart';
 import '../../domain/models/setup_status.dart';
 import 'auth_providers.dart';
-import 'database_provider.dart';
 
 // PART 1: adminExistsProvider
 
-/// Checks if an admin user exists in the local database.
+/// Checks if an admin user exists in the Firestore database.
 ///
 /// Returns [true] if at least one admin exists, [false] otherwise.
 /// Returns [false] on error to force a safe fallback (likely setup required).
@@ -17,9 +16,13 @@ import 'database_provider.dart';
 /// This provider is NOT auto-disposed as it represents a core app state check.
 final adminExistsProvider = FutureProvider<bool>((ref) async {
   try {
-    final db = ref.watch(databaseProvider);
-    final count = await db.countUsersByRole(Role.admin);
-    return count > 0;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('role', isEqualTo: 'admin')
+        .limit(1)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
   } catch (e, st) {
     debugPrint('❌ adminExistsProvider error: $e\n$st');
     return false;
