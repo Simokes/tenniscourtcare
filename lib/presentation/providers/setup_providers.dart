@@ -1,30 +1,64 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/user_entity.dart';
+import '../../domain/enums/role.dart';
 import '../../domain/models/setup_status.dart';
 import 'auth_providers.dart';
+import 'database_provider.dart';
 
 // PART 1: adminExistsProvider
 
-/// Checks if an admin user exists in the Firestore database.
+/// Checks if an admin user exists (Cloud-First with Local Fallback).
 ///
 /// Returns [true] if at least one admin exists, [false] otherwise.
-/// Returns [false] on error to force a safe fallback (likely setup required).
+/// Throws a [SocketException] if network is unavailable AND no local admin exists.
 ///
 /// This provider is NOT auto-disposed as it represents a core app state check.
 final adminExistsProvider = FutureProvider<bool>((ref) async {
   try {
+    // 1. Priorité Cloud (Firebase) avec timeout de 5 secondes
     final querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .where('role', isEqualTo: 'admin')
         .limit(1)
-        .get();
+        .get()
+        .timeout(const Duration(seconds: 5));
 
     return querySnapshot.docs.isNotEmpty;
-  } catch (e, st) {
-    debugPrint('❌ adminExistsProvider error: $e\n$st');
+  } catch (e) {
+    // 2. Fallback Réseau
+    final isNetworkError = e is SocketException ||
+                           e is TimeoutException ||
+                           (e is FirebaseException && e.code == 'unavailable');
+
+    if (isNetworkError) {
+      debugPrint('⚠️ Erreur réseau détectée, basculement sur la base locale Drift. Erreur: $e');
+
+      final db = ref.watch(databaseProvider);
+      try {
+        final count = await db.countUsersByRole(Role.admin);
+
+        if (count == 0) {
+           // 3. Cas d'Erreur Critique
+           debugPrint('❌ Aucun réseau et aucun admin local trouvé.');
+           throw const SocketException('No network and no local admin found');
+        }
+
+        return count > 0;
+      } catch (localError) {
+         debugPrint('❌ Erreur lors du fallback local: $localError');
+         // Si la base locale échoue aussi, on relance l'erreur critique réseau (ou l'erreur locale)
+         throw const SocketException('No network and no local admin found');
+      }
+    }
+
+    // Autres types d'erreurs (permissions, etc.)
+    debugPrint('❌ adminExistsProvider erreur inattendue: $e');
     return false;
   }
 });
@@ -43,7 +77,7 @@ final adminExistsProvider = FutureProvider<bool>((ref) async {
 /// Handles loading and error states from dependencies.
 final setupStatusProvider = FutureProvider<SetupStatus>((ref) async {
   try {
-    // Step 1: Check admin existence
+    // Step 1: Check admin existence (Cloud-First)
     final adminExists = await ref.watch(adminExistsProvider.future);
 
     if (!adminExists) {
@@ -69,7 +103,12 @@ final setupStatusProvider = FutureProvider<SetupStatus>((ref) async {
     );
 
   } catch (e, st) {
-    debugPrint('❌ setupStatusProvider error: $e\n$st');
+    if (e is SocketException) {
+      debugPrint('❌ Erreur critique réseau interceptée par setupStatusProvider: $e');
+      // Pour l'instant, on retourne error, mais l'enum pourrait s'enrichir de noNetwork
+      return SetupStatus.error;
+    }
+    debugPrint('❌ setupStatusProvider erreur inattendue: $e\n$st');
     return SetupStatus.error;
   }
 });
