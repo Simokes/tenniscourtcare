@@ -175,7 +175,7 @@ void main() {
 
       // Auth: Error
       mockAuthNotifier.setState(
-        AsyncValue.error('Auth Failed', StackTrace.empty),
+        const AsyncValue.error('Auth Failed', StackTrace.empty),
       );
 
       final container = createContainer();

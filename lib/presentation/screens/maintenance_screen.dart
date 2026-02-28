@@ -22,8 +22,8 @@ class MaintenanceScreen extends ConsumerWidget {
             snap: true,
             expandedHeight: 120,
             actions: [
-              const SyncStatusIndicator(mode: SyncIndicatorMode.compact),
-              const SizedBox(width: 8),
+              SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+              SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: DecoratedBox(
