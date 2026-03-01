@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 // filepath: lib/data/mappers/terrain_mapper.dart
 
 import 'package:drift/drift.dart' as drift;
@@ -70,6 +71,67 @@ class TerrainMapper {
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,
+    );
+  }
+
+  // Domain Entity → Firestore Map
+  static Map<String, dynamic> toFirestore(Terrain item) {
+    return {
+      'nom': item.nom,
+      'type': item.type.index,
+      'status': item.status.name,
+      'latitude': item.latitude,
+      'longitude': item.longitude,
+      'photoUrl': item.photoUrl,
+      'syncStatus': item.syncStatus.name,
+      'createdAt': item.createdAt.toIso8601String(),
+      'updatedAt': item.updatedAt.toIso8601String(),
+      'createdBy': item.createdBy,
+      'modifiedBy': item.modifiedBy,
+      'firebaseId': item.firebaseId,
+    };
+  }
+
+  // Firestore Snapshot → Drift Companion
+  static db.TerrainsCompanion toCompanion(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+
+    DateTime parseTimestamp(dynamic ts) {
+      if (ts is Timestamp) return ts.toDate();
+      if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
+      return DateTime.now();
+    }
+
+    return db.TerrainsCompanion(
+      nom: drift.Value(data['nom'] as String? ?? ''),
+      type: drift.Value(data['type'] as int? ?? 0),
+      status: drift.Value(data['status'] as String? ?? 'playable'),
+      imageUrl: data['photoUrl'] != null
+          ? drift.Value(data['photoUrl'] as String)
+          : const drift.Value.absent(),
+      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
+      firebaseId: drift.Value(doc.id),
+      createdAt: drift.Value(parseTimestamp(data['createdAt'])),
+      updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
+      createdBy: data['createdBy'] != null
+          ? drift.Value(data['createdBy'] as String)
+          : const drift.Value.absent(),
+      modifiedBy: data['modifiedBy'] != null
+          ? drift.Value(data['modifiedBy'] as String)
+          : const drift.Value.absent(),
+      remoteId: drift.Value(doc.id),
+      location: data['location'] != null
+          ? drift.Value(data['location'] as String)
+          : const drift.Value.absent(),
+      capacity: data['capacity'] != null
+          ? drift.Value(data['capacity'] as int)
+          : const drift.Value.absent(),
+      pricePerHour: data['pricePerHour'] != null
+          ? drift.Value((data['pricePerHour'] as num).toDouble())
+          : const drift.Value.absent(),
+      available: drift.Value(data['available'] as bool? ?? true),
     );
   }
 }

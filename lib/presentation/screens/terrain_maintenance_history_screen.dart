@@ -50,7 +50,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
             title: Text(terrain.nom),
             pinned: true,
             actions: [
-              const SyncStatusIndicator(collection: 'maintenances'),
+              const SyncStatusIndicator(),
               const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.add),

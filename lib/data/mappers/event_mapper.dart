@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 // filepath: lib/data/mappers/event_mapper.dart
 
 import 'package:drift/drift.dart' as drift;
@@ -62,6 +63,58 @@ class EventMapper {
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,
+    );
+  }
+
+  // Domain Entity → Firestore Map
+  static Map<String, dynamic> toFirestore(AppEvent item) {
+    return {
+      'title': item.title,
+      'description': item.description,
+      'startTime': item.startTime.toIso8601String(),
+      'endTime': item.endTime.toIso8601String(),
+      'color': item.color,
+      'terrainIds': item.terrainIds,
+      'syncStatus': item.syncStatus.name,
+      'createdAt': item.createdAt.toIso8601String(),
+      'updatedAt': item.updatedAt.toIso8601String(),
+      'createdBy': item.createdBy,
+      'modifiedBy': item.modifiedBy,
+      'firebaseId': item.firebaseId,
+    };
+  }
+
+  // Firestore Snapshot → Drift Companion
+  static db.EventsCompanion toCompanion(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+
+    DateTime parseTimestamp(dynamic ts) {
+      if (ts is Timestamp) return ts.toDate();
+      if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
+      return DateTime.now();
+    }
+
+    return db.EventsCompanion(
+      title: drift.Value(data['title'] as String? ?? ''),
+      description: data['description'] != null
+          ? drift.Value(data['description'] as String)
+          : const drift.Value.absent(),
+      startTime: drift.Value(parseTimestamp(data['startTime'])),
+      endTime: drift.Value(parseTimestamp(data['endTime'])),
+      color: drift.Value(data['color'] as int? ?? 0xFFFFFFFF),
+      terrainIds: drift.Value((data['terrainIds'] as List<dynamic>?)?.map((e) => e as int).toList() ?? []),
+      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
+      firebaseId: drift.Value(doc.id),
+      createdAt: drift.Value(parseTimestamp(data['createdAt'])),
+      updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
+      createdBy: data['createdBy'] != null
+          ? drift.Value(data['createdBy'] as String)
+          : const drift.Value.absent(),
+      modifiedBy: data['modifiedBy'] != null
+          ? drift.Value(data['modifiedBy'] as String)
+          : const drift.Value.absent(),
     );
   }
 }

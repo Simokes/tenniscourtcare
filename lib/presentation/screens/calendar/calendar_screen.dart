@@ -56,7 +56,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         elevation: 0,
         centerTitle: false,
         actions: [
-          const SyncStatusIndicator(collection: 'events'),
+          const SyncStatusIndicator(),
           TextButton.icon(
             onPressed: () {
               setState(() {

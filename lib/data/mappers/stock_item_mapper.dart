@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 // filepath: lib/data/mappers/stock_item_mapper.dart
 
 import 'package:drift/drift.dart' as drift;
@@ -73,6 +74,71 @@ class StockItemMapper {
       modifiedBy:
           driftEntity.modifiedBy ??
           driftEntity.lastModifiedBy, // Fallback to lastModifiedBy
+    );
+  }
+
+  // Domain Entity → Firestore Map
+  static Map<String, dynamic> toFirestore(domain.StockItem item) {
+    return {
+      'name': item.name,
+      'quantity': item.quantity,
+      'unit': item.unit,
+      'comment': item.comment,
+      'isCustom': item.isCustom,
+      'minThreshold': item.minThreshold,
+      'category': item.category,
+      'sortOrder': item.sortOrder,
+      'syncStatus': item.syncStatus.name,
+      'createdAt': item.createdAt.toIso8601String(),
+      'updatedAt': item.updatedAt.toIso8601String(),
+      'createdBy': item.createdBy,
+      'modifiedBy': item.modifiedBy,
+      'firebaseId': item.firebaseId,
+    };
+  }
+
+  // Firestore Snapshot → Drift Companion
+  static db.StockItemsCompanion toCompanion(
+    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data();
+
+    DateTime parseTimestamp(dynamic ts) {
+      if (ts is Timestamp) return ts.toDate();
+      if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
+      return DateTime.now();
+    }
+
+    return db.StockItemsCompanion(
+      name: drift.Value(data['name'] as String? ?? ''),
+      quantity: drift.Value((data['quantity'] as num?)?.toInt() ?? 0),
+      unit: drift.Value(data['unit'] as String? ?? 'unité'),
+      comment: data['comment'] != null
+          ? drift.Value(data['comment'] as String)
+          : const drift.Value.absent(),
+      isCustom: drift.Value(data['isCustom'] as bool? ?? false),
+      minThreshold: data['minThreshold'] != null
+          ? drift.Value((data['minThreshold'] as num).toInt())
+          : const drift.Value.absent(),
+      category: data['category'] != null
+          ? drift.Value(data['category'] as String)
+          : const drift.Value.absent(),
+      sortOrder: drift.Value(data['sortOrder'] as int? ?? 0),
+      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
+      firebaseId: drift.Value(doc.id),
+      createdAt: drift.Value(parseTimestamp(data['createdAt'])),
+      updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
+      createdBy: data['createdBy'] != null
+          ? drift.Value(data['createdBy'] as String)
+          : const drift.Value.absent(),
+      modifiedBy: data['modifiedBy'] != null
+          ? drift.Value(data['modifiedBy'] as String)
+          : const drift.Value.absent(),
+      remoteId: drift.Value(doc.id),
+      lastModifiedBy: data['modifiedBy'] != null
+          ? drift.Value(data['modifiedBy'] as String)
+          : const drift.Value.absent(),
+      isSyncPending: drift.Value(data['syncStatus'] != 'SYNCED'),
     );
   }
 }
