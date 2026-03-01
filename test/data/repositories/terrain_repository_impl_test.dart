@@ -1,21 +1,24 @@
 // filepath: test/data/repositories/terrain_repository_impl_test.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/repositories/terrain_repository_impl.dart';
-import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
-import 'package:tenniscourtcare/data/services/firebase_terrain_service.dart';
+import 'package:tenniscourtcare/domain/entities/terrain.dart';
+import 'package:tenniscourtcare/domain/models/repository_exception.dart';
 import '../../fixtures/test_data.dart';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
-class MockFirebaseSyncService extends Mock implements FirebaseSyncService {}
-class MockFirebaseTerrainService extends Mock implements FirebaseTerrainService {}
+class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
+class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
 
 void main() {
   late MockAppDatabase mockDb;
-  late MockFirebaseSyncService mockSyncService;
-  late MockFirebaseTerrainService mockTerrainService;
+  late MockFirebaseFirestore mockFs;
+  late MockCollectionReference mockCollection;
+  late MockDocumentReference mockDoc;
   late TerrainRepositoryImpl repository;
 
   setUpAll(() {
@@ -24,16 +27,14 @@ void main() {
 
   setUp(() {
     mockDb = MockAppDatabase();
-    mockSyncService = MockFirebaseSyncService();
-    mockTerrainService = MockFirebaseTerrainService();
+    mockFs = MockFirebaseFirestore();
+    mockCollection = MockCollectionReference();
+    mockDoc = MockDocumentReference();
 
-    // Setup Sync Service to return our mocked terrain service
-    when(() => mockSyncService.terrainService).thenReturn(mockTerrainService);
+    when(() => mockFs.collection('terrains')).thenReturn(mockCollection);
+    when(() => mockCollection.doc(any())).thenReturn(mockDoc);
 
-    // Default stubs for void methods to avoid MissingStubError
-    when(() => mockTerrainService.uploadTerrainToFirestore(any())).thenAnswer((_) async {});
-
-    repository = TerrainRepositoryImpl(mockDb, mockSyncService);
+    repository = TerrainRepositoryImpl(db: mockDb, fs: mockFs);
   });
 
   group('TerrainRepositoryImpl', () {
@@ -63,67 +64,84 @@ void main() {
     });
 
     group('addTerrain', () {
-      test('adds terrain successfully and triggers sync', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.insertTerrain(any())).thenAnswer((_) async => 1);
+        when(() => mockCollection.add(any())).thenAnswer((_) async => mockDoc);
 
         // Act
-        final result = await repository.addTerrain(TestData.testTerrain);
+        await repository.addTerrain(TestData.testTerrain);
 
         // Assert
-        expect(result, 1);
-        verify(() => mockDb.insertTerrain(any())).called(1);
+        verify(() => mockCollection.add(any())).called(1);
+        verifyNever(() => mockDb.insertTerrain(any()));
+      });
 
-        // Allow async sync to complete (sync is fire-and-forget but we can verify call happened)
-        // Since it's awaited inside addTerrain (no, it's NOT awaited in repo code: _syncTerrainToFirebase is async but called without await)
-        // Wait, let's check repo code again.
-        // Repo: `_syncTerrainToFirebase(localTerrain.copyWith(id: id));` (no await)
-        // So verification might require a small delay or verifying it was called eventually.
-        // However, since we mock it, the call happens synchronously in the test environment usually unless there's a delay.
-        // But `_syncTerrainToFirebase` is `async` so it returns a Future.
-        // The call is `_syncTerrainToFirebase(...)`.
-        // Verification: `verify(() => mockTerrainService.uploadTerrainToFirestore(any())).called(1);` might fail if it hasn't run yet.
-        // But in Dart event loop, it should be scheduled.
-        // Actually, without `await`, the future starts executing synchronously until first await.
-        // If `uploadTerrainToFirestore` is mocked with `thenAnswer((_) async {})`, it returns a Future.
-        // So `_syncTerrainToFirebase` will complete its synchronous part and return.
-        // Verification should work if we verify strictly.
-        // Let's see. If it fails, we might need `await untilCalled`.
+      test('throws RepositoryException on FirebaseException', () async {
+        // Arrange
+        when(() => mockCollection.add(any()))
+            .thenThrow(FirebaseException(plugin: 'firestore', code: 'unavailable'));
 
-        // Using `verify` with timeout or just verifying it was called.
-        // To be safe against "fire and forget", we can try verify.
-        // If it fails, we know why.
-
-        // verify(() => mockTerrainService.uploadTerrainToFirestore(any())).called(1);
+        // Act & Assert
+        await expectLater(
+          () => repository.addTerrain(TestData.testTerrain),
+          throwsA(isA<RepositoryException>()),
+        );
       });
     });
 
     group('updateTerrain', () {
-      test('updates terrain successfully and triggers sync', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.updateTerrain(any())).thenAnswer((_) async => 1);
+        when(() => mockDoc.update(any())).thenAnswer((_) async {});
+
+        final testTerrainWithId = TestData.testTerrain.copyWith(firebaseId: 'test_id');
 
         // Act
-        final result = await repository.updateTerrain(TestData.testTerrain);
+        await repository.updateTerrain(testTerrainWithId);
 
         // Assert
-        expect(result, true);
-        verify(() => mockDb.updateTerrain(any())).called(1);
-        // verify(() => mockTerrainService.uploadTerrainToFirestore(any())).called(1);
+        verify(() => mockCollection.doc('test_id')).called(1);
+        verify(() => mockDoc.update(any())).called(1);
+        verifyNever(() => mockDb.updateTerrain(any()));
+      });
+
+      test('throws RepositoryException if firebaseId is null', () async {
+        // Arrange
+        final testTerrainWithoutId = TestData.testTerrain.copyWith(
+            // Provide a custom copyWith that actually clears the field if necessary,
+            // but copyWith usually doesn't clear if null is passed. Let's do it manually.
+        );
+
+        final testTerrainWithoutId2 = Terrain(
+          id: testTerrainWithoutId.id,
+          nom: testTerrainWithoutId.nom,
+          type: testTerrainWithoutId.type,
+          status: testTerrainWithoutId.status,
+          createdAt: testTerrainWithoutId.createdAt,
+          updatedAt: testTerrainWithoutId.updatedAt,
+          firebaseId: null,
+        );
+
+        // Act & Assert
+        await expectLater(
+          () => repository.updateTerrain(testTerrainWithoutId2),
+          throwsA(isA<RepositoryException>()),
+        );
       });
     });
 
     group('deleteTerrain', () {
-      test('deletes terrain successfully', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.deleteTerrain(1)).thenAnswer((_) async => 1);
+        when(() => mockDoc.delete()).thenAnswer((_) async {});
 
         // Act
-        final result = await repository.deleteTerrain(1);
+        await repository.deleteTerrain('test_id');
 
         // Assert
-        expect(result, true);
-        verify(() => mockDb.deleteTerrain(1)).called(1);
+        verify(() => mockCollection.doc('test_id')).called(1);
+        verify(() => mockDoc.delete()).called(1);
+        verifyNever(() => mockDb.deleteTerrain(any()));
       });
     });
   });

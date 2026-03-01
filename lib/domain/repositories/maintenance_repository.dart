@@ -1,9 +1,9 @@
 import '../entities/maintenance.dart';
 
 abstract class MaintenanceRepository {
-  Future<int> addMaintenance(Maintenance maintenance);
-  Future<bool> updateMaintenance(Maintenance maintenance);
-  Future<bool> deleteMaintenance(int id);
+  Future<void> addMaintenance(Maintenance maintenance);
+  Future<void> updateMaintenance(Maintenance maintenance);
+  Future<void> deleteMaintenance(String firebaseId);
   Future<List<Maintenance>> getAllMaintenances();
   Future<Maintenance?> getMaintenanceById(int id);
 }

@@ -1,68 +1,59 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/terrain.dart';
-import '../../domain/entities/sync_status.dart';
+import '../../domain/models/repository_exception.dart';
 import '../../domain/repositories/terrain_repository.dart';
 import '../database/app_database.dart';
-import '../services/firebase_sync_service.dart';
+import '../mappers/terrain_mapper.dart';
 
 class TerrainRepositoryImpl implements TerrainRepository {
+  const TerrainRepositoryImpl({
+    required AppDatabase db,
+    required FirebaseFirestore fs,
+  })  : _db = db,
+        _fs = fs;
+
   final AppDatabase _db;
-  final FirebaseSyncService _firebaseService;
-
-  TerrainRepositoryImpl(this._db, this._firebaseService);
+  final FirebaseFirestore _fs;
 
   @override
-  Future<int> addTerrain(Terrain terrain) async {
-    // 1. Sauvegarde LOCAL immédiatement
-    final localTerrain = terrain.copyWith(
-      syncStatus: SyncStatus.local,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    final id = await _db.insertTerrain(localTerrain);
-
-    // 2. Déclenche sync Firebase (asynchrone, non-bloquant)
-    // On doit passer l'ID généré localement pour la suite si besoin,
-    // ou on synchronise l'objet avec son ID
-    _syncTerrainToFirebase(localTerrain.copyWith(id: id));
-
-    return id;
+  Future<void> addTerrain(Terrain terrain) async {
+    try {
+      await _fs
+          .collection('terrains')
+          .add(TerrainMapper.toFirestore(terrain));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ TerrainRepository: Failed to add terrain: ${e.message}');
+      throw RepositoryException('Failed to add terrain: ${e.message}', cause: e);
+    }
   }
 
   @override
-  Future<bool> updateTerrain(Terrain terrain) async {
-    // 1. Update LOCAL immédiatement
-    final updatedTerrain = terrain.copyWith(
-      syncStatus: SyncStatus.local,
-      updatedAt: DateTime.now(),
-    );
-    final result = await _db.updateTerrain(updatedTerrain);
+  Future<void> updateTerrain(Terrain terrain) async {
+    if (terrain.firebaseId == null) {
+      throw const RepositoryException('Cannot update terrain without a firebaseId');
+    }
 
-    // 2. Sync Firebase (asynchrone)
-    _syncTerrainToFirebase(updatedTerrain);
-
-    return result > 0;
+    try {
+      await _fs
+          .collection('terrains')
+          .doc(terrain.firebaseId)
+          .update(TerrainMapper.toFirestore(terrain));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ TerrainRepository: Failed to update terrain: ${e.message}');
+      throw RepositoryException('Failed to update terrain: ${e.message}', cause: e);
+    }
   }
 
   @override
-  Future<bool> deleteTerrain(int id) async {
-    final result = await _db.deleteTerrain(id);
-    // Note: Soft delete pattern could be implemented here if needed by sync logic
-    // For now we just delete local. Ideally we should also propagate delete to Firebase
-    // But the interface provided by user only asked for add/update sync in this block.
-    // However, user said "Mettre à jour TOUS les repositories pour ajouter la logique de synchronisation"
-    // and "deleteTerrain" is listed.
-    // Given the "Fire and Forget" pattern, we should try to delete remote too if possible.
-    // But the user's specific example for `deleteTerrain` in the prompt wasn't explicitly detailed with code,
-    // just listed as a method to modify.
-    // I will add a safe delete call if the service supports it, otherwise keep local delete.
-    // User prompt didn't show `deleteTerrain` implementation in the example block, but listed it.
-
-    // To be safe and follow the pattern:
-    _deleteTerrainFromFirebase(id);
-
-    return result > 0;
+  Future<void> deleteTerrain(String firebaseId) async {
+    try {
+      await _fs.collection('terrains').doc(firebaseId).delete();
+    } on FirebaseException catch (e) {
+      debugPrint('❌ TerrainRepository: Failed to delete terrain: ${e.message}');
+      throw RepositoryException('Failed to delete terrain: ${e.message}', cause: e);
+    }
   }
 
   @override
@@ -73,28 +64,5 @@ class TerrainRepositoryImpl implements TerrainRepository {
   @override
   Future<Terrain?> getTerrainById(int id) async {
     return _db.getTerrainById(id);
-  }
-
-  // Helper: Sync à Firestore en background
-  Future<void> _syncTerrainToFirebase(Terrain terrain) async {
-    try {
-      await _firebaseService.terrainService.uploadTerrainToFirestore(terrain);
-    } catch (e) {
-      debugPrint('Failed to sync terrain: $e');
-      // Ne pas throw - l'utilisateur a déjà le LOCAL
-    }
-  }
-
-  Future<void> _deleteTerrainFromFirebase(int id) async {
-    try {
-      // We might need the firebaseId to delete from Firestore.
-      // If the repo doesn't have it, we might need to fetch it first.
-      // But assuming we have the ID, let's see if the service handles it.
-      // The user didn't explicitly ask for delete sync code in the example, but it's good practice.
-      // I'll leave it as a comment or simple call if available.
-      // await _firebaseService.terrainService.deleteTerrain(id);
-    } catch (e) {
-      debugPrint('Failed to delete terrain from remote: $e');
-    }
   }
 }

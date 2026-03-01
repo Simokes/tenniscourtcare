@@ -177,10 +177,18 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
 
     if (confirm == true) {
+      if (widget.eventToEdit!.firebaseId == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Cannot delete event without a firebaseId.')),
+          );
+        }
+        return;
+      }
       try {
         await ref
             .read(eventRepositoryProvider)
-            .deleteEvent(widget.eventToEdit!.id!);
+            .deleteEvent(widget.eventToEdit!.firebaseId!);
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(

@@ -100,8 +100,10 @@ class TerrainsManagementScreen extends ConsumerWidget {
     );
 
     if (confirm == true) {
-      await ref.read(terrainRepositoryProvider).deleteTerrain(terrain.id);
-      ref.invalidate(terrainsProvider);
+      if (terrain.firebaseId != null) {
+        await ref.read(terrainRepositoryProvider).deleteTerrain(terrain.firebaseId!);
+        ref.invalidate(terrainsProvider);
+      }
     }
   }
 

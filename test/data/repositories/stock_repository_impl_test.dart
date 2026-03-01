@@ -1,16 +1,25 @@
 // filepath: test/data/repositories/stock_repository_impl_test.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/repositories/stock_repository_impl.dart';
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+import 'package:tenniscourtcare/domain/models/repository_exception.dart';
 import '../../fixtures/test_data.dart';
 import 'dart:async';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
+class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
+class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
 
 void main() {
   late MockAppDatabase mockDb;
+  late MockFirebaseFirestore mockFs;
+  late MockCollectionReference mockCollection;
+  late MockDocumentReference mockDoc;
   late StockRepositoryImpl repository;
 
   setUpAll(() {
@@ -19,7 +28,14 @@ void main() {
 
   setUp(() {
     mockDb = MockAppDatabase();
-    repository = StockRepositoryImpl(mockDb);
+    mockFs = MockFirebaseFirestore();
+    mockCollection = MockCollectionReference();
+    mockDoc = MockDocumentReference();
+
+    when(() => mockFs.collection('stock_items')).thenReturn(mockCollection);
+    when(() => mockCollection.doc(any())).thenReturn(mockDoc);
+
+    repository = StockRepositoryImpl(db: mockDb, fs: mockFs);
   });
 
   group('StockRepositoryImpl', () {
@@ -40,44 +56,86 @@ void main() {
     });
 
     group('addStockItem', () {
-      test('adds stock item successfully', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.insertStockItem(any())).thenAnswer((_) async => 1);
+        when(() => mockCollection.add(any())).thenAnswer((_) async => mockDoc);
 
         // Act
-        final result = await repository.addStockItem(TestData.testStockItem);
+        await repository.addStockItem(TestData.testStockItem);
 
         // Assert
-        expect(result, 1);
-        verify(() => mockDb.insertStockItem(any())).called(1);
+        verify(() => mockCollection.add(any())).called(1);
+        verifyNever(() => mockDb.insertStockItem(any()));
+      });
+
+      test('throws RepositoryException on FirebaseException', () async {
+        // Arrange
+        when(() => mockCollection.add(any()))
+            .thenThrow(FirebaseException(plugin: 'firestore', code: 'unavailable'));
+
+        // Act & Assert
+        await expectLater(
+          () => repository.addStockItem(TestData.testStockItem),
+          throwsA(isA<RepositoryException>()),
+        );
       });
     });
 
     group('updateStockItem', () {
-      test('updates stock item successfully', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.updateStockItem(any())).thenAnswer((_) async => true);
+        when(() => mockDoc.update(any())).thenAnswer((_) async {});
+
+        final testStockItemWithId = TestData.testStockItem.copyWith(firebaseId: 'test_id');
 
         // Act
-        final result = await repository.updateStockItem(TestData.testStockItem);
+        await repository.updateStockItem(testStockItemWithId);
 
         // Assert
-        expect(result, true);
-        verify(() => mockDb.updateStockItem(any())).called(1);
+        verify(() => mockCollection.doc('test_id')).called(1);
+        verify(() => mockDoc.update(any())).called(1);
+        verifyNever(() => mockDb.updateStockItem(any()));
+      });
+
+      test('throws RepositoryException if firebaseId is null', () async {
+        // Arrange
+        final testStockItemWithoutId = TestData.testStockItem.copyWith(firebaseId: null);
+
+        // Ensure firebaseId is truly null
+        final itemWithoutId = StockItem(
+          id: testStockItemWithoutId.id,
+          name: testStockItemWithoutId.name,
+          quantity: testStockItemWithoutId.quantity,
+          unit: testStockItemWithoutId.unit,
+          category: testStockItemWithoutId.category,
+          sortOrder: testStockItemWithoutId.sortOrder,
+          minThreshold: testStockItemWithoutId.minThreshold,
+          isCustom: testStockItemWithoutId.isCustom,
+          createdAt: testStockItemWithoutId.createdAt,
+          updatedAt: testStockItemWithoutId.updatedAt,
+          firebaseId: null,
+        );
+
+        // Act & Assert
+        await expectLater(
+          () => repository.updateStockItem(itemWithoutId),
+          throwsA(isA<RepositoryException>()),
+        );
       });
     });
 
     group('deleteStockItem', () {
-      test('deletes stock item successfully', () async {
+      test('writes to Firestore only', () async {
         // Arrange
-        when(() => mockDb.deleteStockItem(1)).thenAnswer((_) async => 1);
+        when(() => mockDoc.delete()).thenAnswer((_) async {});
 
         // Act
-        final result = await repository.deleteStockItem(1);
+        await repository.deleteStockItem('test_id');
 
         // Assert
-        expect(result, true);
-        verify(() => mockDb.deleteStockItem(1)).called(1);
+        verify(() => mockCollection.doc('test_id')).called(1);
+        verify(() => mockDoc.delete()).called(1);
+        verifyNever(() => mockDb.deleteStockItem(any()));
       });
     });
   });

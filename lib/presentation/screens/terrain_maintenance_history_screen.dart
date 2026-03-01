@@ -189,9 +189,11 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                     },
                     onDismissed: (direction) async {
                       try {
-                        await ref
-                            .read(maintenanceNotifierProvider.notifier)
-                            .deleteMaintenance(maintenance.id!, terrain.id);
+                        if (maintenance.firebaseId != null) {
+                          await ref
+                              .read(maintenanceNotifierProvider.notifier)
+                              .deleteMaintenance(maintenance.firebaseId!, terrain.id);
+                        }
 
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(

@@ -5,11 +5,12 @@ import '../../domain/entities/stock_item.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../features/inventory/models/stock_filter.dart';
 import 'database_provider.dart';
-import 'sync_status_provider.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 final stockRepositoryProvider = Provider<StockRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return StockRepositoryImpl(db);
+  return StockRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
 // ✅ STOCK ITEMS - SIMPLE FUTURE PROVIDER
@@ -21,21 +22,17 @@ final stockProvider = FutureProvider<List<StockItem>>((ref) async {
   return items;
 });
 
-// ✅ ADD STOCK ITEM WITH SYNC
+// ✅ ADD STOCK ITEM
 final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
   return (StockItem item) async {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.addStockItem(item);
 
-      final syncService = ref.read(firebaseSyncServiceProvider);
-      await syncService.syncStock();
-
-      // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
 
-      debugPrint('✅ Item added and synced');
+      debugPrint('✅ Item added');
     } catch (e) {
       debugPrint('❌ Error adding stock: $e');
       rethrow;
@@ -43,7 +40,7 @@ final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
   };
 });
 
-// ✅ UPDATE STOCK ITEM WITH SYNC
+// ✅ UPDATE STOCK ITEM
 final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
   ref,
 ) {
@@ -52,14 +49,10 @@ final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
       final repo = ref.read(stockRepositoryProvider);
       await repo.updateStockItem(item);
 
-      final syncService = ref.read(firebaseSyncServiceProvider);
-      await syncService.syncStock();
-
-      // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
 
-      debugPrint('✅ Item updated and synced');
+      debugPrint('✅ Item updated');
     } catch (e) {
       debugPrint('❌ Error updating stock: $e');
       rethrow;
@@ -67,32 +60,22 @@ final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
   };
 });
 
-// ✅ DELETE STOCK ITEM WITH SYNC
-final deleteStockItemProvider = Provider<Future<void> Function(int)>((ref) {
-  return (int itemId) async {
+// ✅ DELETE STOCK ITEM
+final deleteStockItemProvider = Provider<Future<void> Function(String)>((ref) {
+  return (String firebaseId) async {
     try {
       final repo = ref.read(stockRepositoryProvider);
-      await repo.deleteStockItem(itemId);
+      await repo.deleteStockItem(firebaseId);
 
-      final syncService = ref.read(firebaseSyncServiceProvider);
-      await syncService.syncStock();
-
-      // ✅ INVALIDATE to refresh UI
       ref.invalidate(stockProvider);
       ref.invalidate(filteredStockItemsProvider);
 
-      debugPrint('✅ Item deleted and synced');
+      debugPrint('✅ Item deleted');
     } catch (e) {
       debugPrint('❌ Error deleting stock: $e');
       rethrow;
     }
   };
-});
-
-// ✅ SYNC TRIGGER PROVIDER
-final syncStockProvider = FutureProvider<void>((ref) async {
-  final syncService = ref.watch(firebaseSyncServiceProvider);
-  await syncService.syncStock();
 });
 
 // --- Filters & Search ---
@@ -215,8 +198,8 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
     await ref.read(updateStockItemProvider)(item);
   }
 
-  Future<void> deleteItem(int id) async {
-    await ref.read(deleteStockItemProvider)(id);
+  Future<void> deleteItem(String firebaseId) async {
+    await ref.read(deleteStockItemProvider)(firebaseId);
   }
 }
 

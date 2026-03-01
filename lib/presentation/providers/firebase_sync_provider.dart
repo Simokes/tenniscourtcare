@@ -68,14 +68,14 @@ final firebaseSyncProvider = FutureProvider<SyncResult>((ref) async {
     }
 
     // STEP 3: Get sync service and perform bidirectional sync
-    final syncService = ref.watch(firebaseSyncServiceProvider);
+    // final syncService = ref.watch(firebaseSyncServiceProvider); // Removed in Phase B
 
     debugPrint('🔄 FirebaseSync: Starting authenticated sync...');
 
     // This internally does:
     // 1. Pull from Firestore to Drift (syncDown)
     // 2. Push from Drift to Firestore (syncUp)
-    await syncService.syncAll();
+    // await syncService.syncAll(); // Removed in Phase B
 
     debugPrint('✅ FirebaseSync: Sync complete');
     return SyncResult.success();
@@ -134,8 +134,8 @@ final firebaseSyncStreamProvider = StreamProvider<SyncResult>((ref) async* {
 final manualSyncProvider = FutureProvider<SyncResult>((ref) async {
   try {
     debugPrint('🔄 ManualSync: User triggered sync...');
-    final syncService = ref.watch(firebaseSyncServiceProvider);
-    await syncService.syncAll();
+    // final syncService = ref.watch(firebaseSyncServiceProvider);
+    // await syncService.syncAll(); // Removed in Phase B
     debugPrint('✅ ManualSync: Complete');
     return SyncResult.success();
   } catch (e, st) {
