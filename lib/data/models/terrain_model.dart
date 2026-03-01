@@ -1,5 +1,6 @@
 // filepath: lib/data/models/terrain_model.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
@@ -35,6 +36,16 @@ class TerrainModel {
     this.createdBy,
     this.modifiedBy,
   });
+
+  /// Firestore → Model
+  factory TerrainModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    // Inject local ID as 0 (will be auto-incremented or ignored on update)
+    // Inject firebaseId from doc.id
+    data['id'] = 0;
+    data['firebaseId'] = doc.id;
+    return TerrainModel.fromJson(data);
+  }
 
   /// JSON → Model
   factory TerrainModel.fromJson(Map<String, dynamic> json) {

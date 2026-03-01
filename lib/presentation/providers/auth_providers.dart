@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
+import 'package:tenniscourtcare/presentation/providers/firebase_sync_provider.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_entity.dart';
 import 'core_providers.dart';
@@ -29,13 +30,14 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 
 final authStateProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>((ref) {
-      return AuthNotifier(ref.watch(authRepositoryProvider));
+      return AuthNotifier(ref.watch(authRepositoryProvider), ref);
     });
 
 class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   final AuthRepository _repo;
+  final Ref ref;
 
-  AuthNotifier(this._repo) : super(const AsyncValue.loading()) {
+  AuthNotifier(this._repo, this.ref) : super(const AsyncValue.loading()) {
     _init();
   }
 
@@ -60,20 +62,26 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
   Future<void> registerAdmin(String email, String name, String password) async {
     state = const AsyncValue.loading();
-  try {
-    final user = await _repo.createAdminUser(email: email, name: name, password: password);
-      // ✅ Set state directement avec user créé
-    state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
-  } catch (e, st) {
-    state = AsyncValue.error(e, st);
+    try {
+      final user = await _repo.createAdminUser(email: email, name: name, password: password);
+
+      // ✅ Invalidate sync provider after registration
+      ref.invalidate(firebaseSyncProvider);
+
+      state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
   }
-}
 
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
     try {
       final user = await _repo.signIn(email, password);
       if (user != null) {
+        // ✅ Invalidate sync provider to trigger authenticated sync
+        ref.invalidate(firebaseSyncProvider);
+
         state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
       } else {
         state = AsyncValue.error('Identifiants invalides', StackTrace.current);
@@ -85,6 +93,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
   Future<void> signOut() async {
     await _repo.signOut();
+
+    // ✅ Invalidate sync to prevent stale data
+    ref.invalidate(firebaseSyncProvider);
+
     state = const AsyncValue.data(
       AuthState(user: null, isSetupRequired: false),
     );

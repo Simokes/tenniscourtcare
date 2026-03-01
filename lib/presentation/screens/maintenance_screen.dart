@@ -22,8 +22,8 @@ class MaintenanceScreen extends ConsumerWidget {
             snap: true,
             expandedHeight: 120,
             actions: [
-              SyncStatusIndicator(collection: 'terrains'),
-              SizedBox(width: 8),
+              const SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+              const SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: DecoratedBox(

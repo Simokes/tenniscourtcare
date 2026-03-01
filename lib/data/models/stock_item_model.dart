@@ -1,5 +1,6 @@
 // filepath: lib/data/models/stock_item_model.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
@@ -39,6 +40,14 @@ class StockItemModel {
     this.createdBy,
     this.modifiedBy,
   });
+
+  /// Firestore → Model
+  factory StockItemModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    data['id'] = 0; // Local ID
+    data['firebaseId'] = doc.id;
+    return StockItemModel.fromJson(data);
+  }
 
   /// JSON → Model
   factory StockItemModel.fromJson(Map<String, dynamic> json) {
