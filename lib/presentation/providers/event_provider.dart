@@ -9,10 +9,11 @@ import 'maintenance_provider.dart';
 import 'sync_status_provider.dart';
 import 'terrain_provider.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 final eventRepositoryProvider = Provider<EventRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return EventRepositoryImpl(db, firebaseService);
+  return EventRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
 final localEventsProvider = FutureProvider<List<AppEvent>>((ref) {

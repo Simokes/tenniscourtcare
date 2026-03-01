@@ -71,13 +71,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
         // Add item to database
         await ref.read(stockNotifierProvider.notifier).addItem(newItem);
         
-        // ✅ SYNC TO FIREBASE
-        await ref.read(syncStockProvider.future);
-        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Article ajouté et synchronisé'),
+              content: Text('✅ Article ajouté'),
               backgroundColor: Colors.green,
             ),
           );
@@ -98,13 +95,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
         // Update item in database
         await ref.read(stockNotifierProvider.notifier).updateItem(updated);
         
-        // ✅ SYNC TO FIREBASE
-        await ref.read(syncStockProvider.future);
-        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Article mis à jour et synchronisé'),
+              content: Text('✅ Article mis à jour'),
               backgroundColor: Colors.green,
             ),
           );
@@ -150,21 +144,27 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     setState(() => _isSaving = true);
 
     try {
-      if (widget.item?.id != null) {
+      if (widget.item?.firebaseId != null) {
         // Delete from database
-        await ref.read(stockNotifierProvider.notifier).deleteItem(widget.item!.id!);
-        
-        // ✅ SYNC TO FIREBASE
-        await ref.read(syncStockProvider.future);
+        await ref.read(stockNotifierProvider.notifier).deleteItem(widget.item!.firebaseId!);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('✅ Article supprimé et synchronisé'),
+              content: Text('✅ Article supprimé'),
               backgroundColor: Colors.green,
             ),
           );
           Navigator.pop(context);
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Impossible de supprimer: firebaseId manquant.'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     } catch (e) {

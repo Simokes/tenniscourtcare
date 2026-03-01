@@ -1,16 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_event.dart';
 import '../../domain/entities/sync_status.dart';
+import '../../domain/models/repository_exception.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../database/app_database.dart';
-import '../services/firebase_sync_service.dart';
+import '../mappers/event_mapper.dart';
 
 class EventRepositoryImpl implements EventRepository {
-  final AppDatabase _db;
-  final FirebaseSyncService _firebaseService;
+  const EventRepositoryImpl({
+    required AppDatabase db,
+    required FirebaseFirestore fs,
+  })  : _db = db,
+        _fs = fs;
 
-  EventRepositoryImpl(this._db, this._firebaseService);
+  final AppDatabase _db;
+  final FirebaseFirestore _fs;
 
   @override
   Stream<List<AppEvent>> watchEvents({DateTime? start, DateTime? end}) {
@@ -44,88 +50,41 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<int> addEvent(AppEvent event) async {
-    // 1. Sauvegarde LOCAL
-    final localEvent = event.copyWith(
-      syncStatus: SyncStatus.local,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    final id = await _db
-        .into(_db.events)
-        .insert(
-          EventsCompanion.insert(
-            title: localEvent.title,
-            description: Value(localEvent.description),
-            startTime: localEvent.startTime,
-            endTime: localEvent.endTime,
-            color: localEvent.color,
-            terrainIds: localEvent.terrainIds,
-            // Sync fields
-            createdAt: localEvent.createdAt,
-            updatedAt: localEvent.updatedAt,
-            syncStatus: Value(localEvent.syncStatus.name),
-            firebaseId: Value(localEvent.firebaseId),
-            createdBy: Value(localEvent.createdBy),
-            modifiedBy: Value(localEvent.modifiedBy),
-          ),
-        );
-
-    // 2. Sync Firebase
-    _syncEventToFirebase(localEvent.copyWith(id: id));
-
-    return id;
-  }
-
-  @override
-  Future<bool> updateEvent(AppEvent event) async {
-    if (event.id == null) return false;
-
-    final updatedEvent = event.copyWith(
-      syncStatus: SyncStatus.local,
-      updatedAt: DateTime.now(),
-    );
-
-    final result =
-        await (_db.update(
-          _db.events,
-        )..where((t) => t.id.equals(updatedEvent.id!))).write(
-          EventsCompanion(
-            title: Value(updatedEvent.title),
-            description: Value(updatedEvent.description),
-            startTime: Value(updatedEvent.startTime),
-            endTime: Value(updatedEvent.endTime),
-            color: Value(updatedEvent.color),
-            terrainIds: Value(updatedEvent.terrainIds),
-            // Sync fields
-            updatedAt: Value(updatedEvent.updatedAt),
-            syncStatus: Value(updatedEvent.syncStatus.name),
-            firebaseId: Value(updatedEvent.firebaseId),
-            modifiedBy: Value(updatedEvent.modifiedBy),
-          ),
-        );
-
-    if (result > 0) {
-      _syncEventToFirebase(updatedEvent);
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  Future<int> deleteEvent(int id) async {
-    final result = await (_db.delete(
-      _db.events,
-    )..where((t) => t.id.equals(id))).go();
-    return result;
-  }
-
-  Future<void> _syncEventToFirebase(AppEvent event) async {
+  Future<void> addEvent(AppEvent event) async {
     try {
-      await _firebaseService.eventService.uploadEventToFirestore(event);
-    } catch (e) {
-      debugPrint('Failed to sync event: $e');
+      await _fs
+          .collection('events')
+          .add(EventMapper.toFirestore(event));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ EventRepository: Failed to add event: ${e.message}');
+      throw RepositoryException('Failed to add event: ${e.message}', cause: e);
+    }
+  }
+
+  @override
+  Future<void> updateEvent(AppEvent event) async {
+    if (event.firebaseId == null) {
+      throw const RepositoryException('Cannot update event without a firebaseId');
+    }
+
+    try {
+      await _fs
+          .collection('events')
+          .doc(event.firebaseId)
+          .update(EventMapper.toFirestore(event));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ EventRepository: Failed to update event: ${e.message}');
+      throw RepositoryException('Failed to update event: ${e.message}', cause: e);
+    }
+  }
+
+  @override
+  Future<void> deleteEvent(String firebaseId) async {
+    try {
+      await _fs.collection('events').doc(firebaseId).delete();
+    } on FirebaseException catch (e) {
+      debugPrint('❌ EventRepository: Failed to delete event: ${e.message}');
+      throw RepositoryException('Failed to delete event: ${e.message}', cause: e);
     }
   }
 

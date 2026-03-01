@@ -1,63 +1,60 @@
 // filepath: lib/data/repositories/maintenance_repository_impl.dart
 
-import 'package:drift/drift.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
+import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
+import 'package:tenniscourtcare/domain/models/repository_exception.dart';
 import 'package:tenniscourtcare/domain/repositories/maintenance_repository.dart';
 
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
+  const MaintenanceRepositoryImpl({
+    required AppDatabase db,
+    required FirebaseFirestore fs,
+  })  : _db = db,
+        _fs = fs;
+
   final AppDatabase _db;
-
-  MaintenanceRepositoryImpl(this._db);
+  final FirebaseFirestore _fs;
 
   @override
-  Future<int> addMaintenance(Maintenance maintenance) async {
-    final localMaintenance = maintenance.copyWith(
-      syncStatus: SyncStatus.local,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    return _db.insertMaintenance(localMaintenance);
+  Future<void> addMaintenance(Maintenance maintenance) async {
+    try {
+      await _fs
+          .collection('maintenances')
+          .add(MaintenanceMapper.toFirestore(maintenance));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
+      throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
+    }
   }
 
   @override
-  Future<bool> updateMaintenance(Maintenance maintenance) async {
-    final updatedMaintenance = maintenance.copyWith(
-      syncStatus: SyncStatus.local,
-      updatedAt: DateTime.now(),
-    );
+  Future<void> updateMaintenance(Maintenance maintenance) async {
+    if (maintenance.firebaseId == null) {
+      throw const RepositoryException('Cannot update maintenance without a firebaseId');
+    }
 
-    // Créer MaintenancesCompanion manuellement
-    final companion = MaintenancesCompanion(
-      id: updatedMaintenance.id != null
-          ? Value(updatedMaintenance.id!)
-          : const Value.absent(),
-      terrainId: Value(updatedMaintenance.terrainId),
-      type: Value(updatedMaintenance.type),
-      commentaire: Value(updatedMaintenance.commentaire),
-      date: Value(updatedMaintenance.date),
-      sacsMantoUtilises: Value(updatedMaintenance.sacsMantoUtilises),
-      sacsSottomantoUtilises: Value(updatedMaintenance.sacsSottomantoUtilises),
-      sacsSiliceUtilises: Value(updatedMaintenance.sacsSiliceUtilises),
-      imagePath: Value(updatedMaintenance.imagePath),
-      syncStatus: Value(updatedMaintenance.syncStatus.name),
-      createdAt: Value(updatedMaintenance.createdAt),
-      updatedAt: Value(updatedMaintenance.updatedAt),
-      firebaseId: Value(updatedMaintenance.firebaseId),
-      createdBy: Value(updatedMaintenance.createdBy),
-      modifiedBy: Value(updatedMaintenance.modifiedBy),
-    );
-
-    final result = await _db.updateMaintenance(companion);
-    return result > 0;
+    try {
+      await _fs
+          .collection('maintenances')
+          .doc(maintenance.firebaseId)
+          .update(MaintenanceMapper.toFirestore(maintenance));
+    } on FirebaseException catch (e) {
+      debugPrint('❌ MaintenanceRepository: Failed to update maintenance: ${e.message}');
+      throw RepositoryException('Failed to update maintenance: ${e.message}', cause: e);
+    }
   }
 
   @override
-  Future<bool> deleteMaintenance(int id) async {
-    final result = await _db.deleteMaintenance(id);
-    return result > 0;
+  Future<void> deleteMaintenance(String firebaseId) async {
+    try {
+      await _fs.collection('maintenances').doc(firebaseId).delete();
+    } on FirebaseException catch (e) {
+      debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
+      throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
+    }
   }
 
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {

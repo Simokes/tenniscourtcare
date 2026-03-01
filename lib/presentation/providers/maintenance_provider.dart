@@ -5,10 +5,12 @@ import '../../domain/repositories/maintenance_repository.dart';
 import 'database_provider.dart';
 import 'sync_status_provider.dart'; // for firebaseSyncServiceProvider
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 // Repository Provider
 final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
   final db = ref.watch(databaseProvider);
-  return MaintenanceRepositoryImpl(db);
+  return MaintenanceRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
 // LOCAL
@@ -58,10 +60,10 @@ final updateMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((
 });
 
 // DELETE
-final deleteMaintenanceProvider = Provider<Future<void> Function(int)>((ref) {
-  return (int id) async {
+final deleteMaintenanceProvider = Provider<Future<void> Function(String)>((ref) {
+  return (String firebaseId) async {
     final repo = ref.read(maintenanceRepositoryProvider);
-    await repo.deleteMaintenance(id);
+    await repo.deleteMaintenance(firebaseId);
     ref.invalidate(maintenancesProvider);
   };
 });
@@ -132,8 +134,8 @@ class MaintenanceNotifier extends StateNotifier<AsyncValue<List<Maintenance>>> {
 
   MaintenanceNotifier(this.ref) : super(const AsyncValue.loading());
 
-  Future<void> deleteMaintenance(int id, int terrainId) async {
-    await ref.read(deleteMaintenanceProvider)(id);
+  Future<void> deleteMaintenance(String firebaseId, int terrainId) async {
+    await ref.read(deleteMaintenanceProvider)(firebaseId);
   }
 
   Future<void> addMaintenance(Maintenance maintenance) async {
