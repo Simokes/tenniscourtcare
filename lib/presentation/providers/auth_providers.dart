@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
 import 'package:tenniscourtcare/presentation/providers/firebase_sync_provider.dart';
@@ -79,6 +80,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     try {
       final user = await _repo.signIn(email, password);
       if (user != null) {
+        // ✅ Start FirebaseCacheService
+        final cacheService = ref.read(firebaseCacheServiceProvider);
+        cacheService.startListening();
+        debugPrint('🔥 AuthNotifier: Cache listeners started');
+
         // ✅ Invalidate sync provider to trigger authenticated sync
         ref.invalidate(firebaseSyncProvider);
 
@@ -92,6 +98,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   }
 
   Future<void> signOut() async {
+    // ✅ Stop FirebaseCacheService
+    final cacheService = ref.read(firebaseCacheServiceProvider);
+    cacheService.stopListening();
+    debugPrint('🔥 AuthNotifier: Cache listeners stopped');
+
     await _repo.signOut();
 
     // ✅ Invalidate sync to prevent stale data

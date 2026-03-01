@@ -71,7 +71,7 @@ class MockAuthRepository extends Mock implements AuthRepository {
 
 // Mock AuthNotifier
 class MockAuthNotifier extends AuthNotifier {
-  MockAuthNotifier() : super(MockAuthRepository());
+  MockAuthNotifier() : super(MockAuthRepository(), FakeRef());
 
 
   void setAuthState(AsyncValue<AuthState> newState) {
@@ -382,4 +382,10 @@ void main() {
       expect(router.routerDelegate.currentConfiguration.uri.toString(), '/maintenance');
     });
   });
+}
+
+
+class FakeRef extends Mock implements Ref<Object?> {
+  @override
+  T read<T>(ProviderListenable<T> provider) => throw UnimplementedError();
 }

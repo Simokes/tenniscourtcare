@@ -39,7 +39,7 @@ class MockAuthRepository extends Mock implements AuthRepository {
 // Mock AuthNotifier extending the real one to satisfy type check.
 class MockAuthNotifier extends AuthNotifier {
   // Pass a dummy repo since we mock the methods anyway
-  MockAuthNotifier() : super(MockAuthRepository());
+  MockAuthNotifier() : super(MockAuthRepository(), FakeRef());
 
   // We override internal implementation to control state for tests
 
@@ -252,4 +252,10 @@ void main() {
       expect(result, isNull);
     });
   });
+}
+
+
+class FakeRef extends Mock implements Ref<Object?> {
+  @override
+  T read<T>(ProviderListenable<T> provider) => throw UnimplementedError();
 }

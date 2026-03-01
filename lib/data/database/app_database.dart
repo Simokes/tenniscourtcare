@@ -50,6 +50,41 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
+
+  // === FIREBASE CACHE SERVICE METHODS ===
+
+  Future<void> upsertTerrain(TerrainsCompanion companion) async {
+    await into(terrains).insertOnConflictUpdate(companion);
+  }
+
+  Future<void> deleteTerrainByFirebaseId(String firebaseId) async {
+    await (delete(terrains)..where((t) => t.firebaseId.equals(firebaseId))).go();
+  }
+
+  Future<void> upsertMaintenance(MaintenancesCompanion companion) async {
+    await into(maintenances).insertOnConflictUpdate(companion);
+  }
+
+  Future<void> deleteMaintenanceByFirebaseId(String firebaseId) async {
+    await (delete(maintenances)..where((t) => t.firebaseId.equals(firebaseId))).go();
+  }
+
+  Future<void> upsertStockItem(StockItemsCompanion companion) async {
+    await into(stockItems).insertOnConflictUpdate(companion);
+  }
+
+  Future<void> deleteStockItemByFirebaseId(String firebaseId) async {
+    await (delete(stockItems)..where((t) => t.firebaseId.equals(firebaseId))).go();
+  }
+
+  Future<void> upsertEvent(EventsCompanion companion) async {
+    await into(events).insertOnConflictUpdate(companion);
+  }
+
+  Future<void> deleteEventByFirebaseId(String firebaseId) async {
+    await (delete(events)..where((t) => t.firebaseId.equals(firebaseId))).go();
+  }
+
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
