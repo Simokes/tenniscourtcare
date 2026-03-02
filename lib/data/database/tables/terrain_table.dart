@@ -19,7 +19,6 @@ class Terrains extends Table {
   BoolColumn get available => boolean().withDefault(const Constant(true))();
 
   // Sync fields
-  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get firebaseId => text().nullable()();

@@ -74,7 +74,6 @@ void main() {
         final result = EventMapper.toDomain(model);
 
         // Assert
-        expect(result.syncStatus, event.syncStatus);
         expect(result.createdBy, event.createdBy);
         expect(result.modifiedBy, event.modifiedBy);
       });

@@ -3,7 +3,6 @@ import '../../data/repositories/maintenance_repository_impl.dart';
 import '../../domain/entities/maintenance.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import 'database_provider.dart';
-import 'sync_status_provider.dart'; // for firebaseSyncServiceProvider
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,28 +12,9 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
   return MaintenanceRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
-// LOCAL
-final localMaintenancesProvider = FutureProvider<List<Maintenance>>((ref) {
+final maintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.watchMaintenancesInRange(0, 9999999999).first;
-});
-
-// FIRESTORE
-final firestoreMaintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return firebaseService.maintenanceService.watchMaintenances();
-});
-
-// FUSION
-final maintenancesProvider = StreamProvider<List<Maintenance>>((ref) async* {
-  final localFuture = ref.watch(localMaintenancesProvider.future);
-
-  final local = await localFuture;
-  yield local;
-
-  yield* ref.watch(firestoreMaintenancesProvider.stream).map((remote) {
-    return _mergeMaintenances(local, remote);
-  });
+  return db.watchMaintenancesInRange(0, 9999999999);
 });
 
 // CREATE
@@ -68,27 +48,6 @@ final deleteMaintenanceProvider = Provider<Future<void> Function(String)>((ref) 
   };
 });
 
-List<Maintenance> _mergeMaintenances(
-  List<Maintenance> local,
-  List<Maintenance> remote,
-) {
-  final merged = <int, Maintenance>{};
-
-  for (final t in local) {
-    if (t.id != null) merged[t.id!] = t;
-  }
-
-  for (final t in remote) {
-    if (t.id != null && merged.containsKey(t.id)) {
-      final existing = merged[t.id]!;
-      merged[t.id!] = existing.updatedAt.isAfter(t.updatedAt) ? existing : t;
-    } else if (t.id != null) {
-      merged[t.id!] = t;
-    }
-  }
-
-  return merged.values.toList();
-}
 
 // --- Maintenance Helpers ---
 

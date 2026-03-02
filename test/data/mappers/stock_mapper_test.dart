@@ -67,17 +67,7 @@ void main() {
         expect(result.unit, original.unit);
       });
 
-      test('preserves sync status', () {
-        // Arrange
-        final stockItem = TestData.testStockItem;
-
-        // Act
-        final model = StockItemMapper.toModel(stockItem);
-        final result = StockItemMapper.toDomain(model);
-
-        // Assert
-        expect(result.syncStatus, stockItem.syncStatus);
-      });
+      
 
       test('handles low stock items', () {
         // Arrange

@@ -13,13 +13,10 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
   return StockRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
-// ✅ STOCK ITEMS - SIMPLE FUTURE PROVIDER
-final stockProvider = FutureProvider<List<StockItem>>((ref) async {
-  final repo = ref.watch(stockRepositoryProvider);
-  final items = await repo.getAllStockItems();
-
-  debugPrint('📦 Loaded ${items.length} stock items');
-  return items;
+// ✅ STOCK ITEMS - STREAM PROVIDER (From Drift)
+final stockProvider = StreamProvider<List<StockItem>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.watchAllStockItems();
 });
 
 // ✅ ADD STOCK ITEM

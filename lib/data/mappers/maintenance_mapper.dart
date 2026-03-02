@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/models/maintenance_model.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
 
 class MaintenanceMapper {
@@ -27,7 +26,6 @@ class MaintenanceMapper {
           : null,
       terrainGele: model.terrainGele,
       terrainImpraticable: model.terrainImpraticable,
-      syncStatus: SyncStatus.fromString(model.syncStatus),
       createdAt: DateTime.parse(model.createdAt),
       updatedAt: DateTime.parse(model.updatedAt),
       firebaseId: model.firebaseId,
@@ -51,7 +49,6 @@ class MaintenanceMapper {
       weather: domain.weather?.toJson(),
       terrainGele: domain.terrainGele,
       terrainImpraticable: domain.terrainImpraticable,
-      syncStatus: domain.syncStatus.name,
       createdAt: domain.createdAt.toIso8601String(),
       updatedAt: domain.updatedAt.toIso8601String(),
       firebaseId: domain.firebaseId,
@@ -76,7 +73,6 @@ class MaintenanceMapper {
       weather: null,
       terrainGele: null,
       terrainImpraticable: null,
-      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
       createdAt: driftEntity.createdAt,
       updatedAt: driftEntity.updatedAt,
       firebaseId: driftEntity.firebaseId,
@@ -99,7 +95,6 @@ class MaintenanceMapper {
       'weather': item.weather?.toJson(),
       'terrainGele': item.terrainGele,
       'terrainImpraticable': item.terrainImpraticable,
-      'syncStatus': item.syncStatus.name,
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': item.updatedAt.toIso8601String(),
       'createdBy': item.createdBy,
@@ -133,7 +128,6 @@ class MaintenanceMapper {
       imagePath: data['imagePath'] != null
           ? drift.Value(data['imagePath'] as String)
           : const drift.Value.absent(),
-      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
       firebaseId: drift.Value(doc.id),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
@@ -177,7 +171,6 @@ extension MaintenanceMapperX on Maintenance {
       remoteId: firebaseId == null
           ? const drift.Value.absent()
           : drift.Value(firebaseId),
-      syncStatus: drift.Value(syncStatus.name),
       createdAt: drift.Value(createdAt),
       updatedAt: drift.Value(updatedAt),
       firebaseId: firebaseId == null

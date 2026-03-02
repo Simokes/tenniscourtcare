@@ -34,7 +34,6 @@ class Events extends Table {
   TextColumn get terrainIds => text().map(const IntListConverter())();
 
   // Sync fields
-  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get firebaseId => text().nullable()();

@@ -46,7 +46,7 @@ class DashboardHeader extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              const SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+              const ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
             ],
           ),
         ],

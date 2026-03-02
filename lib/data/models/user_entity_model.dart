@@ -2,7 +2,6 @@
 
 import 'package:tenniscourtcare/domain/entities/user_entity.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class UserEntityModel {
   final int id;
@@ -13,7 +12,6 @@ class UserEntityModel {
   final String? avatarUrl;
 
   // Sync fields
-  final String syncStatus;
   final String createdAt; // ISO8601
   final String updatedAt; // ISO8601
   final String? firebaseId;
@@ -27,7 +25,6 @@ class UserEntityModel {
     required this.role,
     this.lastLoginAt,
     this.avatarUrl,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -44,7 +41,6 @@ class UserEntityModel {
       role: json['role'] as String,
       lastLoginAt: json['lastLoginAt'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
-      syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
       createdAt:
           json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt:
@@ -64,7 +60,6 @@ class UserEntityModel {
       'role': role,
       'lastLoginAt': lastLoginAt,
       'avatarUrl': avatarUrl,
-      'syncStatus': syncStatus,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'firebaseId': firebaseId,
@@ -82,7 +77,6 @@ class UserEntityModel {
       role: Role.values.byName(role),
       lastLoginAt: lastLoginAt != null ? DateTime.parse(lastLoginAt!) : null,
       avatarUrl: avatarUrl,
-      syncStatus: SyncStatus.fromString(syncStatus),
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       firebaseId: firebaseId,
@@ -100,7 +94,6 @@ class UserEntityModel {
       role: user.role.name,
       lastLoginAt: user.lastLoginAt?.toIso8601String(),
       avatarUrl: user.avatarUrl,
-      syncStatus: user.syncStatus.name,
       createdAt: user.createdAt.toIso8601String(),
       updatedAt: user.updatedAt.toIso8601String(),
       firebaseId: user.firebaseId,

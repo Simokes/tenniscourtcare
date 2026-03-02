@@ -7,7 +7,6 @@ import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 import 'package:tenniscourtcare/data/models/stock_item_model.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart' as domain;
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class StockItemMapper {
   // Model → Domain Entity
@@ -22,7 +21,6 @@ class StockItemMapper {
       minThreshold: model.minThreshold,
       category: model.category,
       sortOrder: model.sortOrder,
-      syncStatus: SyncStatus.fromString(model.syncStatus),
       createdAt: DateTime.parse(model.createdAt),
       updatedAt: DateTime.parse(model.updatedAt),
       firebaseId: model.firebaseId,
@@ -43,7 +41,6 @@ class StockItemMapper {
       minThreshold: domainItem.minThreshold,
       category: domainItem.category,
       sortOrder: domainItem.sortOrder,
-      syncStatus: domainItem.syncStatus.name,
       createdAt: domainItem.createdAt.toIso8601String(),
       updatedAt: domainItem.updatedAt.toIso8601String(),
       firebaseId: domainItem.firebaseId,
@@ -64,7 +61,6 @@ class StockItemMapper {
       minThreshold: driftEntity.minThreshold,
       category: driftEntity.category,
       sortOrder: driftEntity.sortOrder,
-      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
       createdAt: driftEntity.createdAt,
       updatedAt: driftEntity.updatedAt,
       firebaseId:
@@ -88,7 +84,6 @@ class StockItemMapper {
       'minThreshold': item.minThreshold,
       'category': item.category,
       'sortOrder': item.sortOrder,
-      'syncStatus': item.syncStatus.name,
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': item.updatedAt.toIso8601String(),
       'createdBy': item.createdBy,
@@ -124,7 +119,6 @@ class StockItemMapper {
           ? drift.Value(data['category'] as String)
           : const drift.Value.absent(),
       sortOrder: drift.Value(data['sortOrder'] as int? ?? 0),
-      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
       firebaseId: drift.Value(doc.id),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
@@ -138,7 +132,6 @@ class StockItemMapper {
       lastModifiedBy: data['modifiedBy'] != null
           ? drift.Value(data['modifiedBy'] as String)
           : const drift.Value.absent(),
-      isSyncPending: drift.Value(data['syncStatus'] != 'SYNCED'),
     );
   }
 }
@@ -171,7 +164,6 @@ extension StockItemMapperX on StockItem {
           ? const drift.Value.absent()
           : drift.Value(category),
       sortOrder: drift.Value(sortOrder),
-      syncStatus: drift.Value(syncStatus.name),
       createdAt: drift.Value(createdAt),
       updatedAt: drift.Value(updatedAt),
       firebaseId: firebaseId == null
@@ -189,7 +181,7 @@ extension StockItemMapperX on StockItem {
       lastModifiedBy: modifiedBy == null
           ? const drift.Value.absent()
           : drift.Value(modifiedBy),
-      isSyncPending: drift.Value(syncStatus != SyncStatus.synced),
+      isSyncPending: const drift.Value(false), // Replaced SyncStatus dependency
     );
   }
 }

@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 
 import 'package:tenniscourtcare/data/models/app_event_model.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class EventMapper {
   // Model → Domain Entity
@@ -19,7 +18,6 @@ class EventMapper {
       endTime: DateTime.parse(model.endTime),
       color: model.color,
       terrainIds: model.terrainIds,
-      syncStatus: SyncStatus.fromString(model.syncStatus),
       createdAt: DateTime.parse(model.createdAt),
       updatedAt: DateTime.parse(model.updatedAt),
       firebaseId: model.firebaseId,
@@ -38,7 +36,6 @@ class EventMapper {
       endTime: domain.endTime.toIso8601String(),
       color: domain.color,
       terrainIds: domain.terrainIds,
-      syncStatus: domain.syncStatus.name,
       createdAt: domain.createdAt.toIso8601String(),
       updatedAt: domain.updatedAt.toIso8601String(),
       firebaseId: domain.firebaseId,
@@ -57,7 +54,6 @@ class EventMapper {
       endTime: driftEntity.endTime,
       color: driftEntity.color,
       terrainIds: driftEntity.terrainIds,
-      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
       createdAt: driftEntity.createdAt,
       updatedAt: driftEntity.updatedAt,
       firebaseId: driftEntity.firebaseId,
@@ -75,7 +71,6 @@ class EventMapper {
       'endTime': item.endTime.toIso8601String(),
       'color': item.color,
       'terrainIds': item.terrainIds,
-      'syncStatus': item.syncStatus.name,
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': item.updatedAt.toIso8601String(),
       'createdBy': item.createdBy,
@@ -105,7 +100,6 @@ class EventMapper {
       endTime: drift.Value(parseTimestamp(data['endTime'])),
       color: drift.Value(data['color'] as int? ?? 0xFFFFFFFF),
       terrainIds: drift.Value((data['terrainIds'] as List<dynamic>?)?.map((e) => e as int).toList() ?? []),
-      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
       firebaseId: drift.Value(doc.id),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
@@ -138,7 +132,6 @@ extension AppEventMapperX on AppEvent {
       color: drift.Value(color),
       terrainIds: drift.Value(terrainIds),
       // Sync mappings
-      syncStatus: drift.Value(syncStatus.name),
       createdAt: drift.Value(createdAt),
       updatedAt: drift.Value(updatedAt),
       firebaseId: firebaseId == null

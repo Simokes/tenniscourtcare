@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import '../../domain/entities/app_event.dart';
-import '../../domain/entities/sync_status.dart';
 import '../../domain/models/repository_exception.dart';
 import '../../domain/repositories/event_repository.dart';
 import '../database/app_database.dart';
@@ -97,7 +96,6 @@ class EventRepositoryImpl implements EventRepository {
       endTime: row.endTime,
       color: row.color,
       terrainIds: row.terrainIds,
-      syncStatus: SyncStatus.fromString(row.syncStatus),
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       firebaseId: row.firebaseId,

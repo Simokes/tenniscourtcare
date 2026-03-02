@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class AppEventModel {
   final int? id;
@@ -14,7 +13,6 @@ class AppEventModel {
   final List<int> terrainIds;
 
   // Sync fields
-  final String syncStatus;
   final String createdAt; // ISO8601
   final String updatedAt; // ISO8601
   final String? firebaseId;
@@ -29,7 +27,6 @@ class AppEventModel {
     required this.endTime,
     required this.color,
     required this.terrainIds,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -57,7 +54,6 @@ class AppEventModel {
       terrainIds: (json['terrainIds'] as List<dynamic>)
           .map((e) => e as int)
           .toList(),
-      syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
       createdAt:
           json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt:
@@ -78,7 +74,6 @@ class AppEventModel {
       'endTime': endTime,
       'color': color,
       'terrainIds': terrainIds,
-      'syncStatus': syncStatus,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'firebaseId': firebaseId,
@@ -97,7 +92,6 @@ class AppEventModel {
       endTime: DateTime.parse(endTime),
       color: color,
       terrainIds: terrainIds,
-      syncStatus: SyncStatus.fromString(syncStatus),
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       firebaseId: firebaseId,
@@ -116,7 +110,6 @@ class AppEventModel {
       endTime: appEvent.endTime.toIso8601String(),
       color: appEvent.color,
       terrainIds: appEvent.terrainIds,
-      syncStatus: appEvent.syncStatus.name,
       createdAt: appEvent.createdAt.toIso8601String(),
       updatedAt: appEvent.updatedAt.toIso8601String(),
       firebaseId: appEvent.firebaseId,

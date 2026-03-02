@@ -8,7 +8,6 @@ import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
 import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/setup_providers.dart' as setup;
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 
 // Manual Mock for AppDatabase
@@ -66,63 +65,29 @@ void main() {
     mockAuthNotifier = MockAuthNotifier();
   });
 
-  ProviderContainer createContainer() {
+  ProviderContainer createContainer({bool adminExists = true}) {
     return ProviderContainer(
       overrides: [
         databaseProvider.overrideWithValue(mockDb),
         // Override with a function that returns the mock notifier
         authStateProvider.overrideWith((ref) => mockAuthNotifier),
+        setup.adminExistsProvider.overrideWith((ref) async => adminExists), // Added override to avoid Firebase call
       ],
     );
   }
 
-  group('adminExistsProvider', () {
-    test('returns false when no admin exists (count = 0)', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 0);
-
-      final container = createContainer();
-      final result = await container.read(setup.adminExistsProvider.future);
-
-      expect(result, isFalse);
-    });
-
-    test('returns true when admin exists (count > 0)', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
-      final container = createContainer();
-      final result = await container.read(setup.adminExistsProvider.future);
-
-      expect(result, isTrue);
-    });
-
-    test('returns false on database exception', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenThrow(Exception('DB Error'));
-
-      final container = createContainer();
-      final result = await container.read(setup.adminExistsProvider.future);
-
-      expect(result, isFalse);
-    });
-  });
-
   group('setupStatusProvider', () {
     test('returns needsAdminSetup if admin check fails (false)', () async {
-      // Setup: No admin
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 0);
-
       // Auth state shouldn't matter here
       mockAuthNotifier.setState(const AsyncValue.loading());
 
-      final container = createContainer();
+      final container = createContainer(adminExists: false);
       final result = await container.read(setup.setupStatusProvider.future);
 
       expect(result, SetupStatus.needsAdminSetup);
     });
 
     test('returns loading if admin exists but auth is loading', () async {
-      // Setup: Admin exists
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       // Auth: Loading
       mockAuthNotifier.setState(const AsyncValue.loading());
 
@@ -133,9 +98,6 @@ void main() {
     });
 
     test('returns needsLogin if admin exists and no user logged in', () async {
-      // Setup: Admin exists
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       // Auth: Data, no user
       mockAuthNotifier.setState(
         const AsyncValue.data(AuthState(user: null, isSetupRequired: false)),
@@ -148,8 +110,6 @@ void main() {
     });
 
     test('returns authenticated if admin exists and user logged in', () async {
-      // Setup: Admin exists
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
 
       // Auth: Data, with user
       final user = UserEntity(
@@ -157,7 +117,6 @@ void main() {
         email: 'test@test.com',
         name: 'Test',
         role: Role.admin,
-        syncStatus: SyncStatus.local,
       );
       mockAuthNotifier.setState(
         AsyncValue.data(AuthState(user: user, isSetupRequired: false)),
@@ -170,12 +129,9 @@ void main() {
     });
 
     test('returns error if auth provider throws error', () async {
-      // Setup: Admin exists
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       // Auth: Error
       mockAuthNotifier.setState(
-        AsyncValue.error('Auth Failed', StackTrace.empty),
+       const AsyncValue.error('Auth Failed', StackTrace.empty),
       );
 
       final container = createContainer();
@@ -187,14 +143,11 @@ void main() {
 
   group('Derived Providers', () {
     test('isAuthenticatedProvider returns true when authenticated', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       final user = UserEntity(
         id: 1,
         email: 'test@test.com',
         name: 'Test',
         role: Role.admin,
-        syncStatus: SyncStatus.local,
       );
       mockAuthNotifier.setState(
         AsyncValue.data(AuthState(user: user, isSetupRequired: false)),
@@ -220,14 +173,11 @@ void main() {
     });
 
     test('currentSetupUserProvider returns user when authenticated', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       final user = UserEntity(
         id: 1,
         email: 'test@test.com',
         name: 'Test',
         role: Role.admin,
-        syncStatus: SyncStatus.local,
       );
       mockAuthNotifier.setState(
         AsyncValue.data(AuthState(user: user, isSetupRequired: false)),
@@ -240,8 +190,6 @@ void main() {
     });
 
     test('currentSetupUserProvider returns null when not authenticated', () async {
-       when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
       mockAuthNotifier.setState(
         const AsyncValue.data(AuthState(user: null, isSetupRequired: false)),
       );

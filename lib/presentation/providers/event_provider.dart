@@ -6,7 +6,6 @@ import '../../domain/entities/terrain.dart'; // Needed
 import '../../domain/repositories/event_repository.dart';
 import 'database_provider.dart';
 import 'maintenance_provider.dart';
-import 'sync_status_provider.dart';
 import 'terrain_provider.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,25 +15,9 @@ final eventRepositoryProvider = Provider<EventRepository>((ref) {
   return EventRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
-final localEventsProvider = FutureProvider<List<AppEvent>>((ref) {
+final eventsProvider = StreamProvider<List<AppEvent>>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.watchAllEvents().first;
-});
-
-final firestoreEventsProvider = StreamProvider<List<AppEvent>>((ref) {
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return firebaseService.eventService.watchEvents();
-});
-
-final eventsProvider = StreamProvider<List<AppEvent>>((ref) async* {
-  final localFuture = ref.watch(localEventsProvider.future);
-
-  final local = await localFuture;
-  yield local;
-
-  yield* ref.watch(firestoreEventsProvider.stream).map((remote) {
-    return _mergeEvents(local, remote);
-  });
+  return db.watchAllEvents();
 });
 
 final addEventProvider = Provider<Future<void> Function(AppEvent)>((ref) {
@@ -53,24 +36,6 @@ final updateEventProvider = Provider<Future<void> Function(AppEvent)>((ref) {
   };
 });
 
-List<AppEvent> _mergeEvents(List<AppEvent> local, List<AppEvent> remote) {
-  final merged = <int, AppEvent>{};
-
-  for (final t in local) {
-    if (t.id != null) merged[t.id!] = t;
-  }
-
-  for (final t in remote) {
-    if (t.id != null && merged.containsKey(t.id)) {
-      final existing = merged[t.id]!;
-      merged[t.id!] = existing.updatedAt.isAfter(t.updatedAt) ? existing : t;
-    } else if (t.id != null) {
-      merged[t.id!] = t;
-    }
-  }
-
-  return merged.values.toList();
-}
 
 // --- Calendar Helpers ---
 

@@ -5,7 +5,6 @@ import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 
 import 'package:tenniscourtcare/data/models/terrain_model.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 
 class TerrainMapper {
@@ -19,7 +18,6 @@ class TerrainMapper {
       latitude: model.latitude,
       longitude: model.longitude,
       photoUrl: model.photoUrl,
-      syncStatus: SyncStatus.fromString(model.syncStatus),
       createdAt: DateTime.parse(model.createdAt),
       updatedAt: DateTime.parse(model.updatedAt),
       firebaseId: model.firebaseId,
@@ -38,7 +36,6 @@ class TerrainMapper {
       latitude: domain.latitude,
       longitude: domain.longitude,
       photoUrl: domain.photoUrl,
-      syncStatus: domain.syncStatus.name,
       createdAt: domain.createdAt.toIso8601String(),
       updatedAt: domain.updatedAt.toIso8601String(),
       firebaseId: domain.firebaseId,
@@ -65,7 +62,6 @@ class TerrainMapper {
       latitude: null, // Drift entity does not store latitude
       longitude: null, // Drift entity does not store longitude
       photoUrl: driftEntity.imageUrl,
-      syncStatus: SyncStatus.fromString(driftEntity.syncStatus),
       createdAt: driftEntity.createdAt,
       updatedAt: driftEntity.updatedAt,
       firebaseId: driftEntity.firebaseId,
@@ -83,7 +79,6 @@ class TerrainMapper {
       'latitude': item.latitude,
       'longitude': item.longitude,
       'photoUrl': item.photoUrl,
-      'syncStatus': item.syncStatus.name,
       'createdAt': item.createdAt.toIso8601String(),
       'updatedAt': item.updatedAt.toIso8601String(),
       'createdBy': item.createdBy,
@@ -111,7 +106,6 @@ class TerrainMapper {
       imageUrl: data['photoUrl'] != null
           ? drift.Value(data['photoUrl'] as String)
           : const drift.Value.absent(),
-      syncStatus: drift.Value(data['syncStatus'] as String? ?? 'LOCAL'),
       firebaseId: drift.Value(doc.id),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
@@ -156,7 +150,6 @@ extension TerrainMapperX on Terrain {
       imageUrl: photoUrl == null
           ? const drift.Value.absent()
           : drift.Value(photoUrl),
-      syncStatus: drift.Value(syncStatus.name),
       firebaseId: firebaseId == null
           ? const drift.Value.absent()
           : drift.Value(firebaseId),

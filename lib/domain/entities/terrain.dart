@@ -1,7 +1,6 @@
 // lib/domain/entities/terrain.dart
 
 import 'package:flutter/material.dart';
-import 'sync_status.dart';
 
 enum TerrainType {
   terreBattue,
@@ -78,7 +77,6 @@ class Terrain {
   final String? photoUrl;
 
   // Sync fields
-  final SyncStatus syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -93,7 +91,6 @@ class Terrain {
     this.latitude,
     this.longitude,
     this.photoUrl,
-    this.syncStatus = SyncStatus.local,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -113,7 +110,6 @@ class Terrain {
     double? latitude,
     double? longitude,
     String? photoUrl,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -128,7 +124,6 @@ class Terrain {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       photoUrl: photoUrl ?? this.photoUrl,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -149,7 +144,6 @@ class Terrain {
           latitude == other.latitude &&
           longitude == other.longitude &&
           photoUrl == other.photoUrl &&
-          syncStatus == other.syncStatus &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -165,7 +159,6 @@ class Terrain {
       latitude.hashCode ^
       longitude.hashCode ^
       photoUrl.hashCode ^
-      syncStatus.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^
@@ -174,5 +167,5 @@ class Terrain {
 
   @override
   String toString() =>
-      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
 }

@@ -15,14 +15,12 @@ import 'tables/audit_logs.dart';
 import 'tables/login_attempts.dart';
 import 'tables/otp_records.dart';
 import 'tables/reservations.dart';
-import 'tables/sync_queue.dart';
 
 import '../../domain/entities/terrain.dart' as dom;
 import '../../domain/entities/maintenance.dart' as domm;
 import '../../domain/entities/stock_item.dart' as doms;
 import '../../domain/entities/user_entity.dart' as domu;
 import '../../domain/entities/app_event.dart';
-import '../../domain/entities/sync_status.dart'; // ✅ IMPORT Added
 import '../../domain/enums/role.dart';
 import '../../utils/date_utils.dart' as cc;
 
@@ -46,7 +44,6 @@ part 'app_database.g.dart';
     LoginAttempts,
     OtpRecords,
     Reservations,
-    SyncQueue,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -88,7 +85,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 17; // Increment version to 17
+  int get schemaVersion => 18; // Phase C: Remove sync columns
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -179,16 +176,6 @@ class AppDatabase extends _$AppDatabase {
         // Create Reservations
         await m.createTable(reservations);
       }
-      if (from < 12) {
-        await m.createTable(syncQueue);
-      }
-      if (from < 13) {
-        // Re-create syncQueue table to add uuid column with UNIQUE constraint
-        // and rename createdAt to timestamp.
-        // Since this is a dev feature, we can safely drop and recreate.
-        await m.deleteTable(syncQueue.actualTableName);
-        await m.createTable(syncQueue);
-      }
 
       if (from < 15) {
         // Removed UNIQUE constraint from firebaseUid column
@@ -204,21 +191,18 @@ class AppDatabase extends _$AppDatabase {
         // Phase 3: Add sync columns to Terrains, Maintenances, StockItems, Events
 
         // Terrains
-        await m.addColumn(terrains, terrains.syncStatus);
         await m.addColumn(terrains, terrains.firebaseId);
         await m.addColumn(terrains, terrains.createdBy);
         await m.addColumn(terrains, terrains.modifiedBy);
         // createdAt, updatedAt already exist in older versions, skipping to avoid duplicates
 
         // Maintenances
-        await m.addColumn(maintenances, maintenances.syncStatus);
         await m.addColumn(maintenances, maintenances.updatedAt);
         await m.addColumn(maintenances, maintenances.firebaseId);
         await m.addColumn(maintenances, maintenances.modifiedBy);
         // createdAt already exists, skipping
 
         // StockItems
-        await m.addColumn(stockItems, stockItems.syncStatus);
         await m.addColumn(
           stockItems,
           stockItems.updatedAt,
@@ -234,12 +218,31 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(stockItems, stockItems.modifiedBy);
 
         // Events
-        await m.addColumn(events, events.syncStatus);
         await m.addColumn(events, events.createdAt);
         await m.addColumn(events, events.updatedAt);
         await m.addColumn(events, events.firebaseId);
         await m.addColumn(events, events.createdBy);
         await m.addColumn(events, events.modifiedBy);
+      }
+
+      if (from < 18) {
+        // Also drops syncQueue entirely
+
+        await m.recreateAllViews();
+
+        await m.deleteTable('sync_queue');
+
+        await m.deleteTable(terrains.actualTableName);
+        await m.createTable(terrains);
+
+        await m.deleteTable(stockItems.actualTableName);
+        await m.createTable(stockItems);
+
+        await m.deleteTable(maintenances.actualTableName);
+        await m.createTable(maintenances);
+
+        await m.deleteTable(events.actualTableName);
+        await m.createTable(events);
       }
     },
   );
@@ -738,6 +741,10 @@ class AppDatabase extends _$AppDatabase {
 
   // ========== TERRAINS ==========
 
+  Stream<List<dom.Terrain>> watchAllTerrains() {
+    return select(terrains).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
+  }
+
   Future<List<dom.Terrain>> getAllTerrains() async {
     final rows = await select(terrains).get();
     return rows.map((r) => r.toDomain()).toList();
@@ -773,6 +780,10 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // ========== MAINTENANCES ==========
+
+  Stream<List<domm.Maintenance>> watchAllMaintenances() {
+    return select(maintenances).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
+  }
 
   Future<List<domm.Maintenance>> getMaintenancesForTerrain(
     int terrainId,
@@ -1161,10 +1172,6 @@ extension EventRowDomainX on EventRow {
       endTime: endTime,
       color: color,
       terrainIds: terrainIds,
-      syncStatus: SyncStatus.values.firstWhere(
-        (e) => e.name == syncStatus,
-        orElse: () => SyncStatus.local,
-      ),
       createdAt: createdAt,
       updatedAt: updatedAt,
       firebaseId: firebaseId,

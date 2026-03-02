@@ -2,110 +2,64 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
-import 'package:tenniscourtcare/domain/models/sync_status_model.dart';
+import 'package:tenniscourtcare/presentation/providers/connectivity_providers.dart';
 
 void main() {
-  testWidgets('Displays Syncing state', (tester) async {
-    final model = SyncStatusModel(
-      isSyncing: true,
-      hasError: false,
-      lastSyncTime: DateTime.now(),
-    );
-
+  testWidgets('Displays Online state (compact)', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          currentSyncStatusProvider.overrideWith((ref) => Stream.value(model)),
+          isOnlineStatusProvider.overrideWith((ref) => Stream.value(true)),
         ],
         child: const MaterialApp(
           home: Scaffold(
-            body: SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+            body: ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
           ),
         ),
       ),
     );
     await tester.pump();
 
-    expect(find.text('Syncing...'), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Online'), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_done), findsOneWidget);
   });
 
-  testWidgets('Displays Success state', (tester) async {
-    final now = DateTime.now();
-    final model = SyncStatusModel(
-      isSyncing: false,
-      hasError: false,
-      lastSyncTime: now.subtract(const Duration(minutes: 5)),
-    );
-
+  testWidgets('Displays Offline state (compact)', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          currentSyncStatusProvider.overrideWith((ref) => Stream.value(model)),
+          isOnlineStatusProvider.overrideWith((ref) => Stream.value(false)),
         ],
         child: const MaterialApp(
           home: Scaffold(
-            body: SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+            body: ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
           ),
         ),
       ),
     );
     await tester.pump();
 
-    expect(find.text('Synced 5m ago'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+    expect(find.text('Offline'), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_off), findsOneWidget);
   });
 
-  testWidgets('Displays Error state', (tester) async {
-    final model = SyncStatusModel(
-      isSyncing: false,
-      hasError: true,
-      errorMessage: 'Network Error',
-      lastSyncTime: DateTime.now(),
-    );
-
+  testWidgets('Displays Online state (detailed)', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          currentSyncStatusProvider.overrideWith((ref) => Stream.value(model)),
+          isOnlineStatusProvider.overrideWith((ref) => Stream.value(true)),
         ],
         child: const MaterialApp(
           home: Scaffold(
-            body: SyncStatusIndicator(mode: SyncIndicatorMode.compact),
+            body: ConnectionStatusIndicator(mode: SyncIndicatorMode.detailed),
           ),
         ),
       ),
     );
     await tester.pump();
 
-    expect(find.text('Error'), findsOneWidget);
-    expect(find.byIcon(Icons.refresh), findsOneWidget);
-  });
-
-  testWidgets('Displays Detailed mode', (tester) async {
-    final now = DateTime.now();
-    final model = SyncStatusModel(
-      isSyncing: false,
-      hasError: false,
-      lastSyncTime: now.subtract(const Duration(hours: 1)),
-    );
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          currentSyncStatusProvider.overrideWith((ref) => Stream.value(model)),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: SyncStatusIndicator(mode: SyncIndicatorMode.detailed),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(find.text('Data Synced'), findsOneWidget);
-    expect(find.text('Last update: 1h ago'), findsOneWidget);
-    expect(find.byIcon(Icons.check_circle), findsOneWidget);
+    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('Receiving real-time updates'), findsOneWidget);
+    expect(find.byIcon(Icons.cloud_done), findsOneWidget);
   });
 }

@@ -91,7 +91,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
           ),
           Row(
             children: [
-              const SyncStatusIndicator(mode: SyncIndicatorMode.minimal),
+              const ConnectionStatusIndicator(mode: SyncIndicatorMode.minimal),
               const SizedBox(width: 8),
               IconButton(
                 onPressed: () {

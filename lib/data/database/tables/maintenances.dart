@@ -24,7 +24,6 @@ class Maintenances extends Table {
   DateTimeColumn get completedDate => dateTime().nullable()();
 
   // Sync fields
-  TextColumn get syncStatus => text().withDefault(const Constant('LOCAL'))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get firebaseId => text().nullable()();

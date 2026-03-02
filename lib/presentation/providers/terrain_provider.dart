@@ -3,7 +3,6 @@ import '../../data/repositories/terrain_repository_impl.dart';
 import '../../domain/entities/terrain.dart';
 import '../../domain/repositories/terrain_repository.dart';
 import 'database_provider.dart';
-import 'sync_status_provider.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,29 +12,9 @@ final terrainRepositoryProvider = Provider<TerrainRepository>((ref) {
   return TerrainRepositoryImpl(db: db, fs: FirebaseFirestore.instance);
 });
 
-// LOCAL (SQLite)
-final localTerrainsProvider = FutureProvider<List<Terrain>>((ref) async {
-  final repo = ref.watch(terrainRepositoryProvider);
-  return repo.getAllTerrains();
-});
-
-// FIRESTORE (stream temps réel)
-final firestoreTerrainsProvider = StreamProvider<List<Terrain>>((ref) {
-  final firebaseService = ref.watch(firebaseSyncServiceProvider);
-  return firebaseService.terrainService.watchTerrains();
-});
-
-// FUSION LOCAL + FIRESTORE
-final terrainsProvider = StreamProvider<List<Terrain>>((ref) async* {
-  final localFuture = ref.watch(localTerrainsProvider.future);
-
-  final local = await localFuture;
-  yield local; // Yield local first for instant UI
-
-  // Then listen to remote
-  yield* ref.watch(firestoreTerrainsProvider.stream).map((remote) {
-    return _mergeTerrains(local, remote);
-  });
+final terrainsProvider = StreamProvider<List<Terrain>>((ref) {
+  final db = ref.watch(databaseProvider);
+  return db.watchAllTerrains();
 });
 
 final terrainProvider = FutureProvider.family<Terrain?, int>((ref, id) async {
@@ -106,37 +85,3 @@ final updateTerrainProvider = Provider<Future<void> Function(Terrain)>((ref) {
   };
 });
 
-// Helper: Merge LOCAL + FIRESTORE
-List<Terrain> _mergeTerrains(List<Terrain> local, List<Terrain> remote) {
-  final merged = <int, Terrain>{};
-
-  // Ajouter tous les locaux
-  for (final t in local) {
-    merged[t.id] = t;
-  }
-
-  // Fusionner avec les remotes (LAST-WRITE-WINS)
-  for (final t in remote) {
-    // Try to find local match by firebaseId or ID
-    // Note: In a real scenario, we'd map by firebaseId.
-    // Here we assume ID consistency or merge based on ID if present.
-    // If ID is 0 or null from remote (unlikely if mapped correctly), we might skip or append.
-    // For this implementation, we prioritize local ID match if available.
-
-    // Check if we have a local item with same ID
-    if (merged.containsKey(t.id)) {
-      final existing = merged[t.id]!;
-      // Use remote if it's newer
-      if (t.updatedAt.isAfter(existing.updatedAt)) {
-        merged[t.id] = t;
-      }
-    } else {
-       // Remote only item. If ID > 0, include it.
-       if (t.id != 0) {
-         merged[t.id] = t;
-       }
-    }
-  }
-
-  return merged.values.toList();
-}

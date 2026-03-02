@@ -1,7 +1,5 @@
 // lib/domain/entities/app_event.dart
 
-import 'sync_status.dart';
-
 class AppEvent {
   final int? id;
   final String title;
@@ -12,7 +10,6 @@ class AppEvent {
   final List<int> terrainIds;
 
   // Sync fields
-  final SyncStatus syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -27,7 +24,6 @@ class AppEvent {
     required this.endTime,
     required this.color,
     required this.terrainIds,
-    this.syncStatus = SyncStatus.local,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -44,7 +40,6 @@ class AppEvent {
     DateTime? endTime,
     int? color,
     List<int>? terrainIds,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -59,7 +54,6 @@ class AppEvent {
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
       terrainIds: terrainIds ?? this.terrainIds,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -80,7 +74,6 @@ class AppEvent {
           endTime == other.endTime &&
           color == other.color &&
           _listEquals(terrainIds, other.terrainIds) &&
-          syncStatus == other.syncStatus &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -96,7 +89,6 @@ class AppEvent {
       endTime.hashCode ^
       color.hashCode ^
       terrainIds.hashCode ^
-      syncStatus.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^
@@ -105,7 +97,7 @@ class AppEvent {
 
   @override
   String toString() {
-    return 'AppEvent{id: $id, title: $title, description: $description, startTime: $startTime, endTime: $endTime, color: $color, terrainIds: $terrainIds, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt}';
+    return 'AppEvent{id: $id, title: $title, description: $description, startTime: $startTime, endTime: $endTime, color: $color, terrainIds: $terrainIds, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 
   bool _listEquals<T>(List<T>? a, List<T>? b) {

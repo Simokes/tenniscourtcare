@@ -15,7 +15,7 @@ class TerrainsManagementScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Gestion des terrains'),
         actions: const [
-          SyncStatusIndicator(),
+          ConnectionStatusIndicator(),
           SizedBox(width: 8),
         ],
       ),

@@ -1,7 +1,6 @@
 // lib/domain/entities/stock_item.dart
 
 import 'package:flutter/foundation.dart';
-import 'sync_status.dart';
 
 @immutable
 class StockItem {
@@ -16,7 +15,6 @@ class StockItem {
   final int sortOrder;
 
   // Sync fields
-  final SyncStatus syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -33,7 +31,6 @@ class StockItem {
     this.minThreshold,
     this.category,
     this.sortOrder = 0,
-    this.syncStatus = SyncStatus.local,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -54,7 +51,6 @@ class StockItem {
     int? minThreshold,
     String? category,
     int? sortOrder,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -71,7 +67,6 @@ class StockItem {
       minThreshold: minThreshold ?? this.minThreshold,
       category: category ?? this.category,
       sortOrder: sortOrder ?? this.sortOrder,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -94,7 +89,6 @@ class StockItem {
           minThreshold == other.minThreshold &&
           category == other.category &&
           sortOrder == other.sortOrder &&
-          syncStatus == other.syncStatus &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -112,7 +106,6 @@ class StockItem {
       minThreshold.hashCode ^
       category.hashCode ^
       sortOrder.hashCode ^
-      syncStatus.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^
@@ -121,6 +114,6 @@ class StockItem {
 
   @override
   String toString() {
-    return 'StockItem{id: $id, name: $name, quantity: $quantity, unit: $unit, isCustom: $isCustom, isLow: $isLowOnStock, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt}';
+    return 'StockItem{id: $id, name: $name, quantity: $quantity, unit: $unit, isCustom: $isCustom, isLow: $isLowOnStock, createdAt: $createdAt, updatedAt: $updatedAt}';
   }
 }

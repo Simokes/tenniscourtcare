@@ -113,18 +113,6 @@ class $TerrainsTable extends Terrains
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
-  @override
-  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('LOCAL'),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -213,7 +201,6 @@ class $TerrainsTable extends Terrains
     capacity,
     pricePerHour,
     available,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -290,12 +277,6 @@ class $TerrainsTable extends Terrains
       context.handle(
         _availableMeta,
         available.isAcceptableOrUnknown(data['available']!, _availableMeta),
-      );
-    }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
       );
     }
     if (data.containsKey('created_at')) {
@@ -389,10 +370,6 @@ class $TerrainsTable extends Terrains
         DriftSqlType.bool,
         data['${effectivePrefix}available'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}sync_status'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -440,7 +417,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final int? capacity;
   final double? pricePerHour;
   final bool available;
-  final String syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -458,7 +434,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     this.capacity,
     this.pricePerHour,
     required this.available,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -487,7 +462,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       map['price_per_hour'] = Variable<double>(pricePerHour);
     }
     map['available'] = Variable<bool>(available);
-    map['sync_status'] = Variable<String>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || firebaseId != null) {
@@ -527,7 +501,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ? const Value.absent()
           : Value(pricePerHour),
       available: Value(available),
-      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       firebaseId: firebaseId == null && nullToAbsent
@@ -563,7 +536,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       capacity: serializer.fromJson<int?>(json['capacity']),
       pricePerHour: serializer.fromJson<double?>(json['pricePerHour']),
       available: serializer.fromJson<bool>(json['available']),
-      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       firebaseId: serializer.fromJson<String?>(json['firebaseId']),
@@ -586,7 +558,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       'capacity': serializer.toJson<int?>(capacity),
       'pricePerHour': serializer.toJson<double?>(pricePerHour),
       'available': serializer.toJson<bool>(available),
-      'syncStatus': serializer.toJson<String>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'firebaseId': serializer.toJson<String?>(firebaseId),
@@ -607,7 +578,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     Value<int?> capacity = const Value.absent(),
     Value<double?> pricePerHour = const Value.absent(),
     bool? available,
-    String? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<String?> firebaseId = const Value.absent(),
@@ -625,7 +595,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     capacity: capacity.present ? capacity.value : this.capacity,
     pricePerHour: pricePerHour.present ? pricePerHour.value : this.pricePerHour,
     available: available ?? this.available,
-    syncStatus: syncStatus ?? this.syncStatus,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
@@ -647,9 +616,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ? data.pricePerHour.value
           : this.pricePerHour,
       available: data.available.present ? data.available.value : this.available,
-      syncStatus: data.syncStatus.present
-          ? data.syncStatus.value
-          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       firebaseId: data.firebaseId.present
@@ -676,7 +642,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ..write('capacity: $capacity, ')
           ..write('pricePerHour: $pricePerHour, ')
           ..write('available: $available, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -699,7 +664,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     capacity,
     pricePerHour,
     available,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -721,7 +685,6 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           other.capacity == this.capacity &&
           other.pricePerHour == this.pricePerHour &&
           other.available == this.available &&
-          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.firebaseId == this.firebaseId &&
@@ -741,7 +704,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<int?> capacity;
   final Value<double?> pricePerHour;
   final Value<bool> available;
-  final Value<String> syncStatus;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String?> firebaseId;
@@ -759,7 +721,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.capacity = const Value.absent(),
     this.pricePerHour = const Value.absent(),
     this.available = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.firebaseId = const Value.absent(),
@@ -778,7 +739,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.capacity = const Value.absent(),
     this.pricePerHour = const Value.absent(),
     this.available = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.firebaseId = const Value.absent(),
@@ -800,7 +760,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Expression<int>? capacity,
     Expression<double>? pricePerHour,
     Expression<bool>? available,
-    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? firebaseId,
@@ -819,7 +778,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       if (capacity != null) 'capacity': capacity,
       if (pricePerHour != null) 'price_per_hour': pricePerHour,
       if (available != null) 'available': available,
-      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (firebaseId != null) 'firebase_id': firebaseId,
@@ -840,7 +798,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Value<int?>? capacity,
     Value<double?>? pricePerHour,
     Value<bool>? available,
-    Value<String>? syncStatus,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String?>? firebaseId,
@@ -859,7 +816,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       capacity: capacity ?? this.capacity,
       pricePerHour: pricePerHour ?? this.pricePerHour,
       available: available ?? this.available,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -900,9 +856,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     if (available.present) {
       map['available'] = Variable<bool>(available.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(syncStatus.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -939,7 +892,6 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
           ..write('capacity: $capacity, ')
           ..write('pricePerHour: $pricePerHour, ')
           ..write('available: $available, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -1100,18 +1052,6 @@ class $MaintenancesTable extends Maintenances
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
-  @override
-  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('LOCAL'),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1193,7 +1133,6 @@ class $MaintenancesTable extends Maintenances
     status,
     scheduledDate,
     completedDate,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -1312,12 +1251,6 @@ class $MaintenancesTable extends Maintenances
         ),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1419,10 +1352,6 @@ class $MaintenancesTable extends Maintenances
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_date'],
       ),
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}sync_status'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1470,7 +1399,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final String? status;
   final DateTime? scheduledDate;
   final DateTime? completedDate;
-  final String syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -1491,7 +1419,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     this.status,
     this.scheduledDate,
     this.completedDate,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -1527,7 +1454,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     if (!nullToAbsent || completedDate != null) {
       map['completed_date'] = Variable<DateTime>(completedDate);
     }
-    map['sync_status'] = Variable<String>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || firebaseId != null) {
@@ -1572,7 +1498,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       completedDate: completedDate == null && nullToAbsent
           ? const Value.absent()
           : Value(completedDate),
-      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       firebaseId: firebaseId == null && nullToAbsent
@@ -1611,7 +1536,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       status: serializer.fromJson<String?>(json['status']),
       scheduledDate: serializer.fromJson<DateTime?>(json['scheduledDate']),
       completedDate: serializer.fromJson<DateTime?>(json['completedDate']),
-      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       firebaseId: serializer.fromJson<String?>(json['firebaseId']),
@@ -1637,7 +1561,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       'status': serializer.toJson<String?>(status),
       'scheduledDate': serializer.toJson<DateTime?>(scheduledDate),
       'completedDate': serializer.toJson<DateTime?>(completedDate),
-      'syncStatus': serializer.toJson<String>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'firebaseId': serializer.toJson<String?>(firebaseId),
@@ -1661,7 +1584,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     Value<String?> status = const Value.absent(),
     Value<DateTime?> scheduledDate = const Value.absent(),
     Value<DateTime?> completedDate = const Value.absent(),
-    String? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<String?> firebaseId = const Value.absent(),
@@ -1687,7 +1609,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     completedDate: completedDate.present
         ? completedDate.value
         : this.completedDate,
-    syncStatus: syncStatus ?? this.syncStatus,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
@@ -1722,9 +1643,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       completedDate: data.completedDate.present
           ? data.completedDate.value
           : this.completedDate,
-      syncStatus: data.syncStatus.present
-          ? data.syncStatus.value
-          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       firebaseId: data.firebaseId.present
@@ -1754,7 +1672,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ..write('status: $status, ')
           ..write('scheduledDate: $scheduledDate, ')
           ..write('completedDate: $completedDate, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -1780,7 +1697,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     status,
     scheduledDate,
     completedDate,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -1805,7 +1721,6 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           other.status == this.status &&
           other.scheduledDate == this.scheduledDate &&
           other.completedDate == this.completedDate &&
-          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.firebaseId == this.firebaseId &&
@@ -1828,7 +1743,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<String?> status;
   final Value<DateTime?> scheduledDate;
   final Value<DateTime?> completedDate;
-  final Value<String> syncStatus;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String?> firebaseId;
@@ -1849,7 +1763,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.status = const Value.absent(),
     this.scheduledDate = const Value.absent(),
     this.completedDate = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.firebaseId = const Value.absent(),
@@ -1871,7 +1784,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.status = const Value.absent(),
     this.scheduledDate = const Value.absent(),
     this.completedDate = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.firebaseId = const Value.absent(),
@@ -1897,7 +1809,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Expression<String>? status,
     Expression<DateTime>? scheduledDate,
     Expression<DateTime>? completedDate,
-    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? firebaseId,
@@ -1921,7 +1832,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       if (status != null) 'status': status,
       if (scheduledDate != null) 'scheduled_date': scheduledDate,
       if (completedDate != null) 'completed_date': completedDate,
-      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (firebaseId != null) 'firebase_id': firebaseId,
@@ -1945,7 +1855,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Value<String?>? status,
     Value<DateTime?>? scheduledDate,
     Value<DateTime?>? completedDate,
-    Value<String>? syncStatus,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String?>? firebaseId,
@@ -1968,7 +1877,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       status: status ?? this.status,
       scheduledDate: scheduledDate ?? this.scheduledDate,
       completedDate: completedDate ?? this.completedDate,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -2022,9 +1930,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     if (completedDate.present) {
       map['completed_date'] = Variable<DateTime>(completedDate.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(syncStatus.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -2062,7 +1967,6 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           ..write('status: $status, ')
           ..write('scheduledDate: $scheduledDate, ')
           ..write('completedDate: $completedDate, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -2249,18 +2153,6 @@ class $StockItemsTable extends StockItems
     ),
     defaultValue: const Constant(false),
   );
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
-  @override
-  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('LOCAL'),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2332,7 +2224,6 @@ class $StockItemsTable extends StockItems
     lastModifiedBy,
     syncedAt,
     isSyncPending,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -2447,12 +2338,6 @@ class $StockItemsTable extends StockItems
         ),
       );
     }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -2552,10 +2437,6 @@ class $StockItemsTable extends StockItems
         DriftSqlType.bool,
         data['${effectivePrefix}is_sync_pending'],
       )!,
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}sync_status'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2600,7 +2481,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
   final String? lastModifiedBy;
   final DateTime? syncedAt;
   final bool isSyncPending;
-  final String syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -2621,7 +2501,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     this.lastModifiedBy,
     this.syncedAt,
     required this.isSyncPending,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -2659,7 +2538,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       map['synced_at'] = Variable<DateTime>(syncedAt);
     }
     map['is_sync_pending'] = Variable<bool>(isSyncPending);
-    map['sync_status'] = Variable<String>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || firebaseId != null) {
@@ -2704,7 +2582,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ? const Value.absent()
           : Value(syncedAt),
       isSyncPending: Value(isSyncPending),
-      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       firebaseId: firebaseId == null && nullToAbsent
@@ -2739,7 +2616,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       lastModifiedBy: serializer.fromJson<String?>(json['lastModifiedBy']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       isSyncPending: serializer.fromJson<bool>(json['isSyncPending']),
-      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       firebaseId: serializer.fromJson<String?>(json['firebaseId']),
@@ -2765,7 +2641,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       'lastModifiedBy': serializer.toJson<String?>(lastModifiedBy),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'isSyncPending': serializer.toJson<bool>(isSyncPending),
-      'syncStatus': serializer.toJson<String>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'firebaseId': serializer.toJson<String?>(firebaseId),
@@ -2789,7 +2664,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     Value<String?> lastModifiedBy = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
     bool? isSyncPending,
-    String? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<String?> firebaseId = const Value.absent(),
@@ -2812,7 +2686,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
         : this.lastModifiedBy,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     isSyncPending: isSyncPending ?? this.isSyncPending,
-    syncStatus: syncStatus ?? this.syncStatus,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
@@ -2841,9 +2714,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
       isSyncPending: data.isSyncPending.present
           ? data.isSyncPending.value
           : this.isSyncPending,
-      syncStatus: data.syncStatus.present
-          ? data.syncStatus.value
-          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       firebaseId: data.firebaseId.present
@@ -2873,7 +2743,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           ..write('lastModifiedBy: $lastModifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('isSyncPending: $isSyncPending, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -2899,7 +2768,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
     lastModifiedBy,
     syncedAt,
     isSyncPending,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -2924,7 +2792,6 @@ class StockItemRow extends DataClass implements Insertable<StockItemRow> {
           other.lastModifiedBy == this.lastModifiedBy &&
           other.syncedAt == this.syncedAt &&
           other.isSyncPending == this.isSyncPending &&
-          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.firebaseId == this.firebaseId &&
@@ -2947,7 +2814,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
   final Value<String?> lastModifiedBy;
   final Value<DateTime?> syncedAt;
   final Value<bool> isSyncPending;
-  final Value<String> syncStatus;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String?> firebaseId;
@@ -2968,7 +2834,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.lastModifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.isSyncPending = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.firebaseId = const Value.absent(),
@@ -2990,7 +2855,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     this.lastModifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.isSyncPending = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.firebaseId = const Value.absent(),
@@ -3016,7 +2880,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Expression<String>? lastModifiedBy,
     Expression<DateTime>? syncedAt,
     Expression<bool>? isSyncPending,
-    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? firebaseId,
@@ -3038,7 +2901,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       if (lastModifiedBy != null) 'last_modified_by': lastModifiedBy,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (isSyncPending != null) 'is_sync_pending': isSyncPending,
-      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (firebaseId != null) 'firebase_id': firebaseId,
@@ -3062,7 +2924,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     Value<String?>? lastModifiedBy,
     Value<DateTime?>? syncedAt,
     Value<bool>? isSyncPending,
-    Value<String>? syncStatus,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String?>? firebaseId,
@@ -3084,7 +2945,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
       lastModifiedBy: lastModifiedBy ?? this.lastModifiedBy,
       syncedAt: syncedAt ?? this.syncedAt,
       isSyncPending: isSyncPending ?? this.isSyncPending,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -3138,9 +2998,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
     if (isSyncPending.present) {
       map['is_sync_pending'] = Variable<bool>(isSyncPending.value);
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(syncStatus.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -3176,7 +3033,6 @@ class StockItemsCompanion extends UpdateCompanion<StockItemRow> {
           ..write('lastModifiedBy: $lastModifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('isSyncPending: $isSyncPending, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -4026,18 +3882,6 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       ).withConverter<List<int>>($EventsTable.$converterterrainIds);
-  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
-    'syncStatus',
-  );
-  @override
-  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
-    'sync_status',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: const Constant('LOCAL'),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4102,7 +3946,6 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
     endTime,
     color,
     terrainIds,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -4164,12 +4007,6 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
       );
     } else if (isInserting) {
       context.missing(_colorMeta);
-    }
-    if (data.containsKey('sync_status')) {
-      context.handle(
-        _syncStatusMeta,
-        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
-      );
     }
     if (data.containsKey('created_at')) {
       context.handle(
@@ -4244,10 +4081,6 @@ class $EventsTable extends Events with TableInfo<$EventsTable, EventRow> {
           data['${effectivePrefix}terrain_ids'],
         )!,
       ),
-      syncStatus: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}sync_status'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -4288,7 +4121,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
   final DateTime endTime;
   final int color;
   final List<int> terrainIds;
-  final String syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -4302,7 +4134,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     required this.endTime,
     required this.color,
     required this.terrainIds,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -4325,7 +4156,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
         $EventsTable.$converterterrainIds.toSql(terrainIds),
       );
     }
-    map['sync_status'] = Variable<String>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || firebaseId != null) {
@@ -4351,7 +4181,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       endTime: Value(endTime),
       color: Value(color),
       terrainIds: Value(terrainIds),
-      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       firebaseId: firebaseId == null && nullToAbsent
@@ -4379,7 +4208,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       endTime: serializer.fromJson<DateTime>(json['endTime']),
       color: serializer.fromJson<int>(json['color']),
       terrainIds: serializer.fromJson<List<int>>(json['terrainIds']),
-      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       firebaseId: serializer.fromJson<String?>(json['firebaseId']),
@@ -4398,7 +4226,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       'endTime': serializer.toJson<DateTime>(endTime),
       'color': serializer.toJson<int>(color),
       'terrainIds': serializer.toJson<List<int>>(terrainIds),
-      'syncStatus': serializer.toJson<String>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'firebaseId': serializer.toJson<String?>(firebaseId),
@@ -4415,7 +4242,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     DateTime? endTime,
     int? color,
     List<int>? terrainIds,
-    String? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<String?> firebaseId = const Value.absent(),
@@ -4429,7 +4255,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     endTime: endTime ?? this.endTime,
     color: color ?? this.color,
     terrainIds: terrainIds ?? this.terrainIds,
-    syncStatus: syncStatus ?? this.syncStatus,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     firebaseId: firebaseId.present ? firebaseId.value : this.firebaseId,
@@ -4449,9 +4274,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
       terrainIds: data.terrainIds.present
           ? data.terrainIds.value
           : this.terrainIds,
-      syncStatus: data.syncStatus.present
-          ? data.syncStatus.value
-          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       firebaseId: data.firebaseId.present
@@ -4474,7 +4296,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
           ..write('endTime: $endTime, ')
           ..write('color: $color, ')
           ..write('terrainIds: $terrainIds, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -4493,7 +4314,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
     endTime,
     color,
     terrainIds,
-    syncStatus,
     createdAt,
     updatedAt,
     firebaseId,
@@ -4511,7 +4331,6 @@ class EventRow extends DataClass implements Insertable<EventRow> {
           other.endTime == this.endTime &&
           other.color == this.color &&
           other.terrainIds == this.terrainIds &&
-          other.syncStatus == this.syncStatus &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.firebaseId == this.firebaseId &&
@@ -4527,7 +4346,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
   final Value<DateTime> endTime;
   final Value<int> color;
   final Value<List<int>> terrainIds;
-  final Value<String> syncStatus;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String?> firebaseId;
@@ -4541,7 +4359,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     this.endTime = const Value.absent(),
     this.color = const Value.absent(),
     this.terrainIds = const Value.absent(),
-    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.firebaseId = const Value.absent(),
@@ -4556,7 +4373,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     required DateTime endTime,
     required int color,
     required List<int> terrainIds,
-    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.firebaseId = const Value.absent(),
@@ -4577,7 +4393,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     Expression<DateTime>? endTime,
     Expression<int>? color,
     Expression<String>? terrainIds,
-    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? firebaseId,
@@ -4592,7 +4407,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
       if (endTime != null) 'end_time': endTime,
       if (color != null) 'color': color,
       if (terrainIds != null) 'terrain_ids': terrainIds,
-      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (firebaseId != null) 'firebase_id': firebaseId,
@@ -4609,7 +4423,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
     Value<DateTime>? endTime,
     Value<int>? color,
     Value<List<int>>? terrainIds,
-    Value<String>? syncStatus,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<String?>? firebaseId,
@@ -4624,7 +4437,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
       endTime: endTime ?? this.endTime,
       color: color ?? this.color,
       terrainIds: terrainIds ?? this.terrainIds,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -4659,9 +4471,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
         $EventsTable.$converterterrainIds.toSql(terrainIds.value),
       );
     }
-    if (syncStatus.present) {
-      map['sync_status'] = Variable<String>(syncStatus.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4690,7 +4499,6 @@ class EventsCompanion extends UpdateCompanion<EventRow> {
           ..write('endTime: $endTime, ')
           ..write('color: $color, ')
           ..write('terrainIds: $terrainIds, ')
-          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('firebaseId: $firebaseId, ')
@@ -7473,659 +7281,6 @@ class ReservationsCompanion extends UpdateCompanion<Reservation> {
   }
 }
 
-class $SyncQueueTable extends SyncQueue
-    with TableInfo<$SyncQueueTable, SyncQueueItem> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $SyncQueueTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
-  @override
-  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
-    'uuid',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
-  );
-  static const VerificationMeta _collectionMeta = const VerificationMeta(
-    'collection',
-  );
-  @override
-  late final GeneratedColumn<String> collection = GeneratedColumn<String>(
-    'collection',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _actionMeta = const VerificationMeta('action');
-  @override
-  late final GeneratedColumn<String> action = GeneratedColumn<String>(
-    'action',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _documentIdMeta = const VerificationMeta(
-    'documentId',
-  );
-  @override
-  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
-    'document_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _dataMeta = const VerificationMeta('data');
-  @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
-    'data',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _timestampMeta = const VerificationMeta(
-    'timestamp',
-  );
-  @override
-  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
-    'timestamp',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _syncedAtMeta = const VerificationMeta(
-    'syncedAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> syncedAt = GeneratedColumn<DateTime>(
-    'synced_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _retryCountMeta = const VerificationMeta(
-    'retryCount',
-  );
-  @override
-  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
-    'retry_count',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
-    'lastError',
-  );
-  @override
-  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
-    'last_error',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _nextRetryAtMeta = const VerificationMeta(
-    'nextRetryAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> nextRetryAt = GeneratedColumn<DateTime>(
-    'next_retry_at',
-    aliasedName,
-    true,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [
-    id,
-    uuid,
-    collection,
-    action,
-    documentId,
-    data,
-    timestamp,
-    syncedAt,
-    retryCount,
-    lastError,
-    nextRetryAt,
-  ];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'sync_queue';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<SyncQueueItem> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('uuid')) {
-      context.handle(
-        _uuidMeta,
-        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_uuidMeta);
-    }
-    if (data.containsKey('collection')) {
-      context.handle(
-        _collectionMeta,
-        collection.isAcceptableOrUnknown(data['collection']!, _collectionMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_collectionMeta);
-    }
-    if (data.containsKey('action')) {
-      context.handle(
-        _actionMeta,
-        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_actionMeta);
-    }
-    if (data.containsKey('document_id')) {
-      context.handle(
-        _documentIdMeta,
-        documentId.isAcceptableOrUnknown(data['document_id']!, _documentIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_documentIdMeta);
-    }
-    if (data.containsKey('data')) {
-      context.handle(
-        _dataMeta,
-        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_dataMeta);
-    }
-    if (data.containsKey('timestamp')) {
-      context.handle(
-        _timestampMeta,
-        timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_timestampMeta);
-    }
-    if (data.containsKey('synced_at')) {
-      context.handle(
-        _syncedAtMeta,
-        syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
-      );
-    }
-    if (data.containsKey('retry_count')) {
-      context.handle(
-        _retryCountMeta,
-        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
-      );
-    }
-    if (data.containsKey('last_error')) {
-      context.handle(
-        _lastErrorMeta,
-        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
-      );
-    }
-    if (data.containsKey('next_retry_at')) {
-      context.handle(
-        _nextRetryAtMeta,
-        nextRetryAt.isAcceptableOrUnknown(
-          data['next_retry_at']!,
-          _nextRetryAtMeta,
-        ),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  SyncQueueItem map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return SyncQueueItem(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      uuid: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}uuid'],
-      )!,
-      collection: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}collection'],
-      )!,
-      action: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}action'],
-      )!,
-      documentId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}document_id'],
-      )!,
-      data: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}data'],
-      )!,
-      timestamp: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}timestamp'],
-      )!,
-      syncedAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}synced_at'],
-      ),
-      retryCount: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}retry_count'],
-      )!,
-      lastError: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}last_error'],
-      ),
-      nextRetryAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}next_retry_at'],
-      ),
-    );
-  }
-
-  @override
-  $SyncQueueTable createAlias(String alias) {
-    return $SyncQueueTable(attachedDatabase, alias);
-  }
-}
-
-class SyncQueueItem extends DataClass implements Insertable<SyncQueueItem> {
-  final int id;
-  final String uuid;
-  final String collection;
-  final String action;
-  final String documentId;
-  final String data;
-  final DateTime timestamp;
-  final DateTime? syncedAt;
-  final int retryCount;
-  final String? lastError;
-  final DateTime? nextRetryAt;
-  const SyncQueueItem({
-    required this.id,
-    required this.uuid,
-    required this.collection,
-    required this.action,
-    required this.documentId,
-    required this.data,
-    required this.timestamp,
-    this.syncedAt,
-    required this.retryCount,
-    this.lastError,
-    this.nextRetryAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['uuid'] = Variable<String>(uuid);
-    map['collection'] = Variable<String>(collection);
-    map['action'] = Variable<String>(action);
-    map['document_id'] = Variable<String>(documentId);
-    map['data'] = Variable<String>(data);
-    map['timestamp'] = Variable<DateTime>(timestamp);
-    if (!nullToAbsent || syncedAt != null) {
-      map['synced_at'] = Variable<DateTime>(syncedAt);
-    }
-    map['retry_count'] = Variable<int>(retryCount);
-    if (!nullToAbsent || lastError != null) {
-      map['last_error'] = Variable<String>(lastError);
-    }
-    if (!nullToAbsent || nextRetryAt != null) {
-      map['next_retry_at'] = Variable<DateTime>(nextRetryAt);
-    }
-    return map;
-  }
-
-  SyncQueueCompanion toCompanion(bool nullToAbsent) {
-    return SyncQueueCompanion(
-      id: Value(id),
-      uuid: Value(uuid),
-      collection: Value(collection),
-      action: Value(action),
-      documentId: Value(documentId),
-      data: Value(data),
-      timestamp: Value(timestamp),
-      syncedAt: syncedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(syncedAt),
-      retryCount: Value(retryCount),
-      lastError: lastError == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastError),
-      nextRetryAt: nextRetryAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(nextRetryAt),
-    );
-  }
-
-  factory SyncQueueItem.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return SyncQueueItem(
-      id: serializer.fromJson<int>(json['id']),
-      uuid: serializer.fromJson<String>(json['uuid']),
-      collection: serializer.fromJson<String>(json['collection']),
-      action: serializer.fromJson<String>(json['action']),
-      documentId: serializer.fromJson<String>(json['documentId']),
-      data: serializer.fromJson<String>(json['data']),
-      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
-      syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
-      retryCount: serializer.fromJson<int>(json['retryCount']),
-      lastError: serializer.fromJson<String?>(json['lastError']),
-      nextRetryAt: serializer.fromJson<DateTime?>(json['nextRetryAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'uuid': serializer.toJson<String>(uuid),
-      'collection': serializer.toJson<String>(collection),
-      'action': serializer.toJson<String>(action),
-      'documentId': serializer.toJson<String>(documentId),
-      'data': serializer.toJson<String>(data),
-      'timestamp': serializer.toJson<DateTime>(timestamp),
-      'syncedAt': serializer.toJson<DateTime?>(syncedAt),
-      'retryCount': serializer.toJson<int>(retryCount),
-      'lastError': serializer.toJson<String?>(lastError),
-      'nextRetryAt': serializer.toJson<DateTime?>(nextRetryAt),
-    };
-  }
-
-  SyncQueueItem copyWith({
-    int? id,
-    String? uuid,
-    String? collection,
-    String? action,
-    String? documentId,
-    String? data,
-    DateTime? timestamp,
-    Value<DateTime?> syncedAt = const Value.absent(),
-    int? retryCount,
-    Value<String?> lastError = const Value.absent(),
-    Value<DateTime?> nextRetryAt = const Value.absent(),
-  }) => SyncQueueItem(
-    id: id ?? this.id,
-    uuid: uuid ?? this.uuid,
-    collection: collection ?? this.collection,
-    action: action ?? this.action,
-    documentId: documentId ?? this.documentId,
-    data: data ?? this.data,
-    timestamp: timestamp ?? this.timestamp,
-    syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
-    retryCount: retryCount ?? this.retryCount,
-    lastError: lastError.present ? lastError.value : this.lastError,
-    nextRetryAt: nextRetryAt.present ? nextRetryAt.value : this.nextRetryAt,
-  );
-  SyncQueueItem copyWithCompanion(SyncQueueCompanion data) {
-    return SyncQueueItem(
-      id: data.id.present ? data.id.value : this.id,
-      uuid: data.uuid.present ? data.uuid.value : this.uuid,
-      collection: data.collection.present
-          ? data.collection.value
-          : this.collection,
-      action: data.action.present ? data.action.value : this.action,
-      documentId: data.documentId.present
-          ? data.documentId.value
-          : this.documentId,
-      data: data.data.present ? data.data.value : this.data,
-      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
-      syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
-      retryCount: data.retryCount.present
-          ? data.retryCount.value
-          : this.retryCount,
-      lastError: data.lastError.present ? data.lastError.value : this.lastError,
-      nextRetryAt: data.nextRetryAt.present
-          ? data.nextRetryAt.value
-          : this.nextRetryAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SyncQueueItem(')
-          ..write('id: $id, ')
-          ..write('uuid: $uuid, ')
-          ..write('collection: $collection, ')
-          ..write('action: $action, ')
-          ..write('documentId: $documentId, ')
-          ..write('data: $data, ')
-          ..write('timestamp: $timestamp, ')
-          ..write('syncedAt: $syncedAt, ')
-          ..write('retryCount: $retryCount, ')
-          ..write('lastError: $lastError, ')
-          ..write('nextRetryAt: $nextRetryAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(
-    id,
-    uuid,
-    collection,
-    action,
-    documentId,
-    data,
-    timestamp,
-    syncedAt,
-    retryCount,
-    lastError,
-    nextRetryAt,
-  );
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is SyncQueueItem &&
-          other.id == this.id &&
-          other.uuid == this.uuid &&
-          other.collection == this.collection &&
-          other.action == this.action &&
-          other.documentId == this.documentId &&
-          other.data == this.data &&
-          other.timestamp == this.timestamp &&
-          other.syncedAt == this.syncedAt &&
-          other.retryCount == this.retryCount &&
-          other.lastError == this.lastError &&
-          other.nextRetryAt == this.nextRetryAt);
-}
-
-class SyncQueueCompanion extends UpdateCompanion<SyncQueueItem> {
-  final Value<int> id;
-  final Value<String> uuid;
-  final Value<String> collection;
-  final Value<String> action;
-  final Value<String> documentId;
-  final Value<String> data;
-  final Value<DateTime> timestamp;
-  final Value<DateTime?> syncedAt;
-  final Value<int> retryCount;
-  final Value<String?> lastError;
-  final Value<DateTime?> nextRetryAt;
-  const SyncQueueCompanion({
-    this.id = const Value.absent(),
-    this.uuid = const Value.absent(),
-    this.collection = const Value.absent(),
-    this.action = const Value.absent(),
-    this.documentId = const Value.absent(),
-    this.data = const Value.absent(),
-    this.timestamp = const Value.absent(),
-    this.syncedAt = const Value.absent(),
-    this.retryCount = const Value.absent(),
-    this.lastError = const Value.absent(),
-    this.nextRetryAt = const Value.absent(),
-  });
-  SyncQueueCompanion.insert({
-    this.id = const Value.absent(),
-    required String uuid,
-    required String collection,
-    required String action,
-    required String documentId,
-    required String data,
-    required DateTime timestamp,
-    this.syncedAt = const Value.absent(),
-    this.retryCount = const Value.absent(),
-    this.lastError = const Value.absent(),
-    this.nextRetryAt = const Value.absent(),
-  }) : uuid = Value(uuid),
-       collection = Value(collection),
-       action = Value(action),
-       documentId = Value(documentId),
-       data = Value(data),
-       timestamp = Value(timestamp);
-  static Insertable<SyncQueueItem> custom({
-    Expression<int>? id,
-    Expression<String>? uuid,
-    Expression<String>? collection,
-    Expression<String>? action,
-    Expression<String>? documentId,
-    Expression<String>? data,
-    Expression<DateTime>? timestamp,
-    Expression<DateTime>? syncedAt,
-    Expression<int>? retryCount,
-    Expression<String>? lastError,
-    Expression<DateTime>? nextRetryAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (uuid != null) 'uuid': uuid,
-      if (collection != null) 'collection': collection,
-      if (action != null) 'action': action,
-      if (documentId != null) 'document_id': documentId,
-      if (data != null) 'data': data,
-      if (timestamp != null) 'timestamp': timestamp,
-      if (syncedAt != null) 'synced_at': syncedAt,
-      if (retryCount != null) 'retry_count': retryCount,
-      if (lastError != null) 'last_error': lastError,
-      if (nextRetryAt != null) 'next_retry_at': nextRetryAt,
-    });
-  }
-
-  SyncQueueCompanion copyWith({
-    Value<int>? id,
-    Value<String>? uuid,
-    Value<String>? collection,
-    Value<String>? action,
-    Value<String>? documentId,
-    Value<String>? data,
-    Value<DateTime>? timestamp,
-    Value<DateTime?>? syncedAt,
-    Value<int>? retryCount,
-    Value<String?>? lastError,
-    Value<DateTime?>? nextRetryAt,
-  }) {
-    return SyncQueueCompanion(
-      id: id ?? this.id,
-      uuid: uuid ?? this.uuid,
-      collection: collection ?? this.collection,
-      action: action ?? this.action,
-      documentId: documentId ?? this.documentId,
-      data: data ?? this.data,
-      timestamp: timestamp ?? this.timestamp,
-      syncedAt: syncedAt ?? this.syncedAt,
-      retryCount: retryCount ?? this.retryCount,
-      lastError: lastError ?? this.lastError,
-      nextRetryAt: nextRetryAt ?? this.nextRetryAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (uuid.present) {
-      map['uuid'] = Variable<String>(uuid.value);
-    }
-    if (collection.present) {
-      map['collection'] = Variable<String>(collection.value);
-    }
-    if (action.present) {
-      map['action'] = Variable<String>(action.value);
-    }
-    if (documentId.present) {
-      map['document_id'] = Variable<String>(documentId.value);
-    }
-    if (data.present) {
-      map['data'] = Variable<String>(data.value);
-    }
-    if (timestamp.present) {
-      map['timestamp'] = Variable<DateTime>(timestamp.value);
-    }
-    if (syncedAt.present) {
-      map['synced_at'] = Variable<DateTime>(syncedAt.value);
-    }
-    if (retryCount.present) {
-      map['retry_count'] = Variable<int>(retryCount.value);
-    }
-    if (lastError.present) {
-      map['last_error'] = Variable<String>(lastError.value);
-    }
-    if (nextRetryAt.present) {
-      map['next_retry_at'] = Variable<DateTime>(nextRetryAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SyncQueueCompanion(')
-          ..write('id: $id, ')
-          ..write('uuid: $uuid, ')
-          ..write('collection: $collection, ')
-          ..write('action: $action, ')
-          ..write('documentId: $documentId, ')
-          ..write('data: $data, ')
-          ..write('timestamp: $timestamp, ')
-          ..write('syncedAt: $syncedAt, ')
-          ..write('retryCount: $retryCount, ')
-          ..write('lastError: $lastError, ')
-          ..write('nextRetryAt: $nextRetryAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -8140,7 +7295,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LoginAttemptsTable loginAttempts = $LoginAttemptsTable(this);
   late final $OtpRecordsTable otpRecords = $OtpRecordsTable(this);
   late final $ReservationsTable reservations = $ReservationsTable(this);
-  late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8156,7 +7310,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     loginAttempts,
     otpRecords,
     reservations,
-    syncQueue,
   ];
 }
 
@@ -8171,7 +7324,6 @@ typedef $$TerrainsTableCreateCompanionBuilder =
       Value<int?> capacity,
       Value<double?> pricePerHour,
       Value<bool> available,
-      Value<String> syncStatus,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<String?> firebaseId,
@@ -8191,7 +7343,6 @@ typedef $$TerrainsTableUpdateCompanionBuilder =
       Value<int?> capacity,
       Value<double?> pricePerHour,
       Value<bool> available,
-      Value<String> syncStatus,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> firebaseId,
@@ -8275,11 +7426,6 @@ class $$TerrainsTableFilterComposer
 
   ColumnFilters<bool> get available => $composableBuilder(
     column: $table.available,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8398,11 +7544,6 @@ class $$TerrainsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -8476,11 +7617,6 @@ class $$TerrainsTableAnnotationComposer
 
   GeneratedColumn<bool> get available =>
       $composableBuilder(column: $table.available, builder: (column) => column);
-
-  GeneratedColumn<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -8570,7 +7706,6 @@ class $$TerrainsTableTableManager
                 Value<int?> capacity = const Value.absent(),
                 Value<double?> pricePerHour = const Value.absent(),
                 Value<bool> available = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> firebaseId = const Value.absent(),
@@ -8588,7 +7723,6 @@ class $$TerrainsTableTableManager
                 capacity: capacity,
                 pricePerHour: pricePerHour,
                 available: available,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -8608,7 +7742,6 @@ class $$TerrainsTableTableManager
                 Value<int?> capacity = const Value.absent(),
                 Value<double?> pricePerHour = const Value.absent(),
                 Value<bool> available = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<String?> firebaseId = const Value.absent(),
@@ -8626,7 +7759,6 @@ class $$TerrainsTableTableManager
                 capacity: capacity,
                 pricePerHour: pricePerHour,
                 available: available,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -8705,7 +7837,6 @@ typedef $$MaintenancesTableCreateCompanionBuilder =
       Value<String?> status,
       Value<DateTime?> scheduledDate,
       Value<DateTime?> completedDate,
-      Value<String> syncStatus,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<String?> firebaseId,
@@ -8728,7 +7859,6 @@ typedef $$MaintenancesTableUpdateCompanionBuilder =
       Value<String?> status,
       Value<DateTime?> scheduledDate,
       Value<DateTime?> completedDate,
-      Value<String> syncStatus,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> firebaseId,
@@ -8808,11 +7938,6 @@ class $$MaintenancesTableFilterComposer
 
   ColumnFilters<DateTime> get completedDate => $composableBuilder(
     column: $table.completedDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8921,11 +8046,6 @@ class $$MaintenancesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9017,11 +8137,6 @@ class $$MaintenancesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -9089,7 +8204,6 @@ class $$MaintenancesTableTableManager
                 Value<String?> status = const Value.absent(),
                 Value<DateTime?> scheduledDate = const Value.absent(),
                 Value<DateTime?> completedDate = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> firebaseId = const Value.absent(),
@@ -9110,7 +8224,6 @@ class $$MaintenancesTableTableManager
                 status: status,
                 scheduledDate: scheduledDate,
                 completedDate: completedDate,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -9133,7 +8246,6 @@ class $$MaintenancesTableTableManager
                 Value<String?> status = const Value.absent(),
                 Value<DateTime?> scheduledDate = const Value.absent(),
                 Value<DateTime?> completedDate = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<String?> firebaseId = const Value.absent(),
@@ -9154,7 +8266,6 @@ class $$MaintenancesTableTableManager
                 status: status,
                 scheduledDate: scheduledDate,
                 completedDate: completedDate,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -9203,7 +8314,6 @@ typedef $$StockItemsTableCreateCompanionBuilder =
       Value<String?> lastModifiedBy,
       Value<DateTime?> syncedAt,
       Value<bool> isSyncPending,
-      Value<String> syncStatus,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<String?> firebaseId,
@@ -9226,7 +8336,6 @@ typedef $$StockItemsTableUpdateCompanionBuilder =
       Value<String?> lastModifiedBy,
       Value<DateTime?> syncedAt,
       Value<bool> isSyncPending,
-      Value<String> syncStatus,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> firebaseId,
@@ -9336,11 +8445,6 @@ class $$StockItemsTableFilterComposer
 
   ColumnFilters<bool> get isSyncPending => $composableBuilder(
     column: $table.isSyncPending,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9474,11 +8578,6 @@ class $$StockItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -9559,11 +8658,6 @@ class $$StockItemsTableAnnotationComposer
 
   GeneratedColumn<bool> get isSyncPending => $composableBuilder(
     column: $table.isSyncPending,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
     builder: (column) => column,
   );
 
@@ -9654,7 +8748,6 @@ class $$StockItemsTableTableManager
                 Value<String?> lastModifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<bool> isSyncPending = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> firebaseId = const Value.absent(),
@@ -9675,7 +8768,6 @@ class $$StockItemsTableTableManager
                 lastModifiedBy: lastModifiedBy,
                 syncedAt: syncedAt,
                 isSyncPending: isSyncPending,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -9698,7 +8790,6 @@ class $$StockItemsTableTableManager
                 Value<String?> lastModifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<bool> isSyncPending = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<String?> firebaseId = const Value.absent(),
@@ -9719,7 +8810,6 @@ class $$StockItemsTableTableManager
                 lastModifiedBy: lastModifiedBy,
                 syncedAt: syncedAt,
                 isSyncPending: isSyncPending,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -10344,7 +9434,6 @@ typedef $$EventsTableCreateCompanionBuilder =
       required DateTime endTime,
       required int color,
       required List<int> terrainIds,
-      Value<String> syncStatus,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<String?> firebaseId,
@@ -10360,7 +9449,6 @@ typedef $$EventsTableUpdateCompanionBuilder =
       Value<DateTime> endTime,
       Value<int> color,
       Value<List<int>> terrainIds,
-      Value<String> syncStatus,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String?> firebaseId,
@@ -10412,11 +9500,6 @@ class $$EventsTableFilterComposer
         column: $table.terrainIds,
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
-
-  ColumnFilters<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnFilters(column),
-  );
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
@@ -10488,11 +9571,6 @@ class $$EventsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -10554,11 +9632,6 @@ class $$EventsTableAnnotationComposer
         builder: (column) => column,
       );
 
-  GeneratedColumn<String> get syncStatus => $composableBuilder(
-    column: $table.syncStatus,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -10614,7 +9687,6 @@ class $$EventsTableTableManager
                 Value<DateTime> endTime = const Value.absent(),
                 Value<int> color = const Value.absent(),
                 Value<List<int>> terrainIds = const Value.absent(),
-                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<String?> firebaseId = const Value.absent(),
@@ -10628,7 +9700,6 @@ class $$EventsTableTableManager
                 endTime: endTime,
                 color: color,
                 terrainIds: terrainIds,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -10644,7 +9715,6 @@ class $$EventsTableTableManager
                 required DateTime endTime,
                 required int color,
                 required List<int> terrainIds,
-                Value<String> syncStatus = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<String?> firebaseId = const Value.absent(),
@@ -10658,7 +9728,6 @@ class $$EventsTableTableManager
                 endTime: endTime,
                 color: color,
                 terrainIds: terrainIds,
-                syncStatus: syncStatus,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 firebaseId: firebaseId,
@@ -12462,322 +11531,6 @@ typedef $$ReservationsTableProcessedTableManager =
       Reservation,
       PrefetchHooks Function({bool userId, bool terrainId})
     >;
-typedef $$SyncQueueTableCreateCompanionBuilder =
-    SyncQueueCompanion Function({
-      Value<int> id,
-      required String uuid,
-      required String collection,
-      required String action,
-      required String documentId,
-      required String data,
-      required DateTime timestamp,
-      Value<DateTime?> syncedAt,
-      Value<int> retryCount,
-      Value<String?> lastError,
-      Value<DateTime?> nextRetryAt,
-    });
-typedef $$SyncQueueTableUpdateCompanionBuilder =
-    SyncQueueCompanion Function({
-      Value<int> id,
-      Value<String> uuid,
-      Value<String> collection,
-      Value<String> action,
-      Value<String> documentId,
-      Value<String> data,
-      Value<DateTime> timestamp,
-      Value<DateTime?> syncedAt,
-      Value<int> retryCount,
-      Value<String?> lastError,
-      Value<DateTime?> nextRetryAt,
-    });
-
-class $$SyncQueueTableFilterComposer
-    extends Composer<_$AppDatabase, $SyncQueueTable> {
-  $$SyncQueueTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get uuid => $composableBuilder(
-    column: $table.uuid,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get collection => $composableBuilder(
-    column: $table.collection,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get action => $composableBuilder(
-    column: $table.action,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get documentId => $composableBuilder(
-    column: $table.documentId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get data => $composableBuilder(
-    column: $table.data,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get syncedAt => $composableBuilder(
-    column: $table.syncedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get retryCount => $composableBuilder(
-    column: $table.retryCount,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get lastError => $composableBuilder(
-    column: $table.lastError,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get nextRetryAt => $composableBuilder(
-    column: $table.nextRetryAt,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$SyncQueueTableOrderingComposer
-    extends Composer<_$AppDatabase, $SyncQueueTable> {
-  $$SyncQueueTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get uuid => $composableBuilder(
-    column: $table.uuid,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get collection => $composableBuilder(
-    column: $table.collection,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get action => $composableBuilder(
-    column: $table.action,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get documentId => $composableBuilder(
-    column: $table.documentId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get data => $composableBuilder(
-    column: $table.data,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
-    column: $table.timestamp,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get syncedAt => $composableBuilder(
-    column: $table.syncedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get retryCount => $composableBuilder(
-    column: $table.retryCount,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get lastError => $composableBuilder(
-    column: $table.lastError,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get nextRetryAt => $composableBuilder(
-    column: $table.nextRetryAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$SyncQueueTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SyncQueueTable> {
-  $$SyncQueueTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get uuid =>
-      $composableBuilder(column: $table.uuid, builder: (column) => column);
-
-  GeneratedColumn<String> get collection => $composableBuilder(
-    column: $table.collection,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get action =>
-      $composableBuilder(column: $table.action, builder: (column) => column);
-
-  GeneratedColumn<String> get documentId => $composableBuilder(
-    column: $table.documentId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get data =>
-      $composableBuilder(column: $table.data, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get timestamp =>
-      $composableBuilder(column: $table.timestamp, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get syncedAt =>
-      $composableBuilder(column: $table.syncedAt, builder: (column) => column);
-
-  GeneratedColumn<int> get retryCount => $composableBuilder(
-    column: $table.retryCount,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get lastError =>
-      $composableBuilder(column: $table.lastError, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get nextRetryAt => $composableBuilder(
-    column: $table.nextRetryAt,
-    builder: (column) => column,
-  );
-}
-
-class $$SyncQueueTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $SyncQueueTable,
-          SyncQueueItem,
-          $$SyncQueueTableFilterComposer,
-          $$SyncQueueTableOrderingComposer,
-          $$SyncQueueTableAnnotationComposer,
-          $$SyncQueueTableCreateCompanionBuilder,
-          $$SyncQueueTableUpdateCompanionBuilder,
-          (
-            SyncQueueItem,
-            BaseReferences<_$AppDatabase, $SyncQueueTable, SyncQueueItem>,
-          ),
-          SyncQueueItem,
-          PrefetchHooks Function()
-        > {
-  $$SyncQueueTableTableManager(_$AppDatabase db, $SyncQueueTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$SyncQueueTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$SyncQueueTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$SyncQueueTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> uuid = const Value.absent(),
-                Value<String> collection = const Value.absent(),
-                Value<String> action = const Value.absent(),
-                Value<String> documentId = const Value.absent(),
-                Value<String> data = const Value.absent(),
-                Value<DateTime> timestamp = const Value.absent(),
-                Value<DateTime?> syncedAt = const Value.absent(),
-                Value<int> retryCount = const Value.absent(),
-                Value<String?> lastError = const Value.absent(),
-                Value<DateTime?> nextRetryAt = const Value.absent(),
-              }) => SyncQueueCompanion(
-                id: id,
-                uuid: uuid,
-                collection: collection,
-                action: action,
-                documentId: documentId,
-                data: data,
-                timestamp: timestamp,
-                syncedAt: syncedAt,
-                retryCount: retryCount,
-                lastError: lastError,
-                nextRetryAt: nextRetryAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String uuid,
-                required String collection,
-                required String action,
-                required String documentId,
-                required String data,
-                required DateTime timestamp,
-                Value<DateTime?> syncedAt = const Value.absent(),
-                Value<int> retryCount = const Value.absent(),
-                Value<String?> lastError = const Value.absent(),
-                Value<DateTime?> nextRetryAt = const Value.absent(),
-              }) => SyncQueueCompanion.insert(
-                id: id,
-                uuid: uuid,
-                collection: collection,
-                action: action,
-                documentId: documentId,
-                data: data,
-                timestamp: timestamp,
-                syncedAt: syncedAt,
-                retryCount: retryCount,
-                lastError: lastError,
-                nextRetryAt: nextRetryAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$SyncQueueTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $SyncQueueTable,
-      SyncQueueItem,
-      $$SyncQueueTableFilterComposer,
-      $$SyncQueueTableOrderingComposer,
-      $$SyncQueueTableAnnotationComposer,
-      $$SyncQueueTableCreateCompanionBuilder,
-      $$SyncQueueTableUpdateCompanionBuilder,
-      (
-        SyncQueueItem,
-        BaseReferences<_$AppDatabase, $SyncQueueTable, SyncQueueItem>,
-      ),
-      SyncQueueItem,
-      PrefetchHooks Function()
-    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12802,6 +11555,4 @@ class $AppDatabaseManager {
       $$OtpRecordsTableTableManager(_db, _db.otpRecords);
   $$ReservationsTableTableManager get reservations =>
       $$ReservationsTableTableManager(_db, _db.reservations);
-  $$SyncQueueTableTableManager get syncQueue =>
-      $$SyncQueueTableTableManager(_db, _db.syncQueue);
 }

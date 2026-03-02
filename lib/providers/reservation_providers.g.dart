@@ -171,7 +171,7 @@ final allReservationsStreamProvider =
 // ignore: unused_element
 typedef AllReservationsStreamRef = StreamProviderRef<List<Reservation>>;
 String _$refreshReservationsHash() =>
-    r'377b91e3e792ff43d92502922da1df98261dee13';
+    r'3fc34f29cbb222db7ef9c5c79d43dd4492f2e1ee';
 
 /// See also [refreshReservations].
 @ProviderFor(refreshReservations)

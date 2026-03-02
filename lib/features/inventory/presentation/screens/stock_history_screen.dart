@@ -66,17 +66,17 @@ class StockHistoryScreen extends ConsumerWidget {
   void _showSyncDetails(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      builder: (context) => const Padding(
+        padding: EdgeInsets.all(16.0),
+       child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             Text(
               'État de synchronisation',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            SyncStatusIndicator(mode: SyncIndicatorMode.detailed),
+            ConnectionStatusIndicator(mode: SyncIndicatorMode.detailed),
             SizedBox(height: 16),
           ],
         ),

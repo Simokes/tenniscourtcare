@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class TerrainModel {
   final int id;
@@ -14,7 +13,6 @@ class TerrainModel {
   final String? photoUrl;
 
   // Sync fields
-  final String syncStatus;
   final String createdAt; // ISO8601
   final String updatedAt; // ISO8601
   final String? firebaseId;
@@ -29,7 +27,6 @@ class TerrainModel {
     this.latitude,
     this.longitude,
     this.photoUrl,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -57,7 +54,6 @@ class TerrainModel {
       latitude: json['latitude'] as double?,
       longitude: json['longitude'] as double?,
       photoUrl: json['photoUrl'] as String?,
-      syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
       createdAt:
           json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt:
@@ -78,7 +74,6 @@ class TerrainModel {
       'latitude': latitude,
       'longitude': longitude,
       'photoUrl': photoUrl,
-      'syncStatus': syncStatus,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'firebaseId': firebaseId,
@@ -97,7 +92,6 @@ class TerrainModel {
       latitude: latitude,
       longitude: longitude,
       photoUrl: photoUrl,
-      syncStatus: SyncStatus.fromString(syncStatus),
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       firebaseId: firebaseId,
@@ -116,7 +110,6 @@ class TerrainModel {
       latitude: terrain.latitude,
       longitude: terrain.longitude,
       photoUrl: terrain.photoUrl,
-      syncStatus: terrain.syncStatus.name,
       createdAt: terrain.createdAt.toIso8601String(),
       updatedAt: terrain.updatedAt.toIso8601String(),
       firebaseId: terrain.firebaseId,
