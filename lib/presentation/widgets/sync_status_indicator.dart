@@ -16,8 +16,8 @@ class ConnectionStatusIndicator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isOnline = ref.watch(isOnlineStatusProvider).value ?? false;
 
-    IconData iconData = isOnline ? Icons.cloud_done : Icons.cloud_off;
-    Color color = isOnline ? Colors.green : Colors.grey;
+    final IconData iconData = isOnline ? Icons.cloud_done : Icons.cloud_off;
+    final Color color = isOnline ? Colors.green : Colors.grey;
 
     if (mode == SyncIndicatorMode.minimal) {
       return Icon(iconData, color: color, size: 20);

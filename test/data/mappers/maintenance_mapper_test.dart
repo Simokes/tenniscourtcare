@@ -66,16 +66,7 @@ void main() {
         expect(result.sacsSiliceUtilises, maintenance.sacsSiliceUtilises);
       });
 
-      test('preserves sync status', () {
-        // Arrange
-        final maintenance = TestData.testMaintenance;
-
-        // Act
-        final model = MaintenanceMapper.toModel(maintenance);
-        final result = MaintenanceMapper.toDomain(model);
-
-        // Assert
-      });
+     
 
       test('preserves user audit info', () {
         // Arrange

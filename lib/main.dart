@@ -10,7 +10,6 @@ import 'presentation/providers/app_settings_provider.dart';
 import 'presentation/providers/database_provider.dart'; // ✅ IMPORT
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 
 Future<void> main() async {

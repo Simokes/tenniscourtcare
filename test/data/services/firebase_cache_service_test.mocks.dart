@@ -880,6 +880,14 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
           as _i5.Future<_i13.Maintenance?>);
 
   @override
+  _i5.Stream<List<_i14.Terrain>> watchAllTerrains() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchAllTerrains, []),
+            returnValue: _i5.Stream<List<_i14.Terrain>>.empty(),
+          )
+          as _i5.Stream<List<_i14.Terrain>>);
+
+  @override
   _i5.Future<List<_i14.Terrain>> getAllTerrains() =>
       (super.noSuchMethod(
             Invocation.method(#getAllTerrains, []),
@@ -926,6 +934,14 @@ class MockAppDatabase extends _i1.Mock implements _i3.AppDatabase {
             returnValue: _i5.Future<int>.value(0),
           )
           as _i5.Future<int>);
+
+  @override
+  _i5.Stream<List<_i13.Maintenance>> watchAllMaintenances() =>
+      (super.noSuchMethod(
+            Invocation.method(#watchAllMaintenances, []),
+            returnValue: _i5.Stream<List<_i13.Maintenance>>.empty(),
+          )
+          as _i5.Stream<List<_i13.Maintenance>>);
 
   @override
   _i5.Future<List<_i13.Maintenance>> getMaintenancesForTerrain(
