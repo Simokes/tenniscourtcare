@@ -75,7 +75,6 @@ void main() {
         final result = MaintenanceMapper.toDomain(model);
 
         // Assert
-        expect(result.syncStatus, maintenance.syncStatus);
       });
 
       test('preserves user audit info', () {

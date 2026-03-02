@@ -1,7 +1,5 @@
 import '../database/app_database.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/entities/sync_status.dart';
-
 extension UserMapper on UserRow {
   UserEntity toDomain() {
     return UserEntity(
@@ -18,9 +16,6 @@ extension UserMapper on UserRow {
       firebaseId: firestoreUid ?? remoteId,
       createdBy: null,
       modifiedBy: null,
-      syncStatus: (firestoreUid != null || remoteId != null)
-          ? SyncStatus.synced
-          : SyncStatus.local,
     );
   }
 }

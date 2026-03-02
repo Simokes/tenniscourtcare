@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class StockItemModel {
   final int? id;
@@ -16,7 +15,6 @@ class StockItemModel {
   final int sortOrder;
 
   // Sync fields
-  final String syncStatus;
   final String createdAt;
   final String updatedAt;
   final String? firebaseId;
@@ -33,7 +31,6 @@ class StockItemModel {
     this.minThreshold,
     this.category,
     required this.sortOrder,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -61,7 +58,6 @@ class StockItemModel {
       minThreshold: json['minThreshold'] as int?,
       category: json['category'] as String?,
       sortOrder: json['sortOrder'] as int? ?? 0,
-      syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
       createdAt:
           json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt:
@@ -84,7 +80,6 @@ class StockItemModel {
       'minThreshold': minThreshold,
       'category': category,
       'sortOrder': sortOrder,
-      'syncStatus': syncStatus,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'firebaseId': firebaseId,
@@ -105,7 +100,6 @@ class StockItemModel {
       minThreshold: minThreshold,
       category: category,
       sortOrder: sortOrder,
-      syncStatus: SyncStatus.fromString(syncStatus),
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       firebaseId: firebaseId,
@@ -126,7 +120,6 @@ class StockItemModel {
       minThreshold: stockItem.minThreshold,
       category: stockItem.category,
       sortOrder: stockItem.sortOrder,
-      syncStatus: stockItem.syncStatus.name,
       createdAt: stockItem.createdAt.toIso8601String(),
       updatedAt: stockItem.updatedAt.toIso8601String(),
       firebaseId: stockItem.firebaseId,

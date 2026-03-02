@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
 
 class MaintenanceModel {
@@ -23,7 +22,6 @@ class MaintenanceModel {
   final bool? terrainImpraticable;
 
   // Sync fields
-  final String syncStatus;
   final String createdAt;
   final String updatedAt;
   final String? firebaseId;
@@ -43,7 +41,6 @@ class MaintenanceModel {
     this.weather,
     this.terrainGele,
     this.terrainImpraticable,
-    required this.syncStatus,
     required this.createdAt,
     required this.updatedAt,
     this.firebaseId,
@@ -74,7 +71,6 @@ class MaintenanceModel {
       weather: json['weather'] as Map<String, dynamic>?,
       terrainGele: json['terrainGele'] as bool?,
       terrainImpraticable: json['terrainImpraticable'] as bool?,
-      syncStatus: json['syncStatus'] as String? ?? 'LOCAL',
       createdAt:
           json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt:
@@ -100,7 +96,6 @@ class MaintenanceModel {
       'weather': weather,
       'terrainGele': terrainGele,
       'terrainImpraticable': terrainImpraticable,
-      'syncStatus': syncStatus,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'firebaseId': firebaseId,
@@ -124,7 +119,6 @@ class MaintenanceModel {
       weather: weather != null ? WeatherSnapshot.fromJson(weather!) : null,
       terrainGele: terrainGele,
       terrainImpraticable: terrainImpraticable,
-      syncStatus: SyncStatus.fromString(syncStatus),
       createdAt: DateTime.parse(createdAt),
       updatedAt: DateTime.parse(updatedAt),
       firebaseId: firebaseId,
@@ -150,7 +144,6 @@ class MaintenanceModel {
       weather: maintenance.weather?.toJson(),
       terrainGele: maintenance.terrainGele,
       terrainImpraticable: maintenance.terrainImpraticable,
-      syncStatus: maintenance.syncStatus.name,
       createdAt: maintenance.createdAt.toIso8601String(),
       updatedAt: maintenance.updatedAt.toIso8601String(),
       firebaseId: maintenance.firebaseId,

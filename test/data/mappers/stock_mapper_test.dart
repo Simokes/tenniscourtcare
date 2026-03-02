@@ -76,7 +76,6 @@ void main() {
         final result = StockItemMapper.toDomain(model);
 
         // Assert
-        expect(result.syncStatus, stockItem.syncStatus);
       });
 
       test('handles low stock items', () {

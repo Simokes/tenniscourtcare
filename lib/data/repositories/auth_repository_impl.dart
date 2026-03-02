@@ -7,7 +7,6 @@ import 'dart:math';
 
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/entities/sync_status.dart'; // Added
 import '../../domain/enums/role.dart';
 import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
@@ -172,7 +171,6 @@ class AuthRepositoryImpl implements AuthRepository {
       role: Role.admin,
       createdAt: now,
       updatedAt: now,
-      syncStatus: SyncStatus.local,
     );
   }
 

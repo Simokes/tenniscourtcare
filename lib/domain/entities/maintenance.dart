@@ -1,6 +1,5 @@
 // lib/domain/entities/maintenance.dart
 import 'weather_snapshot.dart';
-import 'sync_status.dart';
 
 class Maintenance {
   final int? id;
@@ -24,7 +23,6 @@ class Maintenance {
   final bool? terrainImpraticable; // selon heuristique pluie/humidité/terrain
 
   // Sync fields
-  final SyncStatus syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -44,7 +42,6 @@ class Maintenance {
     this.weather,
     this.terrainGele,
     this.terrainImpraticable,
-    this.syncStatus = SyncStatus.local,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -66,7 +63,6 @@ class Maintenance {
     WeatherSnapshot? weather,
     bool? terrainGele,
     bool? terrainImpraticable,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -87,7 +83,6 @@ class Maintenance {
       weather: weather ?? this.weather,
       terrainGele: terrainGele ?? this.terrainGele,
       terrainImpraticable: terrainImpraticable ?? this.terrainImpraticable,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -113,7 +108,6 @@ class Maintenance {
           weather == other.weather &&
           terrainGele == other.terrainGele &&
           terrainImpraticable == other.terrainImpraticable &&
-          syncStatus == other.syncStatus &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -134,7 +128,6 @@ class Maintenance {
       weather.hashCode ^
       terrainGele.hashCode ^
       terrainImpraticable.hashCode ^
-      syncStatus.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^
@@ -147,5 +140,5 @@ class Maintenance {
       'manto: $sacsMantoUtilises, sotto: $sacsSottomantoUtilises, silice: $sacsSiliceUtilises, '
       'imagePath: $imagePath, '
       'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable, '
-      'syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'createdAt: $createdAt, updatedAt: $updatedAt)';
 }

@@ -8,14 +8,10 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
 import 'presentation/providers/database_provider.dart'; // ✅ IMPORT
-import 'presentation/providers/sync_status_provider.dart'; // ✅ IMPORT
-import 'providers/queue_providers.dart';
-import 'presentation/widgets/queue_status_widget.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/data/services/firebase_sync_service.dart';
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(
@@ -30,20 +26,14 @@ Future<void> main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      // ✅ Initialize Database & Sync Service
+      // ✅ Initialize Database
       final db = AppDatabase();
-      final firestore = FirebaseFirestore.instance;
-      final syncService = FirebaseSyncService(firestore, db);
-
-      // ❌ Sync logic moved to firebaseSyncProvider to gate on authentication
-      // See lib/presentation/providers/firebase_sync_provider.dart
 
       runApp(
         ProviderScope(
           overrides: [
             // ✅ Override providers with actual instances
             databaseProvider.overrideWithValue(db),
-            firebaseSyncServiceProvider.overrideWithValue(syncService),
           ],
           child: const CourtCareApp(),
         ),
@@ -69,8 +59,6 @@ class CourtCareApp extends ConsumerWidget {
     final settingsAsync = ref.watch(appSettingsProvider);
     final themeMode = settingsAsync.valueOrNull?.themeMode ?? ThemeMode.system;
 
-    ref.watch(scheduleRetryCheckProvider);
-
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Court Care',
@@ -79,12 +67,7 @@ class CourtCareApp extends ConsumerWidget {
       themeMode: themeMode,
       routerConfig: router,
       builder: (context, child) {
-        return Column(
-          children: [
-            const QueueStatusBanner(),
-            Expanded(child: child ?? const SizedBox()),
-          ],
-        );
+        return child ?? const SizedBox();
       },
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

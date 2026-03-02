@@ -94,7 +94,6 @@ void main() {
 
         // Assert
         expect(result.firebaseId, terrain.firebaseId);
-        expect(result.syncStatus, terrain.syncStatus);
       });
 
       test('handles optional GPS coordinates', () {

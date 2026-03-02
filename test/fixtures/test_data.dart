@@ -3,7 +3,6 @@ import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 class TestData {
   // ============= TERRAIN TEST DATA =============
@@ -15,7 +14,6 @@ class TestData {
     latitude: 48.8566,
     longitude: 2.3522,
     photoUrl: null,
-    syncStatus: SyncStatus.synced,
     createdAt: null,
     updatedAt: null,
     firebaseId: 'terrain_001',
@@ -37,7 +35,6 @@ class TestData {
     sortOrder: 0,
     createdAt: null,
     updatedAt: null,
-    syncStatus: SyncStatus.synced,
     firebaseId: 'stock_001',
     createdBy: 'admin',
     modifiedBy: 'admin',
@@ -59,7 +56,6 @@ class TestData {
     weather: null,
     terrainGele: false,
     terrainImpraticable: false,
-    syncStatus: SyncStatus.synced,
     createdAt: DateTime(2024, 1, 1),
     updatedAt: DateTime(2024, 1, 1),
     firebaseId: 'maint_001',
@@ -78,7 +74,6 @@ class TestData {
     endTime: DateTime(2025, 12, 20, 12, 0),
     color: const Color(0xFF3B82F6).toARGB32(),
     terrainIds: const [1],
-    syncStatus: SyncStatus.synced,
     createdAt: DateTime(2024, 1, 1),
     updatedAt: DateTime(2024, 1, 1),
     firebaseId: 'event_001',

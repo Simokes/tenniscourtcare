@@ -157,7 +157,7 @@ void main() {
             email: 'test@test.com',
             name: 'Test',
             role: Role.agent,
-            syncStatus: SyncStatus.local
+
           )),
         ],
       );
@@ -248,7 +248,7 @@ void main() {
             email: 'user@test.com',
             name: 'User',
             role: Role.agent, // Not admin
-            syncStatus: SyncStatus.local
+
           )),
         ],
       );
@@ -284,7 +284,7 @@ void main() {
             email: 'admin@test.com',
             name: 'Admin',
             role: Role.admin, // Is admin
-            syncStatus: SyncStatus.local
+
           )),
         ],
       );
@@ -323,7 +323,7 @@ void main() {
           setupStatusProvider.overrideWith((ref) => SetupStatus.authenticated),
           setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
           // Override currentUserProvider just in case UI needs it
-          currentUserProvider.overrideWith((ref) => UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent, syncStatus: SyncStatus.local)),
+          currentUserProvider.overrideWith((ref) => UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent, )),
         ],
       );
 
@@ -356,7 +356,7 @@ void main() {
         overrides: [
           setupStatusProvider.overrideWith((ref) => SetupStatus.authenticated),
           setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-          currentUserProvider.overrideWith((ref) => UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent, syncStatus: SyncStatus.local)),
+          currentUserProvider.overrideWith((ref) => UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent, )),
         ],
       );
 

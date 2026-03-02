@@ -6,7 +6,6 @@ import 'package:tenniscourtcare/core/security/auth_exceptions.dart';
 import 'package:tenniscourtcare/core/security/security_exceptions.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/domain/entities/user_entity.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 
@@ -121,7 +120,6 @@ class FirebaseAuthRepository implements AuthRepository {
         createdAt: now,
         updatedAt: now,
         firebaseId: fUser.uid,
-        syncStatus: SyncStatus.synced,
       );
     }
   }
@@ -361,7 +359,6 @@ class FirebaseAuthRepository implements AuthRepository {
         createdAt: now,
         updatedAt: now,
         firebaseId: uid,
-        syncStatus: SyncStatus.synced,
       );
     } catch (e) {
       throw _mapFirebaseException(e);

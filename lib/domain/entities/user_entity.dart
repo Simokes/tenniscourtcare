@@ -1,7 +1,6 @@
 // lib/domain/entities/user_entity.dart
 
 import '../enums/role.dart';
-import 'sync_status.dart';
 
 class UserEntity {
   final int id;
@@ -12,7 +11,6 @@ class UserEntity {
   final String? avatarUrl;
 
   // Sync fields
-  final SyncStatus syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? firebaseId;
@@ -26,7 +24,6 @@ class UserEntity {
     required this.role,
     this.lastLoginAt,
     this.avatarUrl,
-    this.syncStatus = SyncStatus.local,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -43,7 +40,6 @@ class UserEntity {
     Role? role,
     DateTime? lastLoginAt,
     String? avatarUrl,
-    SyncStatus? syncStatus,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -57,7 +53,6 @@ class UserEntity {
       role: role ?? this.role,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,
-      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -68,7 +63,7 @@ class UserEntity {
 
   @override
   String toString() =>
-      'UserEntity(id: $id, email: $email, role: ${role.name}, syncStatus: $syncStatus, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'UserEntity(id: $id, email: $email, role: ${role.name}, createdAt: $createdAt, updatedAt: $updatedAt)';
 
   @override
   bool operator ==(Object other) =>
@@ -81,7 +76,6 @@ class UserEntity {
           role == other.role &&
           lastLoginAt == other.lastLoginAt &&
           avatarUrl == other.avatarUrl &&
-          syncStatus == other.syncStatus &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -96,7 +90,6 @@ class UserEntity {
       role.hashCode ^
       lastLoginAt.hashCode ^
       avatarUrl.hashCode ^
-      syncStatus.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^

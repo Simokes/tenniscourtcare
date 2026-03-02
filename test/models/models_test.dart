@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tenniscourtcare/data/models/terrain_model.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 
 void main() {
   group('TerrainModel', () {
@@ -14,7 +13,6 @@ void main() {
         latitude: 10.0,
         longitude: 20.0,
         photoUrl: 'http://example.com/photo.jpg',
-        syncStatus: SyncStatus.synced,
         createdAt: DateTime(2023, 1, 1),
         updatedAt: DateTime(2023, 1, 2),
         firebaseId: 'fb123',
@@ -44,7 +42,6 @@ void main() {
         'latitude': 10.0,
         'longitude': 20.0,
         'photoUrl': 'http://example.com/photo.jpg',
-        'syncStatus': 'SYNCED',
         'createdAt': '2023-01-01T00:00:00.000',
         'updatedAt': '2023-01-02T00:00:00.000',
         'firebaseId': 'fb123',
@@ -52,14 +49,9 @@ void main() {
         'modifiedBy': 'admin',
       };
 
-      // Note: SyncStatus.synced.name is 'synced' (lowercase) usually, but let's check SyncStatus definition.
-      // SyncStatus enum: local, syncing, synced, error. So name is lowercase.
-      // But in my test JSON I put 'SYNCED'. SyncStatus.fromString likely handles case-insensitivity or expects specific string.
-      // Let's check SyncStatus.fromString.
 
       // I'll assume standard .name behavior for now and fix if test fails.
       final jsonCorrect = Map<String, dynamic>.from(json);
-      jsonCorrect['syncStatus'] = 'synced';
 
       final model = TerrainModel.fromJson(jsonCorrect);
 
@@ -70,7 +62,6 @@ void main() {
 
       expect(newJson['id'], 1);
       expect(newJson['type'], 'terreBattue');
-      expect(newJson['syncStatus'], 'synced');
     });
   });
 }

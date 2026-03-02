@@ -76,7 +76,7 @@ class StockHistoryScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 16),
-            SyncStatusIndicator(mode: SyncIndicatorMode.detailed),
+            ConnectionStatusIndicator(mode: SyncIndicatorMode.detailed),
             SizedBox(height: 16),
           ],
         ),
