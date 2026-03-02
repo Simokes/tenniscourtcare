@@ -11,7 +11,6 @@ import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
 import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
-import 'package:tenniscourtcare/domain/entities/sync_status.dart';
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 
 // HttpOverrides to mock network requests
