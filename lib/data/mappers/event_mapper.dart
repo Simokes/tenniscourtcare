@@ -80,11 +80,10 @@ class EventMapper {
   }
 
   // Firestore Snapshot → Drift Companion
-  static db.EventsCompanion toCompanion(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+static db.EventsCompanion toCompanion(
+    String docId,
+    Map<String, dynamic> data,
   ) {
-    final data = doc.data();
-
     DateTime parseTimestamp(dynamic ts) {
       if (ts is Timestamp) return ts.toDate();
       if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
@@ -99,8 +98,12 @@ class EventMapper {
       startTime: drift.Value(parseTimestamp(data['startTime'])),
       endTime: drift.Value(parseTimestamp(data['endTime'])),
       color: drift.Value(data['color'] as int? ?? 0xFFFFFFFF),
-      terrainIds: drift.Value((data['terrainIds'] as List<dynamic>?)?.map((e) => e as int).toList() ?? []),
-      firebaseId: drift.Value(doc.id),
+      terrainIds: drift.Value(
+        (data['terrainIds'] as List<dynamic>?)
+            ?.map((e) => e as int)
+            .toList() ?? [],
+      ),
+      firebaseId: drift.Value(docId),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
       createdBy: data['createdBy'] != null

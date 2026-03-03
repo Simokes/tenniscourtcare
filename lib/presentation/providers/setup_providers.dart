@@ -53,6 +53,7 @@ final adminExistsProvider = FutureProvider<bool>((ref) async {
 });
 
 // PART 2: setupStatusProvider
+
 final setupStatusProvider = FutureProvider<SetupStatus>((ref) async {
   try {
     final adminExists = await ref.watch(adminExistsProvider.future);

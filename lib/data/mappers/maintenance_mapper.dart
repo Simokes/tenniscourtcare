@@ -104,11 +104,10 @@ class MaintenanceMapper {
   }
 
   // Firestore Snapshot → Drift Companion
-  static db.MaintenancesCompanion toCompanion(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+   static db.MaintenancesCompanion toCompanion(
+    String docId,
+    Map<String, dynamic> data,
   ) {
-    final data = doc.data();
-
     DateTime parseTimestamp(dynamic ts) {
       if (ts is Timestamp) return ts.toDate();
       if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
@@ -128,7 +127,8 @@ class MaintenanceMapper {
       imagePath: data['imagePath'] != null
           ? drift.Value(data['imagePath'] as String)
           : const drift.Value.absent(),
-      firebaseId: drift.Value(doc.id),
+      firebaseId: drift.Value(docId),
+      remoteId: drift.Value(docId),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
       createdBy: data['createdBy'] != null
@@ -137,7 +137,6 @@ class MaintenanceMapper {
       modifiedBy: data['modifiedBy'] != null
           ? drift.Value(data['modifiedBy'] as String)
           : const drift.Value.absent(),
-      remoteId: drift.Value(doc.id),
     );
   }
 }
