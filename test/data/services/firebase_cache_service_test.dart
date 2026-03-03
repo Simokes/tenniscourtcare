@@ -2,21 +2,18 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:drift/drift.dart' show Value;
+import 'package:mocktail/mocktail.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/services/firebase_cache_service.dart';
 
-import 'firebase_cache_service_test.mocks.dart';
+class MockAppDatabase extends Mock implements AppDatabase {}
+class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+class MockCollectionReference<T extends Object?> extends Mock implements CollectionReference<T> {}
+class MockQuerySnapshot<T extends Object?> extends Mock implements QuerySnapshot<T> {}
+class MockDocumentChange<T extends Object?> extends Mock implements DocumentChange<T> {}
+class MockQueryDocumentSnapshot<T extends Object?> extends Mock implements QueryDocumentSnapshot<T> {}
 
-@GenerateMocks([
-  AppDatabase,
-  FirebaseFirestore,
-  CollectionReference,
-  QuerySnapshot,
-  DocumentChange,
-  QueryDocumentSnapshot,
-])
 void main() {
   late MockAppDatabase mockDb;
   late MockFirebaseFirestore mockFs;
@@ -25,6 +22,44 @@ void main() {
   late MockCollectionReference<Map<String, dynamic>> mockTerrainsCollection;
   late MockCollectionReference<Map<String, dynamic>> mockMaintenancesCollection;
   late MockCollectionReference<Map<String, dynamic>> mockEventsCollection;
+
+  setUpAll(() {
+    registerFallbackValue(StockItemsCompanion.insert(
+      name: '',
+      quantity: const Value(0),
+      minThreshold: const Value(0),
+      unit: '',
+      isCustom: false,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+    registerFallbackValue(TerrainsCompanion.insert(
+      nom: '',
+      type: 0,
+      status: const Value(''),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+    registerFallbackValue(MaintenancesCompanion.insert(
+      terrainId: 0,
+      type: '',
+      date: 0,
+      sacsMantoUtilises: const Value(0),
+      sacsSottomantoUtilises: const Value(0),
+      sacsSiliceUtilises: const Value(0),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+    registerFallbackValue(EventsCompanion.insert(
+      title: '',
+      startTime: DateTime.now(),
+      endTime: DateTime.now(),
+      color: 0,
+      terrainIds: [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    ));
+  });
 
   late StreamController<QuerySnapshot<Map<String, dynamic>>> stockStreamController;
   late StreamController<QuerySnapshot<Map<String, dynamic>>> terrainsStreamController;
@@ -45,15 +80,15 @@ void main() {
     maintenancesStreamController = StreamController<QuerySnapshot<Map<String, dynamic>>>();
     eventsStreamController = StreamController<QuerySnapshot<Map<String, dynamic>>>();
 
-    when(mockFs.collection('stock')).thenReturn(mockStockCollection);
-    when(mockFs.collection('terrains')).thenReturn(mockTerrainsCollection);
-    when(mockFs.collection('maintenance')).thenReturn(mockMaintenancesCollection);
-    when(mockFs.collection('events')).thenReturn(mockEventsCollection);
+    when(() => mockFs.collection('stock')).thenReturn(mockStockCollection);
+    when(() => mockFs.collection('terrains')).thenReturn(mockTerrainsCollection);
+    when(() => mockFs.collection('maintenance')).thenReturn(mockMaintenancesCollection);
+    when(() => mockFs.collection('events')).thenReturn(mockEventsCollection);
 
-    when(mockStockCollection.snapshots()).thenAnswer((_) => stockStreamController.stream);
-    when(mockTerrainsCollection.snapshots()).thenAnswer((_) => terrainsStreamController.stream);
-    when(mockMaintenancesCollection.snapshots()).thenAnswer((_) => maintenancesStreamController.stream);
-    when(mockEventsCollection.snapshots()).thenAnswer((_) => eventsStreamController.stream);
+    when(() => mockStockCollection.snapshots()).thenAnswer((_) => stockStreamController.stream);
+    when(() => mockTerrainsCollection.snapshots()).thenAnswer((_) => terrainsStreamController.stream);
+    when(() => mockMaintenancesCollection.snapshots()).thenAnswer((_) => maintenancesStreamController.stream);
+    when(() => mockEventsCollection.snapshots()).thenAnswer((_) => eventsStreamController.stream);
 
     cacheService = FirebaseCacheService(mockDb, mockFs);
   });
@@ -72,23 +107,23 @@ void main() {
         cacheService.startListening();
         expect(cacheService.isListening, isTrue);
 
-        verify(mockFs.collection('stock')).called(1);
-        verify(mockFs.collection('terrains')).called(1);
-        verify(mockFs.collection('maintenance')).called(1);
-        verify(mockFs.collection('events')).called(1);
+        verify(() => mockFs.collection('stock')).called(1);
+        verify(() => mockFs.collection('terrains')).called(1);
+        verify(() => mockFs.collection('maintenance')).called(1);
+        verify(() => mockFs.collection('events')).called(1);
 
-        verify(mockStockCollection.snapshots()).called(1);
-        verify(mockTerrainsCollection.snapshots()).called(1);
-        verify(mockMaintenancesCollection.snapshots()).called(1);
-        verify(mockEventsCollection.snapshots()).called(1);
+        verify(() => mockStockCollection.snapshots()).called(1);
+        verify(() => mockTerrainsCollection.snapshots()).called(1);
+        verify(() => mockMaintenancesCollection.snapshots()).called(1);
+        verify(() => mockEventsCollection.snapshots()).called(1);
       });
 
       test('is idempotent (calling twice does not duplicate listeners)', () {
         cacheService.startListening();
         cacheService.startListening();
 
-        verify(mockFs.collection('stock')).called(1);
-        verify(mockStockCollection.snapshots()).called(1);
+        verify(() => mockFs.collection('stock')).called(1);
+        verify(() => mockStockCollection.snapshots()).called(1);
       });
 
       test('sets isListening to true', () {
@@ -128,10 +163,10 @@ void main() {
         mockChange = MockDocumentChange();
         mockDoc = MockQueryDocumentSnapshot();
 
-        when(mockSnapshot.docChanges).thenReturn([mockChange]);
-        when(mockChange.doc).thenReturn(mockDoc);
-        when(mockDoc.id).thenReturn('firebase_id_123');
-        when(mockDoc.data()).thenReturn({
+        when(() => mockSnapshot.docChanges).thenReturn([mockChange]);
+        when(() => mockChange.doc).thenReturn(mockDoc);
+        when(() => mockDoc.id).thenReturn('firebase_id_123');
+        when(() => mockDoc.data()).thenReturn({
           'name': 'Balles',
           'quantity': 10,
           'createdAt': '2024-01-01T00:00:00Z',
@@ -140,44 +175,44 @@ void main() {
       });
 
       test('upserts stock item on DocumentChangeType.added', () async {
-        when(mockChange.type).thenReturn(DocumentChangeType.added);
-        when(mockDb.upsertStockItem(any)).thenAnswer((_) async {});
+        when(() => mockChange.type).thenReturn(DocumentChangeType.added);
+        when(() => mockDb.upsertStockItem(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
 
         await Future.delayed(Duration.zero);
 
-        verify(mockDb.upsertStockItem(any)).called(1);
+        verify(() => mockDb.upsertStockItem(any())).called(1);
       });
 
       test('upserts stock item on DocumentChangeType.modified', () async {
-        when(mockChange.type).thenReturn(DocumentChangeType.modified);
-        when(mockDb.upsertStockItem(any)).thenAnswer((_) async {});
+        when(() => mockChange.type).thenReturn(DocumentChangeType.modified);
+        when(() => mockDb.upsertStockItem(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
 
         await Future.delayed(Duration.zero);
 
-        verify(mockDb.upsertStockItem(any)).called(1);
+        verify(() => mockDb.upsertStockItem(any())).called(1);
       });
 
       test('deletes stock item on DocumentChangeType.removed', () async {
-        when(mockChange.type).thenReturn(DocumentChangeType.removed);
-        when(mockDb.deleteStockItemByFirebaseId(any)).thenAnswer((_) async {});
+        when(() => mockChange.type).thenReturn(DocumentChangeType.removed);
+        when(() => mockDb.deleteStockItemByFirebaseId(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
 
         await Future.delayed(Duration.zero);
 
-        verify(mockDb.deleteStockItemByFirebaseId('firebase_id_123')).called(1);
+        verify(() => mockDb.deleteStockItemByFirebaseId('firebase_id_123')).called(1);
       });
 
       test('logs error but does not throw on Drift write failure', () async {
-        when(mockChange.type).thenReturn(DocumentChangeType.added);
-        when(mockDb.upsertStockItem(any)).thenThrow(Exception('DB Error'));
+        when(() => mockChange.type).thenReturn(DocumentChangeType.added);
+        when(() => mockDb.upsertStockItem(any())).thenThrow(Exception('DB Error'));
 
         cacheService.startListening();
         expect(() {
