@@ -65,12 +65,10 @@ class DashboardHeader extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey.shade200),
-                image: const DecorationImage(
-                  image: NetworkImage(
-                    'https://lh3.googleusercontent.com/aida-public/AB6AXuAveFTSG7Js3Qh4mtwLcHsfwK8QNddL4vXcQtIvhtpXk5AwV6j6qm0KixzDkPknwONgawW4mXxxtFVhuoa9FOmiRARuEz4K1IXo8ftAfzWsASMydFoF-Q925MS2RXZFouHki-i9FEOf5AycGUnFcD9aPyDUd4HTI6A5CEmkQ1j0ki4dRCGVplnxyVlRZnsIFRJShl51WAVdYv8zfkQOd-WLJUizBTKCeiMYlhcjgUj4hq39Tq-s2D4wc_8ToiYfCh1DB7ws5sRU9Q_q',
-                  ),
-                  fit: BoxFit.cover,
-                ),
+              ),
+              child: const Icon(
+                Icons.person,
+                color: Color(0xFF003580),
               ),
             ),
           ),

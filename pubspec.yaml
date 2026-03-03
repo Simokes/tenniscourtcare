@@ -78,6 +78,8 @@ dev_dependencies:
 
   sqlite3: any
   mocktail: ^1.0.4
+  fake_cloud_firestore: ^4.0.1
+  network_image_mock: ^2.1.1
 
 flutter:
   uses-material-design: true

@@ -356,8 +356,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 32),
 
                 // Footer
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       "Don't have an account? ",
