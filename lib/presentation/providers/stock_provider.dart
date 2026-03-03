@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/stock_repository_impl.dart';
 import '../../domain/entities/stock_item.dart';
+import '../../data/mappers/stock_item_mapper.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../features/inventory/models/stock_filter.dart';
 import 'database_provider.dart';
@@ -24,13 +25,14 @@ final stockItemsProvider = StreamProvider<List<StockItem>>((ref) {
 final stockProvider = stockItemsProvider;
 
 // ✅ ADD STOCK ITEM
-final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
+final addStockItemProvider = Provider<Future<String> Function(StockItem)>((ref) {
   return (StockItem item) async {
     try {
       final repo = ref.read(stockRepositoryProvider);
-      await repo.addStockItem(item);
+      final firebaseId = await repo.addStockItem(item);
 
       debugPrint('✅ Item added');
+      return firebaseId;
     } catch (e) {
       debugPrint('❌ Error adding stock: $e');
       rethrow;
@@ -183,7 +185,17 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
   }
 
   Future<void> addItem(StockItem item) async {
-    await ref.read(addStockItemProvider)(item);
+    try {
+      state = const AsyncValue.loading();
+      final firebaseId = await ref.read(addStockItemProvider)(item);
+      final db = ref.read(databaseProvider);
+
+      await db.upsertStockItem(
+        item.copyWith(firebaseId: firebaseId).toCompanion(),
+      );
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
   }
 
   Future<void> updateItem(StockItem item) async {

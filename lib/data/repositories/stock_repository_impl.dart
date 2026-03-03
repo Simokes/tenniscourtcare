@@ -20,11 +20,12 @@ class StockRepositoryImpl implements StockRepository {
   final FirebaseFirestore _fs;
 
   @override
-  Future<void> addStockItem(StockItem item) async {
+  Future<String> addStockItem(StockItem item) async {
     try {
-      await _fs
+      final docRef = await _fs
           .collection('stocks')
           .add(StockItemMapper.toFirestore(item));
+      return docRef.id;
     } on FirebaseException catch (e) {
       debugPrint('❌ StockRepository: Failed to add stock item: ${e.message}');
       throw RepositoryException('Failed to add stock item: ${e.message}', cause: e);
