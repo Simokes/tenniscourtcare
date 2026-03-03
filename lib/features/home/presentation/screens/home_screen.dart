@@ -24,9 +24,9 @@ class HomeScreen extends ConsumerWidget {
     final terrainsAsync = ref.watch(terrainsProvider);
 
     // New Stock Provider Logic
-    final lowStockAsync = ref.watch(lowStockItemsProvider);
+    final lowStockCount = ref.watch(lowStockCountProvider);
     // Convert List<StockItem> to int for the carousel
-    final stockAlertCount = lowStockAsync.whenData((items) => items.length);
+    final stockAlertCountAsync = ref.watch(stockItemsProvider).whenData((_) => lowStockCount);
 
     // Calculate operational courts for the stats card
     final operationalCountAsync = terrainsAsync.whenData(
@@ -47,7 +47,7 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: StatsCarousel(
                 todayMaintenanceCount: todayMaintenanceCount,
-                stockAlertCount: stockAlertCount,
+                stockAlertCount: stockAlertCountAsync,
                 operationalTerrainsCount: operationalCountAsync,
               ),
             ),

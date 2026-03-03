@@ -8,15 +8,16 @@ class StockAlertSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final criticalItemsAsync = ref.watch(criticalStockItemsProvider);
+    final criticalItems = ref.watch(criticalStockItemsProvider);
+    final stockAsync = ref.watch(stockItemsProvider);
 
-    return criticalItemsAsync.when(
-      data: (items) {
-        if (items.isEmpty) return const SizedBox.shrink();
+    return stockAsync.when(
+      data: (_) {
+        if (criticalItems.isEmpty) return const SizedBox.shrink();
 
         // Take the first item (most critical as it is sorted by quantity)
-        final item = items.first;
-        final otherCount = items.length - 1;
+        final item = criticalItems.first;
+        final otherCount = criticalItems.length - 1;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

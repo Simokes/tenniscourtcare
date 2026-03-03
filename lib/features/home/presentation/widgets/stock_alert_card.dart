@@ -9,18 +9,18 @@ class StockAlertCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lowStockAsync = ref.watch(lowStockItemsProvider);
-    final criticalAsync = ref.watch(criticalStockItemsProvider);
-    final allStockAsync = ref.watch(stockProvider);
+    final lowStockItems = ref.watch(lowStockItemsProvider);
+    final criticalItems = ref.watch(criticalStockItemsProvider);
+    final allStockAsync = ref.watch(stockItemsProvider);
 
-    return lowStockAsync.when(
-      data: (lowStockItems) {
+    return allStockAsync.when(
+      data: (allItems) {
         if (lowStockItems.isEmpty) return const SizedBox.shrink();
 
-        final totalItemsCount = allStockAsync.asData?.value.length ?? 1;
+        final totalItemsCount = allItems.length;
         final safeTotal = totalItemsCount == 0 ? 1 : totalItemsCount;
 
-        final criticalItemsCount = criticalAsync.asData?.value.length ?? 0;
+        final criticalItemsCount = criticalItems.length;
         final isCritical = criticalItemsCount > 0;
         final topItem = lowStockItems.first;
 

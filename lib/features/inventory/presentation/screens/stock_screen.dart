@@ -19,7 +19,8 @@ class StockScreen extends ConsumerStatefulWidget {
 class _StockScreenState extends ConsumerState<StockScreen> {
   @override
   Widget build(BuildContext context) {
-    final filteredItemsAsync = ref.watch(filteredStockItemsProvider);
+    final stockAsync = ref.watch(stockItemsProvider);
+    final items = ref.watch(filteredStockItemsProvider);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -54,8 +55,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
 
             // 4. Content List
             Expanded(
-              child: filteredItemsAsync.when(
-                data: (items) => _buildStockList(items),
+              child: stockAsync.when(
+                data: (_) => _buildStockList(items),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, s) => Center(child: Text('Erreur: $e')),
               ),
