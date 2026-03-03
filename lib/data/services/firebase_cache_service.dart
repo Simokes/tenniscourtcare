@@ -47,29 +47,29 @@ class FirebaseCacheService {
     debugPrint('🔥 CacheService: All listeners stopped');
   }
 
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
-    return _fs.collection('stock').snapshots().listen(
+   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
+    return _fs.collection('stocks').snapshots().listen(
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           try {
-            switch (change.type) {
-              case DocumentChangeType.added:
-              case DocumentChangeType.modified:
-                await _db.upsertStockItem(
-                  StockItemMapper.toCompanion(change.doc as QueryDocumentSnapshot<Map<String, dynamic>>),
-                );
-                break;
-              case DocumentChangeType.removed:
-                await _db.deleteStockItemByFirebaseId(change.doc.id);
-                break;
+            if (change.type == DocumentChangeType.added ||
+                change.type == DocumentChangeType.modified) {
+              await _db.upsertStockItem(
+                StockItemMapper.toCompanion(
+                  change.doc as QueryDocumentSnapshot<Map<String, dynamic>>,
+                ),
+              );
+            } else if (change.type == DocumentChangeType.removed) {
+              // ✅ Supprimer de Drift quand supprimé de Firebase:
+              await _db.deleteStockItemByFirebaseId(change.doc.id);
+              debugPrint('🗑️ CacheService: Stock supprimé → ${change.doc.id}');
             }
           } catch (e) {
             debugPrint('❌ CacheService: Error processing stock change: $e');
           }
         }
       },
-      onError: (Object e) =>
-          debugPrint('❌ CacheService: Stock listener error: $e'),
+      onError: (e) => debugPrint('❌ CacheService: Stock listener error: $e'),
     );
   }
 

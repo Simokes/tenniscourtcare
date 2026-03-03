@@ -2,16 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'database_provider.dart';
 import '../../domain/entities/terrain.dart';
 
-/// Provider for the count of items that are low in stock
-final lowStockCountProvider = StreamProvider<int>((ref) {
-  final database = ref.watch(databaseProvider);
-  return database.watchAllStockItems().map((items) {
-    return items
-        .where((item) => item.quantity <= (item.minThreshold ?? 0))
-        .length;
-  });
-});
-
 /// Provider for the count of maintenances performed today
 final todayMaintenanceCountProvider = StreamProvider<int>((ref) {
   final database = ref.watch(databaseProvider);

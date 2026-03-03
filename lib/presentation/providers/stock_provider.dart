@@ -14,10 +14,14 @@ final stockRepositoryProvider = Provider<StockRepository>((ref) {
 });
 
 // ✅ STOCK ITEMS - STREAM PROVIDER (From Drift)
-final stockProvider = StreamProvider<List<StockItem>>((ref) {
+final stockItemsProvider = StreamProvider<List<StockItem>>((ref) {
   final db = ref.watch(databaseProvider);
   return db.watchAllStockItems();
 });
+
+// Also keep an alias to `stockProvider` in case it is used directly elsewhere in unmodified places to avoid massive refactoring,
+// but based on instructions, we should rename or use it as is. We will alias it to `stockItemsProvider`.
+final stockProvider = stockItemsProvider;
 
 // ✅ ADD STOCK ITEM
 final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
@@ -25,9 +29,6 @@ final addStockItemProvider = Provider<Future<void> Function(StockItem)>((ref) {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.addStockItem(item);
-
-      ref.invalidate(stockProvider);
-      ref.invalidate(filteredStockItemsProvider);
 
       debugPrint('✅ Item added');
     } catch (e) {
@@ -46,9 +47,6 @@ final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
       final repo = ref.read(stockRepositoryProvider);
       await repo.updateStockItem(item);
 
-      ref.invalidate(stockProvider);
-      ref.invalidate(filteredStockItemsProvider);
-
       debugPrint('✅ Item updated');
     } catch (e) {
       debugPrint('❌ Error updating stock: $e');
@@ -63,9 +61,6 @@ final deleteStockItemProvider = Provider<Future<void> Function(String)>((ref) {
     try {
       final repo = ref.read(stockRepositoryProvider);
       await repo.deleteStockItem(firebaseId);
-
-      ref.invalidate(stockProvider);
-      ref.invalidate(filteredStockItemsProvider);
 
       debugPrint('✅ Item deleted');
     } catch (e) {
@@ -86,8 +81,8 @@ final stockSearchQueryProvider = StateProvider<String>((ref) {
 });
 
 // ✅ FILTERED STOCK ITEMS
-final filteredStockItemsProvider = FutureProvider<List<StockItem>>((ref) async {
-  final allItems = await ref.watch(stockProvider.future);
+final filteredStockItemsProvider = Provider<List<StockItem>>((ref) {
+  final allItems = ref.watch(stockItemsProvider).value ?? [];
   final filter = ref.watch(stockFilterProvider);
   final searchQuery = ref.watch(stockSearchQueryProvider).toLowerCase();
   var filtered = allItems;
@@ -142,14 +137,14 @@ class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
   }
 
   void _init() {
-    ref.listen(stockProvider, (previous, next) {
+    ref.listen(stockItemsProvider, (previous, next) {
       state = next;
     });
   }
 
   Future<void> adjustQuantity(int itemId, int delta, {String? reason}) async {
     try {
-      final items = await ref.read(stockProvider.future);
+      final items = await ref.read(stockItemsProvider.future);
       final item = items.firstWhere((i) => i.id == itemId);
 
       final newQuantity = item.quantity + delta;
@@ -208,10 +203,8 @@ final stockNotifierProvider =
 // --- Alert Providers ---
 
 // ✅ LOW STOCK ITEMS
-final lowStockItemsProvider = FutureProvider.autoDispose<List<StockItem>>((
-  ref,
-) async {
-  final items = await ref.watch(stockProvider.future);
+final lowStockItemsProvider = Provider<List<StockItem>>((ref) {
+  final items = ref.watch(stockItemsProvider).value ?? [];
 
   final lowStock = items.where((item) {
     final threshold = item.minThreshold;
@@ -223,16 +216,12 @@ final lowStockItemsProvider = FutureProvider.autoDispose<List<StockItem>>((
 });
 
 // ✅ CRITICAL STOCK ITEMS
-final criticalStockItemsProvider = FutureProvider.autoDispose<List<StockItem>>((
-  ref,
-) async {
-  final lowStockItems = await ref.watch(lowStockItemsProvider.future);
-
+final criticalStockItemsProvider = Provider<List<StockItem>>((ref) {
+  final lowStockItems = ref.watch(lowStockItemsProvider);
   return lowStockItems.where((item) => item.quantity <= 5).toList();
 });
 
 // ✅ LOW STOCK COUNT
-final lowStockCountProvider = FutureProvider.autoDispose<int>((ref) async {
-  final lowStockItems = await ref.watch(lowStockItemsProvider.future);
-  return lowStockItems.length;
+final lowStockCountProvider = Provider<int>((ref) {
+  return ref.watch(lowStockItemsProvider).length;
 });
