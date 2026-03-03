@@ -80,7 +80,7 @@ void main() {
     maintenancesStreamController = StreamController<QuerySnapshot<Map<String, dynamic>>>();
     eventsStreamController = StreamController<QuerySnapshot<Map<String, dynamic>>>();
 
-    when(() => mockFs.collection('stock')).thenReturn(mockStockCollection);
+    when(() => mockFs.collection('stocks')).thenReturn(mockStockCollection);
     when(() => mockFs.collection('terrains')).thenReturn(mockTerrainsCollection);
     when(() => mockFs.collection('maintenance')).thenReturn(mockMaintenancesCollection);
     when(() => mockFs.collection('events')).thenReturn(mockEventsCollection);
@@ -107,7 +107,7 @@ void main() {
         cacheService.startListening();
         expect(cacheService.isListening, isTrue);
 
-        verify(() => mockFs.collection('stock')).called(1);
+        verify(() => mockFs.collection('stocks')).called(1);
         verify(() => mockFs.collection('terrains')).called(1);
         verify(() => mockFs.collection('maintenance')).called(1);
         verify(() => mockFs.collection('events')).called(1);
@@ -122,7 +122,7 @@ void main() {
         cacheService.startListening();
         cacheService.startListening();
 
-        verify(() => mockFs.collection('stock')).called(1);
+        verify(() => mockFs.collection('stocks')).called(1);
         verify(() => mockStockCollection.snapshots()).called(1);
       });
 

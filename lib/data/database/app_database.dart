@@ -101,18 +101,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 18; // Phase C: Remove sync columns
+  int get schemaVersion => 19; // Phase C: Remove sync columns
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
-      await _seedStockItems();
     },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.createTable(stockItems);
-        await _seedStockItems();
       }
       if (from < 3) {
         await m.createTable(users);
@@ -260,81 +258,15 @@ class AppDatabase extends _$AppDatabase {
         await m.deleteTable(events.actualTableName);
         await m.createTable(events);
       }
+
+      if (from < 19) {
+        // Delete all seeded rows that were never synced with Firestore:
+        await customStatement(
+          'DELETE FROM stock_items WHERE firebase_id IS NULL;',
+        );
+      }
     },
   );
-
-  Future<void> _seedStockItems() async {
-    final now = DateTime.now();
-    final items = [
-      doms.StockItem(
-        name: 'Manto',
-        quantity: 0,
-        unit: 'sacs',
-        isCustom: false,
-        minThreshold: 10,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Sottomanto',
-        quantity: 0,
-        unit: 'sacs',
-        isCustom: false,
-        minThreshold: 5,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Silice',
-        quantity: 0,
-        unit: 'sacs',
-        isCustom: false,
-        minThreshold: 10,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Balles',
-        quantity: 0,
-        unit: 'pcs',
-        isCustom: false,
-        minThreshold: 24,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Filets',
-        quantity: 0,
-        unit: 'pcs',
-        isCustom: false,
-        minThreshold: 1,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Peinture',
-        quantity: 0,
-        unit: 'L',
-        isCustom: false,
-        minThreshold: 5,
-        updatedAt: now,
-        createdAt: now,
-      ),
-      doms.StockItem(
-        name: 'Balais',
-        quantity: 0,
-        unit: 'pcs',
-        isCustom: false,
-        minThreshold: 2,
-        updatedAt: now,
-        createdAt: now,
-      ),
-    ];
-
-    await batch((b) {
-      b.insertAll(stockItems, items.map((i) => i.toCompanion()).toList());
-    });
-  }
 
   // ========== USERS ==========
 
