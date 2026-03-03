@@ -32,7 +32,7 @@ void main() {
     mockCollection = MockCollectionReference();
     mockDoc = MockDocumentReference();
 
-    when(() => mockFs.collection('stock_items')).thenReturn(mockCollection);
+    when(() => mockFs.collection('stocks')).thenReturn(mockCollection);
     when(() => mockCollection.doc(any())).thenReturn(mockDoc);
 
     repository = StockRepositoryImpl(db: mockDb, fs: mockFs);
