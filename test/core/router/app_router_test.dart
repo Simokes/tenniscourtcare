@@ -130,7 +130,7 @@ class MockHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return MockHttpClient();
-    return MockHttpClient();
+    
   }
 }
 
