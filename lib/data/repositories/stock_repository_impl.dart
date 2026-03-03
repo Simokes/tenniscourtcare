@@ -23,7 +23,7 @@ class StockRepositoryImpl implements StockRepository {
   Future<void> addStockItem(StockItem item) async {
     try {
       await _fs
-          .collection('stock_items')
+          .collection('stocks')
           .add(StockItemMapper.toFirestore(item));
     } on FirebaseException catch (e) {
       debugPrint('❌ StockRepository: Failed to add stock item: ${e.message}');
@@ -39,7 +39,7 @@ class StockRepositoryImpl implements StockRepository {
 
     try {
       await _fs
-          .collection('stock_items')
+          .collection('stocks')
           .doc(item.firebaseId)
           .update(StockItemMapper.toFirestore(item));
     } on FirebaseException catch (e) {
@@ -51,7 +51,7 @@ class StockRepositoryImpl implements StockRepository {
   @override
   Future<void> deleteStockItem(String firebaseId) async {
     try {
-      await _fs.collection('stock_items').doc(firebaseId).delete();
+      await _fs.collection('stocks').doc(firebaseId).delete();
     } on FirebaseException catch (e) {
       debugPrint('❌ StockRepository: Failed to delete stock item: ${e.message}');
       throw RepositoryException('Failed to delete stock item: ${e.message}', cause: e);

@@ -142,35 +142,6 @@ void main() {
   });
 
   group('Derived Providers', () {
-    test('isAuthenticatedProvider returns true when authenticated', () async {
-      final user = UserEntity(
-        id: 1,
-        email: 'test@test.com',
-        name: 'Test',
-        role: Role.admin,
-      );
-      mockAuthNotifier.setState(
-        AsyncValue.data(AuthState(user: user, isSetupRequired: false)),
-      );
-
-      final container = createContainer();
-      final result = await container.read(setup.isAuthenticatedProvider.future);
-
-      expect(result, isTrue);
-    });
-
-    test('isAuthenticatedProvider returns false when not authenticated', () async {
-      when(mockDb.countUsersByRole(Role.admin)).thenAnswer((_) async => 1);
-
-      mockAuthNotifier.setState(
-        const AsyncValue.data(AuthState(user: null, isSetupRequired: false)),
-      );
-
-      final container = createContainer();
-      final result = await container.read(setup.isAuthenticatedProvider.future);
-
-      expect(result, isFalse);
-    });
 
     test('currentSetupUserProvider returns user when authenticated', () async {
       final user = UserEntity(

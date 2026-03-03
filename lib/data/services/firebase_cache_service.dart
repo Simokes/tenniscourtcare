@@ -21,8 +21,6 @@ class FirebaseCacheService {
 
   bool get isListening => _subscriptions.isNotEmpty;
 
-  /// Start all Firestore → Drift listeners.
-  /// Call after successful authentication.
   void startListening() {
     if (isListening) {
       debugPrint('⚠️ CacheService: Already listening, skipping');
@@ -37,8 +35,6 @@ class FirebaseCacheService {
     debugPrint('🔥 CacheService: ${_subscriptions.length} listeners started');
   }
 
-  /// Stop all Firestore listeners.
-  /// Call before logout to prevent writes after session ends.
   void stopListening() {
     for (final sub in _subscriptions) {
       sub.cancel();
@@ -47,22 +43,21 @@ class FirebaseCacheService {
     debugPrint('🔥 CacheService: All listeners stopped');
   }
 
-   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
     return _fs.collection('stocks').snapshots().listen(
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           try {
             if (change.type == DocumentChangeType.added ||
                 change.type == DocumentChangeType.modified) {
+              // ✅ pattern uniforme: id + data() — zéro cast
+              final data = change.doc.data();
+              if (data == null) continue;
               await _db.upsertStockItem(
-                StockItemMapper.toCompanion(
-                  change.doc as QueryDocumentSnapshot<Map<String, dynamic>>,
-                ),
+                StockItemMapper.toCompanion(change.doc.id, data),
               );
             } else if (change.type == DocumentChangeType.removed) {
-              // ✅ Supprimer de Drift quand supprimé de Firebase:
               await _db.deleteStockItemByFirebaseId(change.doc.id);
-              debugPrint('🗑️ CacheService: Stock supprimé → ${change.doc.id}');
             }
           } catch (e) {
             debugPrint('❌ CacheService: Error processing stock change: $e');
@@ -78,24 +73,23 @@ class FirebaseCacheService {
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           try {
-            switch (change.type) {
-              case DocumentChangeType.added:
-              case DocumentChangeType.modified:
-                await _db.upsertTerrain(
-                  TerrainMapper.toCompanion(change.doc as QueryDocumentSnapshot<Map<String, dynamic>>),
-                );
-                break;
-              case DocumentChangeType.removed:
-                await _db.deleteTerrainByFirebaseId(change.doc.id);
-                break;
+            if (change.type == DocumentChangeType.added ||
+                change.type == DocumentChangeType.modified) {
+              // ✅ pattern uniforme: id + data() — zéro cast
+              final data = change.doc.data();
+              if (data == null) continue;
+              await _db.upsertTerrain(
+                TerrainMapper.toCompanion(change.doc.id, data),
+              );
+            } else if (change.type == DocumentChangeType.removed) {
+              await _db.deleteTerrainByFirebaseId(change.doc.id);
             }
           } catch (e) {
             debugPrint('❌ CacheService: Error processing terrains change: $e');
           }
         }
       },
-      onError: (Object e) =>
-          debugPrint('❌ CacheService: Terrains listener error: $e'),
+      onError: (e) => debugPrint('❌ CacheService: Terrains listener error: $e'),
     );
   }
 
@@ -104,23 +98,23 @@ class FirebaseCacheService {
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           try {
-            switch (change.type) {
-              case DocumentChangeType.added:
-              case DocumentChangeType.modified:
-                await _db.upsertMaintenance(
-                  MaintenanceMapper.toCompanion(change.doc as QueryDocumentSnapshot<Map<String, dynamic>>),
-                );
-                break;
-              case DocumentChangeType.removed:
-                await _db.deleteMaintenanceByFirebaseId(change.doc.id);
-                break;
+            if (change.type == DocumentChangeType.added ||
+                change.type == DocumentChangeType.modified) {
+              // ✅ déjà correct — garder le même pattern
+              final data = change.doc.data();
+              if (data == null) continue;
+              await _db.upsertMaintenance(
+                MaintenanceMapper.toCompanion(change.doc.id, data),
+              );
+            } else if (change.type == DocumentChangeType.removed) {
+              await _db.deleteMaintenanceByFirebaseId(change.doc.id);
             }
           } catch (e) {
             debugPrint('❌ CacheService: Error processing maintenance change: $e');
           }
         }
       },
-      onError: (Object e) =>
+      onError: (e) =>
           debugPrint('❌ CacheService: Maintenance listener error: $e'),
     );
   }
@@ -130,24 +124,23 @@ class FirebaseCacheService {
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           try {
-            switch (change.type) {
-              case DocumentChangeType.added:
-              case DocumentChangeType.modified:
-                await _db.upsertEvent(
-                  EventMapper.toCompanion(change.doc as QueryDocumentSnapshot<Map<String, dynamic>>),
-                );
-                break;
-              case DocumentChangeType.removed:
-                await _db.deleteEventByFirebaseId(change.doc.id);
-                break;
+            if (change.type == DocumentChangeType.added ||
+                change.type == DocumentChangeType.modified) {
+              // ✅ FIX: id + data() au lieu de cast QueryDocumentSnapshot
+              final data = change.doc.data();
+              if (data == null) continue;
+              await _db.upsertEvent(
+                EventMapper.toCompanion(change.doc.id, data),
+              );
+            } else if (change.type == DocumentChangeType.removed) {
+              await _db.deleteEventByFirebaseId(change.doc.id);
             }
           } catch (e) {
             debugPrint('❌ CacheService: Error processing events change: $e');
           }
         }
       },
-      onError: (Object e) =>
-          debugPrint('❌ CacheService: Events listener error: $e'),
+      onError: (e) => debugPrint('❌ CacheService: Events listener error: $e'),
     );
   }
 }

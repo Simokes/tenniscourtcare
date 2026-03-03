@@ -89,10 +89,9 @@ class TerrainMapper {
 
   // Firestore Snapshot → Drift Companion
   static db.TerrainsCompanion toCompanion(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    String docId,
+    Map<String, dynamic> data,
   ) {
-    final data = doc.data();
-
     DateTime parseTimestamp(dynamic ts) {
       if (ts is Timestamp) return ts.toDate();
       if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
@@ -106,7 +105,8 @@ class TerrainMapper {
       imageUrl: data['photoUrl'] != null
           ? drift.Value(data['photoUrl'] as String)
           : const drift.Value.absent(),
-      firebaseId: drift.Value(doc.id),
+      firebaseId: drift.Value(docId),
+      remoteId: drift.Value(docId),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
       createdBy: data['createdBy'] != null
@@ -115,7 +115,6 @@ class TerrainMapper {
       modifiedBy: data['modifiedBy'] != null
           ? drift.Value(data['modifiedBy'] as String)
           : const drift.Value.absent(),
-      remoteId: drift.Value(doc.id),
       location: data['location'] != null
           ? drift.Value(data['location'] as String)
           : const drift.Value.absent(),

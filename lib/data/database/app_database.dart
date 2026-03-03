@@ -67,7 +67,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertStockItem(StockItemsCompanion companion) async {
-    await into(stockItems).insertOnConflictUpdate(companion);
+    final firebaseId = companion.firebaseId.value;
+    if (firebaseId == null || firebaseId.isEmpty) {
+      await into(stockItems).insert(companion);
+      return;
+    }
+
+    final existing = await (select(stockItems)
+          ..where((t) => t.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(stockItems)
+            ..where((t) => t.firebaseId.equals(firebaseId)))
+          .write(companion);
+    } else {
+      await into(stockItems).insert(companion);
+    }
   }
 
   Future<void> deleteStockItemByFirebaseId(String firebaseId) async {

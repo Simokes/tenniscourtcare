@@ -94,10 +94,9 @@ class StockItemMapper {
 
   // Firestore Snapshot → Drift Companion
   static db.StockItemsCompanion toCompanion(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
+    String docId,
+    Map<String, dynamic> data,
   ) {
-    final data = doc.data();
-
     DateTime parseTimestamp(dynamic ts) {
       if (ts is Timestamp) return ts.toDate();
       if (ts is String) return DateTime.tryParse(ts) ?? DateTime.now();
@@ -119,7 +118,8 @@ class StockItemMapper {
           ? drift.Value(data['category'] as String)
           : const drift.Value.absent(),
       sortOrder: drift.Value(data['sortOrder'] as int? ?? 0),
-      firebaseId: drift.Value(doc.id),
+      firebaseId: drift.Value(docId),       // ✅ docId direct
+      remoteId: drift.Value(docId),         // ✅ docId direct
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
       createdBy: data['createdBy'] != null
@@ -128,10 +128,10 @@ class StockItemMapper {
       modifiedBy: data['modifiedBy'] != null
           ? drift.Value(data['modifiedBy'] as String)
           : const drift.Value.absent(),
-      remoteId: drift.Value(doc.id),
       lastModifiedBy: data['modifiedBy'] != null
           ? drift.Value(data['modifiedBy'] as String)
           : const drift.Value.absent(),
+      isSyncPending: const drift.Value(false),
     );
   }
 }
