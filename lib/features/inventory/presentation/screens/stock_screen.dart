@@ -21,7 +21,15 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   Widget build(BuildContext context) {
     final stockAsync = ref.watch(stockItemsProvider);
     final items = ref.watch(filteredStockItemsProvider);
-
+    
+    ref.listen(stockItemsProvider, (_, next) {
+      next.whenData((items) {
+        debugPrint('📦 Total Drift rows: ${items.length}');
+        for (final i in items) {
+          debugPrint('  → ${i.name} | firebaseId: ${i.firebaseId}');
+        }
+      });
+    });
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: SafeArea(
@@ -84,10 +92,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             child: Text(
               'Inventaire',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Row(

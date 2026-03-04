@@ -4,7 +4,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
-
+import 'package:flutter/foundation.dart';
 import 'tables/terrain_table.dart';
 import 'tables/maintenances.dart';
 import 'tables/stock_items.dart';
@@ -265,6 +265,20 @@ class AppDatabase extends _$AppDatabase {
           'DELETE FROM stock_items WHERE firebase_id IS NULL;',
         );
       }
+    },
+     // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
+    beforeOpen: (details) async {
+      if (details.wasCreated) {
+        // Nouvelle installation → tables vides → rien à faire
+        debugPrint('🗄️ DB: Nouvelle installation schema v$schemaVersion');
+        return;
+      }
+      // ✅ Purge défensive au démarrage — idempotent
+      // Supprime tous les items sans firebaseId (seeds ou orphelins)
+      await customStatement(
+        'DELETE FROM stock_items WHERE firebase_id IS NULL;',
+      );
+      debugPrint('🗄️ DB: Purge seeds orphelins au démarrage ✅');
     },
   );
 

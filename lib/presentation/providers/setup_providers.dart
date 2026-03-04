@@ -102,7 +102,7 @@ final setupStatusStreamProvider = StreamProvider<SetupStatus>((ref) {
       next.when(
         data: (status) => controller.add(status),
         loading: () {}, // ne pas émettre pendant loading
-        error: (_, __) => controller.add(SetupStatus.error),
+        error: (_, _) => controller.add(SetupStatus.error),
       );
     },
     fireImmediately: true, // ✅ émet la valeur courante au démarrage
