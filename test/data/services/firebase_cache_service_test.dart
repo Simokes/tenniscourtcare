@@ -31,6 +31,7 @@ void main() {
   late MockCollectionReference<Map<String, dynamic>> mockTerrainsCollection;
   late MockCollectionReference<Map<String, dynamic>> mockMaintenancesCollection;
   late MockCollectionReference<Map<String, dynamic>> mockEventsCollection;
+  late MockCollectionReference<Map<String, dynamic>> mockUsersCollection;
 
   setUpAll(() {
     registerFallbackValue(
@@ -86,6 +87,8 @@ void main() {
   maintenancesStreamController;
   late StreamController<QuerySnapshot<Map<String, dynamic>>>
   eventsStreamController;
+  late StreamController<QuerySnapshot<Map<String, dynamic>>>
+  usersStreamController;
 
   setUp(() {
     mockDb = MockAppDatabase();
@@ -95,6 +98,7 @@ void main() {
     mockTerrainsCollection = MockCollectionReference();
     mockMaintenancesCollection = MockCollectionReference();
     mockEventsCollection = MockCollectionReference();
+    mockUsersCollection = MockCollectionReference();
 
     stockStreamController =
         StreamController<QuerySnapshot<Map<String, dynamic>>>();
@@ -103,6 +107,8 @@ void main() {
     maintenancesStreamController =
         StreamController<QuerySnapshot<Map<String, dynamic>>>();
     eventsStreamController =
+        StreamController<QuerySnapshot<Map<String, dynamic>>>();
+    usersStreamController =
         StreamController<QuerySnapshot<Map<String, dynamic>>>();
 
     when(() => mockFs.collection('stocks')).thenReturn(mockStockCollection);
@@ -113,6 +119,7 @@ void main() {
       () => mockFs.collection('maintenance'),
     ).thenReturn(mockMaintenancesCollection);
     when(() => mockFs.collection('events')).thenReturn(mockEventsCollection);
+    when(() => mockFs.collection('users')).thenReturn(mockUsersCollection);
 
     when(
       () => mockStockCollection.snapshots(),
@@ -126,6 +133,9 @@ void main() {
     when(
       () => mockEventsCollection.snapshots(),
     ).thenAnswer((_) => eventsStreamController.stream);
+    when(
+      () => mockUsersCollection.snapshots(),
+    ).thenAnswer((_) => usersStreamController.stream);
 
     cacheService = FirebaseCacheService(mockDb, mockFs);
   });
@@ -137,6 +147,7 @@ void main() {
     if (!terrainsStreamController.isClosed) terrainsStreamController.close();
     if (!maintenancesStreamController.isClosed) maintenancesStreamController.close();
     if (!eventsStreamController.isClosed) eventsStreamController.close();
+    if (!usersStreamController.isClosed) usersStreamController.close();
   });
 
   group('FirebaseCacheService', () {
@@ -149,11 +160,13 @@ void main() {
         verify(() => mockFs.collection('terrains')).called(1);
         verify(() => mockFs.collection('maintenance')).called(1);
         verify(() => mockFs.collection('events')).called(1);
+        verify(() => mockFs.collection('users')).called(1);
 
         verify(() => mockStockCollection.snapshots()).called(1);
         verify(() => mockTerrainsCollection.snapshots()).called(1);
         verify(() => mockMaintenancesCollection.snapshots()).called(1);
         verify(() => mockEventsCollection.snapshots()).called(1);
+        verify(() => mockUsersCollection.snapshots()).called(1);
       });
 
       test('is idempotent (calling twice does not duplicate listeners)', () {

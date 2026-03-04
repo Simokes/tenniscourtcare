@@ -146,10 +146,34 @@ class AppDatabase extends _$AppDatabase {
     await (delete(events)..where((t) => t.firebaseId.equals(firebaseId))).go();
   }
 
+  Future<void> upsertUser(UsersCompanion companion) async {
+    final firebaseId = companion.firestoreUid.value;
+    if (firebaseId == null || firebaseId.isEmpty) {
+      await into(users).insert(companion);
+      return;
+    }
+
+    final existing = await (select(users)
+          ..where((t) => t.firestoreUid.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(users)
+            ..where((t) => t.firestoreUid.equals(firebaseId)))
+          .write(companion);
+    } else {
+      await into(users).insert(companion);
+    }
+  }
+
+  Future<void> deleteUserByFirebaseId(String firebaseId) async {
+    await (delete(users)..where((t) => t.firestoreUid.equals(firebaseId))).go();
+  }
+
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 19; // Phase C: Remove sync columns
+  int get schemaVersion => 20; // Signup Flow
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -313,6 +337,12 @@ class AppDatabase extends _$AppDatabase {
           'DELETE FROM stock_items WHERE firebase_id IS NULL;',
         );
       }
+
+      if (from < 20) {
+        await m.addColumn(users, users.status);
+        await m.addColumn(users, users.approvedAt);
+        await m.addColumn(users, users.approvedBy);
+      }
     },
      // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
     beforeOpen: (details) async {
@@ -372,6 +402,12 @@ class AppDatabase extends _$AppDatabase {
   Future<List<domu.UserEntity>> getAllUsers() async {
     final rows = await select(users).get();
     return rows.map((r) => r.toDomain()).toList();
+  }
+
+  Stream<List<domu.UserEntity>> watchPendingUsers() {
+    return (select(users)..where((u) => u.status.equals('inactive')))
+        .watch()
+        .map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
   Future<int> insertUser(UsersCompanion companion) {

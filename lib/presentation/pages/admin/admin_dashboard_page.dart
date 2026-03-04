@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'sections/user_management_section.dart';
 import '../../providers/auth_providers.dart';
 import '../../widgets/premium/premium_card.dart';
@@ -17,6 +18,40 @@ class AdminDashboardPage extends ConsumerWidget {
         title: const Text('Admin Dashboard'),
         centerTitle: false,
         actions: [
+          Consumer(
+            builder: (context, ref, child) {
+              final pendingCount = ref.watch(pendingCountProvider);
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.group_add),
+                    onPressed: () => context.push('/admin/pending-users'),
+                  ),
+                  if (pendingCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          pendingCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {

@@ -11,6 +11,15 @@ import '../../domain/enums/role.dart';
 import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
 
+// SUGGESTED FIRESTORE RULES:
+// match /users/{userId} {
+//   allow create: if request.auth != null;
+//   allow read: if request.auth.uid == userId
+//               || get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+//   allow update: if get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+//   allow delete: if get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+// }
+
 import '../../core/security/auth_exceptions.dart';
 import '../../core/security/security_exceptions.dart'; // New exceptions
 import '../../core/security/auth_validator.dart';
@@ -241,6 +250,26 @@ class AuthRepositoryImpl implements AuthRepository {
       // Sinon on masque l'erreur interne
       throw const InvalidCredentialsException();
     }
+  }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+  }
+
+  @override
+  Future<void> approveUser(String userId) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+  }
+
+  @override
+  Future<void> rejectUser(String userId) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
   }
 
   @override

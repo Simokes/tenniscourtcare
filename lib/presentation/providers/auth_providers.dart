@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
 import '../../domain/repositories/auth_repository.dart';
+import 'dart:async';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/enums/role.dart';
 import 'core_providers.dart';
 
 class AuthState {
@@ -71,6 +73,22 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     }
   }
 
+  Future<void> signUp(
+    String email,
+    String name,
+    String password,
+    Role role,
+  ) async {
+    state = const AsyncValue.loading();
+    try {
+      await _repo.signUp(email: email, name: name, password: password, role: role);
+      // Stay on login page after signup, user is inactive
+      state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
   Future<void> signIn(String email, String password) async {
     state = const AsyncValue.loading();
     try {
@@ -115,3 +133,50 @@ final isAuthenticatedProvider = Provider<bool>((ref) {
 final isSetupRequiredProvider = Provider<bool>((ref) {
   return ref.watch(authStateProvider).value?.isSetupRequired ?? false;
 });
+
+final pendingUsersProvider = StreamProvider<List<UserEntity>>((ref) {
+  return ref.read(databaseProvider).watchPendingUsers();
+});
+
+final pendingCountProvider = Provider<int>((ref) {
+  return ref.watch(pendingUsersProvider).maybeWhen(
+    data: (users) => users.length,
+    orElse: () => 0,
+  );
+});
+
+class UserApprovalNotifier extends AsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {
+    // Initial state
+  }
+
+  Future<void> approveUser(String userId) async {
+    state = const AsyncLoading();
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      await repo.approveUser(userId);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> rejectUser(String userId) async {
+    state = const AsyncLoading();
+    try {
+      final repo = ref.read(authRepositoryProvider);
+      await repo.rejectUser(userId);
+      state = const AsyncData(null);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+      rethrow;
+    }
+  }
+}
+
+final userApprovalNotifierProvider =
+    AsyncNotifierProvider<UserApprovalNotifier, void>(
+      UserApprovalNotifier.new,
+    );

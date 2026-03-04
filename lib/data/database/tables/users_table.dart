@@ -13,6 +13,11 @@ class Users extends Table {
   TextColumn get avatarUrl => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
+  // Approval fields
+  TextColumn get status => text().withDefault(const Constant('inactive'))();
+  DateTimeColumn get approvedAt => dateTime().nullable()();
+  TextColumn get approvedBy => text().nullable()();
+
   // New fields for Firestore sync
   TextColumn get remoteId => text().nullable()();
   DateTimeColumn get syncedAt => dateTime().nullable()();

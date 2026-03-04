@@ -1,6 +1,7 @@
 // lib/domain/entities/user_entity.dart
 
 import '../enums/role.dart';
+import '../enums/user_status.dart';
 
 class UserEntity {
   final int id;
@@ -9,6 +10,9 @@ class UserEntity {
   final Role role;
   final DateTime? lastLoginAt;
   final String? avatarUrl;
+  final UserStatus status;
+  final DateTime? approvedAt;
+  final String? approvedBy;
 
   // Sync fields
   final DateTime createdAt;
@@ -22,6 +26,9 @@ class UserEntity {
     required this.email,
     required this.name,
     required this.role,
+    this.status = UserStatus.inactive,
+    this.approvedAt,
+    this.approvedBy,
     this.lastLoginAt,
     this.avatarUrl,
     DateTime? createdAt,
@@ -38,6 +45,9 @@ class UserEntity {
     String? email,
     String? name,
     Role? role,
+    UserStatus? status,
+    DateTime? approvedAt,
+    String? approvedBy,
     DateTime? lastLoginAt,
     String? avatarUrl,
     DateTime? createdAt,
@@ -51,6 +61,9 @@ class UserEntity {
       email: email ?? this.email,
       name: name ?? this.name,
       role: role ?? this.role,
+      status: status ?? this.status,
+      approvedAt: approvedAt ?? this.approvedAt,
+      approvedBy: approvedBy ?? this.approvedBy,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
@@ -63,7 +76,7 @@ class UserEntity {
 
   @override
   String toString() =>
-      'UserEntity(id: $id, email: $email, role: ${role.name}, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'UserEntity(id: $id, email: $email, role: ${role.name}, status: ${status.name}, createdAt: $createdAt, updatedAt: $updatedAt)';
 
   @override
   bool operator ==(Object other) =>
@@ -74,6 +87,9 @@ class UserEntity {
           email == other.email &&
           name == other.name &&
           role == other.role &&
+          status == other.status &&
+          approvedAt == other.approvedAt &&
+          approvedBy == other.approvedBy &&
           lastLoginAt == other.lastLoginAt &&
           avatarUrl == other.avatarUrl &&
           createdAt == other.createdAt &&
@@ -88,6 +104,9 @@ class UserEntity {
       email.hashCode ^
       name.hashCode ^
       role.hashCode ^
+      status.hashCode ^
+      approvedAt.hashCode ^
+      approvedBy.hashCode ^
       lastLoginAt.hashCode ^
       avatarUrl.hashCode ^
       createdAt.hashCode ^
