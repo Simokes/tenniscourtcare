@@ -186,7 +186,9 @@ void main() {
       });
 
       test('is safe to call when not listening', () {
-        expect(() => cacheService.stopListening(), returnsNormally);
+        expect(() {
+          cacheService.stopListening();
+        }, returnsNormally);
       });
     });
 
