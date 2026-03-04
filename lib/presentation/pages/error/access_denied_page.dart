@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_providers.dart';
 
-class AccessDeniedPage extends StatelessWidget {
+class AccessDeniedPage extends ConsumerWidget {
   const AccessDeniedPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
@@ -34,9 +36,12 @@ class AccessDeniedPage extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
-              onPressed: () => context.go('/'),
-              icon: const Icon(Icons.home),
-              label: const Text('Retour à l\'accueil'),
+              onPressed: () {
+                ref.read(authStateProvider.notifier).signOut();
+                context.go('/login');
+              },
+              icon: const Icon(Icons.login),
+              label: const Text('Retourner à la connexion'),
             ),
           ],
         ),
