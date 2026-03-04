@@ -51,7 +51,23 @@ class AppDatabase extends _$AppDatabase {
   // === FIREBASE CACHE SERVICE METHODS ===
 
   Future<void> upsertTerrain(TerrainsCompanion companion) async {
-    await into(terrains).insertOnConflictUpdate(companion);
+    final firebaseId = companion.firebaseId.value;
+    if (firebaseId == null || firebaseId.isEmpty) {
+      await into(terrains).insert(companion);
+      return;
+    }
+
+    final existing = await (select(terrains)
+          ..where((t) => t.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(terrains)
+            ..where((t) => t.firebaseId.equals(firebaseId)))
+          .write(companion);
+    } else {
+      await into(terrains).insert(companion);
+    }
   }
 
   Future<void> deleteTerrainByFirebaseId(String firebaseId) async {

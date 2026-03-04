@@ -20,9 +20,9 @@ class _AddTerrainScreenState extends ConsumerState<AddTerrainScreen> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      final addTerrainFn = ref.read(addTerrainProvider);
-
-      await addTerrainFn(_nameController.text, _selectedType);
+      await ref
+          .read(terrainNotifierProvider.notifier)
+          .addTerrain(_nameController.text, _selectedType);
 
       if (mounted) Navigator.pop(context);
     }
