@@ -68,6 +68,20 @@ class FakeAuthRepository implements AuthRepository {
       role: Role.admin,
     );
   }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {}
+
+  @override
+  Future<void> approveUser(String userId) async {}
+
+  @override
+  Future<void> rejectUser(String userId) async {}
   @override
   Future<void> requestOtp(String email) async {}
   @override

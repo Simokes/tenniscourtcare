@@ -7,6 +7,8 @@ import 'package:tenniscourtcare/data/mappers/event_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/stock_item_mapper.dart';
 import 'package:tenniscourtcare/data/mappers/terrain_mapper.dart';
+import 'package:drift/drift.dart' as drift;
+import 'package:tenniscourtcare/domain/enums/role.dart';
 
 /// Listens to Firestore collections and keeps Drift cache in sync.
 /// This is the ONLY component authorized to write into Drift.
@@ -31,6 +33,7 @@ class FirebaseCacheService {
       _listenTerrains(),
       _listenMaintenances(),
       _listenEvents(),
+      _listenUsers(),
     ]);
     debugPrint('🔥 CacheService: ${_subscriptions.length} listeners started');
   }
@@ -141,6 +144,51 @@ class FirebaseCacheService {
         }
       },
       onError: (e) => debugPrint('❌ CacheService: Events listener error: $e'),
+    );
+  }
+
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenUsers() {
+    return _fs.collection('users').snapshots().listen(
+      (snapshot) async {
+        for (final change in snapshot.docChanges) {
+          try {
+            if (change.type == DocumentChangeType.added ||
+                change.type == DocumentChangeType.modified) {
+              final data = change.doc.data();
+              if (data == null) continue;
+
+              final uid = data['uid'] as String? ?? change.doc.id;
+              final roleStr = data['role'] as String? ?? 'agent';
+              final role = Role.values.firstWhere((r) => r.name == roleStr, orElse: () => Role.agent);
+
+              DateTime? parseTimestamp(dynamic ts) {
+                if (ts == null) return null;
+                if (ts is Timestamp) return ts.toDate();
+                return null;
+              }
+
+              final companion = UsersCompanion(
+                email: drift.Value(data['email'] as String? ?? ''),
+                firestoreUid: drift.Value(uid),
+                name: drift.Value(data['name'] ?? data['firstName'] ?? 'Utilisateur'),
+                role: drift.Value(role),
+                status: drift.Value(data['status'] as String? ?? 'inactive'),
+                approvedAt: drift.Value(parseTimestamp(data['approvedAt'])),
+                approvedBy: drift.Value(data['approvedBy'] as String?),
+                createdAt: drift.Value(parseTimestamp(data['createdAt']) ?? DateTime.now()),
+                passwordHash: const drift.Value('FIREBASE_AUTH'),
+              );
+
+              await _db.upsertUser(companion);
+            } else if (change.type == DocumentChangeType.removed) {
+              await _db.deleteUserByFirebaseId(change.doc.id);
+            }
+          } catch (e) {
+            debugPrint('❌ CacheService: Error processing users change: $e');
+          }
+        }
+      },
+      onError: (e) => debugPrint('❌ CacheService: Users listener error: $e'),
     );
   }
 }

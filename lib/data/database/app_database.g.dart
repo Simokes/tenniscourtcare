@@ -3145,6 +3145,38 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('inactive'),
+  );
+  static const VerificationMeta _approvedAtMeta = const VerificationMeta(
+    'approvedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> approvedAt = GeneratedColumn<DateTime>(
+    'approved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _approvedByMeta = const VerificationMeta(
+    'approvedBy',
+  );
+  @override
+  late final GeneratedColumn<String> approvedBy = GeneratedColumn<String>(
+    'approved_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _remoteIdMeta = const VerificationMeta(
     'remoteId',
   );
@@ -3204,6 +3236,9 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
     lastLoginAt,
     avatarUrl,
     createdAt,
+    status,
+    approvedAt,
+    approvedBy,
     remoteId,
     syncedAt,
     updatedAt,
@@ -3281,6 +3316,24 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
       );
     }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('approved_at')) {
+      context.handle(
+        _approvedAtMeta,
+        approvedAt.isAcceptableOrUnknown(data['approved_at']!, _approvedAtMeta),
+      );
+    }
+    if (data.containsKey('approved_by')) {
+      context.handle(
+        _approvedByMeta,
+        approvedBy.isAcceptableOrUnknown(data['approved_by']!, _approvedByMeta),
+      );
+    }
     if (data.containsKey('remote_id')) {
       context.handle(
         _remoteIdMeta,
@@ -3352,6 +3405,18 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      approvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}approved_at'],
+      ),
+      approvedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}approved_by'],
+      ),
       remoteId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}remote_id'],
@@ -3390,6 +3455,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
   final DateTime? lastLoginAt;
   final String? avatarUrl;
   final DateTime createdAt;
+  final String status;
+  final DateTime? approvedAt;
+  final String? approvedBy;
   final String? remoteId;
   final DateTime? syncedAt;
   final DateTime? updatedAt;
@@ -3404,6 +3472,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     this.lastLoginAt,
     this.avatarUrl,
     required this.createdAt,
+    required this.status,
+    this.approvedAt,
+    this.approvedBy,
     this.remoteId,
     this.syncedAt,
     this.updatedAt,
@@ -3429,6 +3500,13 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       map['avatar_url'] = Variable<String>(avatarUrl);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || approvedAt != null) {
+      map['approved_at'] = Variable<DateTime>(approvedAt);
+    }
+    if (!nullToAbsent || approvedBy != null) {
+      map['approved_by'] = Variable<String>(approvedBy);
+    }
     if (!nullToAbsent || remoteId != null) {
       map['remote_id'] = Variable<String>(remoteId);
     }
@@ -3459,6 +3537,13 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           ? const Value.absent()
           : Value(avatarUrl),
       createdAt: Value(createdAt),
+      status: Value(status),
+      approvedAt: approvedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvedAt),
+      approvedBy: approvedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(approvedBy),
       remoteId: remoteId == null && nullToAbsent
           ? const Value.absent()
           : Value(remoteId),
@@ -3489,6 +3574,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       lastLoginAt: serializer.fromJson<DateTime?>(json['lastLoginAt']),
       avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      status: serializer.fromJson<String>(json['status']),
+      approvedAt: serializer.fromJson<DateTime?>(json['approvedAt']),
+      approvedBy: serializer.fromJson<String?>(json['approvedBy']),
       remoteId: serializer.fromJson<String?>(json['remoteId']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
@@ -3510,6 +3598,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
       'lastLoginAt': serializer.toJson<DateTime?>(lastLoginAt),
       'avatarUrl': serializer.toJson<String?>(avatarUrl),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'status': serializer.toJson<String>(status),
+      'approvedAt': serializer.toJson<DateTime?>(approvedAt),
+      'approvedBy': serializer.toJson<String?>(approvedBy),
       'remoteId': serializer.toJson<String?>(remoteId),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
@@ -3527,6 +3618,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     Value<DateTime?> lastLoginAt = const Value.absent(),
     Value<String?> avatarUrl = const Value.absent(),
     DateTime? createdAt,
+    String? status,
+    Value<DateTime?> approvedAt = const Value.absent(),
+    Value<String?> approvedBy = const Value.absent(),
     Value<String?> remoteId = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
@@ -3541,6 +3635,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     lastLoginAt: lastLoginAt.present ? lastLoginAt.value : this.lastLoginAt,
     avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
     createdAt: createdAt ?? this.createdAt,
+    status: status ?? this.status,
+    approvedAt: approvedAt.present ? approvedAt.value : this.approvedAt,
+    approvedBy: approvedBy.present ? approvedBy.value : this.approvedBy,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
@@ -3563,6 +3660,13 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           : this.lastLoginAt,
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      status: data.status.present ? data.status.value : this.status,
+      approvedAt: data.approvedAt.present
+          ? data.approvedAt.value
+          : this.approvedAt,
+      approvedBy: data.approvedBy.present
+          ? data.approvedBy.value
+          : this.approvedBy,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -3582,6 +3686,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           ..write('lastLoginAt: $lastLoginAt, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('approvedAt: $approvedAt, ')
+          ..write('approvedBy: $approvedBy, ')
           ..write('remoteId: $remoteId, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -3601,6 +3708,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
     lastLoginAt,
     avatarUrl,
     createdAt,
+    status,
+    approvedAt,
+    approvedBy,
     remoteId,
     syncedAt,
     updatedAt,
@@ -3619,6 +3729,9 @@ class UserRow extends DataClass implements Insertable<UserRow> {
           other.lastLoginAt == this.lastLoginAt &&
           other.avatarUrl == this.avatarUrl &&
           other.createdAt == this.createdAt &&
+          other.status == this.status &&
+          other.approvedAt == this.approvedAt &&
+          other.approvedBy == this.approvedBy &&
           other.remoteId == this.remoteId &&
           other.syncedAt == this.syncedAt &&
           other.updatedAt == this.updatedAt &&
@@ -3635,6 +3748,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
   final Value<DateTime?> lastLoginAt;
   final Value<String?> avatarUrl;
   final Value<DateTime> createdAt;
+  final Value<String> status;
+  final Value<DateTime?> approvedAt;
+  final Value<String?> approvedBy;
   final Value<String?> remoteId;
   final Value<DateTime?> syncedAt;
   final Value<DateTime?> updatedAt;
@@ -3649,6 +3765,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     this.lastLoginAt = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.approvedAt = const Value.absent(),
+    this.approvedBy = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -3664,6 +3783,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     this.lastLoginAt = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.approvedAt = const Value.absent(),
+    this.approvedBy = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.syncedAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -3682,6 +3804,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     Expression<DateTime>? lastLoginAt,
     Expression<String>? avatarUrl,
     Expression<DateTime>? createdAt,
+    Expression<String>? status,
+    Expression<DateTime>? approvedAt,
+    Expression<String>? approvedBy,
     Expression<String>? remoteId,
     Expression<DateTime>? syncedAt,
     Expression<DateTime>? updatedAt,
@@ -3697,6 +3822,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
       if (lastLoginAt != null) 'last_login_at': lastLoginAt,
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (createdAt != null) 'created_at': createdAt,
+      if (status != null) 'status': status,
+      if (approvedAt != null) 'approved_at': approvedAt,
+      if (approvedBy != null) 'approved_by': approvedBy,
       if (remoteId != null) 'remote_id': remoteId,
       if (syncedAt != null) 'synced_at': syncedAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -3714,6 +3842,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     Value<DateTime?>? lastLoginAt,
     Value<String?>? avatarUrl,
     Value<DateTime>? createdAt,
+    Value<String>? status,
+    Value<DateTime?>? approvedAt,
+    Value<String?>? approvedBy,
     Value<String?>? remoteId,
     Value<DateTime?>? syncedAt,
     Value<DateTime?>? updatedAt,
@@ -3729,6 +3860,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
+      status: status ?? this.status,
+      approvedAt: approvedAt ?? this.approvedAt,
+      approvedBy: approvedBy ?? this.approvedBy,
       remoteId: remoteId ?? this.remoteId,
       syncedAt: syncedAt ?? this.syncedAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -3768,6 +3902,15 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (approvedAt.present) {
+      map['approved_at'] = Variable<DateTime>(approvedAt.value);
+    }
+    if (approvedBy.present) {
+      map['approved_by'] = Variable<String>(approvedBy.value);
+    }
     if (remoteId.present) {
       map['remote_id'] = Variable<String>(remoteId.value);
     }
@@ -3795,6 +3938,9 @@ class UsersCompanion extends UpdateCompanion<UserRow> {
           ..write('lastLoginAt: $lastLoginAt, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('approvedAt: $approvedAt, ')
+          ..write('approvedBy: $approvedBy, ')
           ..write('remoteId: $remoteId, ')
           ..write('syncedAt: $syncedAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -8887,6 +9033,9 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<DateTime?> lastLoginAt,
       Value<String?> avatarUrl,
       Value<DateTime> createdAt,
+      Value<String> status,
+      Value<DateTime?> approvedAt,
+      Value<String?> approvedBy,
       Value<String?> remoteId,
       Value<DateTime?> syncedAt,
       Value<DateTime?> updatedAt,
@@ -8903,6 +9052,9 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<DateTime?> lastLoginAt,
       Value<String?> avatarUrl,
       Value<DateTime> createdAt,
+      Value<String> status,
+      Value<DateTime?> approvedAt,
+      Value<String?> approvedBy,
       Value<String?> remoteId,
       Value<DateTime?> syncedAt,
       Value<DateTime?> updatedAt,
@@ -9001,6 +9153,21 @@ class $$UsersTableFilterComposer extends Composer<_$AppDatabase, $UsersTable> {
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -9129,6 +9296,21 @@ class $$UsersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get remoteId => $composableBuilder(
     column: $table.remoteId,
     builder: (column) => ColumnOrderings(column),
@@ -9191,6 +9373,19 @@ class $$UsersTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get approvedAt => $composableBuilder(
+    column: $table.approvedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get approvedBy => $composableBuilder(
+    column: $table.approvedBy,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get remoteId =>
       $composableBuilder(column: $table.remoteId, builder: (column) => column);
@@ -9295,6 +9490,9 @@ class $$UsersTableTableManager
                 Value<DateTime?> lastLoginAt = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> approvedAt = const Value.absent(),
+                Value<String?> approvedBy = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -9309,6 +9507,9 @@ class $$UsersTableTableManager
                 lastLoginAt: lastLoginAt,
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
+                status: status,
+                approvedAt: approvedAt,
+                approvedBy: approvedBy,
                 remoteId: remoteId,
                 syncedAt: syncedAt,
                 updatedAt: updatedAt,
@@ -9325,6 +9526,9 @@ class $$UsersTableTableManager
                 Value<DateTime?> lastLoginAt = const Value.absent(),
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> approvedAt = const Value.absent(),
+                Value<String?> approvedBy = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
@@ -9339,6 +9543,9 @@ class $$UsersTableTableManager
                 lastLoginAt: lastLoginAt,
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
+                status: status,
+                approvedAt: approvedAt,
+                approvedBy: approvedBy,
                 remoteId: remoteId,
                 syncedAt: syncedAt,
                 updatedAt: updatedAt,

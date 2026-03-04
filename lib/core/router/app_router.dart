@@ -5,8 +5,10 @@ import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
 import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import '../../presentation/pages/auth/login_page.dart';
+import '../../presentation/pages/auth/signup_page.dart';
 import '../../presentation/pages/auth/admin_setup_page.dart';
 import '../../presentation/pages/admin/admin_dashboard_page.dart';
+import '../../presentation/pages/admin/pending_users_page.dart';
 import '../../presentation/pages/error/access_denied_page.dart';
 import 'package:tenniscourtcare/features/home/presentation/screens/home_screen.dart';
 import 'package:tenniscourtcare/features/inventory/presentation/screens/stock_history_screen.dart';
@@ -47,6 +49,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
 
       final isSettingUp = state.uri.path == '/admin-setup';
       final isLoggingIn = state.uri.path == '/login';
+      final isSignup = state.uri.path == '/signup';
       final isAccessDenied = state.uri.path == '/access-denied';
 
       switch (setupStatus) {
@@ -58,11 +61,11 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           return null;
 
         case SetupStatus.needsLogin:
-          if (!isLoggingIn) return '/login';
+          if (!isLoggingIn && !isSignup) return '/login';
           return null;
 
         case SetupStatus.authenticated:
-          if (isLoggingIn || isSettingUp) {
+          if (isLoggingIn || isSettingUp || isSignup) {
             return '/';
           }
           return null;
@@ -74,6 +77,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
       GoRoute(
         path: '/admin-setup',
         builder: (context, state) => const AdminSetupPage(),
@@ -85,6 +89,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminDashboardPage(),
+        redirect: (context, state) {
+          final user = ref.read(currentUserProvider);
+          if (user?.role != Role.admin) return '/access-denied';
+          return null;
+        },
+      ),
+      GoRoute(
+        path: '/admin/pending-users',
+        builder: (context, state) => const PendingUsersPage(),
         redirect: (context, state) {
           final user = ref.read(currentUserProvider);
           if (user?.role != Role.admin) return '/access-denied';

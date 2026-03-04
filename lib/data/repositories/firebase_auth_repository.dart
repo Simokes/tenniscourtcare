@@ -73,6 +73,17 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   Future<UserEntity> _syncUser(firebase.User fUser) async {
+    // Check if the user is inactive before syncing/returning
+    final doc = await _firestore.collection('users').doc(fUser.uid).get();
+    if (doc.exists) {
+      final status = doc.data()?['status'] as String?;
+      if (status == 'inactive') {
+        throw const PendingApprovalException();
+      } else if (status == 'rejected') {
+        throw const AccountRejectedException();
+      }
+    }
+
     // CRITICAL FIX: Query by firestore_uid, not email
     final localUser = await _db.getUserByFirestoreUid(fUser.uid);
 
@@ -151,6 +162,98 @@ class FirebaseAuthRepository implements AuthRepository {
       return await _syncUser(fUser);
     } catch (e) {
       return null;
+    }
+  }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
+    try {
+      if (role == Role.admin) {
+        throw const ValidationException('Impossible de s\'inscrire en tant qu\'administrateur.');
+      }
+
+      // 1. Firebase Auth createUserWithEmailAndPassword
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user == null) {
+        throw const SecurityException('Erreur lors de la création de l\'utilisateur.');
+      }
+
+      // Update displayName
+      await user.updateDisplayName(name);
+
+      // 2. Write Firestore doc in 'users' collection
+      final uid = user.uid;
+      final now = DateTime.now();
+      await _firestore.collection('users').doc(uid).set({
+        'email': email,
+        'name': name,
+        'role': role.name,
+        'status': 'inactive',
+        'createdAt': FieldValue.serverTimestamp(),
+        'approvedAt': null,
+        'approvedBy': null,
+        'uid': uid,
+      });
+
+      // 3. Write Drift local user row (status: inactive)
+      await _db.into(_db.users).insert(
+        UsersCompanion.insert(
+          email: email,
+          name: name,
+          passwordHash: 'FIREBASE_AUTH',
+          role: role,
+          status: const drift.Value('inactive'),
+          firestoreUid: drift.Value(uid),
+          createdAt: drift.Value(now),
+          updatedAt: drift.Value(now),
+        ),
+      );
+
+      // 4. Sign out immediately after signup
+      await _auth.signOut();
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> approveUser(String userId) async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw const UnauthorizedException();
+      }
+
+      await _firestore.collection('users').doc(userId).update({
+        'status': 'active',
+        'approvedAt': FieldValue.serverTimestamp(),
+        'approvedBy': currentUser.email,
+      });
+      // Drift local row update will be handled by FirebaseCacheService listener
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> rejectUser(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'status': 'rejected',
+      });
+      // Local row and user logic handled via sync / Cloud function isn't needed per instructions
+    } catch (e) {
+      throw _mapFirebaseException(e);
     }
   }
 

@@ -1,10 +1,24 @@
+enum AuthExceptionType {
+  invalidCredentials,
+  pendingApproval,
+  rejected,
+  emailAlreadyInUse,
+  unknown,
+}
+
 /// Base class for all authentication related exceptions
 abstract class AuthException implements Exception {
   final String message;
   final String? code;
   final dynamic originalError;
+  final AuthExceptionType type;
 
-  const AuthException(this.message, {this.code, this.originalError});
+  const AuthException(
+    this.message, {
+    this.code,
+    this.originalError,
+    this.type = AuthExceptionType.unknown,
+  });
 
   @override
   String toString() =>
@@ -13,13 +27,52 @@ abstract class AuthException implements Exception {
 
 // Added concrete class for generic auth errors
 class GenericAuthException extends AuthException {
-  const GenericAuthException(super.message, {super.code, super.originalError});
+  const GenericAuthException(
+    super.message, {
+    super.code,
+    super.originalError,
+    super.type = AuthExceptionType.unknown,
+  });
 }
 
 class InvalidCredentialsException extends AuthException {
   const InvalidCredentialsException({
     String message = 'Email ou mot de passe incorrect.',
-  }) : super(message, code: 'INVALID_CREDENTIALS');
+  }) : super(
+         message,
+         code: 'INVALID_CREDENTIALS',
+         type: AuthExceptionType.invalidCredentials,
+       );
+}
+
+class PendingApprovalException extends AuthException {
+  const PendingApprovalException({
+    String message = 'Votre compte est en attente de validation par un administrateur.',
+  }) : super(
+         message,
+         code: 'PENDING_APPROVAL',
+         type: AuthExceptionType.pendingApproval,
+       );
+}
+
+class AccountRejectedException extends AuthException {
+  const AccountRejectedException({
+    String message = 'Votre demande de création de compte a été refusée.',
+  }) : super(
+         message,
+         code: 'ACCOUNT_REJECTED',
+         type: AuthExceptionType.rejected,
+       );
+}
+
+class EmailAlreadyInUseException extends AuthException {
+  const EmailAlreadyInUseException({
+    String message = 'Cet email est déjà utilisé.',
+  }) : super(
+         message,
+         code: 'EMAIL_ALREADY_IN_USE',
+         type: AuthExceptionType.emailAlreadyInUse,
+       );
 }
 
 class AccountLockedException extends AuthException {

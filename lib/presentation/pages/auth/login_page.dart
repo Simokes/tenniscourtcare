@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/auth_providers.dart';
+import '../../../core/security/auth_exceptions.dart';
 import 'auth_icons.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -224,23 +226,35 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Error Message
                 if (error != null) ...[
                   const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      error.toString(),
-                      style: GoogleFonts.inter(
-                        color: Colors.red,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                  Builder(builder: (context) {
+                    Color errorBgColor = Colors.red.withValues(alpha: 0.1);
+                    Color errorBorderColor = Colors.red.withValues(alpha: 0.3);
+                    Color errorTextColor = Colors.red;
+
+                    if (error is AuthException && error.type == AuthExceptionType.pendingApproval) {
+                      errorBgColor = Colors.orange.withValues(alpha: 0.1);
+                      errorBorderColor = Colors.orange.withValues(alpha: 0.3);
+                      errorTextColor = Colors.orange.shade800;
+                    }
+
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: errorBgColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: errorBorderColor),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+                      child: Text(
+                        error is AuthException ? error.message : error.toString(),
+                        style: GoogleFonts.inter(
+                          color: errorTextColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }),
                 ],
 
                 const SizedBox(height: 24),
@@ -368,13 +382,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     TextButton(
                       onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please contact your administrator to create an account.',
-                            ),
-                          ),
-                        );
+                        context.go('/signup');
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -382,7 +390,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: Text(
-                        'Sign up',
+                        'S\'inscrire',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,

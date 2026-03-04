@@ -8,8 +8,18 @@ import 'dart:math';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/enums/role.dart';
+import '../../domain/enums/user_status.dart';
 import '../database/app_database.dart';
 import '../mappers/user_mapper.dart';
+
+// SUGGESTED FIRESTORE RULES:
+// match /users/{userId} {
+//   allow create: if request.auth != null;
+//   allow read: if request.auth.uid == userId
+//               || get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+//   allow update: if get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+//   allow delete: if get(/databases/.../users/$(request.auth.uid)).data.role == 'admin';
+// }
 
 import '../../core/security/auth_exceptions.dart';
 import '../../core/security/security_exceptions.dart'; // New exceptions
@@ -204,7 +214,21 @@ class AuthRepositoryImpl implements AuthRepository {
         throw const InvalidCredentialsException();
       }
 
-      // 5. Succès
+      // 5. Vérification du statut
+      final userStatus = UserStatus.values.firstWhere(
+        (s) => s.name == userRow.status,
+        orElse: () => UserStatus.inactive,
+      );
+
+      if (userStatus == UserStatus.inactive) {
+        throw const PendingApprovalException();
+      }
+
+      if (userStatus == UserStatus.rejected) {
+        throw const AccountRejectedException();
+      }
+
+      // 6. Succès
       await _rateLimiter.recordAttempt(email: email, success: true);
 
       // Génération Token JWT
@@ -241,6 +265,26 @@ class AuthRepositoryImpl implements AuthRepository {
       // Sinon on masque l'erreur interne
       throw const InvalidCredentialsException();
     }
+  }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  }) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+  }
+
+  @override
+  Future<void> approveUser(String userId) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+  }
+
+  @override
+  Future<void> rejectUser(String userId) async {
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
   }
 
   @override

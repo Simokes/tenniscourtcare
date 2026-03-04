@@ -28,6 +28,14 @@ abstract class AuthRepository {
     required String password,
   });
 
+  /// Inscrit un nouvel utilisateur et le place en attente de validation.
+  Future<void> signUp({
+    required String email,
+    required String name,
+    required String password,
+    required Role role,
+  });
+
   /// Crée un nouvel utilisateur (Agent ou Admin) avec hashage sécurisé.
   Future<void> createUser({
     required String email,
@@ -41,6 +49,12 @@ abstract class AuthRepository {
 
   /// Met à jour le rôle d'un utilisateur.
   Future<void> updateUserRole(int userId, Role newRole);
+
+  /// Approuve un utilisateur en attente.
+  Future<void> approveUser(String userId);
+
+  /// Refuse un utilisateur en attente.
+  Future<void> rejectUser(String userId);
 
   /// Met à jour le mot de passe d'un utilisateur (reset).
   Future<void> updateUserPassword(int userId, String newPassword);
