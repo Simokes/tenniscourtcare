@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/event_provider.dart';
 import '../../providers/terrain_provider.dart';
+import '../../providers/auth_providers.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../widgets/premium/premium_card.dart';
 import '../../widgets/premium/premium_text_form_field.dart';
@@ -116,8 +117,11 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final currentUser = ref.read(currentUserProvider);
+
     final event = AppEvent(
       id: widget.eventToEdit?.id,
+      firebaseId: widget.eventToEdit?.firebaseId, // ✅ AJOUTÉ
       title: _titleController.text.trim(),
       description: _descController.text.trim().isEmpty
           ? null
@@ -128,8 +132,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       terrainIds: _selectedTerrainIds,
       createdAt: widget.eventToEdit?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
+      createdBy: widget.eventToEdit?.createdBy ?? currentUser?.email, // ✅ AJOUTÉ
+      modifiedBy: currentUser?.email, // ✅ AJOUTÉ
     );
-
     try {
       if (widget.eventToEdit == null) {
         await ref.read(eventNotifierProvider.notifier).addEvent(event);

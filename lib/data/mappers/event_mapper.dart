@@ -63,19 +63,19 @@ class EventMapper {
   }
 
   // Domain Entity → Firestore Map
-  static Map<String, dynamic> toFirestore(AppEvent item) {
+    static Map<String, dynamic> toFirestore(AppEvent item) {
     return {
       'title': item.title,
-      'description': item.description,
+      if (item.description != null) 'description': item.description,
       'startTime': Timestamp.fromDate(item.startTime),
       'endTime': Timestamp.fromDate(item.endTime),
       'color': item.color,
       'terrainIds': item.terrainIds,
       'createdAt': Timestamp.fromDate(item.createdAt),
       'updatedAt': Timestamp.fromDate(item.updatedAt),
-      'createdBy': item.createdBy,
-      'modifiedBy': item.modifiedBy,
-      'firebaseId': item.firebaseId,
+      if (item.createdBy != null) 'createdBy': item.createdBy,
+      if (item.modifiedBy != null) 'modifiedBy': item.modifiedBy,
+      // ✅ SUPPRIMÉ: 'firebaseId': item.firebaseId,
     };
   }
 
