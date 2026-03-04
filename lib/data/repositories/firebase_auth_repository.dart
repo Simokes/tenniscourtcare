@@ -206,15 +206,16 @@ class FirebaseAuthRepository implements AuthRepository {
       });
 
       // 3. Write Drift local user row (status: inactive)
-      await _db.insertUser(
-        UsersCompanion(
-          email: drift.Value(email),
-          firestoreUid: drift.Value(uid),
-          name: drift.Value(name),
-          passwordHash: const drift.Value('FIREBASE_AUTH'),
-          role: drift.Value(role),
+      await _db.into(_db.users).insert(
+        UsersCompanion.insert(
+          email: email,
+          name: name,
+          passwordHash: 'FIREBASE_AUTH',
+          role: role,
           status: const drift.Value('inactive'),
+          firestoreUid: drift.Value(uid),
           createdAt: drift.Value(now),
+          updatedAt: drift.Value(now),
         ),
       );
 

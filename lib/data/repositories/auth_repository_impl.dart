@@ -274,49 +274,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required Role role,
   }) async {
-    try {
-      // 1. Validate inputs
-      AuthValidator.validateEmail(email);
-      AuthValidator.validateName(name);
-      AuthValidator.validatePassword(password);
-
-      // 2. Check email not already used
-      final existing = await _db.getUserRowByEmail(email);
-      if (existing != null) {
-        throw const EmailAlreadyInUseException();
-      }
-
-      // 3. Hash password
-      final passwordHash = await _hashPassword(password);
-
-      // 4. Write to Drift immediately (status: inactive)
-      final now = DateTime.now();
-      await _db.insertUser(
-        UsersCompanion(
-          email: drift.Value(email),
-          name: drift.Value(name),
-          passwordHash: drift.Value(passwordHash),
-          role: drift.Value(role),
-          status: const drift.Value('inactive'),
-          createdAt: drift.Value(now),
-          updatedAt: drift.Value(now),
-        ),
-      );
-
-      // Note: Write to Firestore is handled in FirebaseAuthRepository since
-      // AuthRepositoryImpl is mostly for local/offline auth operations in this app
-      // according to previous architecture. If needed, this could interact
-      // with a Firestore instance here, but usually FirebaseAuthRepository
-      // handles the remote part.
-
-    } on AuthException {
-      rethrow;
-    } catch (e) {
-      throw GenericAuthException(
-        'Erreur lors de l\'inscription: $e',
-        type: AuthExceptionType.unknown,
-      );
-    }
+    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
   }
 
   @override
