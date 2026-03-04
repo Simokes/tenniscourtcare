@@ -2,6 +2,7 @@ enum AuthExceptionType {
   invalidCredentials,
   pendingApproval,
   rejected,
+  emailAlreadyInUse,
   unknown,
 }
 
@@ -61,6 +62,16 @@ class AccountRejectedException extends AuthException {
          message,
          code: 'ACCOUNT_REJECTED',
          type: AuthExceptionType.rejected,
+       );
+}
+
+class EmailAlreadyInUseException extends AuthException {
+  const EmailAlreadyInUseException({
+    String message = 'Cet email est déjà utilisé.',
+  }) : super(
+         message,
+         code: 'EMAIL_ALREADY_IN_USE',
+         type: AuthExceptionType.emailAlreadyInUse,
        );
 }
 
