@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 import '../../domain/entities/terrain.dart';
 
 /// Provider for the count of maintenances performed today

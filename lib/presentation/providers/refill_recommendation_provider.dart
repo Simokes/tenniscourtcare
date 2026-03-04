@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/refill_recommendation.dart';
 import 'app_settings_provider.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 import '../../features/weather/infrastructure/weather_service.dart';
 import 'weather_providers.dart';
 

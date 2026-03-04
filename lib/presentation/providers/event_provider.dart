@@ -4,7 +4,7 @@ import '../../data/repositories/event_repository_impl.dart';
 import '../../domain/entities/app_event.dart';
 import '../../domain/entities/terrain.dart'; // Needed
 import '../../domain/repositories/event_repository.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 import 'maintenance_provider.dart';
 import 'terrain_provider.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/maintenance_repository_impl.dart';
 import '../../domain/entities/maintenance.dart';
 import '../../domain/repositories/maintenance_repository.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

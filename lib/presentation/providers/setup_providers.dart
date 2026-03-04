@@ -9,7 +9,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/models/setup_status.dart';
 import '../../domain/enums/role.dart';
 import 'auth_providers.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 
 // PART 1: adminExistsProvider
 final adminExistsProvider = FutureProvider<bool>((ref) async {

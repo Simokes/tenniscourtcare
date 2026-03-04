@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:drift/drift.dart';
 
-import '../presentation/providers/database_provider.dart';
+import '../presentation/providers/core_providers.dart';
 import '../presentation/providers/auth_providers.dart';
 import '../data/database/app_database.dart';
 import '../domain/enums/role.dart';

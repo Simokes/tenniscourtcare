@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import '../../utils/date_utils.dart'; // <- inutile ici, à retirer si non utilisé
-import 'database_provider.dart';
+import 'core_providers.dart';
 import 'stats_period_provider.dart';
 import 'selected_terrains_provider.dart';
 import 'terrain_provider.dart';

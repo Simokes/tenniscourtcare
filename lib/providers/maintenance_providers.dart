@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../presentation/providers/database_provider.dart';
+import '../presentation/providers/core_providers.dart';
 import '../domain/entities/maintenance.dart' as dom;
 import '../data/mappers/maintenance_mapper.dart';
 import '../services/listener_monitor.dart';

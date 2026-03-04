@@ -5,7 +5,7 @@ import '../../domain/entities/stock_item.dart';
 import '../../data/mappers/stock_item_mapper.dart';
 import '../../domain/repositories/stock_repository.dart';
 import '../../features/inventory/models/stock_filter.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 

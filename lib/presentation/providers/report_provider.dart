@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/period_report.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 import 'stats_period_provider.dart';
 
 final reportProvider = FutureProvider<PeriodReport>((ref) async {

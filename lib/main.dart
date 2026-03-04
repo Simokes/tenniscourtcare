@@ -7,7 +7,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/providers/app_settings_provider.dart';
-import 'presentation/providers/database_provider.dart'; // ✅ IMPORT
+import 'presentation/providers/core_providers.dart'; // ✅ IMPORT
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';

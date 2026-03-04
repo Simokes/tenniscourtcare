@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'database_provider.dart';
+import 'core_providers.dart';
 import 'app_settings_provider.dart';
 import 'weather_providers.dart';
 
