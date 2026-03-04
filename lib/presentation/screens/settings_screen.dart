@@ -6,7 +6,6 @@ import '../providers/auth_providers.dart';
 import '../widgets/settings_components.dart';
 import '../../domain/enums/role.dart';
 import 'edit_coords_page.dart';
-import 'admin/user_management_screen.dart';
 import 'admin/security_log_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -142,17 +141,13 @@ class SettingsScreen extends ConsumerWidget {
               SettingsContainer(
                 children: [
                   PreferenceTile(
-                    icon: Icons.manage_accounts,
-                    title: 'Gestion des membres',
-                    subtitle: 'Ajouter, supprimer, modifier',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const UserManagementScreen(),
-                        ),
-                      );
-                    },
+                    icon: Icons.admin_panel_settings,
+                    title: 'Tableau de bord admin',
+                    subtitle: 'Gérer terrains, utilisateurs et club',
+                    onTap: () => context.push('/admin'),
+                    trailing: ref.watch(pendingCountProvider) > 0
+                        ? Badge(label: Text('${ref.watch(pendingCountProvider)}'))
+                        : null,
                   ),
                   const Divider(height: 1, indent: 56),
                   PreferenceTile(
@@ -170,6 +165,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
             ],
 
             // Security & Data Section

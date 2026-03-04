@@ -2,139 +2,92 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'sections/user_management_section.dart';
+import 'sections/terrain_management_section.dart';
+import 'sections/club_info_section.dart';
 import '../../providers/auth_providers.dart';
-import '../../widgets/premium/premium_card.dart';
 
 class AdminDashboardPage extends ConsumerWidget {
   const AdminDashboardPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
-
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        centerTitle: false,
-        actions: [
-          Consumer(
-            builder: (context, ref, child) {
-              final pendingCount = ref.watch(pendingCountProvider);
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.group_add),
-                    onPressed: () => context.push('/admin/pending-users'),
-                  ),
-                  if (pendingCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          pendingCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: AppBar(
+          title: const Text('Administration'),
+          centerTitle: false,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/'),
+          ),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Terrains'),
+              Tab(text: 'Utilisateurs'),
+              Tab(text: 'Club'),
+            ],
+          ),
+          actions: [
+            Consumer(
+              builder: (context, ref, child) {
+                final pendingCount = ref.watch(pendingCountProvider);
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.group_add),
+                      onPressed: () => context.push('/admin/pending-users'),
+                    ),
+                    if (pendingCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            pendingCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              ref.read(authStateProvider.notifier).signOut();
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (user != null)
-              Text(
-                'Bonjour, ${user.name}',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            const SizedBox(height: 24),
-
-            // Stats Row
-            const Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    title: 'Courts',
-                    value: '4',
-                    icon: Icons.sports_tennis,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: _StatCard(
-                    title: 'Interventions',
-                    value: '12',
-                    icon: Icons.handyman,
-                  ),
-                ),
-                // Assuming we fetch these numbers from a provider later
-              ],
+                  ],
+                );
+              },
             ),
-            const SizedBox(height: 24),
-
-            // User Management
-            const UserManagementSection(),
-
-            const SizedBox(height: 24),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {
+                ref.read(authStateProvider.notifier).signOut();
+              },
+            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      color: Theme.of(
-        context,
-      ).colorScheme.primaryContainer.withValues(alpha: 0.3),
-      child: Column(
-        children: [
-          Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          Text(title),
-        ],
+        body: const TabBarView(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: TerrainManagementSection(),
+            ),
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: UserManagementSection(),
+            ),
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16),
+              child: ClubInfoSection(),
+            ),
+          ],
+        ),
       ),
     );
   }

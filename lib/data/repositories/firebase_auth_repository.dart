@@ -488,4 +488,16 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<bool> verifyOtp(String email, String code) async {
     throw UnimplementedError('OTP non supporté dans cette version.');
   }
+
+  @override
+  Future<void> deleteUserAndData(int localId, String? firebaseId) async {
+    try {
+      if (firebaseId != null) {
+        await _firestore.collection('users').doc(firebaseId).delete();
+      }
+      await _db.deleteUser(localId);
+    } catch (e) {
+      throw GenericAuthException('Failed to delete user: $e');
+    }
+  }
 }

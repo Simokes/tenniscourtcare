@@ -574,4 +574,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return false;
     }
   }
+
+  @override
+  Future<void> deleteUserAndData(int localId, String? firebaseId) async {
+    // Local-only implementation
+    await _db.deleteUser(localId);
+  }
 }
