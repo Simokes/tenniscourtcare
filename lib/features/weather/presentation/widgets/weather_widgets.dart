@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
-import 'weather_badge.dart';
+
 
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;

@@ -55,7 +55,7 @@ class WeatherScreen extends ConsumerWidget {
             icon: Icon(Icons.settings, color: navy800),
             onPressed: () {
               // Action pour rafraîchir ou paramètres
-              ref.refresh(weatherForClubProvider(terrainType));
+              ref.invalidate(weatherForClubProvider(terrainType));
             },
           ),
           const SizedBox(width: 8),
