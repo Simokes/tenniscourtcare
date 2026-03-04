@@ -130,12 +130,13 @@ void main() {
     cacheService = FirebaseCacheService(mockDb, mockFs);
   });
 
-  tearDown(() async {
+  tearDown(() {
     cacheService.stopListening();
-    await stockStreamController.close();
-    await terrainsStreamController.close();
-    await maintenancesStreamController.close();
-    await eventsStreamController.close();
+
+    if (!stockStreamController.isClosed) stockStreamController.close();
+    if (!terrainsStreamController.isClosed) terrainsStreamController.close();
+    if (!maintenancesStreamController.isClosed) maintenancesStreamController.close();
+    if (!eventsStreamController.isClosed) eventsStreamController.close();
   });
 
   group('FirebaseCacheService', () {
@@ -186,9 +187,7 @@ void main() {
       });
 
       test('is safe to call when not listening', () {
-        expect(() {
-          cacheService.stopListening();
-        }, returnsNormally);
+        expect(() => cacheService.stopListening(), returnsNormally);
       });
     });
 
