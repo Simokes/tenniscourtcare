@@ -12,6 +12,7 @@ import 'package:tenniscourtcare/features/home/presentation/screens/home_screen.d
 import 'package:tenniscourtcare/features/inventory/presentation/screens/stock_history_screen.dart';
 import '../../features/inventory/presentation/screens/stock_screen.dart';
 import '../../features/weather/presentation/screens/weather_screen.dart';
+import '../../presentation/screens/calendar/calendar_screen.dart';
 import '../../presentation/screens/maintenance_screen.dart';
 import '../../presentation/screens/stats_screen.dart';
 import '../../presentation/screens/settings_screen.dart';
@@ -120,6 +121,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+       GoRoute(
+        path: '/calendar',
+        builder: (context, state) => const CalendarScreen(),
       ),
       GoRoute(
         path: '/add-terrain',

@@ -162,7 +162,7 @@ class HomeScreen extends ConsumerWidget {
                   color: Colors.grey.shade400,
                 ),
                 onPressed: () {
-                  // Schedule - placeholder
+                 context.push('/calendar'); // ✅ navigation calendar
                 },
               ),
               IconButton(
