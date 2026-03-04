@@ -66,6 +66,7 @@ void main() {
     group('addTerrain', () {
       test('writes to Firestore only', () async {
         // Arrange
+        when(() => mockDoc.id).thenReturn('new_doc_id');
         when(() => mockCollection.add(any())).thenAnswer((_) async => mockDoc);
 
         // Act
