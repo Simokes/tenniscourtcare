@@ -33,11 +33,14 @@ Drift (SQLite)       = Read cache only
 **Data flow:**
 ```
 WRITE:
-UI action → Repository.create/update/delete() → Firestore → listener → Drift → UI rebuilt
+UI action → Repository.addX/updateX/deleteX() → Firestore → listener → Drift → UI rebuilt
 
 READ:
 UI → ref.watch(xxxProvider) → Drift stream → StreamProvider → UI
 ```
+
+> ⚡ **EXCEPTION RULE (firebaseId persistence):**
+> After calling `addX()`, Firestore returns the generated `docRef.id`. The Notifier (`XNotifier`) MUST immediately call `upsertX(item.copyWith(firebaseId: docRef.id))` to persist the ID locally without waiting for the CacheService listener. This is the **ONLY** authorized exception to the "CacheService is the only writer to Drift" rule. The CacheService listener will confirm this write later idempotently.
 
 ---
 
@@ -156,22 +159,23 @@ class StockRepositoryImpl implements StockRepository {
 
   // WRITE: Always to Firestore (Drift updated automatically via listener)
   @override
-  Future<void> create(StockItem item) async {
+  Future<String> addStockItem(StockItem item) async {
     try {
-      await _fs
-          .collection('stock')
+      final docRef = await _fs
+          .collection('stocks')
           .add(StockItemMapper.toFirestore(item));
-      // ✅ Done. FirebaseCacheService listener handles Drift update.
+      // ✅ Returns ID to Notifier so it can immediately persist to Drift.
+      return docRef.id;
     } on FirebaseException catch (e) {
       throw RepositoryException('Failed to create stock item: ${e.message}');
     }
   }
 
   @override
-  Future<void> update(StockItem item) async {
+  Future<void> updateStockItem(StockItem item) async {
     try {
       await _fs
-          .collection('stock')
+          .collection('stocks')
           .doc(item.firebaseId)
           .update(StockItemMapper.toFirestore(item));
     } on FirebaseException catch (e) {
@@ -180,12 +184,38 @@ class StockRepositoryImpl implements StockRepository {
   }
 
   @override
-  Future<void> delete(String firebaseId) async {
+  Future<void> deleteStockItem(String firebaseId) async {
     try {
-      await _fs.collection('stock').doc(firebaseId).delete();
+      await _fs.collection('stocks').doc(firebaseId).delete();
     } on FirebaseException catch (e) {
       throw RepositoryException('Failed to delete stock item: ${e.message}');
     }
+  }
+}
+```
+
+**AppDatabase Upsert Pattern:**
+```dart
+/// Example AppDatabase method to upsert an item safely using firebaseId
+Future<void> upsertStockItem(StockItemsCompanion companion) async {
+  if (companion.firebaseId.present && companion.firebaseId.value != null) {
+    // 1. Lookup existing record by firebaseId
+    final existing = await (select(stockItems)
+          ..where((t) => t.firebaseId.equals(companion.firebaseId.value!)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      // 2. UPDATE if found, keeping the local integer ID
+      await update(stockItems).replace(
+        companion.copyWith(id: Value(existing.id)),
+      );
+    } else {
+      // 3. INSERT if not found
+      await into(stockItems).insert(companion);
+    }
+  } else {
+    // 4. INSERT directly if no firebaseId
+    await into(stockItems).insert(companion);
   }
 }
 ```
@@ -221,14 +251,17 @@ class FirebaseCacheService {
   }
 
   StreamSubscription _listenStock() {
-    return _fs.collection('stock').snapshots().listen(
+    return _fs.collection('stocks').snapshots().listen(
       (snapshot) async {
         for (final change in snapshot.docChanges) {
           switch (change.type) {
             case DocumentChangeType.added:
             case DocumentChangeType.modified:
               await _db.upsertStockItem(
-                StockItemMapper.toCompanion(change.doc),
+                StockItemMapper.toCompanion(
+                  change.doc.id,
+                  change.doc.data(),
+                ),
               );
               break;
             case DocumentChangeType.removed:
@@ -296,20 +329,63 @@ presentation/
 ❌ firebaseSyncStreamProvider       (replaced by listener)
 ```
 
-**Provider pattern for reads:**
+**Provider/Notifier pattern (Reads and Writes):**
 ```dart
 // Reads Drift stream — always fresh via FirebaseCacheService listener
 final stockProvider = StreamProvider<List<StockItem>>((ref) {
   final repo = ref.watch(stockRepositoryProvider);
   return repo.watchAll(); // Drift stream
 });
+
+// Writes and Mutations via AsyncNotifier
+class StockNotifier extends AsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {}
+
+  Future<void> addStockItem(StockItem item) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(stockRepositoryProvider);
+      final db = ref.read(databaseProvider);
+
+      // 1. Write to Firestore and get the generated ID
+      final docId = await repo.addStockItem(item);
+
+      // 2. Exception Rule: Persist ID to Drift immediately
+      await db.upsertStockItem(
+        StockItemMapper.toCompanion(docId, item.toFirestore()),
+      );
+    });
+  }
+
+  Future<void> updateStockItem(StockItem item) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(stockRepositoryProvider);
+      await repo.updateStockItem(item);
+    });
+  }
+
+  Future<void> deleteStockItem(String firebaseId) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(stockRepositoryProvider);
+      await repo.deleteStockItem(firebaseId);
+    });
+  }
+}
+
+final stockNotifierProvider = AsyncNotifierProvider<StockNotifier, void>(
+  StockNotifier.new,
+);
 ```
 
 **Rules:**
 - Providers READ: Use `StreamProvider` (Drift streams, always fresh)
-- Providers WRITE: Call repository methods (Firestore)
+- Providers WRITE: Use `AsyncNotifier` (handles mutations and loading state)
+- NO fragmented action providers (`Provider<Future<void> Function(...)>`)
+- NO `ref.invalidate()` on StreamProviders (auto-reactive via Drift stream)
 - NO `firebaseSyncProvider` dependency in data providers
-- NO `await syncAll()` before reading
 
 ---
 
@@ -446,9 +522,8 @@ final lowStockItemsProvider = StreamProvider.autoDispose<List<StockItem>>(...);
 final stockFilterProvider = StateProvider<StockFilter>(...);
 final stockSearchQueryProvider = StateProvider<String>(...);
 
-// Action providers
-final addStockItemProvider = Provider<Future<void> Function(StockItem)>(...);
-final updateStockItemProvider = Provider<Future<void> Function(StockItem)>(...);
+// Action/Mutation providers (AsyncNotifier)
+final stockNotifierProvider = AsyncNotifierProvider<StockNotifier, void>(...);
 
 // Auth + setup
 final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<AuthState>>(...);
@@ -573,9 +648,10 @@ Exception (base)
 
 **Repository (write to Firestore):**
 ```dart
-Future<void> create(StockItem item) async {
+Future<String> addStockItem(StockItem item) async {
   try {
-    await _fs.collection('stock').add(item.toFirestore());
+    final docRef = await _fs.collection('stocks').add(item.toFirestore());
+    return docRef.id;
   } on FirebaseException catch (e) {
     throw RepositoryException('Failed to create: ${e.message}');
   }
@@ -586,7 +662,7 @@ Future<void> create(StockItem item) async {
 ```dart
 // User attempts write without internet
 try {
-  await repository.create(item);
+  await repository.addStockItem(item);
 } on FirebaseException catch (e) {
   if (e.code == 'unavailable') {
     // Show: "Action impossible hors-ligne"
@@ -867,13 +943,13 @@ Network restored:
 
 **Pattern:**
 ```dart
-test('StockRepositoryImpl.create() writes to Firestore only', () async {
+test('StockRepositoryImpl.addStockItem() writes to Firestore only', () async {
   final mockFs = MockFirebaseFirestore();
   final repo = StockRepositoryImpl(db: mockDb, fs: mockFs);
   
-  await repo.create(testItem);
+  await repo.addStockItem(testItem);
   
-  verify(mockFs.collection('stock').add(any)).called(1);
+  verify(mockFs.collection('stocks').add(any)).called(1);
   verifyNever(mockDb.upsertStockItem(any)); // Drift NOT touched by repo
 });
 
@@ -972,9 +1048,9 @@ When implementing a new domain entity:
 
 - [ ] Create repository interface (`domain/repositories/[name]_repository.dart`)
   - `Stream<List<T>> watchAll()` — reads Drift
-  - `Future<void> create(T item)` — writes Firestore
-  - `Future<void> update(T item)` — writes Firestore
-  - `Future<void> delete(String firebaseId)` — writes Firestore
+  - `Future<String> addX(T item)` — writes Firestore, returns `docRef.id`
+  - `Future<void> updateX(T item)` — writes Firestore
+  - `Future<void> deleteX(String firebaseId)` — writes Firestore
 
 - [ ] Create Drift table (`data/database/tables/[name]_table.dart`)
   - NO `syncStatus`, `pendingSync`, `lastSyncedAt` columns
@@ -982,8 +1058,8 @@ When implementing a new domain entity:
 
 - [ ] Create repository impl (`data/repositories/[name]_repository_impl.dart`)
   - `watchAll()` → Drift stream
-  - `create/update/delete()` → Firestore only
-  - NO Drift writes (handled by FirebaseCacheService)
+  - `addX/updateX/deleteX()` → Firestore only
+  - NO Drift writes (handled by FirebaseCacheService + Notifier on add)
 
 - [ ] Add listener in `FirebaseCacheService`
   - Add `_listen[Entity]()` method
@@ -995,9 +1071,9 @@ When implementing a new domain entity:
   - `toFirestore()` — Entity → Firestore map
   - `toCompanion()` — Firestore snapshot → Drift companion (for cache upsert)
 
-- [ ] Create provider (`presentation/providers/[name]_provider.dart`)
+- [ ] Create provider/notifier (`presentation/providers/[name]_provider.dart`)
   - `StreamProvider` for reading (Drift stream)
-  - `Provider<Function>` for actions (Firestore writes)
+  - `AsyncNotifier` for actions/mutations (`addX`, `updateX`, `deleteX`)
   - `StateProvider` for filters
   - NO dependency on `firebaseSyncProvider`
 
