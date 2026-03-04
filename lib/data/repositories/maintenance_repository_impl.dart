@@ -19,11 +19,12 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final FirebaseFirestore _fs;
 
   @override
-  Future<void> addMaintenance(Maintenance maintenance) async {
+  Future<String> addMaintenance(Maintenance maintenance) async {
     try {
-      await _fs
-          .collection('maintenances')
+      final docRef = await _fs
+          .collection('maintenance')
           .add(MaintenanceMapper.toFirestore(maintenance));
+      return docRef.id;
     } on FirebaseException catch (e) {
       debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
       throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
@@ -38,7 +39,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
     try {
       await _fs
-          .collection('maintenances')
+          .collection('maintenance')
           .doc(maintenance.firebaseId)
           .update(MaintenanceMapper.toFirestore(maintenance));
     } on FirebaseException catch (e) {
@@ -50,7 +51,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<void> deleteMaintenance(String firebaseId) async {
     try {
-      await _fs.collection('maintenances').doc(firebaseId).delete();
+      await _fs.collection('maintenance').doc(firebaseId).delete();
     } on FirebaseException catch (e) {
       debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
       throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);

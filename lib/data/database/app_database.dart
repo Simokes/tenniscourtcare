@@ -75,7 +75,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertMaintenance(MaintenancesCompanion companion) async {
-    await into(maintenances).insertOnConflictUpdate(companion);
+    final firebaseId = companion.firebaseId.value;
+    if (firebaseId == null || firebaseId.isEmpty) {
+      await into(maintenances).insert(companion);
+      return;
+    }
+
+    final existing = await (select(maintenances)
+          ..where((t) => t.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(maintenances)
+            ..where((t) => t.firebaseId.equals(firebaseId)))
+          .write(companion);
+    } else {
+      await into(maintenances).insert(companion);
+    }
   }
 
   Future<void> deleteMaintenanceByFirebaseId(String firebaseId) async {

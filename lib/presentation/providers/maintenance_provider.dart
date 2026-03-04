@@ -1,10 +1,14 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/repositories/maintenance_repository_impl.dart';
-import '../../domain/entities/maintenance.dart';
-import '../../domain/repositories/maintenance_repository.dart';
-import 'core_providers.dart';
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/mappers/maintenance_mapper.dart';
+import '../../data/repositories/maintenance_repository_impl.dart';
+import '../../domain/entities/maintenance.dart';
+import '../../domain/models/repository_exception.dart';
+import '../../domain/repositories/maintenance_repository.dart';
+import 'core_providers.dart';
 
 // Repository Provider
 final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
@@ -14,40 +18,8 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
 
 final maintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.watchMaintenancesInRange(0, 9999999999);
+  return db.watchAllMaintenances();
 });
-
-// CREATE
-final addMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((
-  ref,
-) {
-  return (Maintenance maintenance) async {
-    final repo = ref.read(maintenanceRepositoryProvider);
-    await repo.addMaintenance(maintenance);
-    ref.invalidate(maintenancesProvider);
-  };
-});
-
-// UPDATE
-final updateMaintenanceProvider = Provider<Future<void> Function(Maintenance)>((
-  ref,
-) {
-  return (Maintenance updated) async {
-    final repo = ref.read(maintenanceRepositoryProvider);
-    await repo.updateMaintenance(updated);
-    ref.invalidate(maintenancesProvider);
-  };
-});
-
-// DELETE
-final deleteMaintenanceProvider = Provider<Future<void> Function(String)>((ref) {
-  return (String firebaseId) async {
-    final repo = ref.read(maintenanceRepositoryProvider);
-    await repo.deleteMaintenance(firebaseId);
-    ref.invalidate(maintenancesProvider);
-  };
-});
-
 
 // --- Maintenance Helpers ---
 
@@ -87,45 +59,47 @@ final lastMajorMaintenanceProvider = StreamProvider.family<Maintenance?, int>((
   }
 });
 
-// Compatibility wrapper for MaintenanceNotifier
-class MaintenanceNotifier extends StateNotifier<AsyncValue<List<Maintenance>>> {
-  final Ref ref;
-
-  MaintenanceNotifier(this.ref) : super(const AsyncValue.loading());
-
-  Future<void> deleteMaintenance(String firebaseId, int terrainId) async {
-    await ref.read(deleteMaintenanceProvider)(firebaseId);
+class MaintenanceNotifier extends AsyncNotifier<void> {
+  @override
+  FutureOr<void> build() {
+    // No initial loading needed as we only manage mutations
   }
 
   Future<void> addMaintenance(Maintenance maintenance) async {
-    // Basic validation (restore if complex logic existed)
-    if (maintenance.date > DateTime.now().millisecondsSinceEpoch) {
-      // Future maintenance? Allow for now.
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(maintenanceRepositoryProvider);
+      final db = ref.read(databaseProvider);
 
-    // Check stock availability if needed (simplified restoration)
-    // In a full restoration, we would check stock quantities for manto/silice etc.
-    // For now, we proceed with add.
+      final firebaseId = await repo.addMaintenance(maintenance);
+      final updatedMaintenance = maintenance.copyWith(firebaseId: firebaseId);
 
-    await ref.read(addMaintenanceProvider)(maintenance);
-
-    // Deduct stock (restored logic placeholder)
-    // Ideally this should happen in repository or service transactionally.
-    // Since we are in provider layer:
-    if (maintenance.sacsMantoUtilises > 0 ||
-        maintenance.sacsSiliceUtilises > 0) {
-      // logic to decrease stock would go here
-    }
+      await db.upsertMaintenance(updatedMaintenance.toCompanion());
+    });
   }
 
   Future<void> updateMaintenance(Maintenance maintenance) async {
-    await ref.read(updateMaintenanceProvider)(maintenance);
+    if (maintenance.firebaseId == null) {
+      throw const RepositoryException(
+        'Cannot update maintenance without a firebaseId',
+      );
+    }
+
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(maintenanceRepositoryProvider);
+      await repo.updateMaintenance(maintenance);
+    });
+  }
+
+  Future<void> deleteMaintenance(String firebaseId, int terrainId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final repo = ref.read(maintenanceRepositoryProvider);
+      await repo.deleteMaintenance(firebaseId);
+    });
   }
 }
 
 final maintenanceNotifierProvider =
-    StateNotifierProvider<MaintenanceNotifier, AsyncValue<List<Maintenance>>>((
-      ref,
-    ) {
-      return MaintenanceNotifier(ref);
-    });
+    AsyncNotifierProvider<MaintenanceNotifier, void>(MaintenanceNotifier.new);
