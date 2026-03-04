@@ -18,22 +18,6 @@ class EventRepositoryImpl implements EventRepository {
   final FirebaseFirestore _fs;
 
   @override
-  Stream<List<AppEvent>> watchEvents({DateTime? start, DateTime? end}) {
-    final query = _db.select(_db.events);
-
-    if (start != null) {
-      query.where((t) => t.startTime.isBiggerOrEqualValue(start));
-    }
-    if (end != null) {
-      query.where((t) => t.endTime.isSmallerOrEqualValue(end));
-    }
-
-    return query.watch().map(
-      (rows) => rows.map((row) => _toDomain(row)).toList(),
-    );
-  }
-
-  @override
   Future<List<AppEvent>> getEvents({DateTime? start, DateTime? end}) async {
     final query = _db.select(_db.events);
 
@@ -49,11 +33,12 @@ class EventRepositoryImpl implements EventRepository {
   }
 
   @override
-  Future<void> addEvent(AppEvent event) async {
+  Future<String> addEvent(AppEvent event) async {
     try {
-      await _fs
+      final docRef = await _fs
           .collection('events')
           .add(EventMapper.toFirestore(event));
+      return docRef.id;
     } on FirebaseException catch (e) {
       debugPrint('❌ EventRepository: Failed to add event: ${e.message}');
       throw RepositoryException('Failed to add event: ${e.message}', cause: e);

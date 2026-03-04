@@ -123,7 +123,23 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertEvent(EventsCompanion companion) async {
-    await into(events).insertOnConflictUpdate(companion);
+    final firebaseId = companion.firebaseId.value;
+    if (firebaseId == null || firebaseId.isEmpty) {
+      await into(events).insert(companion);
+      return;
+    }
+
+    final existing = await (select(events)
+          ..where((t) => t.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(events)
+            ..where((t) => t.firebaseId.equals(firebaseId)))
+          .write(companion);
+    } else {
+      await into(events).insert(companion);
+    }
   }
 
   Future<void> deleteEventByFirebaseId(String firebaseId) async {
