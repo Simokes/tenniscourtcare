@@ -67,12 +67,12 @@ class EventMapper {
     return {
       'title': item.title,
       'description': item.description,
-      'startTime': item.startTime.toIso8601String(),
-      'endTime': item.endTime.toIso8601String(),
+      'startTime': Timestamp.fromDate(item.startTime),
+      'endTime': Timestamp.fromDate(item.endTime),
       'color': item.color,
       'terrainIds': item.terrainIds,
-      'createdAt': item.createdAt.toIso8601String(),
-      'updatedAt': item.updatedAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(item.createdAt),
+      'updatedAt': Timestamp.fromDate(item.updatedAt),
       'createdBy': item.createdBy,
       'modifiedBy': item.modifiedBy,
       'firebaseId': item.firebaseId,
@@ -100,7 +100,8 @@ static db.EventsCompanion toCompanion(
       color: drift.Value(data['color'] as int? ?? 0xFFFFFFFF),
       terrainIds: drift.Value(
         (data['terrainIds'] as List<dynamic>?)
-            ?.map((e) => e as int)
+            ?.map((e) => int.tryParse(e.toString()) ?? 0)
+            .where((id) => id != 0)
             .toList() ?? [],
       ),
       firebaseId: drift.Value(docId),

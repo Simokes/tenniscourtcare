@@ -7,6 +7,8 @@ import '../../domain/repositories/event_repository.dart';
 import 'core_providers.dart';
 import 'maintenance_provider.dart';
 import 'terrain_provider.dart';
+import '../../data/mappers/event_mapper.dart';
+import '../../domain/models/repository_exception.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,21 +22,58 @@ final eventsProvider = StreamProvider<List<AppEvent>>((ref) {
   return db.watchAllEvents();
 });
 
-final addEventProvider = Provider<Future<void> Function(AppEvent)>((ref) {
-  return (AppEvent event) async {
-    final repo = ref.read(eventRepositoryProvider);
-    await repo.addEvent(event);
-    ref.invalidate(eventsProvider);
-  };
-});
+class EventNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
 
-final updateEventProvider = Provider<Future<void> Function(AppEvent)>((ref) {
-  return (AppEvent event) async {
-    final repo = ref.read(eventRepositoryProvider);
-    await repo.updateEvent(event);
-    ref.invalidate(eventsProvider);
-  };
-});
+  Future<void> addEvent(AppEvent event) async {
+    state = const AsyncValue.loading();
+    try {
+      final repo = ref.read(eventRepositoryProvider);
+      final db = ref.read(databaseProvider);
+
+      final firebaseId = await repo.addEvent(event);
+      final eventWithId = event.copyWith(firebaseId: firebaseId);
+      await db.upsertEvent(eventWithId.toCompanion());
+
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> updateEvent(AppEvent event) async {
+    if (event.firebaseId == null) {
+      throw const RepositoryException('Cannot update event without a firebaseId');
+    }
+    state = const AsyncValue.loading();
+    try {
+      final repo = ref.read(eventRepositoryProvider);
+      await repo.updateEvent(event);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteEvent(String firebaseId) async {
+    state = const AsyncValue.loading();
+    try {
+      final repo = ref.read(eventRepositoryProvider);
+      await repo.deleteEvent(firebaseId);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+}
+
+final eventNotifierProvider = AsyncNotifierProvider<EventNotifier, void>(
+  () => EventNotifier(),
+);
 
 
 // --- Calendar Helpers ---

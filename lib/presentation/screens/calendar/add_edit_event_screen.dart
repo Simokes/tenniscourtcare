@@ -51,8 +51,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         event?.startTime ?? DateTime(now.year, now.month, now.day, 9, 0);
     _endTime = event?.endTime ?? _startTime.add(const Duration(hours: 1));
 
-    // ignore: deprecated_member_use
-    _selectedColor = event?.color ?? Colors.blue.value;
+    _selectedColor = event?.color ?? Colors.blue.toARGB32();
 
     if (event != null) {
       _selectedTerrainIds.addAll(event.terrainIds);
@@ -131,13 +130,11 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       updatedAt: DateTime.now(),
     );
 
-    final repo = ref.read(eventRepositoryProvider);
-
     try {
       if (widget.eventToEdit == null) {
-        await repo.addEvent(event);
+        await ref.read(eventNotifierProvider.notifier).addEvent(event);
       } else {
-        await repo.updateEvent(event);
+        await ref.read(eventNotifierProvider.notifier).updateEvent(event);
       }
 
       if (mounted) {
@@ -156,7 +153,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   }
 
   Future<void> _delete() async {
-    if (widget.eventToEdit?.id == null) return;
+    final eventFirebaseId = widget.eventToEdit?.firebaseId;
+    if (eventFirebaseId == null) return;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -177,18 +175,10 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     );
 
     if (confirm == true) {
-      if (widget.eventToEdit!.firebaseId == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Cannot delete event without a firebaseId.')),
-          );
-        }
-        return;
-      }
       try {
         await ref
-            .read(eventRepositoryProvider)
-            .deleteEvent(widget.eventToEdit!.firebaseId!);
+            .read(eventNotifierProvider.notifier)
+            .deleteEvent(eventFirebaseId);
         if (mounted) {
           Navigator.pop(context);
           ScaffoldMessenger.of(
@@ -320,14 +310,12 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: _availableColors.map((color) {
-                          // ignore: deprecated_member_use
-                          final isSelected = _selectedColor == color.value;
+                          final isSelected = _selectedColor == color.toARGB32();
                           return Padding(
                             padding: const EdgeInsets.only(right: 12),
                             child: InkWell(
-                              // ignore: deprecated_member_use
                               onTap: () =>
-                                  setState(() => _selectedColor = color.value),
+                                  setState(() => _selectedColor = color.toARGB32()),
                               customBorder: const CircleBorder(),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
