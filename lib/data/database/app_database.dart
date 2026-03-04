@@ -326,6 +326,15 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(
         'DELETE FROM stock_items WHERE firebase_id IS NULL;',
       );
+      await customStatement(
+        'DELETE FROM maintenances WHERE firebase_id IS NULL;',  // ✅ AJOUTÉ
+      );
+      await customStatement(
+        'DELETE FROM terrains WHERE firebase_id IS NULL;',      // ✅ AJOUTÉ
+      );
+      await customStatement(
+        'DELETE FROM events WHERE firebase_id IS NULL;',        // ✅ AJOUTÉ
+      );
       debugPrint('🗄️ DB: Purge seeds orphelins au démarrage ✅');
     },
   );

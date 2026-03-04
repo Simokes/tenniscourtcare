@@ -75,7 +75,6 @@ class EventMapper {
       'updatedAt': Timestamp.fromDate(item.updatedAt),
       if (item.createdBy != null) 'createdBy': item.createdBy,
       if (item.modifiedBy != null) 'modifiedBy': item.modifiedBy,
-      // ✅ SUPPRIMÉ: 'firebaseId': item.firebaseId,
     };
   }
 
