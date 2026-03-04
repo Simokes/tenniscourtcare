@@ -18,11 +18,12 @@ class TerrainRepositoryImpl implements TerrainRepository {
   final FirebaseFirestore _fs;
 
   @override
-  Future<void> addTerrain(Terrain terrain) async {
+  Future<String> addTerrain(Terrain terrain) async {
     try {
-      await _fs
+      final docRef = await _fs
           .collection('terrains')
           .add(TerrainMapper.toFirestore(terrain));
+      return docRef.id;
     } on FirebaseException catch (e) {
       debugPrint('❌ TerrainRepository: Failed to add terrain: ${e.message}');
       throw RepositoryException('Failed to add terrain: ${e.message}', cause: e);

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/native.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
+import 'package:tenniscourtcare/presentation/providers/core_providers.dart';
 import 'package:tenniscourtcare/presentation/providers/stats_providers.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 

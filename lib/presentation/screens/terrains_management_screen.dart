@@ -101,8 +101,9 @@ class TerrainsManagementScreen extends ConsumerWidget {
 
     if (confirm == true) {
       if (terrain.firebaseId != null) {
-        await ref.read(terrainRepositoryProvider).deleteTerrain(terrain.firebaseId!);
-        ref.invalidate(terrainsProvider);
+        await ref
+            .read(terrainNotifierProvider.notifier)
+            .deleteTerrain(terrain.firebaseId!);
       }
     }
   }
@@ -197,11 +198,11 @@ class _TerrainDialogState extends State<_TerrainDialog> {
               _formKey.currentState!.save();
 
               if (isEditing) {
-                await ref.read(updateTerrainProvider)(
+                await ref.read(terrainNotifierProvider.notifier).updateTerrain(
                   widget.terrain!.copyWith(nom: _name, type: _type),
                 );
               } else {
-                await ref.read(addTerrainProvider)(_name, _type);
+                await ref.read(terrainNotifierProvider.notifier).addTerrain(_name, _type);
               }
               if (context.mounted) Navigator.pop(context);
             },

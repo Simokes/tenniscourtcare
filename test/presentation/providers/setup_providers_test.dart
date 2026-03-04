@@ -6,7 +6,7 @@ import 'package:tenniscourtcare/domain/entities/user_entity.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/database_provider.dart';
+import 'package:tenniscourtcare/presentation/providers/core_providers.dart';
 import 'package:tenniscourtcare/presentation/providers/setup_providers.dart' as setup;
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 
