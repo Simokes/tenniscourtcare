@@ -11,8 +11,13 @@ import '../../widgets/premium/premium_button.dart';
 
 class AddEditEventScreen extends ConsumerStatefulWidget {
   final AppEvent? eventToEdit;
+  final DateTime? initialDate;
 
-  const AddEditEventScreen({super.key, this.eventToEdit});
+  const AddEditEventScreen({
+    super.key,
+    this.eventToEdit,
+    this.initialDate,
+  });
 
   @override
   ConsumerState<AddEditEventScreen> createState() => _AddEditEventScreenState();
@@ -48,8 +53,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     _descController = TextEditingController(text: event?.description ?? '');
 
     final now = DateTime.now();
-    _startTime =
-        event?.startTime ?? DateTime(now.year, now.month, now.day, 9, 0);
+    _startTime = event?.startTime ??
+        widget.initialDate ??
+        DateTime(now.year, now.month, now.day, 9, 0);
     _endTime = event?.endTime ?? _startTime.add(const Duration(hours: 1));
 
     _selectedColor = event?.color ?? Colors.blue.toARGB32();

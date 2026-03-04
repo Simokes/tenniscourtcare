@@ -192,7 +192,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                         if (maintenance.firebaseId != null) {
                           await ref
                               .read(maintenanceNotifierProvider.notifier)
-                              .deleteMaintenance(maintenance.firebaseId!, terrain.id);
+                              .deleteMaintenance(maintenance.firebaseId!);
                         }
 
                         if (context.mounted) {

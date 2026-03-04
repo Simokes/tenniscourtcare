@@ -92,7 +92,7 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> deleteMaintenance(String firebaseId, int terrainId) async {
+  Future<void> deleteMaintenance(String firebaseId) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(maintenanceRepositoryProvider);

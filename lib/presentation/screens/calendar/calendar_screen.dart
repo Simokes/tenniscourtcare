@@ -252,7 +252,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddEditEventScreen()),
+            MaterialPageRoute(
+              builder: (context) => AddEditEventScreen(
+                initialDate: _selectedDay,
+              ),
+            ),
           );
         },
         backgroundColor: Theme.of(context).colorScheme.primary,

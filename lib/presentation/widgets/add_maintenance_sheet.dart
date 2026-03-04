@@ -131,6 +131,51 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     }
   }
 
+  Future<void> _delete() async {
+    final firebaseId = widget.maintenance?.firebaseId;
+    if (firebaseId == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Supprimer ?'),
+        content: const Text(
+          'Voulez-vous vraiment supprimer cette maintenance ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Supprimer',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await ref
+            .read(maintenanceNotifierProvider.notifier)
+            .deleteMaintenance(firebaseId);
+        if (mounted) Navigator.of(context).pop(true);
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -255,6 +300,11 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
+                    if (widget.maintenance?.firebaseId != null)
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: _delete,
+                      ),
                     IconButton.filledTonal(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
