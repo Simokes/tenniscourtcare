@@ -113,7 +113,7 @@ class CurrentWeatherCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Current Conditions',
+                      'Conditions Actuelles',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -127,7 +127,7 @@ class CurrentWeatherCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        unplayable ? 'AVOID' : 'IDEAL FOR PLAY',
+                        unplayable ? 'À ÉVITER' : 'IDÉAL POUR JOUER',
                         style: TextStyle(
                           color: unplayable ? Colors.red.shade700 : Colors.green.shade700,
                           fontSize: 10,
@@ -144,7 +144,7 @@ class CurrentWeatherCard extends StatelessWidget {
                     Expanded(
                       child: _WeatherDetailItem(
                         icon: Icons.air,
-                        label: 'WIND',
+                        label: 'VENT',
                         value: weather.windSpeed.round().toString(),
                         unit: 'km/h',
                       ),
@@ -170,7 +170,7 @@ class CurrentWeatherCard extends StatelessWidget {
                     Expanded(
                       child: _WeatherDetailItem(
                         icon: Icons.grain,
-                        label: 'RAIN',
+                        label: 'PLUIE',
                         value: precipitationLast24h.round().toString(),
                         unit: 'mm',
                       ),
@@ -186,12 +186,12 @@ class CurrentWeatherCard extends StatelessWidget {
   }
 
   String _getWeatherConditionString(int code) {
-    if (code == 0) return 'Clear Sky';
-    if (code < 3) return 'Partly Cloudy';
-    if (code < 50) return 'Foggy';
-    if (code < 70) return 'Rain';
-    if (code < 80) return 'Snow';
-    return 'Thunderstorm';
+    if (code == 0) return 'Ciel dégagé';
+    if (code < 3) return 'Partiellement nuageux';
+    if (code < 50) return 'Brouillard';
+    if (code < 70) return 'Pluie';
+    if (code < 80) return 'Neige';
+    return 'Orage';
   }
 
   IconData _getWeatherIcon(int code) {
@@ -243,7 +243,7 @@ class RainHistoryChart extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'RAIN HISTORY (30 DAYS)',
+                'HISTORIQUE DES PLUIES (30 JOURS)',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -329,7 +329,7 @@ class ForecastSection extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           const Text(
-            '7-Day Forecast',
+            'Prévisions sur 7 jours',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -354,12 +354,12 @@ class _ForecastListItem extends StatelessWidget {
     final now = DateTime.now();
     final date = forecast.date;
 
-    // Day format like "Monday"
-    final List<String> weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    // Day format like "Lundi"
+    final List<String> weekdays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
     String dayLabel = weekdays[date.weekday - 1];
 
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
-      dayLabel = 'Today';
+      dayLabel = 'Aujourd\'hui';
     }
 
     final String conditionStr = _getWeatherConditionString(forecast.weatherCode);
@@ -374,11 +374,11 @@ class _ForecastListItem extends StatelessWidget {
     IconData statusIcon = Icons.check_circle;
 
     if (isHeavyRain) {
-      statusStr = 'Avoid';
+      statusStr = 'À éviter';
       statusColor = Colors.red.shade500;
       statusIcon = Icons.cancel;
     } else if (isRaining || forecast.weatherCode >= 50) {
-      statusStr = 'Playable';
+      statusStr = 'Jouable';
       statusColor = const Color(0xFF00419A); // primary blue
       statusIcon = Icons.check_circle;
     }
@@ -480,13 +480,13 @@ class _ForecastListItem extends StatelessWidget {
   }
 
   String _getWeatherConditionString(int code) {
-    if (code == 0) return 'Clear';
-    if (code < 3) return 'Cloudy'; // Or partly cloudy
-    if (code < 50) return 'Overcast';
-    if (code < 70) return 'Rain';
-    if (code == 71 || code == 73 || code == 75 || code == 77) return 'Snow';
-    if (code > 80) return 'Heavy Rain';
-    return 'Thunderstorm';
+    if (code == 0) return 'Dégagé';
+    if (code < 3) return 'Nuageux'; // Or partly cloudy
+    if (code < 50) return 'Couvert';
+    if (code < 70) return 'Pluie';
+    if (code == 71 || code == 73 || code == 75 || code == 77) return 'Neige';
+    if (code > 80) return 'Forte Pluie';
+    return 'Orage';
   }
 
   IconData _getWeatherIcon(int code) {

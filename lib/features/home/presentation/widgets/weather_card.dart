@@ -4,18 +4,91 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/presentation/providers/weather_for_club_provider.dart';
 
 class WeatherCard extends ConsumerWidget {
   const WeatherCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final terrainsAsync = ref.watch(terrainsProvider);
+    final terrains = terrainsAsync.valueOrNull ?? const <Terrain>[];
+    final TerrainType? terrainType = terrains.isNotEmpty ? terrains.first.type : null;
+
+    if (terrainType == null) {
+      return _buildFallbackCard(context, ref);
+    }
+
+    final weatherAsync = ref.watch(weatherForClubProvider(terrainType));
+
+    return weatherAsync.when(
+      data: (weatherData) {
+        final weather = weatherData.context.snapshot;
+        final precipitationLast24h = weatherData.context.precipitationLast24h;
+        final unplayable = weatherData.unplayable;
+
+        final String conditionsTitle = unplayable ? 'À éviter' : 'Conditions optimales';
+        final IconData weatherIcon = _getWeatherIcon(weather.weatherCode);
+
+        return _buildCard(
+          context: context,
+          ref: ref,
+          terrains: terrains,
+          temp: '${weather.temperature.round()}°C',
+          rain: '${precipitationLast24h.round()} mm',
+          wind: '${weather.windSpeed.round()} km/h',
+          conditionsTitle: conditionsTitle,
+          icon: weatherIcon,
+        );
+      },
+      loading: () => _buildCard(
+        context: context,
+        ref: ref,
+        terrains: terrains,
+        temp: '--°C',
+        rain: '-- mm',
+        wind: '-- km/h',
+        conditionsTitle: 'Chargement...',
+        icon: Icons.hourglass_empty,
+      ),
+      error: (_, __) => _buildCard(
+        context: context,
+        ref: ref,
+        terrains: terrains,
+        temp: '--°C',
+        rain: '-- mm',
+        wind: '-- km/h',
+        conditionsTitle: 'Météo indisponible',
+        icon: Icons.error_outline,
+      ),
+    );
+  }
+
+  Widget _buildFallbackCard(BuildContext context, WidgetRef ref) {
+    return _buildCard(
+      context: context,
+      ref: ref,
+      terrains: [],
+      temp: '--°C',
+      rain: '-- mm',
+      wind: '-- km/h',
+      conditionsTitle: 'Aucun terrain',
+      icon: Icons.wb_sunny,
+    );
+  }
+
+  Widget _buildCard({
+    required BuildContext context,
+    required WidgetRef ref,
+    required List<Terrain> terrains,
+    required String temp,
+    required String rain,
+    required String wind,
+    required String conditionsTitle,
+    required IconData icon,
+  }) {
     return GestureDetector(
       onTap: () {
-        final terrains = ref
-            .read(terrainsProvider)
-            .maybeWhen(data: (list) => list, orElse: () => const <Terrain>[]);
-
         if (terrains.isNotEmpty) {
           final Terrain picked = terrains.first;
           context.push('/weather/${picked.type.name}');
@@ -42,7 +115,7 @@ class WeatherCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.blue.withValues(alpha:0.3),
+              color: Colors.blue.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -59,17 +132,17 @@ class WeatherCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LIVE WEATHER',
+                      'MÉTÉO EN DIRECT',
                       style: GoogleFonts.inter(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white.withValues(alpha:0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         letterSpacing: 1.5,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Optimal Conditions',
+                      conditionsTitle,
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -78,16 +151,16 @@ class WeatherCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const Icon(Icons.wb_sunny, color: Colors.amber, size: 48),
+                Icon(icon, color: Colors.amber, size: 48),
               ],
             ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildWeatherDetail('18°C', 'Temperature'),
-                _buildWeatherDetail('30%', 'Rain'),
-                _buildWeatherDetail('12km/h', 'Wind'),
+                _buildWeatherDetail(temp, 'Température'),
+                _buildWeatherDetail(rain, 'Pluie'),
+                _buildWeatherDetail(wind, 'Vent'),
               ],
             ),
           ],
@@ -118,5 +191,14 @@ class WeatherCard extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  IconData _getWeatherIcon(int code) {
+    if (code == 0) return Icons.wb_sunny;
+    if (code < 3) return Icons.cloud;
+    if (code < 50) return Icons.cloud;
+    if (code < 70) return Icons.water_drop;
+    if (code < 80) return Icons.ac_unit;
+    return Icons.thunderstorm;
   }
 }
