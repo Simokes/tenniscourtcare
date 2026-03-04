@@ -1,224 +1,197 @@
 import 'package:flutter/material.dart';
 import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
-import 'weather_badge.dart';
+
 
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;
   final double precipitationLast24h;
+  final bool unplayable;
 
   const CurrentWeatherCard({
     super.key,
     required this.weather,
     required this.precipitationLast24h,
+    required this.unplayable,
   });
 
   @override
   Widget build(BuildContext context) {
+    final String conditionStr = _getWeatherConditionString(weather.weatherCode);
+
     return Container(
       margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Maintenant',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${weather.temperature.toStringAsFixed(1)}°',
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w800,
-                      height: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const WeatherBadge(
-                    frozen: false, // Calculated in parent logic usually
-                    unplayable: false,
-                  ),
-                ],
-              ),
-              Icon(
-                _getWeatherIcon(weather.weatherCode),
-                size: 64,
-                color: Colors.orange.shade400,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _WeatherDetailItem(
-                icon: Icons.water_drop,
-                label: 'Humidité',
-                value: '${weather.humidity}%',
-              ),
-              _WeatherDetailItem(
-                icon: Icons.air,
-                label: 'Vent',
-                value: '${weather.windSpeed.toStringAsFixed(1)} km/h',
-              ),
-              _WeatherDetailItem(
-                icon: Icons.grain,
-                label: 'Pluie (24h)',
-                value: '${precipitationLast24h.toStringAsFixed(1)} mm',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  IconData _getWeatherIcon(int code) {
-    // Basic mapping, can be improved
-    if (code == 0) return Icons.wb_sunny;
-    if (code < 3) return Icons.wb_cloudy;
-    if (code < 50) return Icons.foggy;
-    if (code < 70) return Icons.grain; // Rain
-    if (code < 80) return Icons.ac_unit; // Snow
-    return Icons.thunderstorm;
-  }
-}
-
-class ForecastList extends StatelessWidget {
-  final List<DailyForecast> forecasts;
-
-  const ForecastList({super.key, required this.forecasts});
-
-  @override
-  Widget build(BuildContext context) {
-    if (forecasts.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            'Prévisions 3 jours',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: 160,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            scrollDirection: Axis.horizontal,
-            itemCount: forecasts.take(3).length, // Limit to 3
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-              final forecast = forecasts[index];
-              return _ForecastCard(forecast: forecast);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ForecastCard extends StatelessWidget {
-  final DailyForecast forecast;
-
-  const _ForecastCard({required this.forecast});
-
-  @override
-  Widget build(BuildContext context) {
-    // Determine day name
-    final now = DateTime.now();
-    final date = forecast.date;
-    String dayLabel;
-
-    if (date.day == now.day) {
-      dayLabel = 'Aujourd\'hui';
-    } else if (date.day == now.add(const Duration(days: 1)).day) {
-      dayLabel = 'Demain';
-    } else {
-      // Just generic day/month
-      dayLabel = '${date.day}/${date.month}';
-    }
-
-    return Container(
-      width: 110,
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            dayLabel,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Icon(
-            _getWeatherIcon(forecast.weatherCode),
-            size: 32,
-            color: Colors.blue.shade400,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${forecast.tempMax.round()}°',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          Text(
-            '${forecast.tempMin.round()}°',
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-          ),
-          if (forecast.precipitationSum > 0.5) ...[
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+          // Header Image Section
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Stack(
               children: [
-                Icon(Icons.water_drop, size: 10, color: Colors.blue.shade300),
-                Text(
-                  '${forecast.precipitationSum.round()}mm',
-                  style: TextStyle(fontSize: 10, color: Colors.blue.shade300),
+                SizedBox(
+                  height: 190,
+                  width: double.infinity,
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2942&auto=format&fit=crop',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF001A3D).withValues(alpha: 0.8),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _getWeatherIcon(weather.weatherCode),
+                            color: Colors.yellow.shade400,
+                            size: 36,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '${weather.temperature.round()}°C',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              height: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '$conditionStr • Los Angeles, CA',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
+
+          // Details Section
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Conditions Actuelles',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF001A3D),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: unplayable ? Colors.red.shade100 : Colors.green.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        unplayable ? 'À ÉVITER' : 'IDÉAL POUR JOUER',
+                        style: TextStyle(
+                          color: unplayable ? Colors.red.shade700 : Colors.green.shade700,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _WeatherDetailItem(
+                        icon: Icons.air,
+                        label: 'VENT',
+                        value: weather.windSpeed.round().toString(),
+                        unit: 'km/h',
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.grey.shade200,
+                    ),
+                    Expanded(
+                      child: _WeatherDetailItem(
+                        icon: Icons.water_drop_outlined,
+                        label: 'HUM',
+                        value: weather.humidity.toString(),
+                        unit: '%',
+                      ),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.grey.shade200,
+                    ),
+                    Expanded(
+                      child: _WeatherDetailItem(
+                        icon: Icons.grain,
+                        label: 'PLUIE',
+                        value: precipitationLast24h.round().toString(),
+                        unit: 'mm',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  String _getWeatherConditionString(int code) {
+    if (code == 0) return 'Ciel dégagé';
+    if (code < 3) return 'Partiellement nuageux';
+    if (code < 50) return 'Brouillard';
+    if (code < 70) return 'Pluie';
+    if (code < 80) return 'Neige';
+    return 'Orage';
   }
 
   IconData _getWeatherIcon(int code) {
@@ -231,34 +204,357 @@ class _ForecastCard extends StatelessWidget {
   }
 }
 
+class RainHistoryChart extends StatelessWidget {
+  final List<double> dailyPrecipitation;
+  final double totalPrecipitation;
+
+  const RainHistoryChart({
+    super.key,
+    required this.dailyPrecipitation,
+    required this.totalPrecipitation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Generate bars to match the design. If we have actual data, map it to bar heights.
+    // The max height of the container is 96 (h-24 in tailwind).
+    // Let's find the max precipitation to scale the bars.
+    final double maxPrecip = dailyPrecipitation.isEmpty ? 1.0 : dailyPrecipitation.reduce((a, b) => a > b ? a : b);
+    final double effectiveMax = maxPrecip > 0 ? maxPrecip : 1.0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'HISTORIQUE DES PLUIES (30 JOURS)',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF001A3D),
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Text(
+                'Total: ${totalPrecipitation.round()}mm',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 96,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(30, (index) {
+                // If we don't have exactly 30 days of data, pad with 0s.
+                // Assuming dailyPrecipitation is ordered chronologically (oldest to newest).
+                final int dataIndex = dailyPrecipitation.length - 30 + index;
+                final double precip = dataIndex >= 0 && dataIndex < dailyPrecipitation.length
+                    ? dailyPrecipitation[dataIndex]
+                    : 0.0;
+
+                // For a purely visual match to the mockup when data might be zero right now,
+                // we can just draw what the API gives us. But let's actually map it properly.
+                // Minimum bar height is 10% for tiny amounts, else scale it.
+                // If it's exactly 0, give it a tiny height and lighter color.
+
+                double pct = precip / effectiveMax;
+                bool isSignificant = precip > 0.5;
+
+                // The design uses blue-500 for significant, slate-200 for none/low.
+                Color barColor = isSignificant
+                    ? const Color(0xFF00419A) // navy-500 equivalent in the design
+                    : Colors.blue.shade100.withValues(alpha: 0.5);
+
+                if (!isSignificant && pct < 0.1) pct = 0.1; // tiny bump for visual
+
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                    child: FractionallySizedBox(
+                      heightFactor: pct,
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: barColor,
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ForecastSection extends StatelessWidget {
+  final List<DailyForecast> forecasts;
+
+  const ForecastSection({super.key, required this.forecasts});
+
+  @override
+  Widget build(BuildContext context) {
+    if (forecasts.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+          const Text(
+            'Prévisions sur 7 jours',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF001A3D),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...forecasts.map((forecast) => _ForecastListItem(forecast: forecast)),
+        ],
+      ),
+    );
+  }
+}
+
+class _ForecastListItem extends StatelessWidget {
+  final DailyForecast forecast;
+
+  const _ForecastListItem({required this.forecast});
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final date = forecast.date;
+
+    // Day format like "Lundi"
+    final List<String> weekdays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    String dayLabel = weekdays[date.weekday - 1];
+
+    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+      dayLabel = 'Aujourd\'hui';
+    }
+
+    final String conditionStr = _getWeatherConditionString(forecast.weatherCode);
+    final String tempStr = '${forecast.tempMax.round()}°C';
+
+    // Simple logic for status. This should ideally be moved to a helper or WeatherRules
+    final bool isRaining = forecast.precipitationSum > 2.0;
+    final bool isHeavyRain = forecast.precipitationSum > 10.0;
+
+    String statusStr = 'Excellent';
+    Color statusColor = Colors.green.shade600;
+    IconData statusIcon = Icons.check_circle;
+
+    if (isHeavyRain) {
+      statusStr = 'À éviter';
+      statusColor = Colors.red.shade500;
+      statusIcon = Icons.cancel;
+    } else if (isRaining || forecast.weatherCode >= 50) {
+      statusStr = 'Jouable';
+      statusColor = const Color(0xFF00419A); // primary blue
+      statusIcon = Icons.check_circle;
+    }
+
+    // Icon and background color based on weather
+    IconData weatherIcon = _getWeatherIcon(forecast.weatherCode);
+    Color iconColor;
+    Color iconBgColor;
+
+    if (forecast.weatherCode == 0 || forecast.weatherCode == 1) {
+      iconColor = Colors.orange.shade500;
+      iconBgColor = Colors.orange.shade50;
+    } else if (forecast.weatherCode < 50) {
+      iconColor = Colors.blue.shade500;
+      iconBgColor = Colors.blue.shade50;
+    } else {
+      iconColor = Colors.grey.shade500;
+      iconBgColor = Colors.grey.shade100;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  weatherIcon,
+                  color: iconColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    dayLabel,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Color(0xFF001A3D),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$tempStr - $conditionStr',
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                statusStr,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: statusColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Icon(
+                statusIcon,
+                color: statusColor,
+                size: 20,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getWeatherConditionString(int code) {
+    if (code == 0) return 'Dégagé';
+    if (code < 3) return 'Nuageux'; // Or partly cloudy
+    if (code < 50) return 'Couvert';
+    if (code < 70) return 'Pluie';
+    if (code == 71 || code == 73 || code == 75 || code == 77) return 'Neige';
+    if (code > 80) return 'Forte Pluie';
+    return 'Orage';
+  }
+
+  IconData _getWeatherIcon(int code) {
+    if (code == 0) return Icons.wb_sunny;
+    if (code < 3) return Icons.cloud;
+    if (code < 50) return Icons.cloud;
+    if (code < 70) return Icons.water_drop;
+    if (code < 80) return Icons.ac_unit;
+    return Icons.thunderstorm;
+  }
+}
+
 class _WeatherDetailItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final String unit;
 
   const _WeatherDetailItem({
     required this.icon,
     required this.label,
     required this.value,
+    required this.unit,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Colors.grey.shade600, size: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: Colors.grey.shade500, size: 16),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 8),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                color: Color(0xFF001A3D),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Text(
+              unit,
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
       ],
     );

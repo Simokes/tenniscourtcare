@@ -10,10 +10,15 @@ class WeatherContext {
   final WeatherSnapshot snapshot;
   final double precipitationLast24h; // mm
   final List<DailyForecast> dailyForecasts;
+  final List<double> past30DaysPrecipitation; // mm per day
+  final double precipitationLast30Days; // total mm
+
   const WeatherContext(
     this.snapshot,
     this.precipitationLast24h, {
     this.dailyForecasts = const [],
+    this.past30DaysPrecipitation = const [],
+    this.precipitationLast30Days = 0.0,
   });
 }
 
@@ -38,8 +43,8 @@ class WeatherService {
       '&current=temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m,weather_code'
       '&hourly=precipitation'
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum'
-      '&past_days=1'
-      '&forecast_days=4',
+      '&past_days=30'
+      '&forecast_days=7',
     );
 
     final resp = await _client.get(uri);
@@ -81,7 +86,7 @@ class WeatherService {
       }
     }
 
-    // --- daily forecast ---
+    // --- daily past history and forecast ---
     final daily = json['daily'] as Map<String, dynamic>;
     final dailyTimes = (daily['time'] as List).cast<String>();
     final dailyCodes = (daily['weather_code'] as List).cast<num>();
@@ -90,22 +95,53 @@ class WeatherService {
     final dailyPrecip = (daily['precipitation_sum'] as List).cast<num>();
 
     final forecasts = <DailyForecast>[];
-    // Start from index 1 (tomorrow) for 3 days, or include today if preferred.
-    // Let's include today + 2 days, or tomorrow + 2 days.
-    // Requirement says "sur 3 jours". Usually implies Forecast (Tomorrow, Day+2, Day+3).
-    // Or Today, Tomorrow, Day+2. Let's do Today + 3 days to be safe and let UI filter.
+    final past30DaysPrecip = <double>[];
+    double sum30 = 0.0;
+
+    // Open-Meteo returns 'past_days' + 'today' + 'forecast_days - 1'
+    // If we request past_days=30 and forecast_days=7, we get 37 days total.
+    // The first 30 days are past history. The rest is today + 6 forecast days.
+
+    final int todayIndex = dailyTimes.indexWhere((timeStr) {
+      final d = DateTime.parse(timeStr);
+      return d.year == dt.year && d.month == dt.month && d.day == dt.day;
+    });
+
+    // fallback if not found
+    final int actualTodayIndex = todayIndex >= 0 ? todayIndex : 30;
+
     for (var i = 0; i < dailyTimes.length; i++) {
-      forecasts.add(
-        DailyForecast(
-          date: DateTime.parse(dailyTimes[i]),
-          weatherCode: dailyCodes[i].toInt(),
-          tempMax: dailyMax[i].toDouble(),
-          tempMin: dailyMin[i].toDouble(),
-          precipitationSum: dailyPrecip[i].toDouble(),
-        ),
-      );
+      final dailyPrecipitationValue = dailyPrecip[i].toDouble();
+
+      // Collect past 30 days history
+      if (i < actualTodayIndex && i >= actualTodayIndex - 30) {
+        past30DaysPrecip.add(dailyPrecipitationValue);
+        sum30 += dailyPrecipitationValue;
+      }
+
+      // Collect forecast (from tomorrow onwards)
+      // If we want today + forecast, use >= actualTodayIndex
+      // Design shows "Monday, Tuesday...", which usually starts from tomorrow or today.
+      // Let's include from today to today + 6 days.
+      if (i >= actualTodayIndex) {
+        forecasts.add(
+          DailyForecast(
+            date: DateTime.parse(dailyTimes[i]),
+            weatherCode: dailyCodes[i].toInt(),
+            tempMax: dailyMax[i].toDouble(),
+            tempMin: dailyMin[i].toDouble(),
+            precipitationSum: dailyPrecipitationValue,
+          ),
+        );
+      }
     }
 
-    return WeatherContext(snapshot, sum24, dailyForecasts: forecasts);
+    return WeatherContext(
+      snapshot,
+      sum24,
+      dailyForecasts: forecasts,
+      past30DaysPrecipitation: past30DaysPrecip,
+      precipitationLast30Days: sum30,
+    );
   }
 }
