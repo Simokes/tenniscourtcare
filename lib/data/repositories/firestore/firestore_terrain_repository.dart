@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../firestore/models/terrain_firestore_model.dart';
+import './terrain_firestore_model.dart';
 
 class FirestoreTerrainRepository {
   final FirebaseFirestore _firestore;

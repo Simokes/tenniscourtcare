@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
+import 'package:tenniscourtcare/shared/widgets/common/sync_status_indicator.dart';
 
 class DashboardHeader extends ConsumerWidget {
   const DashboardHeader({super.key});

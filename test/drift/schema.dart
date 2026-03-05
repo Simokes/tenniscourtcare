@@ -3,8 +3,8 @@
 // ignore_for_file: type=lint
 import 'package:drift/drift.dart';
 import 'package:drift/internal/migrations.dart';
-import 'schema_v19.dart' as v19;
-import 'schema_v20.dart' as v20;
+import './schema_v19.dart' as v19;
+import './schema_v20.dart' as v20;
 
 class GeneratedHelper implements SchemaInstantiationHelper {
   @override

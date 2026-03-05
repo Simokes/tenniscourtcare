@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../firestore/models/audit_log_firestore_model.dart';
+import './audit_log_firestore_model.dart';
 
 class FirestoreAuditLogRepository {
   final FirebaseFirestore _firestore;

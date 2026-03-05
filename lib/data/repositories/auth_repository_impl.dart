@@ -26,7 +26,7 @@ import '../../core/security/security_exceptions.dart'; // New exceptions
 import '../../core/security/auth_validator.dart';
 import '../../core/security/token_service.dart';
 import '../../core/security/rate_limiter.dart';
-import '../../data/repositories/audit_repository.dart';
+import './audit_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AppDatabase _db;

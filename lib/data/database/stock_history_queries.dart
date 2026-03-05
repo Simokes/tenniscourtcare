@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'app_database.dart';
+import './app_database.dart';
 
 class StockMovementWithDetails {
   final StockMovement movement;

@@ -1,6 +1,6 @@
 import 'dart:async';
 import '../../data/repositories/audit_repository.dart';
-import '../security/auth_exceptions.dart';
+import './auth_exceptions.dart';
 
 class RateLimiter {
   final AuditRepository _auditRepository;

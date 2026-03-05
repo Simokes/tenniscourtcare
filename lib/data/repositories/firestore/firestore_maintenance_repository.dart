@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../firestore/models/maintenance_firestore_model.dart';
+import './maintenance_firestore_model.dart';
 
 class FirestoreMaintenanceRepository {
   final FirebaseFirestore _firestore;

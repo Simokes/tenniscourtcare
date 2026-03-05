@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tenniscourtcare/data/database/stock_history_queries.dart';
-import 'package:tenniscourtcare/presentation/providers/core_providers.dart';
-import 'package:tenniscourtcare/presentation/widgets/premium/premium_card.dart';
-import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
+import 'package:tenniscourtcare/core/providers/core_providers.dart';
+import 'package:tenniscourtcare/shared/widgets/premium/premium_card.dart';
+import 'package:tenniscourtcare/shared/widgets/common/sync_status_indicator.dart';
 
 final stockHistoryProvider =
     StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {

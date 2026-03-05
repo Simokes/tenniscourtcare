@@ -1,28 +1,28 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
+import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/features/auth/providers/setup_providers.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
-import '../../presentation/pages/auth/login_page.dart';
-import '../../presentation/pages/auth/signup_page.dart';
-import '../../presentation/pages/auth/admin_setup_page.dart';
-import '../../presentation/pages/admin/admin_dashboard_page.dart';
-import '../../presentation/pages/admin/pending_users_page.dart';
-import '../../presentation/pages/error/access_denied_page.dart';
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/signup_page.dart';
+import '../../features/auth/presentation/pages/admin_setup_page.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/pending_users_page.dart';
+import '../../features/auth/presentation/pages/access_denied_page.dart';
 import 'package:tenniscourtcare/features/home/presentation/screens/home_screen.dart';
 import 'package:tenniscourtcare/features/inventory/presentation/screens/stock_history_screen.dart';
 import '../../features/inventory/presentation/screens/stock_screen.dart';
 import '../../features/weather/presentation/screens/weather_screen.dart';
-import '../../presentation/screens/calendar/calendar_screen.dart';
-import '../../presentation/screens/maintenance_screen.dart';
-import '../../presentation/screens/stats_screen.dart';
-import '../../presentation/screens/settings_screen.dart';
-import '../../presentation/screens/add_terrain_screen.dart';
-import '../../presentation/screens/terrain_maintenance_history_screen.dart';
+import '../../features/calendar/presentation/screens/calendar_screen.dart';
+import '../../features/maintenance/presentation/screens/maintenance_screen.dart';
+import '../../features/stats/presentation/screens/stats_screen.dart';
+import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/terrain/presentation/screens/add_terrain_screen.dart';
+import '../../features/maintenance/presentation/screens/terrain_maintenance_history_screen.dart';
 import '../../domain/enums/role.dart';
 import '../../domain/entities/terrain.dart';
-import 'go_router_refresh_stream.dart';
+import './go_router_refresh_stream.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   // Watch the stream of setup status changes

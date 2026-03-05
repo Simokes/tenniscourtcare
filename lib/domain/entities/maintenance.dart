@@ -1,5 +1,5 @@
 // lib/domain/entities/maintenance.dart
-import 'weather_snapshot.dart';
+import './weather_snapshot.dart';
 
 class Maintenance {
   final int? id;

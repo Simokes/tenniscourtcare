@@ -1,4 +1,4 @@
-import 'auth_exceptions.dart';
+import './auth_exceptions.dart';
 
 class AuthValidator {
   // NIST 2024:

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../firestore/models/user_firestore_model.dart';
+import './user_firestore_model.dart';
 
 class FirestoreUserRepository {
   final FirebaseFirestore _firestore;

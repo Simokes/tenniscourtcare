@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'users_table.dart';
-import 'terrain_table.dart';
+import './users_table.dart';
+import './terrain_table.dart';
 
 @DataClassName('Reservation')
 class Reservations extends Table {

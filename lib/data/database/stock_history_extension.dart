@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'app_database.dart';
+import './app_database.dart';
 
 // Extension pour ajouter les fonctionnalités de traçabilité à AppDatabase
 extension StockHistoryExtension on AppDatabase {

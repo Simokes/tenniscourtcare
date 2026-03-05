@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tenniscourtcare/presentation/providers/admin_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/security_providers.dart';
+import 'package:tenniscourtcare/features/admin/providers/admin_providers.dart';
+import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
+import 'package:tenniscourtcare/features/auth/providers/security_providers.dart';
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 import 'package:tenniscourtcare/data/repositories/audit_repository.dart';
 import 'package:tenniscourtcare/domain/entities/user_entity.dart';

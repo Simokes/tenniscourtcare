@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'core/router/app_router.dart';
-import 'core/theme/app_theme.dart';
-import 'presentation/providers/app_settings_provider.dart';
-import 'presentation/providers/core_providers.dart'; // ✅ IMPORT
+import './core/router/app_router.dart';
+import './core/theme/app_theme.dart';
+import './features/settings/providers/app_settings_provider.dart';
+import './core/providers/core_providers.dart'; // ✅ IMPORT
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import './firebase_options.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 
 Future<void> main() async {

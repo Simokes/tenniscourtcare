@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tenniscourtcare/presentation/widgets/sync_status_indicator.dart';
-import 'package:tenniscourtcare/presentation/providers/connectivity_providers.dart';
+import 'package:tenniscourtcare/shared/widgets/common/sync_status_indicator.dart';
+import 'package:tenniscourtcare/core/providers/connectivity_providers.dart';
 
 void main() {
   testWidgets('Displays Online state (compact)', (tester) async {

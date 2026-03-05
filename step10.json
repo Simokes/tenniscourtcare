@@ -1,0 +1,3 @@
+{
+  "lib/data/firestore/models/": "lib/data/repositories/firestore/"
+}

@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/domain/logic/stock_categorizer.dart';
-import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
-import 'category_selector.dart';
-import 'package:tenniscourtcare/presentation/widgets/quantity_selector.dart';
+import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
+import './category_selector.dart';
+import 'package:tenniscourtcare/shared/widgets/common/quantity_selector.dart';
 
 class AddEditStockItemSheet extends ConsumerStatefulWidget {
   final StockItem? item;

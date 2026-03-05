@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'stock_items.dart';
-import 'users_table.dart';
+import './stock_items.dart';
+import './users_table.dart';
 
 @DataClassName('StockMovement')
 class StockMovements extends Table {

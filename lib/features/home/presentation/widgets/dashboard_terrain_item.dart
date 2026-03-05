@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/presentation/providers/terrain_health_provider.dart';
-import 'package:tenniscourtcare/presentation/widgets/terrain_health_gauge.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_health_provider.dart';
+import 'package:tenniscourtcare/features/terrain/presentation/widgets/terrain_health_gauge.dart';
 import 'package:go_router/go_router.dart';
 
 class DashboardTerrainItem extends StatelessWidget {

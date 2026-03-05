@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 import 'package:tenniscourtcare/data/database/app_database.dart';
-import 'package:tenniscourtcare/data/models/maintenance_model.dart';
+import 'package:tenniscourtcare/data/mappers/maintenance_model.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
 

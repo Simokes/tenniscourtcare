@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
-import 'add_edit_stock_item_sheet.dart';
+import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
+import './add_edit_stock_item_sheet.dart';
 
 class StockAlertSection extends ConsumerWidget {
   const StockAlertSection({super.key});
