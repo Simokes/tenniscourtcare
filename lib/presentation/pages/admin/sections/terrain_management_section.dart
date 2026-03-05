@@ -137,7 +137,7 @@ class TerrainManagementSection extends ConsumerWidget {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TerrainType>(
                     decoration: const InputDecoration(labelText: 'Type de terrain'),
-                    value: type,
+                    initialValue: type,
                     items: TerrainType.values.map((t) {
                       return DropdownMenuItem(
                         value: t,
@@ -203,7 +203,7 @@ class TerrainManagementSection extends ConsumerWidget {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TerrainType>(
                     decoration: const InputDecoration(labelText: 'Type de terrain'),
-                    value: type,
+                    initialValue: type,
                     items: TerrainType.values.map((t) {
                       return DropdownMenuItem(
                         value: t,
@@ -221,7 +221,7 @@ class TerrainManagementSection extends ConsumerWidget {
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TerrainStatus>(
                     decoration: const InputDecoration(labelText: 'Statut'),
-                    value: status,
+                    initialValue: status,
                     items: TerrainStatus.values.map((s) {
                       return DropdownMenuItem(
                         value: s,
