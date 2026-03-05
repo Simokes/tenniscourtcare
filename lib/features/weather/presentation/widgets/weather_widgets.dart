@@ -1,30 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
+import 'package:tenniscourtcare/domain/services/weather_rules.dart';
 
 
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;
   final double precipitationLast24h;
   final bool unplayable;
+  final bool frozen;
+  final bool windyStrong;
+  final String conditionLabel;
+  final IconData conditionIcon;
+  final Color conditionColor;
 
   const CurrentWeatherCard({
     super.key,
     required this.weather,
     required this.precipitationLast24h,
     required this.unplayable,
+    required this.frozen,
+    required this.windyStrong,
+    required this.conditionLabel,
+    required this.conditionIcon,
+    required this.conditionColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final String conditionStr = _getWeatherConditionString(weather.weatherCode);
 
+    // Colored border if bad conditions
+    final bool hasBadConditions = frozen || unplayable || windyStrong;
+    final Color borderColor = hasBadConditions ? conditionColor : Colors.grey.shade200;
+
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: borderColor, width: hasBadConditions ? 2.0 : 1.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -123,17 +139,27 @@ class CurrentWeatherCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: unplayable ? Colors.red.shade100 : Colors.green.shade100,
+                        color: conditionColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
-                        unplayable ? 'À ÉVITER' : 'IDÉAL POUR JOUER',
-                        style: TextStyle(
-                          color: unplayable ? Colors.red.shade700 : Colors.green.shade700,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            conditionIcon,
+                            color: conditionColor,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            conditionLabel.toUpperCase(),
+                            style: TextStyle(
+                              color: conditionColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -354,33 +380,28 @@ class _ForecastListItem extends StatelessWidget {
     final now = DateTime.now();
     final date = forecast.date;
 
-    // Day format like "Lundi"
-    final List<String> weekdays = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    String dayLabel = weekdays[date.weekday - 1];
+    String dayLabel = DateFormat('E d MMM', 'fr').format(date);
+    dayLabel = dayLabel[0].toUpperCase() + dayLabel.substring(1);
 
     if (date.year == now.year && date.month == now.month && date.day == now.day) {
       dayLabel = 'Aujourd\'hui';
+    } else if (date.year == now.year && date.month == now.month && date.day == now.day + 1) {
+      dayLabel = 'Demain';
     }
 
-    final String conditionStr = _getWeatherConditionString(forecast.weatherCode);
-    final String tempStr = '${forecast.tempMax.round()}°C';
+    final forecastLabel = WeatherRules.forecastLabel(
+      precipitationSum: forecast.precipitationSum,
+      tempMax: forecast.tempMax,
+      windSpeed: forecast.windSpeed,
+    );
 
-    // Simple logic for status. This should ideally be moved to a helper or WeatherRules
-    final bool isRaining = forecast.precipitationSum > 2.0;
-    final bool isHeavyRain = forecast.precipitationSum > 10.0;
-
-    String statusStr = 'Excellent';
-    Color statusColor = Colors.green.shade600;
-    IconData statusIcon = Icons.check_circle;
-
-    if (isHeavyRain) {
-      statusStr = 'À éviter';
-      statusColor = Colors.red.shade500;
-      statusIcon = Icons.cancel;
-    } else if (isRaining || forecast.weatherCode >= 50) {
-      statusStr = 'Jouable';
-      statusColor = const Color(0xFF00419A); // primary blue
-      statusIcon = Icons.check_circle;
+    Color labelColor;
+    if (forecastLabel.startsWith('Éviter')) {
+      labelColor = Colors.red.shade600;
+    } else if (forecastLabel.startsWith('Prudence') || forecastLabel.startsWith('Conditions dégradées')) {
+      labelColor = Colors.orange.shade600;
+    } else {
+      labelColor = Colors.green.shade600;
     }
 
     // Icon and background color based on weather
@@ -414,79 +435,99 @@ class _ForecastListItem extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  weatherIcon,
-                  color: iconColor,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    dayLabel,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF001A3D),
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: iconBgColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      weatherIcon,
+                      color: iconColor,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '$tempStr - $conditionStr',
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 13,
-                    ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        dayLabel,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFF001A3D),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '↑${forecast.tempMax.round()}° ↓${forecast.tempMin.round()}°',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
                   ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (forecast.precipitationSum > 0)
+                    Row(
+                      children: [
+                        const Text('💧 '),
+                        Text(
+                          '${forecast.precipitationSum.toStringAsFixed(1)} mm',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (forecast.windSpeed >= 25) ...[
+                    if (forecast.precipitationSum > 0) const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Text('💨 '),
+                        Text(
+                          '${forecast.windSpeed.round()} km/h',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ]
                 ],
               ),
             ],
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                statusStr,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: statusColor,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Icon(
-                statusIcon,
-                color: statusColor,
-                size: 20,
-              ),
-            ],
+          const SizedBox(height: 12),
+          Text(
+            forecastLabel,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: labelColor,
+            ),
           ),
         ],
       ),
     );
-  }
-
-  String _getWeatherConditionString(int code) {
-    if (code == 0) return 'Dégagé';
-    if (code < 3) return 'Nuageux'; // Or partly cloudy
-    if (code < 50) return 'Couvert';
-    if (code < 70) return 'Pluie';
-    if (code == 71 || code == 73 || code == 75 || code == 77) return 'Neige';
-    if (code > 80) return 'Forte Pluie';
-    return 'Orage';
   }
 
   IconData _getWeatherIcon(int code) {
