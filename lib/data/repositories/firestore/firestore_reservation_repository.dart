@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../firestore/models/reservation_firestore_model.dart';
+import './reservation_firestore_model.dart';
 
 class FirestoreReservationRepository {
   final FirebaseFirestore _firestore;

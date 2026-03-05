@@ -1,15 +1,16 @@
+import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tenniscourtcare/presentation/providers/dashboard_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
+import 'package:tenniscourtcare/features/home/providers/dashboard_providers.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/dashboard_header.dart';
 import '../widgets/stats_carousel.dart';
-import '../widgets/weather_card.dart';
+import 'package:tenniscourtcare/features/weather/presentation/widgets/weather_card.dart';
 import '../widgets/upcoming_events.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
@@ -22,6 +23,10 @@ class HomeScreen extends ConsumerWidget {
     // Providers
     final todayMaintenanceCount = ref.watch(todayMaintenanceCountProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
+    final terrains = terrainsAsync.valueOrNull ?? const <Terrain>[];
+    final TerrainType? terrainType = terrains.isNotEmpty ? terrains.first.type : null;
+    final weatherAsync = terrainType != null ? ref.watch(weatherForClubProvider(terrainType)) : const AsyncValue.loading();
+
 
     // New Stock Provider Logic
     final lowStockCount = ref.watch(lowStockCountProvider);
@@ -54,10 +59,20 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // 3. Weather Card
-          const SliverToBoxAdapter(
+          SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 24),
-              child: WeatherCard(),
+              padding: const EdgeInsets.only(bottom: 24),
+              child: weatherAsync.when(
+                data: (weatherData) => WeatherCard(
+                  weather: weatherData?.current,
+                  precip24h: weatherData?.precip24h,
+                  frozen: weatherData?.isFrozen,
+                  unplayable: weatherData?.isUnplayable,
+                  onRefresh: () => ref.refresh(weatherForClubProvider(terrainType!)),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => const Center(child: Text('Erreur météo')),
+              ),
             ),
           ),
 

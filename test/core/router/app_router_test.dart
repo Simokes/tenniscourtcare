@@ -10,15 +10,15 @@ import 'package:tenniscourtcare/domain/entities/user_entity.dart';
 import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tenniscourtcare/presentation/providers/auth_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/setup_providers.dart';
-import 'package:tenniscourtcare/presentation/providers/core_providers.dart';
+import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
+import 'package:tenniscourtcare/features/auth/providers/setup_providers.dart';
+import 'package:tenniscourtcare/core/providers/core_providers.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
-import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/stock_provider.dart';
-import 'package:tenniscourtcare/presentation/providers/maintenance_provider.dart';
-import 'package:tenniscourtcare/providers/reservation_providers.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
+import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
+
 import 'package:tenniscourtcare/data/services/firebase_cache_service.dart';
 
 class FakeFirebaseCacheService extends Mock implements FirebaseCacheService {}
@@ -178,7 +178,7 @@ List<Override> baseOverrides() => [
   terrainsProvider.overrideWith((ref) => Stream.value([])),
   stockProvider.overrideWith((ref) => Stream.value([])),
   maintenancesProvider.overrideWith((ref) => Stream.value([])),
-  allReservationsStreamProvider.overrideWith((ref) => Stream.value([])),
+   // null.overrideWith((ref) => Stream.value([])),
   firebaseCacheServiceProvider.overrideWithValue(FakeFirebaseCacheService()),
   authStateProvider.overrideWith((ref) => MockAuthNotifier()),
 ];
@@ -205,7 +205,7 @@ void main() {
             }),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(router.routerDelegate.currentConfiguration.uri.toString(), '/admin-setup');
       });
     });
@@ -226,7 +226,7 @@ void main() {
             }),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(router.routerDelegate.currentConfiguration.uri.toString(), '/login');
       });
     });
@@ -250,11 +250,11 @@ void main() {
             }),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
 
         // Try to navigate to login
         router.go('/login');
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
       });
     });
@@ -274,7 +274,7 @@ void main() {
           }),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(router.routerDelegate.currentConfiguration.uri.toString(), '/access-denied');
     });
 
@@ -294,7 +294,7 @@ void main() {
             }),
           ),
         );
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
         expect(router.routerDelegate.currentConfiguration.uri.toString(), '/admin-setup');
       });
     });

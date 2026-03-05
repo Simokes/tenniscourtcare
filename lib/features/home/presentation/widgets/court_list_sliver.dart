@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/presentation/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CourtListSliver extends ConsumerWidget {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../domain/models/repository_exception.dart';
-import '../../presentation/providers/app_settings_provider.dart' show ClubLocation;
+import '../../features/settings/providers/app_settings_provider.dart' show ClubLocation;
 
 class NominatimService {
   final http.Client _client;

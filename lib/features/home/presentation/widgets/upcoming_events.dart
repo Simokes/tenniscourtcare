@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
-import 'package:tenniscourtcare/presentation/providers/event_provider.dart';
+import 'package:tenniscourtcare/features/calendar/providers/event_provider.dart';
 
 class UpcomingEventsList extends ConsumerWidget {
   const UpcomingEventsList({super.key});

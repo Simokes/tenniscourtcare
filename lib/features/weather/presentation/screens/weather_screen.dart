@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
-import 'package:tenniscourtcare/presentation/providers/weather_for_club_provider.dart';
+import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
 import '../widgets/weather_widgets.dart';
 
 class WeatherScreen extends ConsumerWidget {

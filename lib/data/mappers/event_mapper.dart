@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:tenniscourtcare/data/database/app_database.dart' as db;
 
-import 'package:tenniscourtcare/data/models/app_event_model.dart';
+import 'package:tenniscourtcare/data/mappers/app_event_model.dart';
 import 'package:tenniscourtcare/domain/entities/app_event.dart';
 
 class EventMapper {

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'auth_exceptions.dart';
+import './auth_exceptions.dart';
 
 class TokenService {
   final FlutterSecureStorage _storage;

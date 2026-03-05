@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dashboard_theme_extension.dart';
+import './dashboard_theme_extension.dart';
 
 class AppTheme {
   static const Color _primary = Color(0xFF094CAA); // Primary Blue from design

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tenniscourtcare/data/models/terrain_model.dart';
+import 'package:tenniscourtcare/data/mappers/terrain_model.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 
 void main() {

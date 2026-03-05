@@ -1,0 +1,9 @@
+{
+  "lib/presentation/screens/maintenance_screen.dart": "lib/features/maintenance/presentation/screens/maintenance_screen.dart",
+  "lib/presentation/screens/terrain_maintenance_history_screen.dart": "lib/features/maintenance/presentation/screens/terrain_maintenance_history_screen.dart",
+  "lib/presentation/widgets/add_maintenance_sheet.dart": "lib/features/maintenance/presentation/widgets/add_maintenance_sheet.dart",
+  "lib/presentation/widgets/maintenance_type_selector.dart": "lib/features/maintenance/presentation/widgets/maintenance_type_selector.dart",
+  "lib/presentation/widgets/maintenance/refill_recommendation_card.dart": "lib/features/maintenance/presentation/widgets/refill_recommendation_card.dart",
+  "lib/presentation/providers/maintenance_provider.dart": "lib/features/maintenance/providers/maintenance_provider.dart",
+  "lib/presentation/providers/refill_recommendation_provider.dart": "lib/features/maintenance/providers/refill_recommendation_provider.dart"
+}
