@@ -307,41 +307,21 @@ class FirebaseCacheService {
 
 ---
 
-### 3.3 Presentation Layer (presentation)
+### 3.3 Presentation Layer
 
 **Responsibility:** UI, state management, navigation, routing logic
 
-**Composition:**
+> ℹ️ **NOTE:** The presentation layer is now fully integrated into each feature under `lib/features/`. The `lib/presentation/` folder has been removed.
+
+Each feature folder now encapsulates its own presentation logic:
+
 ```
-presentation/
-├── providers/
-│   ├── core_providers.dart              # databaseProvider, firebaseCacheServiceProvider
-│   ├── auth_providers.dart              # authStateProvider, pendingUsersProvider, UserApprovalNotifier
-│   ├── setup_providers.dart             # setupStatusProvider (network-aware)
-│   ├── [domain]_provider.dart           # stockProvider, terrainProvider, clubInfoProvider
-│   └── database_provider.dart           # Singleton Drift instance
-│
-├── pages/
-│   ├── auth/
-│   │   ├── login_page.dart              # With offline banner
-│   │   ├── signup_page.dart             # Registration
-│   │   └── admin_setup_page.dart
-│   ├── admin/
-│   │   └── pending_users_page.dart      # Approving/Rejecting inactive users
-│   └── error/
-│       ├── access_denied_page.dart
-│       └── no_network_first_launch_page.dart
-│
-├── screens/
-│   ├── maintenance_screen.dart
-│   └── ...
-│
-└── widgets/
-    ├── sync_status_indicator.dart       # Shows listener connection state
-    └── access_control/
-        ├── permission_visibility.dart
-        ├── role_visibility.dart
-        └── feature_flag_visibility.dart
+features/[feature]/
+├── presentation/
+│   ├── screens/   # Full pages
+│   ├── pages/     # If applicable (auth, admin)
+│   └── widgets/   # Feature-specific widgets
+└── providers/     # All Riverpod providers for this feature
 ```
 
 **Weather Location Priority:**
@@ -352,6 +332,7 @@ The `weatherForClubProvider` dynamically determines which location coordinates t
 
 **REMOVED from presentation layer:**
 ```
+❌ lib/presentation/                (folder deleted, migrated to features)
 ❌ firebase_sync_provider.dart      (replaced by FirebaseCacheService)
 ❌ SyncStatusModel                  (no longer needed)
 ❌ manualSyncProvider               (no manual sync)
@@ -420,26 +401,102 @@ final stockNotifierProvider = AsyncNotifierProvider<StockNotifier, void>(
 
 ### 3.4 Features Layer (features)
 
-**Responsibility:** Feature-specific screens, widgets, models
+**Responsibility:** Feature-specific UI, state management, and specific models/infrastructure
 
 ```
 features/
-├── [feature]/
+├── admin/
+│   ├── presentation/
+│   │   ├── pages/
+│   │   │   └── sections/
+│   │   └── screens/
+│   └── providers/
+│
+├── auth/
+│   ├── presentation/
+│   │   └── pages/
+│   └── providers/
+│
+├── calendar/
+│   ├── presentation/
+│   │   └── screens/
+│   └── providers/
+│
+├── home/
 │   ├── presentation/
 │   │   ├── screens/
 │   │   └── widgets/
+│   └── providers/
+│
+├── inventory/
 │   ├── models/
-│   └── infrastructure/
+│   ├── presentation/
+│   │   ├── screens/
+│   │   └── widgets/
+│   └── providers/
+│
+├── maintenance/
+│   ├── presentation/
+│   │   ├── screens/
+│   │   └── widgets/
+│   └── providers/
+│
+├── settings/
+│   ├── presentation/
+│   │   ├── screens/
+│   │   └── widgets/
+│   └── providers/
+│
+├── stats/
+│   ├── presentation/
+│   │   ├── screens/
+│   │   └── widgets/
+│   └── providers/
+│
+├── terrain/
+│   ├── presentation/
+│   │   ├── screens/
+│   │   └── widgets/
+│   └── providers/
+│
+└── weather/
+    ├── infrastructure/   # weather_service.dart
+    ├── presentation/
+    │   ├── screens/
+    │   └── widgets/
+    └── providers/
 ```
 
 **Rules:**
-- Feature code is self-contained
-- Feature models are NOT domain entities
-- Providers in `presentation/providers/` only
+- Feature code is self-contained.
+- `presentation/` folder contains UI logic specific to the feature.
+  - `screens/` (for full pages).
+  - `pages/` (for specialized routing pages like in auth or admin).
+  - `widgets/` (for feature-specific visual components).
+- `providers/` folder inside each feature contains all Riverpod providers for that feature.
+- Feature models are NOT domain entities.
 
 ---
 
-### 3.5 Core Layer (core)
+### 3.5 Shared Layer (shared)
+
+**Responsibility:** Cross-feature widgets and common application services
+
+```
+shared/
+├── services/             # Cross-cutting services (image_picker, share_report, listener_monitor)
+└── widgets/
+    ├── access_control/   # Role/permission/feature_flag visibility wrappers
+    ├── common/           # Reusable UI components (sync_status, image_viewer, quantity_selector)
+    └── premium/          # Premium UI components (premium_button, premium_card, premium_text_field)
+```
+
+**Rules:**
+- Shared widgets and services can be imported by any feature, but `shared/` must never import from `lib/features/`.
+
+---
+
+### 3.6 Core Layer (core)
 
 **Responsibility:** Shared infrastructure, configuration, routing, security
 
@@ -480,7 +537,7 @@ core/
 ✅ import 'package:cloud_firestore/';
 ✅ import '../domain/';
 ❌ NEVER: import 'package:flutter_riverpod/';
-❌ NEVER: import 'presentation/';
+❌ NEVER: import 'features/';
 ```
 
 **Presentation** (can import domain + data):
@@ -489,7 +546,7 @@ core/
 ✅ import 'package:flutter_riverpod/';
 ✅ import '../domain/';
 ✅ import '../data/';
-❌ NEVER: import '../presentation/' (circular imports)
+❌ NEVER: import '../features/' (circular imports)
 ```
 
 ### 4.2 Provider Dependency Chain
@@ -840,20 +897,17 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
 ## 8. Folder Structure
 
+> ℹ️ **NOTE:** `lib/presentation/` removed — fully migrated to features/
+
 ```
 lib/
 ├── core/
 │   ├── config/
+│   ├── providers/        # connectivity, core providers
 │   ├── router/
 │   ├── security/
-│   └── theme/
-│
-├── domain/
-│   ├── entities/         # NO syncStatus field
-│   ├── repositories/
-│   ├── enums/            # Role, Permission (NO SyncStatus)
-│   ├── logic/
-│   └── models/           # SetupStatus
+│   ├── theme/
+│   └── utils/            # date_utils, csv_export
 │
 ├── data/
 │   ├── database/         # Drift (cache only, NO syncStatus columns)
@@ -866,16 +920,31 @@ lib/
 │       ├── firebase_cache_service.dart  # ← CORE: replaces sync service
 │       └── firebase_auth_service.dart
 │
-├── features/
-│   └── [feature]/
-│       ├── presentation/
-│       └── models/
+├── domain/
+│   ├── entities/         # NO syncStatus field
+│   ├── repositories/
+│   ├── enums/            # Role, Permission (NO SyncStatus)
+│   ├── logic/
+│   └── models/           # SetupStatus
 │
-├── presentation/
-│   ├── providers/
-│   ├── pages/
-│   ├── screens/
+├── features/
+│   ├── admin/
+│   ├── auth/
+│   ├── calendar/
+│   ├── home/
+│   ├── inventory/
+│   ├── maintenance/
+│   ├── settings/
+│   ├── stats/
+│   ├── terrain/
+│   └── weather/
+│
+├── shared/
+│   ├── services/         # image_picker, share_report, listener_monitor
 │   └── widgets/
+│       ├── access_control/
+│       ├── common/
+│       └── premium/
 │
 └── main.dart
 ```
@@ -1138,7 +1207,7 @@ When implementing a new domain entity:
   - `toFirestore()` — Entity → Firestore map
   - `toCompanion()` — Firestore snapshot → Drift companion (for cache upsert)
 
-- [ ] Create provider/notifier (`presentation/providers/[name]_provider.dart`)
+- [ ] Create provider/notifier (`features/[feature]/providers/[name]_provider.dart`)
   - `StreamProvider` for reading (Drift stream)
   - `AsyncNotifier` for actions/mutations (`addX`, `updateX`, `deleteX`)
   - `StateProvider` for filters
@@ -1158,7 +1227,7 @@ When implementing a new domain entity:
 ```
 REMOVE COMPLETELY:
 ├─ lib/data/services/firebase_sync_service.dart
-├─ lib/presentation/providers/firebase_sync_provider.dart
+├─ lib/features/core/providers/firebase_sync_provider.dart
 │  └─ SyncResult class
 │  └─ firebaseSyncProvider
 │  └─ firebaseSyncStreamProvider
