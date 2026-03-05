@@ -4,6 +4,7 @@ import '../../domain/services/weather_rules.dart';
 import '../../features/weather/infrastructure/weather_service.dart';
 import 'app_settings_provider.dart';
 import 'weather_providers.dart' show weatherServiceProvider;
+import 'club_info_provider.dart';
 
 class WeatherComputed {
   final WeatherContext context;
@@ -20,11 +21,13 @@ class WeatherComputed {
 
 /// Météo pour le club (coordonnée globale), en fonction d’un type de terrain
 final weatherForClubProvider =
-    FutureProvider.family<WeatherComputed, TerrainType>((ref, type) async {
-      final settingsAsync = ref.watch(appSettingsProvider);
-      final loc = settingsAsync.value?.location;
+    FutureProvider.family<WeatherComputed?, TerrainType>((ref, type) async {
+      final clubLoc = ref.watch(clubLocationFromInfoProvider);
+      final settingsLoc = ref.watch(appSettingsProvider).valueOrNull?.location;
+      final loc = clubLoc ?? settingsLoc;
+
       if (loc == null) {
-        throw Exception('Aucune coordonnée du club définie');
+        return null;
       }
 
       final svc = ref.read(weatherServiceProvider);
