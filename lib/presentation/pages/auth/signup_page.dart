@@ -264,7 +264,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   _buildLabel('Rôle', isDarkMode, textColor),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<Role>(
-                    value: _selectedRole,
+                    initialValue: _selectedRole,
                     items: [Role.agent, Role.secretary].map((role) {
                       return DropdownMenuItem(
                         value: role,
