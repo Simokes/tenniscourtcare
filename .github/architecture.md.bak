@@ -1,7 +1,5 @@
 # ARCHITECTURE.md
 
-*Last updated: schema v20*
-
 ## 1. Architecture Pattern
 
 **Pattern:** Clean Architecture + MVVM (via Riverpod) + Offline-First Cache
@@ -44,9 +42,6 @@ UI → ref.watch(xxxProvider) → Drift stream → StreamProvider → UI
 > ⚡ **EXCEPTION RULE (firebaseId persistence):**
 > After calling `addX()`, Firestore returns the generated `docRef.id`. The Notifier (`XNotifier`) MUST immediately call `upsertX(item.copyWith(firebaseId: docRef.id))` to persist the ID locally without waiting for the CacheService listener. This is the **ONLY** authorized exception to the "CacheService is the only writer to Drift" rule. The CacheService listener will confirm this write later idempotently.
 
-> ℹ️ **EXCEPTION RULE (ClubInfo):**
-> `ClubInfo` is an intentional exception to the Drift caching rule. It is stored ONLY in Firestore, as the data is rarely modified and does not require an offline read cache. It bypasses Drift entirely.
-
 ---
 
 ## 3. Layer Organization
@@ -58,11 +53,11 @@ UI → ref.watch(xxxProvider) → Drift stream → StreamProvider → UI
 **Composition:**
 ```
 domain/
-├── entities/          # @immutable data classes (StockItem, UserEntity, Terrain, ClubInfo, etc)
-├── repositories/      # Abstract interfaces (StockRepository, AuthRepository, ClubInfoRepository, etc)
-├── enums/            # Role, Permission, FeatureFlag, UserStatus
+├── entities/          # @immutable data classes (StockItem, User, Terrain, etc)
+├── repositories/      # Abstract interfaces (StockRepository, AuthRepository, etc)
+├── enums/            # Role, Permission, FeatureFlag
 ├── logic/            # Business services (PermissionResolver, StockCategorizer)
-├── models/           # Domain-specific models (SetupStatus, DailyForecast)
+├── models/           # Domain-specific models (SetupStatus)
 └── services/         # Domain services (WeatherRules)
 ```
 
@@ -111,21 +106,7 @@ enum SetupStatus {
   error,
   noNetworkFirstLaunch, // No internet + no local admin
 }
-
-enum UserStatus {
-  active,
-  inactive,
-  rejected
-}
 ```
-
-**WeatherRules & Domain Services:**
-The `WeatherRules` domain service defines threshold conditions for tennis playability based on `DailyForecast` data (precipitation, tempMax, windSpeed):
-- **frozen:** `temp <= 0°C` → 'Terrain gelé' (blue)
-- **unplayable + rain:** → 'Terrain impraticable' (red)
-- **windyStrong:** `windSpeed >= 40 km/h` → 'Conditions dégradées' (orange)
-- **windyModerate:** `windSpeed >= 25 km/h` → 'Vent modéré' (amber)
-- **normal:** → 'Conditions optimales' (green)
 
 ---
 
@@ -150,8 +131,7 @@ data/
 │
 └── services/
     ├── firebase_cache_service.dart  # CORE: Firestore listeners → Drift updates
-    ├── firebase_auth_service.dart
-    └── nominatim_service.dart       # API integration for geocoding ClubInfo addresses
+    └── firebase_auth_service.dart
 ```
 
 **REMOVED from data layer:**
@@ -316,18 +296,15 @@ class FirebaseCacheService {
 presentation/
 ├── providers/
 │   ├── core_providers.dart              # databaseProvider, firebaseCacheServiceProvider
-│   ├── auth_providers.dart              # authStateProvider, pendingUsersProvider, UserApprovalNotifier
+│   ├── auth_providers.dart              # authStateProvider, currentUserProvider
 │   ├── setup_providers.dart             # setupStatusProvider (network-aware)
-│   ├── [domain]_provider.dart           # stockProvider, terrainProvider, clubInfoProvider
+│   ├── [domain]_provider.dart           # stockProvider, terrainProvider (read Drift streams)
 │   └── database_provider.dart           # Singleton Drift instance
 │
 ├── pages/
 │   ├── auth/
 │   │   ├── login_page.dart              # With offline banner
-│   │   ├── signup_page.dart             # Registration
 │   │   └── admin_setup_page.dart
-│   ├── admin/
-│   │   └── pending_users_page.dart      # Approving/Rejecting inactive users
 │   └── error/
 │       ├── access_denied_page.dart
 │       └── no_network_first_launch_page.dart
@@ -343,12 +320,6 @@ presentation/
         ├── role_visibility.dart
         └── feature_flag_visibility.dart
 ```
-
-**Weather Location Priority:**
-The `weatherForClubProvider` dynamically determines which location coordinates to query based on this priority order:
-1. `clubLocationFromInfoProvider`: Coordinates strictly geocoded from the `ClubInfo` (via NominatimService).
-2. `AppSettings.location`: Saved settings fallback (SharedPreferences).
-3. `null`: Safe failure → `AsyncValue.data(null)` yielding no weather.
 
 **REMOVED from presentation layer:**
 ```
@@ -664,18 +635,6 @@ Exception (base)
     └── CacheReadException
 ```
 
-**AuthExceptionType Enum:**
-Alongside the hierarchy, `AuthExceptionType` is used strictly for user-facing UI feedback:
-```dart
-enum AuthExceptionType {
-  invalidCredentials,
-  pendingApproval,   // Renders orange warning on LoginPage
-  rejected,          // Renders red warning on LoginPage
-  emailAlreadyInUse,
-  unknown
-}
-```
-
 **REMOVED exceptions:**
 ```
 ❌ SyncException       (no sync system)
@@ -765,11 +724,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/no-network', builder: ...),
       GoRoute(path: '/admin-setup', builder: ...),
       GoRoute(path: '/login', builder: ...),
-      GoRoute(path: '/signup', builder: ...), // Public (no auth guard)
       GoRoute(path: '/', builder: ..., routes: [
         GoRoute(path: 'stock', builder: ...),
         GoRoute(path: 'maintenance', builder: ...),
-        GoRoute(path: 'admin/pending-users', builder: ...), // Guarded (Role.admin only)
       ]),
     ],
   );
@@ -813,10 +770,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   Future<void> signIn({required String email, required String password}) async {
     try {
       await _authRepo.signIn(email: email, password: password);
-      
+
       // Start Firestore listeners → Drift stays fresh
       _cacheService.startListening();
-      
+
       state = AsyncValue.data(AuthState.authenticated(...));
       ref.invalidate(setupStatusProvider);
     } catch (e, st) {
@@ -828,7 +785,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   Future<void> signOut() async {
     // Stop listeners before logout
     _cacheService.stopListening();
-    
+
     await _authRepo.signOut();
     state = AsyncValue.data(AuthState.unauthenticated());
     ref.invalidate(setupStatusProvider);
@@ -908,9 +865,6 @@ lib/
 ```
 
 ### 9.2 Schema Version
-
-**Current schema version:** 20
-- v20: Added `users.status`, `users.approvedAt`, `users.approvedBy`.
 
 **Rule:** Bump schema version when:
 - Adding/removing columns
@@ -992,9 +946,9 @@ Network restored:
 test('StockRepositoryImpl.addStockItem() writes to Firestore only', () async {
   final mockFs = MockFirebaseFirestore();
   final repo = StockRepositoryImpl(db: mockDb, fs: mockFs);
-  
+
   await repo.addStockItem(testItem);
-  
+
   verify(mockFs.collection('stocks').add(any)).called(1);
   verifyNever(mockDb.upsertStockItem(any)); // Drift NOT touched by repo
 });
@@ -1056,29 +1010,8 @@ First Launch (no admin):
     3. ref.invalidate(setupStatusProvider)
     4. Router → needsLogin → /login
 
-Signup Flow (Normal User):
-  SignupPage → signUp() (Role.admin forbidden)
-    1. Firebase Auth: createUserWithEmailAndPassword()
-    2. Sets displayName in Firebase Auth
-    3. Writes Firestore document with status: 'inactive'
-    4. Writes Drift row with firestoreUid immediately
-    5. Signs out immediately after signup
-    6. Router → Dialog success → /login
-
-Admin Approval Lifecycle:
-  Admin views PendingUsersPage (reads from pendingUsersProvider)
-  → approveUser(userId): Updates Firestore status to 'active', adds approvedAt/approvedBy
-  → rejectUser(userId): Updates Firestore status to 'rejected'
-  → FirebaseCacheService._listenUsers() synchronizes status back to Drift
-
 Login (online):
-  LoginPage → signIn() → Firebase Auth
-    1. Reads user document from Firestore (NOT Custom Claims)
-    2. Checks status:
-       a. If 'inactive' → PendingApprovalException (Orange UI warning)
-       b. If 'rejected' → AccountRejectedException (Red UI warning)
-       c. If 'active'   → Proceed
-    3. startListening() → authenticated → /
+  LoginPage → signIn() → Firebase Auth → startListening() → authenticated → /
 
 Login (offline):
   LoginPage → signIn() → FirebaseException → signInOffline()
@@ -1224,6 +1157,6 @@ RISK: Low (incremental, parallel before remove)
 
 ---
 
-**Last updated:** schema v20 (Firebase as Source of Truth, Drift as cache)
+**Last updated:** 2024 (v15 schema — Firebase as Source of Truth, Drift as cache)
 **Valid for:** Flutter 3.x, Dart 3.x, Riverpod 2.4.x, Drift 2.13.x, Firebase 4.x
 **Architecture version:** 2.0 (simplified from bidirectional sync)
