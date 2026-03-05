@@ -63,6 +63,18 @@ class WeatherScreen extends ConsumerWidget {
       ),
       body: weatherAsync.when(
         data: (data) {
+          if (data == null) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  "Configurez l'adresse du club",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              ),
+            );
+          }
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 40),
             child: Column(

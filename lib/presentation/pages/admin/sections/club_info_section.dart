@@ -62,7 +62,21 @@ class ClubInfoSection extends ConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.location_on),
                     title: const Text('Adresse postale'),
-                    subtitle: Text(info.address ?? 'Non renseignée'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text([info.street, info.postalCode, info.city]
+                            .where((e) => e != null && e.isNotEmpty)
+                            .join(', ').isEmpty ? 'Non renseignée' : [info.street, info.postalCode, info.city]
+                            .where((e) => e != null && e.isNotEmpty)
+                            .join(', ')),
+                        if (info.latitude != null && info.longitude != null)
+                          Text(
+                            '📍 Coordonnées GPS: ${info.latitude}, ${info.longitude}',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                          ),
+                      ],
+                    ),
                   ),
                   const Divider(),
                   ListTile(
@@ -88,107 +102,176 @@ class ClubInfoSection extends ConsumerWidget {
   }
 
   void _showEditClubInfoDialog(BuildContext context, WidgetRef ref, ClubInfo? currentInfo, String? userEmail) {
-    final formKey = GlobalKey<FormState>();
-    String name = currentInfo?.name ?? '';
-    String? address = currentInfo?.address;
-    String? phone = currentInfo?.phone;
-    String? email = currentInfo?.email;
-
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Modifier les informations'),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  initialValue: name,
-                  decoration: const InputDecoration(labelText: 'Nom du club *'),
-                  validator: (value) {
-                    if (value == null || value.trim().length < 2) {
-                      return 'Minimum 2 caractères requis';
+      barrierDismissible: false,
+      builder: (ctx) => _EditClubInfoDialog(
+        currentInfo: currentInfo,
+        userEmail: userEmail,
+      ),
+    );
+  }
+}
+
+class _EditClubInfoDialog extends ConsumerStatefulWidget {
+  final ClubInfo? currentInfo;
+  final String? userEmail;
+
+  const _EditClubInfoDialog({
+    this.currentInfo,
+    this.userEmail,
+  });
+
+  @override
+  ConsumerState<_EditClubInfoDialog> createState() => _EditClubInfoDialogState();
+}
+
+class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late String _name;
+  String? _street;
+  String? _postalCode;
+  String? _city;
+  String? _phone;
+  String? _email;
+
+  @override
+  void initState() {
+    super.initState();
+    _name = widget.currentInfo?.name ?? '';
+    _street = widget.currentInfo?.street;
+    _postalCode = widget.currentInfo?.postalCode;
+    _city = widget.currentInfo?.city;
+    _phone = widget.currentInfo?.phone;
+    _email = widget.currentInfo?.email;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final saveState = ref.watch(clubInfoNotifierProvider);
+    final isLoading = saveState.isLoading;
+
+    return AlertDialog(
+      title: const Text('Modifier les informations'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                initialValue: _name,
+                decoration: const InputDecoration(labelText: 'Nom du club *'),
+                enabled: !isLoading,
+                validator: (value) {
+                  if (value == null || value.trim().length < 2) {
+                    return 'Minimum 2 caractères requis';
+                  }
+                  return null;
+                },
+                onSaved: (value) => _name = value!.trim(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _street,
+                decoration: const InputDecoration(labelText: 'Rue et numéro'),
+                enabled: !isLoading,
+                onSaved: (value) => _street = value?.trim().isEmpty ?? true ? null : value!.trim(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _postalCode,
+                decoration: const InputDecoration(labelText: 'Code postal'),
+                keyboardType: TextInputType.number,
+                enabled: !isLoading,
+                onSaved: (value) => _postalCode = value?.trim().isEmpty ?? true ? null : value!.trim(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _city,
+                decoration: const InputDecoration(labelText: 'Ville'),
+                enabled: !isLoading,
+                onSaved: (value) => _city = value?.trim().isEmpty ?? true ? null : value!.trim(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _phone,
+                decoration: const InputDecoration(labelText: 'Téléphone'),
+                keyboardType: TextInputType.phone,
+                enabled: !isLoading,
+                onSaved: (value) => _phone = value?.trim().isEmpty ?? true ? null : value!.trim(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                initialValue: _email,
+                decoration: const InputDecoration(labelText: 'Email contact'),
+                keyboardType: TextInputType.emailAddress,
+                enabled: !isLoading,
+                validator: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    if (!emailRegex.hasMatch(value.trim())) {
+                      return 'Format d\'email invalide';
                     }
-                    return null;
-                  },
-                  onSaved: (value) => name = value!.trim(),
-                ),
+                  }
+                  return null;
+                },
+                onSaved: (value) => _email = value?.trim().isEmpty ?? true ? null : value!.trim(),
+              ),
+              if (isLoading) ...[
                 const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: address,
-                  decoration: const InputDecoration(labelText: 'Adresse postale'),
-                  onSaved: (value) => address = value?.trim().isEmpty ?? true ? null : value!.trim(),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: phone,
-                  decoration: const InputDecoration(labelText: 'Téléphone'),
-                  keyboardType: TextInputType.phone,
-                  onSaved: (value) => phone = value?.trim().isEmpty ?? true ? null : value!.trim(),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: email,
-                  decoration: const InputDecoration(labelText: 'Email contact'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value != null && value.trim().isNotEmpty) {
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(value.trim())) {
-                        return 'Format d\'email invalide';
-                      }
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => email = value?.trim().isEmpty ?? true ? null : value!.trim(),
-                ),
+                const Center(child: CircularProgressIndicator()),
+                const SizedBox(height: 8),
+                const Center(child: Text('Géocodage en cours...')),
               ],
-            ),
+            ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () async {  // ✅ async ajouté
-              if (formKey.currentState!.validate()) {
-                formKey.currentState!.save();
+      ),
+      actions: [
+        TextButton(
+          onPressed: isLoading ? null : () => Navigator.pop(context),
+          child: const Text('Annuler'),
+        ),
+        TextButton(
+          onPressed: isLoading ? null : () async {
+            if (_formKey.currentState!.validate()) {
+              _formKey.currentState!.save();
 
-                final newInfo = ClubInfo(
-                  id: currentInfo?.id ?? 'main',
-                  name: name,
-                  address: address,
-                  phone: phone,
-                  email: email,
-                  updatedAt: DateTime.now(),
-                  updatedBy: userEmail,
-                );
+              final newInfo = ClubInfo(
+                id: widget.currentInfo?.id ?? 'main',
+                name: _name,
+                street: _street,
+                postalCode: _postalCode,
+                city: _city,
+                latitude: widget.currentInfo?.latitude,
+                longitude: widget.currentInfo?.longitude,
+                phone: _phone,
+                email: _email,
+                updatedAt: DateTime.now(),
+                updatedBy: widget.userEmail,
+              );
 
-                try {
-                  await ref                          // ✅ await ajouté
-                      .read(clubInfoNotifierProvider.notifier)
-                      .saveClubInfo(newInfo);
-                  if (ctx.mounted) Navigator.pop(ctx); // ✅ pop après succès
-                } catch (e) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      SnackBar(
-                        content: Text('Erreur: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
+              try {
+                await ref
+                    .read(clubInfoNotifierProvider.notifier)
+                    .saveClubInfo(newInfo);
+                if (context.mounted) Navigator.pop(context);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               }
-            },
-            child: const Text('Enregistrer'),
-          ),
-        ],
-      ),
+            }
+          },
+          child: const Text('Enregistrer'),
+        ),
+      ],
     );
   }
 }

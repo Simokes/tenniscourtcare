@@ -6,7 +6,6 @@ import '../../domain/entities/maintenance.dart';
 import '../providers/maintenance_provider.dart';
 import '../../domain/entities/weather_snapshot.dart';
 import '../providers/weather_for_club_provider.dart';
-import '../providers/app_settings_provider.dart';
 import 'maintenance_type_selector.dart';
 import 'quantity_selector.dart';
 import '../../features/weather/presentation/widgets/weather_card.dart';
@@ -100,23 +99,23 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   }
 
   Future<void> _loadWeather() async {
-    final clubLoc = ref.read(appSettingsProvider).value?.location;
-    if (clubLoc == null) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Définis d’abord les coordonnées du club dans Paramètres',
-          ),
-        ),
-      );
-      return;
-    }
-
     try {
       final computed = await ref.read(
         weatherForClubProvider(widget.terrain.type).future,
       );
+
+      if (computed == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Définis d’abord les coordonnées du club dans Paramètres',
+            ),
+          ),
+        );
+        return;
+      }
+
       setState(() {
         _weather = computed.context.snapshot;
         _precip24h = computed.context.precipitationLast24h;

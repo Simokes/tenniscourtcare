@@ -23,6 +23,19 @@ class WeatherCard extends ConsumerWidget {
 
     return weatherAsync.when(
       data: (weatherData) {
+        if (weatherData == null) {
+          return _buildCard(
+            context: context,
+            ref: ref,
+            terrains: terrains,
+            temp: '--°C',
+            rain: '-- mm',
+            wind: '-- km/h',
+            conditionsTitle: "Configurez l'adresse du club",
+            icon: Icons.location_off,
+          );
+        }
+
         final weather = weatherData.context.snapshot;
         final precipitationLast24h = weatherData.context.precipitationLast24h;
         final unplayable = weatherData.unplayable;
