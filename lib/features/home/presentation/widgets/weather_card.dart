@@ -51,7 +51,7 @@ class WeatherCard extends ConsumerWidget {
         conditionsTitle: 'Chargement...',
         icon: Icons.hourglass_empty,
       ),
-      error: (_, _) => _buildCard(
+      error: (_, __) => _buildCard(
         context: context,
         ref: ref,
         terrains: terrains,

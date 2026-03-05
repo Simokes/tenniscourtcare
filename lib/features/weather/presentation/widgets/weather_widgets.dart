@@ -280,10 +280,10 @@ class RainHistoryChart extends StatelessWidget {
                 // If it's exactly 0, give it a tiny height and lighter color.
 
                 double pct = precip / effectiveMax;
-                final bool isSignificant = precip > 0.5;
+                bool isSignificant = precip > 0.5;
 
                 // The design uses blue-500 for significant, slate-200 for none/low.
-                final Color barColor = isSignificant
+                Color barColor = isSignificant
                     ? const Color(0xFF00419A) // navy-500 equivalent in the design
                     : Colors.blue.shade100.withValues(alpha: 0.5);
 
@@ -384,7 +384,7 @@ class _ForecastListItem extends StatelessWidget {
     }
 
     // Icon and background color based on weather
-    final IconData weatherIcon = _getWeatherIcon(forecast.weatherCode);
+    IconData weatherIcon = _getWeatherIcon(forecast.weatherCode);
     Color iconColor;
     Color iconBgColor;
 
