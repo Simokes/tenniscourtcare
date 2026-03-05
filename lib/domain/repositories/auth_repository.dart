@@ -61,4 +61,5 @@ abstract class AuthRepository {
 
   /// Récupère la liste de tous les utilisateurs.
   Future<List<UserEntity>> getAllUsers();
+  Future<void> deleteUserAndData(int localId, String? firebaseId);
 }

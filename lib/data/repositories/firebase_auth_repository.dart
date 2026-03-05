@@ -87,9 +87,8 @@ class FirebaseAuthRepository implements AuthRepository {
     // CRITICAL FIX: Query by firestore_uid, not email
     final localUser = await _db.getUserByFirestoreUid(fUser.uid);
 
-    // Refresh token to get latest claims
-    final token = await fUser.getIdTokenResult(true);
-    final roleStr = token.claims?['role'] as String?;
+    // ✅ Read role from Firestore document (already fetched above)
+    final roleStr = doc.data()?['role'] as String?;
     final userRole = roleStr != null
         ? Role.values.firstWhere(
             (r) => r.name == roleStr,
@@ -98,10 +97,9 @@ class FirebaseAuthRepository implements AuthRepository {
         : Role.agent;
 
     if (localUser != null) {
-      bool needsUpdate = false;
+      // ✅ Always return with Firestore role (source of truth)
       if (localUser.role != userRole) {
         await _db.updateUserRole(localUser.id, userRole);
-        needsUpdate = true;
       }
       // Ensure email is up to date if changed in Firebase
       if (localUser.email != fUser.email) {
@@ -109,7 +107,7 @@ class FirebaseAuthRepository implements AuthRepository {
         // For now we assume email matches or we update it if we had a method.
       }
 
-      return needsUpdate ? localUser.copyWith(role: userRole) : localUser;
+      return localUser.copyWith(role: userRole);
     } else {
       // Create new local user with firestore_uid
       final now = DateTime.now();
@@ -487,5 +485,17 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<bool> verifyOtp(String email, String code) async {
     throw UnimplementedError('OTP non supporté dans cette version.');
+  }
+
+  @override
+  Future<void> deleteUserAndData(int localId, String? firebaseId) async {
+    try {
+      if (firebaseId != null) {
+        await _firestore.collection('users').doc(firebaseId).delete();
+      }
+      await _db.deleteUser(localId);
+    } catch (e) {
+      throw GenericAuthException('Failed to delete user: $e');
+    }
   }
 }
