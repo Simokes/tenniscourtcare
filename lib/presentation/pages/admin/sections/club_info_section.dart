@@ -154,7 +154,7 @@ class ClubInfoSection extends ConsumerWidget {
             child: const Text('Annuler'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {  // ✅ async ajouté
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
 
@@ -168,8 +168,21 @@ class ClubInfoSection extends ConsumerWidget {
                   updatedBy: userEmail,
                 );
 
-                ref.read(clubInfoNotifierProvider.notifier).saveClubInfo(newInfo);
-                Navigator.pop(ctx);
+                try {
+                  await ref                          // ✅ await ajouté
+                      .read(clubInfoNotifierProvider.notifier)
+                      .saveClubInfo(newInfo);
+                  if (ctx.mounted) Navigator.pop(ctx); // ✅ pop après succès
+                } catch (e) {
+                  if (ctx.mounted) {
+                    ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(
+                        content: Text('Erreur: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               }
             },
             child: const Text('Enregistrer'),

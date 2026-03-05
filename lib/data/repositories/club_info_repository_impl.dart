@@ -6,7 +6,7 @@ import '../../domain/models/repository_exception.dart';
 class ClubInfoRepositoryImpl implements ClubInfoRepository {
   final FirebaseFirestore _firestore;
 
-  static const String _collectionPath = 'club_info';
+  static const String _collectionPath = 'infoClub';
   static const String _documentId = 'main';
 
   ClubInfoRepositoryImpl({FirebaseFirestore? firestore})
