@@ -92,20 +92,7 @@ class HomeScreen extends ConsumerWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      context.push('/add-terrain');
-                    },
-                    child: Text(
-                      'Manage',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF003580),
-                      ),
-                    ),
-                  ),
-                ],
+                                  ],
               ),
             ),
           ),
