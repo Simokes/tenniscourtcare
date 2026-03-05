@@ -1127,7 +1127,7 @@ String toString() => 'Complex representation'; // NO - affects perf
 ### 9.1 Provider Organization
 
 ```dart
-// File: lib/presentation/providers/stock_provider.dart
+// File: lib/features/inventory/providers/stock_provider.dart
 
 // 1. Repository injection
 final stockRepositoryProvider = Provider((ref) {
