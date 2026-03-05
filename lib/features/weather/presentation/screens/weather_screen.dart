@@ -85,6 +85,11 @@ class WeatherScreen extends ConsumerWidget {
                   weather: data.context.snapshot,
                   precipitationLast24h: data.context.precipitationLast24h,
                   unplayable: data.unplayable,
+                  frozen: data.frozen,
+                  windyStrong: data.windyStrong,
+                  conditionLabel: data.conditionLabel,
+                  conditionIcon: data.conditionIcon,
+                  conditionColor: data.conditionColor,
                 ),
 
                 // Rain History

@@ -42,7 +42,7 @@ class WeatherService {
       '&timezone=$timezone'
       '&current=temperature_2m,precipitation,relative_humidity_2m,wind_speed_10m,weather_code'
       '&hourly=precipitation'
-      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum'
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,windspeed_10m_max'
       '&past_days=30'
       '&forecast_days=7',
     );
@@ -93,6 +93,7 @@ class WeatherService {
     final dailyMax = (daily['temperature_2m_max'] as List).cast<num>();
     final dailyMin = (daily['temperature_2m_min'] as List).cast<num>();
     final dailyPrecip = (daily['precipitation_sum'] as List).cast<num>();
+    final dailyWindSpeed = (daily['windspeed_10m_max'] as List).cast<num>();
 
     final forecasts = <DailyForecast>[];
     final past30DaysPrecip = <double>[];
@@ -131,6 +132,7 @@ class WeatherService {
             tempMax: dailyMax[i].toDouble(),
             tempMin: dailyMin[i].toDouble(),
             precipitationSum: dailyPrecipitationValue,
+            windSpeed: dailyWindSpeed[i].toDouble(),
           ),
         );
       }
