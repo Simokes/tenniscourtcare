@@ -61,7 +61,7 @@
 
 **Gestion Utilisateurs & Admin**
 - Authentification Firebase (email/password)
-- Rôles: admin | manager | user (voir section 2.3)
+- Rôles: admin | agent | secretary (voir section 2.3)
 - Permissions par rôle (voir section 2.3)
 - Logs d'audit (toutes mutations)
 - Rate limiting: 10 login attempts/15min par user (app-side, Drift table login_attempts)
@@ -71,9 +71,9 @@
 
 | Rôle | Accès Lectures | Accès Écritures | Restrictions |
 |------|---|---|---|
-| **admin** | Tous les domaines | Tous (users, rôles, configurations) | Aucune |
-| **manager** | Terrains, Maintenance, Stock, Events | Terrain CRUD, Maintenance CRUD, Stock adjustments | Pas accès Users, Audit logs |
-| **user** | Terrains, Maintenance, Stock | Stock movements (read-only views) | Pas création terrain, pas mutation user |
+| **admin** | Tous les domaines | Tous | Aucune |
+| **agent** | Terrains, Maintenance, Stock | Terrain view, Maintenance CRUD, Stock movements | Pas accès Users, Admin |
+| **secretary** | Terrains, Events, Stock view | Events CRUD | Pas mutation terrain, pas maintenance |
 
 **Implémentation:** `lib/domain/enums/role.dart` + `PermissionResolver` (lib/domain/logic/permission_resolver.dart)
 
@@ -94,7 +94,7 @@
 | **Framework** | Flutter 3.x | iOS/Android |
 | **Language** | Dart 3.x | Null safety, records |
 | **State Mgmt** | Riverpod 2.4.x | Provider, FutureProvider, StreamProvider (deprecation: .stream → .future en v3.0) |
-| **Local DB** | Drift 2.13.x | SQLite avec typage fort, migrations auto (current: v14) |
+| **Local DB** | Drift 2.13.x | SQLite avec typage fort, migrations auto (current: v20) |
 | **Cloud DB** | Firestore | Real-time sync, security rules (rules exist but untested - see section 7) |
 | **Auth** | Firebase Auth 4.15.x | Email/password |
 | **Auth Supplement** | Custom TokenService | JWT management (refresh logic: **À DOCUMENTER**) |
@@ -119,54 +119,75 @@
 lib/
 ├── core/
 │   ├── config/          # App config (API keys, URLs, feature flags)
+│   ├── providers/
 │   ├── router/          # GoRouter setup + redirect logic (conditional: admin setup → login → home)
 │   ├── security/        # Auth validators, rate limiter (LoginAttempts table), token service, auth exceptions
-│   └── theme/           # Material theme + extensions
-│
+│   ├── theme/           # Material theme + extensions
+│   └── utils/
+├── data/
+│   ├── database/        # Drift SQLite (app_database.dart + 11 tables at v20)
+│   │   └── tables/      # UsersTable, TerrainTable, StockItemsTable, StockMovementsTable, MaintenancesTable, ReservationsTable, EventsTable, AuditLogsTable, SyncQueueTable, LoginAttemptsTable, OtpRecordsTable
+│   ├── mappers/         # Entity ↔ DTO conversions (UserMapper, StockItemMapper, etc)
+│   ├── repositories/    # Implementations (local Drift + Firestore)
+│   │   └── firestore/   # Firestore-specific repos (optional for read-heavy queries)
+│   └── services/        # Firebase services (FirebaseSyncService, FirebaseStockService, etc)
 ├── domain/
 │   ├── entities/        # Pure data classes (User, StockItem, Terrain, Maintenance, Reservation, Event, AuditLog, SyncQueue, OtpRecord, LoginAttempt)
+│   ├── enums/           # Role (admin|agent|secretary), Permission (CREATE_USER|DELETE_USER|etc), FeatureFlag
+│   ├── logic/
+│   ├── models/
 │   ├── repositories/    # Abstract interfaces (UserRepository, StockRepository, TerrainRepository, EventRepository, MaintenanceRepository, AuditRepository)
-│   ├── services/        # Business logic (WeatherRules, PermissionResolver)
-│   └── enums/           # Role (admin|manager|user), Permission (CREATE_USER|DELETE_USER|etc), FeatureFlag
-│
-├── data/
-│   ├── database/        # Drift SQLite (app_database.dart + 11 tables at v14)
-│   │   └── tables/      # UsersTable, TerrainTable, StockItemsTable, StockMovementsTable, MaintenancesTable, ReservationsTable, EventsTable, AuditLogsTable, SyncQueueTable, LoginAttemptsTable, OtpRecordsTable
-│   ├── firestore/       # Cloud models (sync targets)
-│   │   └── models/      # FirebaseUserModel, FirebaseStockModel, FirebaseTerrainModel, etc
-│   ├── repositories/    # Implementations (local Drift + Firestore)
-│   │   ├── [entity]_repository_impl.dart
-│   │   └── firestore/   # Firestore-specific repos (optional for read-heavy queries)
-│   ├── services/        # Firebase services (FirebaseSyncService, FirebaseStockService, etc)
-│   │   └── firebase_sync_service.dart (SyncQueue orchestrator)
-│   └── mappers/         # Entity ↔ DTO conversions (UserMapper, StockItemMapper, etc)
-│
+│   └── services/        # Business logic (WeatherRules, PermissionResolver)
 ├── features/
+│   ├── admin/
+│   │   ├── presentation/pages/sections/
+│   │   ├── presentation/screens/
+│   │   └── providers/
+│   ├── auth/
+│   │   ├── presentation/pages/
+│   │   └── providers/
+│   ├── calendar/
+│   │   ├── presentation/screens/
+│   │   └── providers/
 │   ├── home/            # Dashboard module
-│   │   └── presentation/screens + widgets
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
 │   ├── inventory/       # Stock management module
 │   │   ├── models/      # stock_filter.dart (enum: all|lowStock|fixed|custom)
-│   │   └── presentation/screens (stock_screen, add_edit_stock_item_sheet)
-│   ├── weather/         # Weather display module
-│   │   └── presentation
-│   └── [autres modules]
-│
-├── presentation/
-│   ├── pages/           # Top-level pages (admin_setup_page, login_page, admin_dashboard_page)
-│   ├── providers/       # Riverpod providers (auth, stock, terrain, sync, admin, etc)
-│   ├── screens/         # Secondary screens (maintenance, settings, stats, calendar)
-│   ├── widgets/         # Reusable components (terrain_card, sync_status_indicator, etc)
-│   └── utils/           # Helpers (date_utils, csv_export, etc)
-│
-├── services/            # Cross-cutting services
-│   ├── queue/           # QueueManager (v14 schema - retry logic incomplete)
-│   └── sync/            # SyncService (offline-first orchestration)
-│
-├── infrastructure/      # External service adapters
-│   └── services/        # ImagePickerService, ShareReportService, WeatherService
-│
-└── main.dart            # Entry point + ProviderScope + GoRouter setup
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
+│   ├── maintenance/
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
+│   ├── settings/
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
+│   ├── stats/
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
+│   ├── terrain/
+│   │   ├── presentation/screens/
+│   │   ├── presentation/widgets/
+│   │   └── providers/
+│   └── weather/         # Weather display module
+│       ├── infrastructure/
+│       ├── presentation/screens/
+│       ├── presentation/widgets/
+│       └── providers/
+└── shared/
+    ├── services/
+    └── widgets/
+        ├── access_control/
+        ├── common/
+        └── premium/
 ```
+
+*Note: `lib/presentation/` fully migrated to `lib/features/`*
 
 ### Layer Responsibilities
 
@@ -177,7 +198,7 @@ lib/
 - NO database imports, NO Firebase imports
 
 **Data:**
-- Drift: Local persistence, auto-migrations (v14)
+- Drift: Local persistence, auto-migrations (v20)
 - Firestore: Cloud sync targets, real-time listeners
 - Repositories: Implement domain interfaces
 - Mappers: Convert between entities and DTOs
@@ -222,9 +243,9 @@ lib/
 
 **Role** (lib/domain/enums/role.dart):
 ```
-admin    → All permissions
-manager  → Terrain, Maintenance, Stock mutations
-user     → Read-only + StockMovement logging
+admin     → Tous les domaines
+agent     → Terrain view, Maintenance CRUD, Stock movements
+secretary → Events CRUD
 ```
 
 **StockMovement.type**:
@@ -494,13 +515,15 @@ analysis_options.yaml
 
 ## 8. Database Schema Overview
 
-### 8.1 Current Version: v14
+### 8.1 Current Version: v20
 
-**Changelog (v13 → v14):**
-- Added: `SyncQueue` table (operations queueing for offline)
-- Modified: Added `updatedAt` field to all tables (sync tracking)
-- Modified: `StockMovement.reason` nullable (optional movement reason)
-- See: `lib/data/database/migrations/` for full schema_v14.dart
+### Changelog
+- **v20:** users.status (active|inactive|rejected), users.approvedAt, users.approvedBy
+- **v13 → v14:**
+  - Added: `SyncQueue` table (operations queueing for offline)
+  - Modified: Added `updatedAt` field to all tables (sync tracking)
+  - Modified: `StockMovement.reason` nullable (optional movement reason)
+  - See: `lib/data/database/migrations/` for full schema files
 
 **Tables (11 total):**
 
@@ -599,6 +622,9 @@ analysis_options.yaml
 | `currentUserProvider` | FutureProvider | ✅ Exists | Fetch logged-in user from Drift | authStateProvider + databaseProvider |
 | `adminExistsProvider` | FutureProvider | ✅ Exists | Check if admin role exists in users table | databaseProvider |
 | `setupStatusProvider` | StreamProvider | ❌ **MISSING** | Emit SetupStatus (needsAdminSetup\|needsLogin\|authenticated) | adminExistsProvider + authStateProvider |
+| `pendingUsersProvider` | StreamProvider | ✅ | Watch inactive users | databaseProvider |
+| `pendingCountProvider` | Provider<int> | ✅ | Count pending users | pendingUsersProvider |
+| `UserApprovalNotifier` | AsyncNotifier | ✅ | approveUser/rejectUser | authRepositoryProvider |
 
 **setupStatusProvider (TO IMPLEMENT):**
 ```dart
@@ -632,6 +658,9 @@ final setupStatusProvider = StreamProvider<SetupStatus>((ref) async* {
 | `terrainProvider` | FutureProvider | ⚠️ Partial | All terrains from Drift | .stream deprecated (to migrate) |
 | `maintenanceProvider` | FutureProvider | ⚠️ Partial | All maintenances from Drift | .stream deprecated (to migrate) |
 | `eventProvider` | FutureProvider | ⚠️ Partial | All events from Drift | .stream deprecated (to migrate) |
+| `clubInfoProvider` | StreamProvider<ClubInfo?> | ✅ | Watch club info from Firestore | clubInfoRepositoryProvider |
+| `clubLocationFromInfoProvider` | Provider<ClubLocation?> | ✅ | Club lat/lng for weather | clubInfoProvider |
+| `weatherForClubProvider` | FutureProvider.family | ✅ | Weather with priority logic | clubLocationFromInfoProvider + appSettingsProvider |
 
 ---
 
@@ -838,47 +867,23 @@ pubspec.yaml
 
 | Responsibility | File path | Status |
 |---|---|---|
-| Auth flow | 
-
-auth_providers.dart
-
- | ✅ |
-| Setup detection | lib/presentation/providers/admin_setup_provider.dart | ❌ TO CREATE |
-| Router | 
-
-app_router.dart
-
- | ⚠️ Needs setupStatusProvider |
-| Sync service | 
-
-firebase_sync_service.dart
-
- | ⚠️ Retry incomplete |
-| Database | 
-
-app_database.dart
-
- | ✅ v14 |
-| Stock screen | 
-
-stock_screen.dart
-
- | ✅ |
-| Permission logic | 
-
-permission_resolver.dart
-
- | ✅ |
-| Token service | 
-
-token_service.dart
-
- | ❌ Refresh logic undefined |
-| Firestore rules | 
-
-firestore.rules
-
- (root) | ❌ Untested |
+| Auth flow | `auth_providers.dart` | ✅ |
+| Auth pages | `lib/features/auth/presentation/pages/` | ✅ |
+| Setup detection | `lib/features/admin/providers/admin_setup_provider.dart` | ❌ TO CREATE |
+| Admin dashboard | `lib/features/admin/presentation/pages/` | ✅ |
+| Router | `app_router.dart` | ⚠️ Needs setupStatusProvider |
+| Sync service | `firebase_sync_service.dart` | ⚠️ Retry incomplete |
+| Database | `app_database.dart` | ✅ v20 |
+| Stock screen | `lib/features/inventory/presentation/screens/` | ✅ |
+| Permission logic | `permission_resolver.dart` | ✅ |
+| Token service | `token_service.dart` | ❌ Refresh logic undefined |
+| Firestore rules | `firestore.rules` (root) | ❌ Untested |
+| Settings screen | `lib/features/settings/presentation/screens/` | ✅ |
+| Weather screen | `lib/features/weather/presentation/screens/` | ✅ |
+| Club info repository | `lib/data/repositories/club_info_repository_impl.dart` | ✅ |
+| Nominatim service | `lib/data/services/nominatim_service.dart` | ✅ |
+| Club info provider | `lib/features/admin/providers/club_info_provider.dart` | ✅ |
+| Shared widgets | `lib/shared/widgets/` | ✅ |
 
 ---
 
