@@ -24,14 +24,19 @@ class HomeScreen extends ConsumerWidget {
     final todayMaintenanceCount = ref.watch(todayMaintenanceCountProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
     final terrains = terrainsAsync.valueOrNull ?? const <Terrain>[];
-    final TerrainType? terrainType = terrains.isNotEmpty ? terrains.first.type : null;
-    final weatherAsync = terrainType != null ? ref.watch(weatherForClubProvider(terrainType)) : const AsyncValue.loading();
-
+    final TerrainType? terrainType = terrains.isNotEmpty
+        ? terrains.first.type
+        : null;
+    final weatherAsync = terrainType != null
+        ? ref.watch(weatherForClubProvider(terrainType))
+        : const AsyncValue.loading();
 
     // New Stock Provider Logic
     final lowStockCount = ref.watch(lowStockCountProvider);
     // Convert List<StockItem> to int for the carousel
-    final stockAlertCountAsync = ref.watch(stockItemsProvider).whenData((_) => lowStockCount);
+    final stockAlertCountAsync = ref
+        .watch(stockItemsProvider)
+        .whenData((_) => lowStockCount);
 
     // Calculate operational courts for the stats card
     final operationalCountAsync = terrainsAsync.whenData(
@@ -64,11 +69,12 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: 24),
               child: weatherAsync.when(
                 data: (weatherData) => WeatherCard(
-                  weather: weatherData?.current,
-                  precip24h: weatherData?.precip24h,
-                  frozen: weatherData?.isFrozen,
-                  unplayable: weatherData?.isUnplayable,
-                  onRefresh: () => ref.refresh(weatherForClubProvider(terrainType!)),
+                  weather: weatherData?.context.snapshot,
+                  precip24h: weatherData?.context.precipitationLast24h, // ✅
+                  frozen: weatherData?.frozen, // ✅
+                  unplayable: weatherData?.unplayable, // ✅
+                  onRefresh: () =>
+                      ref.refresh(weatherForClubProvider(terrainType!)),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, _) => const Center(child: Text('Erreur météo')),
@@ -107,7 +113,7 @@ class HomeScreen extends ConsumerWidget {
                       color: Colors.black87,
                     ),
                   ),
-                                  ],
+                ],
               ),
             ),
           ),
@@ -164,7 +170,7 @@ class HomeScreen extends ConsumerWidget {
                   color: Colors.grey.shade400,
                 ),
                 onPressed: () {
-                 context.push('/calendar'); // ✅ navigation calendar
+                  context.push('/calendar'); // ✅ navigation calendar
                 },
               ),
               IconButton(
