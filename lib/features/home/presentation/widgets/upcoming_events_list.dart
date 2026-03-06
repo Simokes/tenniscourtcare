@@ -7,58 +7,54 @@ import '../../../../shared/widgets/premium/premium_card.dart';
 import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../../terrain/providers/terrain_provider.dart';
+import '../../providers/dashboard_providers.dart';
 
 class UpcomingEventsList extends ConsumerWidget {
   const UpcomingEventsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Fetch events for the next 30 days
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day);
-    final end = start.add(const Duration(days: 30));
-    final range = (start: start, end: end);
+    // SECTION A — "Aujourd'hui"
+    final todayUpcomingEvents = ref.watch(todayUpcomingEventsProvider);
 
-    final itemsAsync = ref.watch(calendarItemsProvider(range));
+    // SECTION B — "À venir" (next days)
+    final now = DateTime.now();
+    final startOfTomorrow = DateTime(now.year, now.month, now.day + 1);
+    final end = startOfTomorrow.add(const Duration(days: 30));
+    final range = (start: startOfTomorrow, end: end);
+    final futureItemsAsync = ref.watch(calendarItemsProvider(range));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Prochains Événements',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CalendarScreen(),
-                    ),
-                  );
-                },
-                style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                child: const Text('Voir tout'),
-              ),
-            ],
+        if (todayUpcomingEvents.isNotEmpty) ...[
+          _buildSectionHeader(context, "Aujourd'hui"),
+          Column(
+            children: todayUpcomingEvents.take(3).map((event) {
+              // Convert AppEvent to CalendarItem format for _EventItem
+              final item = CalendarItem(
+                id: event.id.toString(),
+                title: event.title,
+                startTime: event.startTime,
+                endTime: event.endTime,
+                color: Color(event.color),
+                type: CalendarItemType.event,
+                originalObject: event,
+                terrainId: event.terrainIds.isNotEmpty
+                    ? event.terrainIds.first
+                    : null,
+              );
+              return _EventItem(item: item);
+            }).toList(),
           ),
-        ),
-        itemsAsync.when(
-          data: (items) {
-            final upcoming = items.take(3).toList();
+          const SizedBox(height: 16),
+        ],
 
-            if (upcoming.isEmpty) {
+        _buildSectionHeader(context, "À venir"),
+        futureItemsAsync.when(
+          data: (items) {
+            final futureItems = items.take(3).toList();
+            if (futureItems.isEmpty) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: PremiumCard(
@@ -78,9 +74,8 @@ class UpcomingEventsList extends ConsumerWidget {
                 ),
               );
             }
-
             return Column(
-              children: upcoming.map((item) => _EventItem(item: item)).toList(),
+              children: futureItems.map((item) => _EventItem(item: item)).toList(),
             );
           },
           loading: () => const Center(
@@ -99,7 +94,41 @@ class UpcomingEventsList extends ConsumerWidget {
             ),
           ),
         ),
+        const SizedBox(height: 24),
       ],
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CalendarScreen(),
+                ),
+              );
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              textStyle: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            child: const Text('Voir tout'),
+          ),
+        ],
+      ),
     );
   }
 }

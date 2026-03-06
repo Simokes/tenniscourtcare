@@ -378,6 +378,7 @@ void main() {
             router.routerDelegate.currentConfiguration.uri.toString(),
             '/',
           );
+          await tester.pump(const Duration(seconds: 3));
         });
       },
     );
@@ -486,6 +487,7 @@ void main() {
             router.routerDelegate.currentConfiguration.uri.toString(),
             '/access-denied',
           );
+          await tester.pump(const Duration(seconds: 3));
         });
       },
     );
@@ -530,6 +532,7 @@ void main() {
           router.routerDelegate.currentConfiguration.uri.toString(),
           '/admin',
         );
+        await tester.pump(const Duration(seconds: 3));
       });
     });
   });

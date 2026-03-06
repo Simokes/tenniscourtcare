@@ -1,59 +1,59 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import os
+
+os.makedirs("lib/features/home/models", exist_ok=True)
+with open("lib/features/home/models/timeline_item.dart", "w") as f:
+    f.write("""import '../../../../domain/entities/maintenance.dart';
+import '../../../../domain/entities/app_event.dart';
+
+enum TimelineItemType { maintenance, event }
+
+class TimelineItem {
+  final DateTime startTime;
+  final DateTime endTime;
+  final String title;
+  final int? terrainId;
+  final TimelineItemType type;
+  final Maintenance? originalMaintenance;
+  final AppEvent? originalEvent;
+
+  const TimelineItem({
+    required this.startTime,
+    required this.endTime,
+    required this.title,
+    this.terrainId,
+    required this.type,
+    this.originalMaintenance,
+    this.originalEvent,
+  });
+
+  bool get isNow {
+    final now = DateTime.now();
+    return startTime.isBefore(now) && endTime.isAfter(now);
+  }
+
+  bool get isPast => endTime.isBefore(DateTime.now());
+}
+""")
+
+with open("lib/features/home/providers/dashboard_providers.dart", "r") as f:
+    dashboard_providers_content = f.read()
+
+# Make sure we don't append multiple times
+if "currentEventsProvider" not in dashboard_providers_content:
+    with open("lib/features/home/providers/dashboard_providers.dart", "w") as f:
+        f.write(dashboard_providers_content.replace(
+"""import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/core_providers.dart';
+import '../../../domain/entities/terrain.dart';""",
+"""import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/core_providers.dart';
 import '../../../domain/entities/terrain.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../../domain/entities/maintenance.dart';
 import '../../calendar/providers/event_provider.dart';
 import '../../maintenance/providers/maintenance_provider.dart';
-import '../models/timeline_item.dart';
-
-/// Provider for the count of maintenances performed today
-final todayMaintenanceCountProvider = StreamProvider<int>((ref) {
-  final database = ref.watch(databaseProvider);
-  final now = DateTime.now();
-  final startOfDay = DateTime(
-    now.year,
-    now.month,
-    now.day,
-  ).millisecondsSinceEpoch;
-  final endOfDay = DateTime(
-    now.year,
-    now.month,
-    now.day,
-    23,
-    59,
-    59,
-  ).millisecondsSinceEpoch;
-
-  // We need a set of all terrain IDs to use watchDailyMaintenanceTypeCounts
-  // or we need to modify the DB method to accept an optional set.
-  // For now, let's get all terrains first.
-  final terrainsAsync = ref.watch(dashboardTerrainsProvider);
-
-  return terrainsAsync.when(
-    data: (terrains) {
-      final ids = terrains.map((t) => t.id).toSet();
-      if (ids.isEmpty) return Stream.value(0);
-
-      return database
-          .watchDailyMaintenanceTypeCounts(
-            terrainIds: ids,
-            start: startOfDay,
-            end: endOfDay,
-          )
-          .map((list) => list.fold(0, (sum, item) => sum + item.count));
-    },
-    loading: () => Stream.value(0),
-    error: (context, index) => Stream.value(0),
-  );
-});
-
-/// Provider for all terrains
-final dashboardTerrainsProvider = FutureProvider<List<Terrain>>((ref) async {
-  final database = ref.watch(databaseProvider);
-  return database.getAllTerrains();
-});
-
+import '../models/timeline_item.dart';"""
+        ) + """
 // Events happening RIGHT NOW (today, within current time)
 final currentEventsProvider = Provider<List<AppEvent>>((ref) {
   final events = ref.watch(eventsProvider).valueOrNull ?? [];
@@ -138,3 +138,4 @@ final todayTimelineProvider = Provider<List<TimelineItem>>((ref) {
   items.sort((a, b) => a.startTime.compareTo(b.startTime));
   return items;
 });
+""")

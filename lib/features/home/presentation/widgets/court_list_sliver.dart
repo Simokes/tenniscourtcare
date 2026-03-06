@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
+import '../../providers/dashboard_providers.dart';
 
 class CourtListSliver extends ConsumerWidget {
   const CourtListSliver({super.key});
@@ -24,7 +26,7 @@ class CourtListSliver extends ConsumerWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final terrain = terrains[index];
-              return _buildCourtItem(context, terrain);
+              return _buildCourtItem(context, ref, terrain);
             }, childCount: terrains.length),
           ),
         );
@@ -37,38 +39,68 @@ class CourtListSliver extends ConsumerWidget {
     );
   }
 
-  Widget _buildCourtItem(BuildContext context, Terrain terrain) {
-    final status = terrain.status;
-    Color statusColor;
-    Color statusTextColor;
-    String statusText;
+  Widget _buildCourtItem(BuildContext context, WidgetRef ref, Terrain terrain) {
+    final currentEvents = ref.watch(currentEventsProvider);
+    final todayMaintenances = ref.watch(todayPlannedMaintenancesProvider);
 
-    switch (status) {
-      case TerrainStatus.playable:
-        statusColor = Colors.green.shade100;
-        statusTextColor = Colors.green.shade800;
-        statusText = 'PLAYABLE';
-        break;
-      case TerrainStatus.maintenance:
-        statusColor = Colors.blue.shade100;
-        statusTextColor = Colors.blue.shade800;
-        statusText = 'MAINTENANCE';
-        break;
-      case TerrainStatus.unavailable:
-        statusColor = Colors.red.shade100;
-        statusTextColor = Colors.red.shade800;
-        statusText = 'UNAVAILABLE';
-        break;
-      case TerrainStatus.frozen:
-        statusColor = Colors.cyan.shade100;
-        statusTextColor = Colors.cyan.shade800;
-        statusText = 'FROZEN';
-        break;
+    final todayTerrainMaintenances = todayMaintenances
+        .where((m) => m.terrainId == terrain.id)
+        .toList();
+    final terrainEvents = currentEvents
+        .where((e) => e.terrainIds.contains(terrain.id))
+        .toList();
+
+    Color leftBorderColor = Colors.grey.shade300;
+    String subtitle = 'Disponible';
+    Widget? actionWidget;
+
+    if (terrain.status == TerrainStatus.maintenance) {
+      leftBorderColor = Colors.blue;
+      subtitle = '🔧 En maintenance';
+
+      if (todayTerrainMaintenances.isNotEmpty) {
+        final m = todayTerrainMaintenances.first;
+        final start = TimeOfDay(hour: m.startHour, minute: 0).format(context);
+        final end = TimeOfDay(hour: m.startHour + (m.durationMinutes ~/ 60), minute: m.durationMinutes % 60).format(context);
+        subtitle = 'Maintenance • $start → $end';
+        actionWidget = IconButton(
+          icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => AddMaintenanceSheet(
+                terrain: terrain,
+                existingMaintenance: m,
+                forceCompleteMode: true,
+              ),
+            );
+          },
+        );
+      }
+    } else if (terrainEvents.isNotEmpty) {
+      final e = terrainEvents.first;
+      leftBorderColor = Color(e.color);
+      subtitle = '🎾 ${e.title} en cours';
+    } else if (terrain.status == TerrainStatus.playable) {
+      leftBorderColor = Colors.green;
+      if (todayTerrainMaintenances.isNotEmpty) {
+        final m = todayTerrainMaintenances.first;
+        final start = TimeOfDay(hour: m.startHour, minute: 0).format(context);
+        subtitle = '📅 Maintenance prévue à $start';
+      }
+    } else if (terrain.status == TerrainStatus.frozen) {
+      leftBorderColor = Colors.cyan;
+      subtitle = '❄️ Gelé';
+    } else if (terrain.status == TerrainStatus.unavailable) {
+      leftBorderColor = Colors.red;
+      subtitle = '❌ Indisponible';
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.only(right: 12, top: 12, bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -83,6 +115,18 @@ class CourtListSliver extends ConsumerWidget {
       ),
       child: Row(
         children: [
+          Container(
+            width: 6,
+            height: 56,
+            decoration: BoxDecoration(
+              color: leftBorderColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16),
+                bottomLeft: Radius.circular(16),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
           Container(
             width: 56,
             height: 56,
@@ -114,7 +158,7 @@ class CourtListSliver extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  _getStatusDescription(status),
+                  subtitle,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -124,37 +168,24 @@ class CourtListSliver extends ConsumerWidget {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              statusText,
-              style: GoogleFonts.inter(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: statusTextColor,
-                letterSpacing: 0.5,
-              ),
-            ),
+          if (actionWidget != null) actionWidget,
+          IconButton(
+            icon: const Icon(Icons.add, size: 20, color: Colors.grey),
+            tooltip: 'Maintenance urgente',
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => AddMaintenanceSheet(
+                  terrain: terrain,
+                  urgentMode: true,
+                ),
+              );
+            },
           ),
         ],
       ),
     );
-  }
-
-  String _getStatusDescription(TerrainStatus status) {
-    switch (status) {
-      case TerrainStatus.playable:
-        return 'Available now';
-      case TerrainStatus.maintenance:
-        return 'Under maintenance';
-      case TerrainStatus.unavailable:
-        return 'Temporarily closed';
-      case TerrainStatus.frozen:
-        return 'Frozen / Unplayable';
-    }
   }
 }

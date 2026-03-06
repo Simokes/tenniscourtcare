@@ -26,6 +26,7 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Maintenance? existingMaintenance;
   final bool forceCompleteMode;
   final bool rescheduleMode;
+  final bool urgentMode;
 
   const AddMaintenanceSheet({
     super.key,
@@ -33,6 +34,7 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
     this.existingMaintenance,
     this.forceCompleteMode = false,
     this.rescheduleMode = false,
+    this.urgentMode = false,
   });
 
   @override
@@ -100,6 +102,11 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
     if (widget.rescheduleMode) {
       _isPlanned = true;
+    }
+
+    if (widget.urgentMode) {
+      _isPlanned = false;
+      _date = DateTime.now();
     }
   }
 
@@ -377,7 +384,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        widget.forceCompleteMode
+                        widget.urgentMode
+                            ? 'Signaler urgence'
+                            : widget.forceCompleteMode
                             ? 'Effectuer maintenance'
                             : widget.existingMaintenance != null
                             ? 'Modifier la maintenance'
@@ -484,7 +493,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           const SizedBox(height: 24),
                         ],
 
-                        if (_selectedTerrain != null) ...[
+                        if (_selectedTerrain != null && !widget.urgentMode) ...[
                           // Duration Selector
                           Text(
                             'Durée de l\'intervention',
@@ -585,55 +594,57 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         ],
 
                         // Date Picker Row
-                        PremiumCard(
-                          padding: const EdgeInsets.all(4),
-                          child: InkWell(
-                            onTap: _pickDate,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.calendar_month,
-                                    color: Colors.blueGrey,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Date de l\'intervention',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelSmall
-                                            ?.copyWith(
-                                              color: Colors.grey.shade600,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        _dateFormat.format(_date),
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  const Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 16,
-                                    color: Colors.grey,
-                                  ),
-                                ],
+                        if (!widget.urgentMode) ...[
+                          PremiumCard(
+                            padding: const EdgeInsets.all(4),
+                            child: InkWell(
+                              onTap: _pickDate,
+                              borderRadius: BorderRadius.circular(12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.calendar_month,
+                                      color: Colors.blueGrey,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Date de l\'intervention',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall
+                                              ?.copyWith(
+                                                color: Colors.grey.shade600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _dateFormat.format(_date),
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium,
+                                        ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    const Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                        ],
 
                         if (!_isPlanned) ...[
                           // Weather Section
