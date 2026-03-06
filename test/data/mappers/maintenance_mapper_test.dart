@@ -62,11 +62,12 @@ void main() {
 
         // Assert
         expect(result.sacsMantoUtilises, maintenance.sacsMantoUtilises);
-        expect(result.sacsSottomantoUtilises, maintenance.sacsSottomantoUtilises);
+        expect(
+          result.sacsSottomantoUtilises,
+          maintenance.sacsSottomantoUtilises,
+        );
         expect(result.sacsSiliceUtilises, maintenance.sacsSiliceUtilises);
       });
-
-     
 
       test('preserves user audit info', () {
         // Arrange

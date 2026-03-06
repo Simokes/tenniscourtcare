@@ -47,13 +47,13 @@ class FakeAuthRepository implements AuthRepository {
   Future<UserEntity?> getCurrentUser() async => null;
   @override
   Future<bool> hasAnyUser() async => true;
-  
+
   Future<void> registerAdmin(
     String email,
     String name,
     String password,
   ) async {}
-  
+
   @override
   Future<UserEntity> createAdminUser({
     required String email,
@@ -61,12 +61,7 @@ class FakeAuthRepository implements AuthRepository {
     required String password,
   }) async {
     // No-op for test - return a fake user
-    return UserEntity(
-      id: 1,
-      email: email,
-      name: name,
-      role: Role.admin,
-    );
+    return UserEntity(id: 1, email: email, name: name, role: Role.admin);
   }
 
   @override

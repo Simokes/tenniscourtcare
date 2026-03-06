@@ -11,9 +11,14 @@ import '../../fixtures/test_data.dart';
 import 'dart:async';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
+
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
+
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {}
+
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {}
 
 void main() {
   late MockAppDatabase mockDb;
@@ -42,9 +47,9 @@ void main() {
     group('getAllStockItems', () {
       test('returns list of stock items from stream', () async {
         // Arrange
-        when(() => mockDb.watchAllStockItems()).thenAnswer(
-          (_) => Stream.value(TestData.testStockItems),
-        );
+        when(
+          () => mockDb.watchAllStockItems(),
+        ).thenAnswer((_) => Stream.value(TestData.testStockItems));
 
         // Act
         final result = await repository.getAllStockItems();
@@ -71,8 +76,9 @@ void main() {
 
       test('throws RepositoryException on FirebaseException', () async {
         // Arrange
-        when(() => mockCollection.add(any()))
-            .thenThrow(FirebaseException(plugin: 'firestore', code: 'unavailable'));
+        when(() => mockCollection.add(any())).thenThrow(
+          FirebaseException(plugin: 'firestore', code: 'unavailable'),
+        );
 
         // Act & Assert
         await expectLater(
@@ -87,7 +93,9 @@ void main() {
         // Arrange
         when(() => mockDoc.update(any())).thenAnswer((_) async {});
 
-        final testStockItemWithId = TestData.testStockItem.copyWith(firebaseId: 'test_id');
+        final testStockItemWithId = TestData.testStockItem.copyWith(
+          firebaseId: 'test_id',
+        );
 
         // Act
         await repository.updateStockItem(testStockItemWithId);
@@ -100,7 +108,9 @@ void main() {
 
       test('throws RepositoryException if firebaseId is null', () async {
         // Arrange
-        final testStockItemWithoutId = TestData.testStockItem.copyWith(firebaseId: null);
+        final testStockItemWithoutId = TestData.testStockItem.copyWith(
+          firebaseId: null,
+        );
 
         // Ensure firebaseId is truly null
         final itemWithoutId = StockItem(

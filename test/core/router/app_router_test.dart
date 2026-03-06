@@ -20,7 +20,6 @@ import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 
 import 'package:tenniscourtcare/data/services/firebase_cache_service.dart';
-import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
 
 class FakeFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
@@ -38,6 +37,7 @@ class MockHttpClientRequest extends Mock implements HttpClientRequest {
   Future<HttpClientResponse> close() async {
     return MockHttpClientResponse();
   }
+
   @override
   HttpHeaders get headers => MockHttpHeaders();
 }
@@ -105,8 +105,12 @@ class MockHttpClientResponse extends Mock implements HttpClientResponse {
       HttpClientResponseCompressionState.notCompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData,
-      {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(
+    void Function(List<int> event)? onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
     return Stream<List<int>>.value(imagePixels).listen(
       onData,
       onError: onError,
@@ -121,8 +125,11 @@ class MockHttpClientResponse extends Mock implements HttpClientResponse {
   }
 
   @override
-  Future<HttpClientResponse> redirect(
-      [String? method, Uri? url, bool? followLoops]) async {
+  Future<HttpClientResponse> redirect([
+    String? method,
+    Uri? url,
+    bool? followLoops,
+  ]) async {
     return this;
   }
 }
@@ -131,18 +138,78 @@ class MockHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     return MockHttpClient();
-    
   }
 }
 
 // 1x1 transparent PNG
 const List<int> imagePixels = [
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
-  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89, 0x00, 0x00, 0x00,
-  0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49,
-  0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
+  0x89,
+  0x50,
+  0x4e,
+  0x47,
+  0x0d,
+  0x0a,
+  0x1a,
+  0x0a,
+  0x00,
+  0x00,
+  0x00,
+  0x0d,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1f,
+  0x15,
+  0xc4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0a,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9c,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0d,
+  0x0a,
+  0x2d,
+  0xb4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4e,
+  0x44,
+  0xae,
+  0x42,
+  0x60,
+  0x82,
 ];
 
 // Helper to remove Timer from setupStatusStreamProvider
@@ -160,13 +227,16 @@ class MockAuthRepository extends Mock implements AuthRepository {
 class MockAuthNotifier extends AuthNotifier {
   MockAuthNotifier() : super(MockAuthRepository(), FakeRef());
 
-
   void setAuthState(AsyncValue<AuthState> newState) {
     state = newState;
   }
 
   @override
-  Future<void> registerAdmin(String email, String name, String password) async {}
+  Future<void> registerAdmin(
+    String email,
+    String name,
+    String password,
+  ) async {}
 
   @override
   Future<void> signIn(String email, String password) async {}
@@ -179,10 +249,9 @@ List<Override> baseOverrides() => [
   terrainsProvider.overrideWith((ref) => Stream.value([])),
   stockProvider.overrideWith((ref) => Stream.value([])),
   maintenancesProvider.overrideWith((ref) => Stream.value([])),
-   // null.overrideWith((ref) => Stream.value([])),
+  // null.overrideWith((ref) => Stream.value([])),
   firebaseCacheServiceProvider.overrideWithValue(FakeFirebaseCacheService()),
   authStateProvider.overrideWith((ref) => MockAuthNotifier()),
-  maintenanceSchedulerProvider.overrideWith((ref) {}),
 ];
 
 void main() {
@@ -191,7 +260,9 @@ void main() {
   });
 
   group('AppRouter Redirect Logic', () {
-    testWidgets('redirects to /admin-setup when status is needsAdminSetup', (tester) async {
+    testWidgets('redirects to /admin-setup when status is needsAdminSetup', (
+      tester,
+    ) async {
       await mockNetworkImagesFor(() async {
         late GoRouter router;
         tester.view.physicalSize = const Size(3000, 4000);
@@ -202,137 +273,222 @@ void main() {
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.needsAdminSetup)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.needsAdminSetup)),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.needsAdminSetup),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.needsAdminSetup),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: MaterialApp.router(routerConfig: router),
+                );
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/admin-setup');
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/admin-setup',
+        );
       });
     });
 
-    testWidgets('redirects to /login when status is needsLogin', (tester) async {
+    testWidgets('redirects to /login when status is needsLogin', (
+      tester,
+    ) async {
       await mockNetworkImagesFor(() async {
         late GoRouter router;
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.needsLogin)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.needsLogin)),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.needsLogin),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.needsLogin),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: MaterialApp.router(routerConfig: router),
+                );
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/login');
-      });
-    });
-
-    testWidgets('redirects to / (home) when status is authenticated and on login page', (tester) async {
-      await mockNetworkImagesFor(() async {
-        late GoRouter router;
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.authenticated)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-              currentUserProvider.overrideWith((ref) => UserEntity(
-                id: 1, email: 'test@test.com', name: 'Test', role: Role.agent,
-              )),
-            ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
-            }),
-          ),
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/login',
         );
-        await tester.pump();
-
-        // Try to navigate to login
-        router.go('/login');
-        await tester.pump();
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
       });
     });
 
-    testWidgets('redirects to /access-denied when status is error', (tester) async {
+    testWidgets(
+      'redirects to / (home) when status is authenticated and on login page',
+      (tester) async {
+        await mockNetworkImagesFor(() async {
+          late GoRouter router;
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                ...baseOverrides(),
+                setupStatusProvider.overrideWith(
+                  (ref) => Future.value(SetupStatus.authenticated),
+                ),
+                setupStatusStreamProvider.overrideWith(
+                  (ref) => Stream.value(SetupStatus.authenticated),
+                ),
+                currentUserProvider.overrideWith(
+                  (ref) => UserEntity(
+                    id: 1,
+                    email: 'test@test.com',
+                    name: 'Test',
+                    role: Role.agent,
+                  ),
+                ),
+              ],
+              child: Consumer(
+                builder: (context, ref, _) {
+                  router = ref.watch(goRouterProvider);
+                  return Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: MaterialApp.router(routerConfig: router),
+                  );
+                },
+              ),
+            ),
+          );
+          await tester.pump();
+
+          // Try to navigate to login
+          router.go('/login');
+          await tester.pump();
+          expect(
+            router.routerDelegate.currentConfiguration.uri.toString(),
+            '/',
+          );
+        });
+      },
+    );
+
+    testWidgets('redirects to /access-denied when status is error', (
+      tester,
+    ) async {
       late GoRouter router;
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             ...baseOverrides(),
-            setupStatusProvider.overrideWith((ref) => Future.error(Exception('error'))),
-            setupStatusStreamProvider.overrideWith((ref) => Stream.error(Exception('error'))),
+            setupStatusProvider.overrideWith(
+              (ref) => Future.error(Exception('error')),
+            ),
+            setupStatusStreamProvider.overrideWith(
+              (ref) => Stream.error(Exception('error')),
+            ),
           ],
-          child: Consumer(builder: (context, ref, _) {
-            router = ref.watch(goRouterProvider);
-            return MaterialApp.router(routerConfig: router);
-          }),
+          child: Consumer(
+            builder: (context, ref, _) {
+              router = ref.watch(goRouterProvider);
+              return MaterialApp.router(routerConfig: router);
+            },
+          ),
         ),
       );
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(router.routerDelegate.currentConfiguration.uri.toString(), '/access-denied');
+      expect(
+        router.routerDelegate.currentConfiguration.uri.toString(),
+        '/access-denied',
+      );
     });
 
-    testWidgets('stays on /admin-setup when status is needsAdminSetup', (tester) async {
+    testWidgets('stays on /admin-setup when status is needsAdminSetup', (
+      tester,
+    ) async {
       await mockNetworkImagesFor(() async {
         late GoRouter router;
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.needsAdminSetup)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.needsAdminSetup)),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.needsAdminSetup),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.needsAdminSetup),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return MaterialApp.router(routerConfig: router);
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return MaterialApp.router(routerConfig: router);
+              },
+            ),
           ),
         );
         await tester.pumpAndSettle(const Duration(seconds: 1));
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/admin-setup');
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/admin-setup',
+        );
       });
     });
   });
 
   group('Role-Based Access Control', () {
-    testWidgets('redirects to /access-denied if non-admin tries to access /admin', (tester) async {
-      await mockNetworkImagesFor(() async {
-        late GoRouter router;
-        await tester.pumpWidget(
-          ProviderScope(
-            overrides: [
-              ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.authenticated)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-              currentUserProvider.overrideWith((ref) => UserEntity(
-                id: 1, email: 'user@test.com', name: 'User', role: Role.agent,
-              )),
-            ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return MaterialApp.router(routerConfig: router);
-            }),
-          ),
-        );
-        await tester.pump();
+    testWidgets(
+      'redirects to /access-denied if non-admin tries to access /admin',
+      (tester) async {
+        await mockNetworkImagesFor(() async {
+          late GoRouter router;
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                ...baseOverrides(),
+                setupStatusProvider.overrideWith(
+                  (ref) => Future.value(SetupStatus.authenticated),
+                ),
+                setupStatusStreamProvider.overrideWith(
+                  (ref) => Stream.value(SetupStatus.authenticated),
+                ),
+                currentUserProvider.overrideWith(
+                  (ref) => UserEntity(
+                    id: 1,
+                    email: 'user@test.com',
+                    name: 'User',
+                    role: Role.agent,
+                  ),
+                ),
+              ],
+              child: Consumer(
+                builder: (context, ref, _) {
+                  router = ref.watch(goRouterProvider);
+                  return MaterialApp.router(routerConfig: router);
+                },
+              ),
+            ),
+          );
+          await tester.pump();
 
-        router.go('/admin');
-        await tester.pump();
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/access-denied');
-      });
-    });
+          router.go('/admin');
+          await tester.pump();
+          expect(
+            router.routerDelegate.currentConfiguration.uri.toString(),
+            '/access-denied',
+          );
+        });
+      },
+    );
 
     testWidgets('allows access to /admin if user is admin', (tester) async {
       await mockNetworkImagesFor(() async {
@@ -341,17 +497,27 @@ void main() {
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.authenticated)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-              currentUserProvider.overrideWith((ref) => UserEntity(
-                id: 1, email: 'admin@test.com', name: 'Admin', role: Role.admin,
-
-              )),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.authenticated),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.authenticated),
+              ),
+              currentUserProvider.overrideWith(
+                (ref) => UserEntity(
+                  id: 1,
+                  email: 'admin@test.com',
+                  name: 'Admin',
+                  role: Role.admin,
+                ),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return MaterialApp.router(routerConfig: router);
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return MaterialApp.router(routerConfig: router);
+              },
+            ),
           ),
         );
         await tester.pump();
@@ -360,7 +526,10 @@ void main() {
         router.go('/admin');
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/admin');
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/admin',
+        );
       });
     });
   });
@@ -377,23 +546,38 @@ void main() {
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.authenticated)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-              currentUserProvider.overrideWith((ref) => UserEntity(
-                id: 1, email: 'a', name: 'a', role: Role.agent,
-              )),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.authenticated),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.authenticated),
+              ),
+              currentUserProvider.overrideWith(
+                (ref) =>
+                    UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: MaterialApp.router(routerConfig: router),
+                );
+              },
+            ),
           ),
         );
         await tester.pump();
 
         router.go('/stock');
         await tester.pump();
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/stock');
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/stock',
+        );
+
+        await tester.pump(const Duration(seconds: 3));
       });
     });
 
@@ -408,28 +592,42 @@ void main() {
           ProviderScope(
             overrides: [
               ...baseOverrides(),
-              setupStatusProvider.overrideWith((ref) => Future.value(SetupStatus.authenticated)),
-              setupStatusStreamProvider.overrideWith((ref) => Stream.value(SetupStatus.authenticated)),
-              currentUserProvider.overrideWith((ref) => UserEntity(
-                id: 1, email: 'a', name: 'a', role: Role.agent,
-              )),
+              setupStatusProvider.overrideWith(
+                (ref) => Future.value(SetupStatus.authenticated),
+              ),
+              setupStatusStreamProvider.overrideWith(
+                (ref) => Stream.value(SetupStatus.authenticated),
+              ),
+              currentUserProvider.overrideWith(
+                (ref) =>
+                    UserEntity(id: 1, email: 'a', name: 'a', role: Role.agent),
+              ),
             ],
-            child: Consumer(builder: (context, ref, _) {
-              router = ref.watch(goRouterProvider);
-              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
-            }),
+            child: Consumer(
+              builder: (context, ref, _) {
+                router = ref.watch(goRouterProvider);
+                return Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: MaterialApp.router(routerConfig: router),
+                );
+              },
+            ),
           ),
         );
         await tester.pump();
 
         router.go('/maintenance');
         await tester.pump();
-        expect(router.routerDelegate.currentConfiguration.uri.toString(), '/maintenance');
+        expect(
+          router.routerDelegate.currentConfiguration.uri.toString(),
+          '/maintenance',
+        );
+
+        await tester.pump(const Duration(seconds: 3));
       });
     });
   });
 }
-
 
 class FakeRef extends Mock implements Ref<Object?> {
   @override

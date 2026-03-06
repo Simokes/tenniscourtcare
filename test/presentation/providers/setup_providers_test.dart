@@ -7,7 +7,8 @@ import 'package:tenniscourtcare/domain/enums/role.dart';
 import 'package:tenniscourtcare/domain/models/setup_status.dart';
 import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
 import 'package:tenniscourtcare/core/providers/core_providers.dart';
-import 'package:tenniscourtcare/features/auth/providers/setup_providers.dart' as setup;
+import 'package:tenniscourtcare/features/auth/providers/setup_providers.dart'
+    as setup;
 import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 
 // Manual Mock for AppDatabase
@@ -47,7 +48,11 @@ class MockAuthNotifier extends AuthNotifier {
   }
 
   @override
-  Future<void> registerAdmin(String email, String name, String password) async {}
+  Future<void> registerAdmin(
+    String email,
+    String name,
+    String password,
+  ) async {}
 
   @override
   Future<void> signIn(String email, String password) async {}
@@ -71,7 +76,9 @@ void main() {
         databaseProvider.overrideWithValue(mockDb),
         // Override with a function that returns the mock notifier
         authStateProvider.overrideWith((ref) => mockAuthNotifier),
-        setup.adminExistsProvider.overrideWith((ref) async => adminExists), // Added override to avoid Firebase call
+        setup.adminExistsProvider.overrideWith(
+          (ref) async => adminExists,
+        ), // Added override to avoid Firebase call
       ],
     );
   }
@@ -110,7 +117,6 @@ void main() {
     });
 
     test('returns authenticated if admin exists and user logged in', () async {
-
       // Auth: Data, with user
       final user = UserEntity(
         id: 1,
@@ -131,7 +137,7 @@ void main() {
     test('returns error if auth provider throws error', () async {
       // Auth: Error
       mockAuthNotifier.setState(
-       const AsyncValue.error('Auth Failed', StackTrace.empty),
+        const AsyncValue.error('Auth Failed', StackTrace.empty),
       );
 
       final container = createContainer();
@@ -142,7 +148,6 @@ void main() {
   });
 
   group('Derived Providers', () {
-
     test('currentSetupUserProvider returns user when authenticated', () async {
       final user = UserEntity(
         id: 1,
@@ -155,24 +160,30 @@ void main() {
       );
 
       final container = createContainer();
-      final result = await container.read(setup.currentSetupUserProvider.future);
+      final result = await container.read(
+        setup.currentSetupUserProvider.future,
+      );
 
       expect(result, user);
     });
 
-    test('currentSetupUserProvider returns null when not authenticated', () async {
-      mockAuthNotifier.setState(
-        const AsyncValue.data(AuthState(user: null, isSetupRequired: false)),
-      );
+    test(
+      'currentSetupUserProvider returns null when not authenticated',
+      () async {
+        mockAuthNotifier.setState(
+          const AsyncValue.data(AuthState(user: null, isSetupRequired: false)),
+        );
 
-      final container = createContainer();
-      final result = await container.read(setup.currentSetupUserProvider.future);
+        final container = createContainer();
+        final result = await container.read(
+          setup.currentSetupUserProvider.future,
+        );
 
-      expect(result, isNull);
-    });
+        expect(result, isNull);
+      },
+    );
   });
 }
-
 
 class FakeRef extends Mock implements Ref<Object?> {
   @override

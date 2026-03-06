@@ -54,16 +54,32 @@ class _MaintenanceHistoryScreenState
                 children: [
                   // Period Filter
                   _buildChoiceChip(
-                      'Tout', 'all', _selectedPeriod, (val) => setState(() => _selectedPeriod = val)),
+                    'Tout',
+                    'all',
+                    _selectedPeriod,
+                    (val) => setState(() => _selectedPeriod = val),
+                  ),
                   const SizedBox(width: 8),
-                  _buildChoiceChip('Cette semaine', 'week', _selectedPeriod,
-                      (val) => setState(() => _selectedPeriod = val)),
+                  _buildChoiceChip(
+                    'Cette semaine',
+                    'week',
+                    _selectedPeriod,
+                    (val) => setState(() => _selectedPeriod = val),
+                  ),
                   const SizedBox(width: 8),
-                  _buildChoiceChip('Ce mois', 'month', _selectedPeriod,
-                      (val) => setState(() => _selectedPeriod = val)),
+                  _buildChoiceChip(
+                    'Ce mois',
+                    'month',
+                    _selectedPeriod,
+                    (val) => setState(() => _selectedPeriod = val),
+                  ),
                   const SizedBox(width: 8),
-                  _buildChoiceChip('Cette année', 'year', _selectedPeriod,
-                      (val) => setState(() => _selectedPeriod = val)),
+                  _buildChoiceChip(
+                    'Cette année',
+                    'year',
+                    _selectedPeriod,
+                    (val) => setState(() => _selectedPeriod = val),
+                  ),
 
                   const SizedBox(width: 20),
                   Container(width: 1, height: 24, color: Colors.grey.shade300),
@@ -95,13 +111,25 @@ class _MaintenanceHistoryScreenState
 
                   // Status Filter
                   _buildChoiceChip(
-                      'Tout', 'all', _selectedStatus, (val) => setState(() => _selectedStatus = val)),
+                    'Tout',
+                    'all',
+                    _selectedStatus,
+                    (val) => setState(() => _selectedStatus = val),
+                  ),
                   const SizedBox(width: 8),
-                  _buildChoiceChip('Effectuées', 'done', _selectedStatus,
-                      (val) => setState(() => _selectedStatus = val)),
+                  _buildChoiceChip(
+                    'Effectuées',
+                    'done',
+                    _selectedStatus,
+                    (val) => setState(() => _selectedStatus = val),
+                  ),
                   const SizedBox(width: 8),
-                  _buildChoiceChip('Planifiées', 'planned', _selectedStatus,
-                      (val) => setState(() => _selectedStatus = val)),
+                  _buildChoiceChip(
+                    'Planifiées',
+                    'planned',
+                    _selectedStatus,
+                    (val) => setState(() => _selectedStatus = val),
+                  ),
                 ],
               ),
             ),
@@ -125,26 +153,23 @@ class _MaintenanceHistoryScreenState
               }
 
               return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final terrain = terrains[index];
-                    return _TerrainHistoryTile(
-                      terrain: terrain,
-                      isExpanded: _expandedTerrains.contains(terrain.id),
-                      onToggle: () => setState(() {
-                        if (_expandedTerrains.contains(terrain.id)) {
-                          _expandedTerrains.remove(terrain.id);
-                        } else {
-                          _expandedTerrains.add(terrain.id);
-                        }
-                      }),
-                      selectedType: _selectedType,
-                      selectedPeriod: _selectedPeriod,
-                      selectedStatus: _selectedStatus,
-                    );
-                  },
-                  childCount: terrains.length,
-                ),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final terrain = terrains[index];
+                  return _TerrainHistoryTile(
+                    terrain: terrain,
+                    isExpanded: _expandedTerrains.contains(terrain.id),
+                    onToggle: () => setState(() {
+                      if (_expandedTerrains.contains(terrain.id)) {
+                        _expandedTerrains.remove(terrain.id);
+                      } else {
+                        _expandedTerrains.add(terrain.id);
+                      }
+                    }),
+                    selectedType: _selectedType,
+                    selectedPeriod: _selectedPeriod,
+                    selectedStatus: _selectedStatus,
+                  );
+                }, childCount: terrains.length),
               );
             },
           ),
@@ -171,7 +196,9 @@ class _MaintenanceHistoryScreenState
   }
 
   Widget _buildKPIRow(
-      List<Maintenance> allMaintenances, List<Maintenance> plannedMaintenances) {
+    List<Maintenance> allMaintenances,
+    List<Maintenance> plannedMaintenances,
+  ) {
     final doneCount = allMaintenances.where((m) => !m.isPlanned).length;
     final plannedCount = plannedMaintenances.length;
     final totalCount = doneCount + plannedCount;
@@ -248,8 +275,11 @@ class _TerrainHistoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final allDone = ref.watch(maintenancesGroupedByTerrainProvider)[terrain.id] ?? [];
-    final allPlanned = ref.watch(plannedMaintenancesByTerrainProvider(terrain.id));
+    final allDone =
+        ref.watch(maintenancesGroupedByTerrainProvider)[terrain.id] ?? [];
+    final allPlanned = ref.watch(
+      plannedMaintenancesByTerrainProvider(terrain.id),
+    );
 
     // Combine and apply filters
     final List<Maintenance> filteredMaintenances = [];
@@ -257,33 +287,41 @@ class _TerrainHistoryTile extends ConsumerWidget {
     final now = DateTime.now();
     DateTime? startDate;
     if (selectedPeriod == 'week') {
-      startDate = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfWeek(now));
+      startDate = DateTime.fromMillisecondsSinceEpoch(
+        DateUtils.startOfWeek(now),
+      );
     } else if (selectedPeriod == 'month') {
-      startDate = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfMonth(now));
+      startDate = DateTime.fromMillisecondsSinceEpoch(
+        DateUtils.startOfMonth(now),
+      );
     } else if (selectedPeriod == 'year') {
       startDate = DateTime(now.year, 1, 1);
     }
 
     if (selectedStatus == 'all' || selectedStatus == 'done') {
-      filteredMaintenances.addAll(allDone.where((m) {
-        if (selectedType != null && m.type != selectedType) return false;
-        if (startDate != null) {
-          final date = DateTime.fromMillisecondsSinceEpoch(m.date);
-          if (date.isBefore(startDate)) return false;
-        }
-        return true;
-      }));
+      filteredMaintenances.addAll(
+        allDone.where((m) {
+          if (selectedType != null && m.type != selectedType) return false;
+          if (startDate != null) {
+            final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+            if (date.isBefore(startDate)) return false;
+          }
+          return true;
+        }),
+      );
     }
 
     if (selectedStatus == 'all' || selectedStatus == 'planned') {
-      filteredMaintenances.addAll(allPlanned.where((m) {
-        if (selectedType != null && m.type != selectedType) return false;
-        if (startDate != null) {
-          final date = DateTime.fromMillisecondsSinceEpoch(m.date);
-          if (date.isBefore(startDate)) return false;
-        }
-        return true;
-      }));
+      filteredMaintenances.addAll(
+        allPlanned.where((m) {
+          if (selectedType != null && m.type != selectedType) return false;
+          if (startDate != null) {
+            final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+            if (date.isBefore(startDate)) return false;
+          }
+          return true;
+        }),
+      );
     }
 
     // Sort combined filtered list by date desc
@@ -293,12 +331,12 @@ class _TerrainHistoryTile extends ConsumerWidget {
     int filteredDoneCount = 0;
     if (selectedStatus != 'planned') {
       filteredDoneCount = allDone.where((m) {
-         if (selectedType != null && m.type != selectedType) return false;
-         if (startDate != null) {
-            final date = DateTime.fromMillisecondsSinceEpoch(m.date);
-            if (date.isBefore(startDate)) return false;
-         }
-         return true;
+        if (selectedType != null && m.type != selectedType) return false;
+        if (startDate != null) {
+          final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+          if (date.isBefore(startDate)) return false;
+        }
+        return true;
       }).length;
     }
 
@@ -306,7 +344,7 @@ class _TerrainHistoryTile extends ConsumerWidget {
 
     DateTime? lastDoneDate;
     if (allDone.isNotEmpty) {
-       lastDoneDate = DateTime.fromMillisecondsSinceEpoch(allDone.first.date);
+      lastDoneDate = DateTime.fromMillisecondsSinceEpoch(allDone.first.date);
     }
 
     final formattedLastDate = lastDoneDate != null
@@ -324,14 +362,26 @@ class _TerrainHistoryTile extends ConsumerWidget {
               backgroundColor: terrain.status.color.withValues(alpha: 0.2),
               child: Icon(terrain.status.icon, color: terrain.status.color),
             ),
-            title: Text(terrain.nom, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              terrain.nom,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Wrap(
               spacing: 8,
               runSpacing: 4,
               children: [
-                Text('✅ $filteredDoneCount effectuées', style: TextStyle(color: Colors.green.shade700, fontSize: 12)),
-                Text('📅 $plannedCount planifiées', style: TextStyle(color: Colors.orange.shade700, fontSize: 12)),
-                Text('🕒 Dernière: $formattedLastDate', style: const TextStyle(fontSize: 12)),
+                Text(
+                  '✅ $filteredDoneCount effectuées',
+                  style: TextStyle(color: Colors.green.shade700, fontSize: 12),
+                ),
+                Text(
+                  '📅 $plannedCount planifiées',
+                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                ),
+                Text(
+                  '🕒 Dernière: $formattedLastDate',
+                  style: const TextStyle(fontSize: 12),
+                ),
               ],
             ),
             trailing: Row(
@@ -358,8 +408,13 @@ class _TerrainHistoryTile extends ConsumerWidget {
             secondChild: filteredMaintenances.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text('Aucune maintenance pour cette période',
-                        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey)),
+                    child: Text(
+                      'Aucune maintenance pour cette période',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
                   )
                 : ListView.builder(
                     shrinkWrap: true,
@@ -372,7 +427,9 @@ class _TerrainHistoryTile extends ConsumerWidget {
                       );
                     },
                   ),
-            crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             duration: const Duration(milliseconds: 200),
           ),
         ],
@@ -419,23 +476,37 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                         size: 16,
                       ),
                       const SizedBox(width: 4),
-                      Text(maintenance.type, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        maintenance.type,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       if (maintenance.imagePath != null) ...[
                         const SizedBox(width: 4),
-                        Icon(Icons.image_outlined, size: 14, color: Theme.of(context).primaryColor),
+                        Icon(
+                          Icons.image_outlined,
+                          size: 14,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ],
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(formattedDate, style: Theme.of(context).textTheme.bodySmall),
-                  if (maintenance.commentaire != null && maintenance.commentaire!.isNotEmpty) ...[
-                     const SizedBox(height: 2),
-                     Text(
-                       maintenance.commentaire!,
-                       style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 12),
-                       maxLines: 1,
-                       overflow: TextOverflow.ellipsis,
-                     ),
+                  Text(
+                    formattedDate,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  if (maintenance.commentaire != null &&
+                      maintenance.commentaire!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      maintenance.commentaire!,
+                      style: const TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                   const SizedBox(height: 4),
                   Wrap(
@@ -443,11 +514,20 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     runSpacing: 4,
                     children: [
                       if (maintenance.sacsMantoUtilises > 0)
-                        _SacChip('M: ${maintenance.sacsMantoUtilises}', Colors.brown),
+                        _SacChip(
+                          'M: ${maintenance.sacsMantoUtilises}',
+                          Colors.brown,
+                        ),
                       if (maintenance.sacsSottomantoUtilises > 0)
-                        _SacChip('S: ${maintenance.sacsSottomantoUtilises}', Colors.blueGrey),
+                        _SacChip(
+                          'S: ${maintenance.sacsSottomantoUtilises}',
+                          Colors.blueGrey,
+                        ),
                       if (maintenance.sacsSiliceUtilises > 0)
-                        _SacChip('Si: ${maintenance.sacsSiliceUtilises}', Colors.teal),
+                        _SacChip(
+                          'Si: ${maintenance.sacsSiliceUtilises}',
+                          Colors.teal,
+                        ),
                     ],
                   ),
                 ],
@@ -470,13 +550,19 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    size: 20,
+                    color: Colors.red,
+                  ),
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Confirmer la suppression'),
-                        content: const Text('Voulez-vous vraiment supprimer cette maintenance ?'),
+                        content: const Text(
+                          'Voulez-vous vraiment supprimer cette maintenance ?',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
@@ -484,7 +570,9 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
-                            style: TextButton.styleFrom(foregroundColor: Colors.red),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.red,
+                            ),
                             child: const Text('Supprimer'),
                           ),
                         ],
@@ -492,22 +580,24 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     );
 
                     if (confirm == true && maintenance.firebaseId != null) {
-                       try {
-                         await ref
-                             .read(maintenanceNotifierProvider.notifier)
-                             .deleteMaintenance(maintenance.firebaseId!);
-                         if (context.mounted) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             const SnackBar(content: Text('Maintenance supprimée')),
-                           );
-                         }
-                       } catch (e) {
-                         if (context.mounted) {
-                           ScaffoldMessenger.of(context).showSnackBar(
-                             SnackBar(content: Text('Erreur: $e')),
-                           );
-                         }
-                       }
+                      try {
+                        await ref
+                            .read(maintenanceNotifierProvider.notifier)
+                            .deleteMaintenance(maintenance.firebaseId!);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Maintenance supprimée'),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                        }
+                      }
                     }
                   },
                 ),
