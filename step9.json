@@ -1,9 +1,0 @@
-{
-  "lib/presentation/providers/connectivity_providers.dart": "lib/core/providers/connectivity_providers.dart",
-  "lib/presentation/providers/core_providers.dart": "lib/core/providers/core_providers.dart",
-  "lib/presentation/providers/dashboard_providers.dart": "lib/features/home/providers/dashboard_providers.dart",
-  "lib/presentation/providers/global_stock_alert_provider.dart": "lib/features/home/providers/global_stock_alert_provider.dart",
-  "lib/presentation/providers/weather_providers.dart": "lib/features/weather/providers/weather_providers.dart",
-  "lib/presentation/providers/weather_for_club_provider.dart": "lib/features/weather/providers/weather_for_club_provider.dart",
-  "lib/presentation/providers/stock_provider.dart": "lib/features/inventory/providers/stock_provider.dart"
-}

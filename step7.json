@@ -1,9 +1,0 @@
-{
-  "lib/presentation/pages/admin/": "lib/features/admin/presentation/pages/",
-  "lib/presentation/screens/admin/security_log_screen.dart": "lib/features/admin/presentation/screens/security_log_screen.dart",
-  "lib/presentation/screens/admin/user_management_screen.dart": "lib/features/admin/presentation/screens/user_management_screen.dart",
-  "lib/presentation/providers/admin_providers.dart": "lib/features/admin/providers/admin_providers.dart",
-  "lib/presentation/providers/club_info_provider.dart": "lib/features/admin/providers/club_info_provider.dart",
-  "lib/presentation/providers/user_providers.dart": "lib/features/admin/providers/user_providers.dart",
-  "lib/presentation/providers/permission_provider.dart": "lib/features/admin/providers/permission_provider.dart"
-}

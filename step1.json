@@ -1,6 +1,0 @@
-{
-  "lib/presentation/screens/settings_screen.dart": "lib/features/settings/presentation/screens/settings_screen.dart",
-  "lib/presentation/widgets/settings_components.dart": "lib/features/settings/presentation/widgets/settings_components.dart",
-  "lib/presentation/providers/app_settings_provider.dart": "lib/features/settings/providers/app_settings_provider.dart",
-  "lib/presentation/providers/shared_prefs_provider.dart": "lib/features/settings/providers/shared_prefs_provider.dart"
-}

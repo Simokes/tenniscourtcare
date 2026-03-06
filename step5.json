@@ -1,5 +1,0 @@
-{
-  "lib/presentation/screens/calendar/calendar_screen.dart": "lib/features/calendar/presentation/screens/calendar_screen.dart",
-  "lib/presentation/screens/calendar/add_edit_event_screen.dart": "lib/features/calendar/presentation/screens/add_edit_event_screen.dart",
-  "lib/presentation/providers/event_provider.dart": "lib/features/calendar/providers/event_provider.dart"
-}
