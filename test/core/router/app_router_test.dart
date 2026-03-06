@@ -20,6 +20,7 @@ import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 
 import 'package:tenniscourtcare/data/services/firebase_cache_service.dart';
+import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
 
 class FakeFirebaseCacheService extends Mock implements FirebaseCacheService {}
 
@@ -181,6 +182,7 @@ List<Override> baseOverrides() => [
    // null.overrideWith((ref) => Stream.value([])),
   firebaseCacheServiceProvider.overrideWithValue(FakeFirebaseCacheService()),
   authStateProvider.overrideWith((ref) => MockAuthNotifier()),
+  maintenanceSchedulerProvider.overrideWith((ref) {}),
 ];
 
 void main() {
