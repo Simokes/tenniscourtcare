@@ -15,6 +15,11 @@ class MaintenanceModel {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
 
+  final bool isPlanned;
+
+  final int startHour;
+  final int durationMinutes;
+
   final String? imagePath;
   final Map<String, dynamic>? weather; // JSON ready
 
@@ -37,6 +42,9 @@ class MaintenanceModel {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.isPlanned = false,
+    this.startHour = 8,
+    this.durationMinutes = 60,
     this.imagePath,
     this.weather,
     this.terrainGele,
@@ -67,6 +75,9 @@ class MaintenanceModel {
       sacsMantoUtilises: json['sacsMantoUtilises'] as int,
       sacsSottomantoUtilises: json['sacsSottomantoUtilises'] as int,
       sacsSiliceUtilises: json['sacsSiliceUtilises'] as int,
+      isPlanned: json['isPlanned'] as bool? ?? false,
+      startHour: json['startHour'] as int? ?? 8,
+      durationMinutes: json['durationMinutes'] as int? ?? 60,
       imagePath: json['imagePath'] as String?,
       weather: json['weather'] as Map<String, dynamic>?,
       terrainGele: json['terrainGele'] as bool?,
@@ -92,6 +103,9 @@ class MaintenanceModel {
       'sacsMantoUtilises': sacsMantoUtilises,
       'sacsSottomantoUtilises': sacsSottomantoUtilises,
       'sacsSiliceUtilises': sacsSiliceUtilises,
+      'isPlanned': isPlanned,
+      'startHour': startHour,
+      'durationMinutes': durationMinutes,
       'imagePath': imagePath,
       'weather': weather,
       'terrainGele': terrainGele,
@@ -115,6 +129,9 @@ class MaintenanceModel {
       sacsMantoUtilises: sacsMantoUtilises,
       sacsSottomantoUtilises: sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises,
+      isPlanned: isPlanned,
+      startHour: startHour,
+      durationMinutes: durationMinutes,
       imagePath: imagePath,
       weather: weather != null ? WeatherSnapshot.fromJson(weather!) : null,
       terrainGele: terrainGele,
@@ -140,6 +157,9 @@ class MaintenanceModel {
       sacsMantoUtilises: maintenance.sacsMantoUtilises,
       sacsSottomantoUtilises: maintenance.sacsSottomantoUtilises,
       sacsSiliceUtilises: maintenance.sacsSiliceUtilises,
+      isPlanned: maintenance.isPlanned,
+      startHour: maintenance.startHour,
+      durationMinutes: maintenance.durationMinutes,
       imagePath: maintenance.imagePath,
       weather: maintenance.weather?.toJson(),
       terrainGele: maintenance.terrainGele,

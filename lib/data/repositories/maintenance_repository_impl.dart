@@ -5,31 +5,54 @@ import 'package:flutter/foundation.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/data/mappers/maintenance_mapper.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
+import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/domain/models/repository_exception.dart';
 import 'package:tenniscourtcare/domain/repositories/maintenance_repository.dart';
+import 'package:tenniscourtcare/domain/repositories/terrain_repository.dart';
+import 'package:drift/drift.dart' as drift;
 
 class MaintenanceRepositoryImpl implements MaintenanceRepository {
   const MaintenanceRepositoryImpl({
     required AppDatabase db,
     required FirebaseFirestore fs,
+    required TerrainRepository terrainRepository,
   })  : _db = db,
-        _fs = fs;
+        _fs = fs,
+        _terrainRepository = terrainRepository;
 
   final AppDatabase _db;
   final FirebaseFirestore _fs;
+  final TerrainRepository _terrainRepository;
 
   @override
-  Future<String> addMaintenance(Maintenance maintenance) async {
-    try {
-      final docRef = await _fs
-          .collection('maintenance')
-          .add(MaintenanceMapper.toFirestore(maintenance));
-      return docRef.id;
-    } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
-      throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
+Future<String> addMaintenance(Maintenance maintenance) async {
+  try {
+    final docRef = await _fs
+        .collection('maintenance')
+        .add(MaintenanceMapper.toFirestore(maintenance));
+
+    // ✅ FIX: Sauvegarder dans Drift immédiatement avec firebaseId
+    final maintenanceWithId = maintenance.copyWith(firebaseId: docRef.id);
+    await _db.upsertMaintenance(maintenanceWithId.toCompanion());
+
+    if (maintenance.isPlanned) {
+      await _terrainRepository.updateTerrainStatus(
+        maintenance.terrainId,
+        TerrainStatus.maintenance,
+      );
+    } else {
+      await _terrainRepository.updateTerrainStatus(
+        maintenance.terrainId,
+        TerrainStatus.playable,
+      );
     }
+
+    return docRef.id;
+  } on FirebaseException catch (e) {
+    debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
+    throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
   }
+}
 
   @override
   Future<void> updateMaintenance(Maintenance maintenance) async {
@@ -50,13 +73,14 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<void> deleteMaintenance(String firebaseId) async {
-    try {
-      await _fs.collection('maintenance').doc(firebaseId).delete();
-    } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
-      throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
-    }
+  try {
+    await _fs.collection('maintenance').doc(firebaseId).delete();
+    await _db.deleteMaintenanceByFirebaseId(firebaseId); // ✅ Drift immédiat
+  } on FirebaseException catch (e) {
+    debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
+    throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
   }
+}
 
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
     return _db.getMaintenancesForTerrain(terrainId);
@@ -77,5 +101,36 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     // si c'est ce qui est attendu, mais le snippet est explicite sur "allMaintenances = []".
     // Je vais suivre le snippet pour être sûr.
     return [];
+  }
+
+  @override
+  Stream<List<Maintenance>> watchPlannedMaintenances() {
+    final query = _db.select(_db.maintenances)
+      ..where((t) => t.isPlanned.equals(true))
+      ..orderBy([(t) => drift.OrderingTerm(expression: t.date, mode: drift.OrderingMode.asc)]);
+    return query.watch().map((rows) => rows.map((r) => r.toDomain()).toList());
+  }
+
+  @override
+  Future<void> markAsCompleted({
+    required String firebaseId,
+    required Maintenance completed,
+  }) async {
+    final updatedMaintenance = completed.copyWith(isPlanned: false);
+
+    try {
+      await _fs
+          .collection('maintenance')
+          .doc(firebaseId)
+          .update(MaintenanceMapper.toFirestore(updatedMaintenance));
+
+      await _terrainRepository.updateTerrainStatus(
+        updatedMaintenance.terrainId,
+        TerrainStatus.playable,
+      );
+    } on FirebaseException catch (e) {
+      debugPrint('❌ MaintenanceRepository: Failed to mark maintenance as completed: ${e.message}');
+      throw RepositoryException('Failed to mark maintenance as completed: ${e.message}', cause: e);
+    }
   }
 }

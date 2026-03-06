@@ -997,6 +997,45 @@ class $MaintenancesTable extends Maintenances
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _isPlannedMeta = const VerificationMeta(
+    'isPlanned',
+  );
+  @override
+  late final GeneratedColumn<bool> isPlanned = GeneratedColumn<bool>(
+    'is_planned',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_planned" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _startHourMeta = const VerificationMeta(
+    'startHour',
+  );
+  @override
+  late final GeneratedColumn<int> startHour = GeneratedColumn<int>(
+    'start_hour',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
+  );
+  static const VerificationMeta _durationMinutesMeta = const VerificationMeta(
+    'durationMinutes',
+  );
+  @override
+  late final GeneratedColumn<int> durationMinutes = GeneratedColumn<int>(
+    'duration_minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(60),
+  );
   static const VerificationMeta _imagePathMeta = const VerificationMeta(
     'imagePath',
   );
@@ -1128,6 +1167,9 @@ class $MaintenancesTable extends Maintenances
     sacsMantoUtilises,
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
+    isPlanned,
+    startHour,
+    durationMinutes,
     imagePath,
     remoteId,
     status,
@@ -1212,6 +1254,27 @@ class $MaintenancesTable extends Maintenances
         sacsSiliceUtilises.isAcceptableOrUnknown(
           data['sacs_silice_utilises']!,
           _sacsSiliceUtilisesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_planned')) {
+      context.handle(
+        _isPlannedMeta,
+        isPlanned.isAcceptableOrUnknown(data['is_planned']!, _isPlannedMeta),
+      );
+    }
+    if (data.containsKey('start_hour')) {
+      context.handle(
+        _startHourMeta,
+        startHour.isAcceptableOrUnknown(data['start_hour']!, _startHourMeta),
+      );
+    }
+    if (data.containsKey('duration_minutes')) {
+      context.handle(
+        _durationMinutesMeta,
+        durationMinutes.isAcceptableOrUnknown(
+          data['duration_minutes']!,
+          _durationMinutesMeta,
         ),
       );
     }
@@ -1332,6 +1395,18 @@ class $MaintenancesTable extends Maintenances
         DriftSqlType.int,
         data['${effectivePrefix}sacs_silice_utilises'],
       )!,
+      isPlanned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_planned'],
+      )!,
+      startHour: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_hour'],
+      )!,
+      durationMinutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_minutes'],
+      )!,
       imagePath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}image_path'],
@@ -1394,6 +1469,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   final int sacsMantoUtilises;
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
+  final bool isPlanned;
+  final int startHour;
+  final int durationMinutes;
   final String? imagePath;
   final String? remoteId;
   final String? status;
@@ -1414,6 +1492,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    required this.isPlanned,
+    required this.startHour,
+    required this.durationMinutes,
     this.imagePath,
     this.remoteId,
     this.status,
@@ -1439,6 +1520,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     map['sacs_manto_utilises'] = Variable<int>(sacsMantoUtilises);
     map['sacs_sottomanto_utilises'] = Variable<int>(sacsSottomantoUtilises);
     map['sacs_silice_utilises'] = Variable<int>(sacsSiliceUtilises);
+    map['is_planned'] = Variable<bool>(isPlanned);
+    map['start_hour'] = Variable<int>(startHour);
+    map['duration_minutes'] = Variable<int>(durationMinutes);
     if (!nullToAbsent || imagePath != null) {
       map['image_path'] = Variable<String>(imagePath);
     }
@@ -1483,6 +1567,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       sacsMantoUtilises: Value(sacsMantoUtilises),
       sacsSottomantoUtilises: Value(sacsSottomantoUtilises),
       sacsSiliceUtilises: Value(sacsSiliceUtilises),
+      isPlanned: Value(isPlanned),
+      startHour: Value(startHour),
+      durationMinutes: Value(durationMinutes),
       imagePath: imagePath == null && nullToAbsent
           ? const Value.absent()
           : Value(imagePath),
@@ -1531,6 +1618,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
         json['sacsSottomantoUtilises'],
       ),
       sacsSiliceUtilises: serializer.fromJson<int>(json['sacsSiliceUtilises']),
+      isPlanned: serializer.fromJson<bool>(json['isPlanned']),
+      startHour: serializer.fromJson<int>(json['startHour']),
+      durationMinutes: serializer.fromJson<int>(json['durationMinutes']),
       imagePath: serializer.fromJson<String?>(json['imagePath']),
       remoteId: serializer.fromJson<String?>(json['remoteId']),
       status: serializer.fromJson<String?>(json['status']),
@@ -1556,6 +1646,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       'sacsMantoUtilises': serializer.toJson<int>(sacsMantoUtilises),
       'sacsSottomantoUtilises': serializer.toJson<int>(sacsSottomantoUtilises),
       'sacsSiliceUtilises': serializer.toJson<int>(sacsSiliceUtilises),
+      'isPlanned': serializer.toJson<bool>(isPlanned),
+      'startHour': serializer.toJson<int>(startHour),
+      'durationMinutes': serializer.toJson<int>(durationMinutes),
       'imagePath': serializer.toJson<String?>(imagePath),
       'remoteId': serializer.toJson<String?>(remoteId),
       'status': serializer.toJson<String?>(status),
@@ -1579,6 +1672,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
+    bool? isPlanned,
+    int? startHour,
+    int? durationMinutes,
     Value<String?> imagePath = const Value.absent(),
     Value<String?> remoteId = const Value.absent(),
     Value<String?> status = const Value.absent(),
@@ -1600,6 +1696,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     sacsSottomantoUtilises:
         sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
     sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+    isPlanned: isPlanned ?? this.isPlanned,
+    startHour: startHour ?? this.startHour,
+    durationMinutes: durationMinutes ?? this.durationMinutes,
     imagePath: imagePath.present ? imagePath.value : this.imagePath,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
     status: status.present ? status.value : this.status,
@@ -1634,6 +1733,11 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
       sacsSiliceUtilises: data.sacsSiliceUtilises.present
           ? data.sacsSiliceUtilises.value
           : this.sacsSiliceUtilises,
+      isPlanned: data.isPlanned.present ? data.isPlanned.value : this.isPlanned,
+      startHour: data.startHour.present ? data.startHour.value : this.startHour,
+      durationMinutes: data.durationMinutes.present
+          ? data.durationMinutes.value
+          : this.durationMinutes,
       imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
       remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       status: data.status.present ? data.status.value : this.status,
@@ -1667,6 +1771,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
           ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
+          ..write('isPlanned: $isPlanned, ')
+          ..write('startHour: $startHour, ')
+          ..write('durationMinutes: $durationMinutes, ')
           ..write('imagePath: $imagePath, ')
           ..write('remoteId: $remoteId, ')
           ..write('status: $status, ')
@@ -1683,7 +1790,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     terrainId,
     type,
@@ -1692,6 +1799,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     sacsMantoUtilises,
     sacsSottomantoUtilises,
     sacsSiliceUtilises,
+    isPlanned,
+    startHour,
+    durationMinutes,
     imagePath,
     remoteId,
     status,
@@ -1703,7 +1813,7 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
     createdBy,
     modifiedBy,
     syncedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1716,6 +1826,9 @@ class MaintenanceRow extends DataClass implements Insertable<MaintenanceRow> {
           other.sacsMantoUtilises == this.sacsMantoUtilises &&
           other.sacsSottomantoUtilises == this.sacsSottomantoUtilises &&
           other.sacsSiliceUtilises == this.sacsSiliceUtilises &&
+          other.isPlanned == this.isPlanned &&
+          other.startHour == this.startHour &&
+          other.durationMinutes == this.durationMinutes &&
           other.imagePath == this.imagePath &&
           other.remoteId == this.remoteId &&
           other.status == this.status &&
@@ -1738,6 +1851,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
   final Value<int> sacsMantoUtilises;
   final Value<int> sacsSottomantoUtilises;
   final Value<int> sacsSiliceUtilises;
+  final Value<bool> isPlanned;
+  final Value<int> startHour;
+  final Value<int> durationMinutes;
   final Value<String?> imagePath;
   final Value<String?> remoteId;
   final Value<String?> status;
@@ -1758,6 +1874,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsMantoUtilises = const Value.absent(),
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
+    this.isPlanned = const Value.absent(),
+    this.startHour = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.status = const Value.absent(),
@@ -1779,6 +1898,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     this.sacsMantoUtilises = const Value.absent(),
     this.sacsSottomantoUtilises = const Value.absent(),
     this.sacsSiliceUtilises = const Value.absent(),
+    this.isPlanned = const Value.absent(),
+    this.startHour = const Value.absent(),
+    this.durationMinutes = const Value.absent(),
     this.imagePath = const Value.absent(),
     this.remoteId = const Value.absent(),
     this.status = const Value.absent(),
@@ -1804,6 +1926,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Expression<int>? sacsMantoUtilises,
     Expression<int>? sacsSottomantoUtilises,
     Expression<int>? sacsSiliceUtilises,
+    Expression<bool>? isPlanned,
+    Expression<int>? startHour,
+    Expression<int>? durationMinutes,
     Expression<String>? imagePath,
     Expression<String>? remoteId,
     Expression<String>? status,
@@ -1827,6 +1952,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
         'sacs_sottomanto_utilises': sacsSottomantoUtilises,
       if (sacsSiliceUtilises != null)
         'sacs_silice_utilises': sacsSiliceUtilises,
+      if (isPlanned != null) 'is_planned': isPlanned,
+      if (startHour != null) 'start_hour': startHour,
+      if (durationMinutes != null) 'duration_minutes': durationMinutes,
       if (imagePath != null) 'image_path': imagePath,
       if (remoteId != null) 'remote_id': remoteId,
       if (status != null) 'status': status,
@@ -1850,6 +1978,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     Value<int>? sacsMantoUtilises,
     Value<int>? sacsSottomantoUtilises,
     Value<int>? sacsSiliceUtilises,
+    Value<bool>? isPlanned,
+    Value<int>? startHour,
+    Value<int>? durationMinutes,
     Value<String?>? imagePath,
     Value<String?>? remoteId,
     Value<String?>? status,
@@ -1872,6 +2003,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
       sacsSottomantoUtilises:
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+      isPlanned: isPlanned ?? this.isPlanned,
+      startHour: startHour ?? this.startHour,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
       imagePath: imagePath ?? this.imagePath,
       remoteId: remoteId ?? this.remoteId,
       status: status ?? this.status,
@@ -1914,6 +2048,15 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
     }
     if (sacsSiliceUtilises.present) {
       map['sacs_silice_utilises'] = Variable<int>(sacsSiliceUtilises.value);
+    }
+    if (isPlanned.present) {
+      map['is_planned'] = Variable<bool>(isPlanned.value);
+    }
+    if (startHour.present) {
+      map['start_hour'] = Variable<int>(startHour.value);
+    }
+    if (durationMinutes.present) {
+      map['duration_minutes'] = Variable<int>(durationMinutes.value);
     }
     if (imagePath.present) {
       map['image_path'] = Variable<String>(imagePath.value);
@@ -1962,6 +2105,9 @@ class MaintenancesCompanion extends UpdateCompanion<MaintenanceRow> {
           ..write('sacsMantoUtilises: $sacsMantoUtilises, ')
           ..write('sacsSottomantoUtilises: $sacsSottomantoUtilises, ')
           ..write('sacsSiliceUtilises: $sacsSiliceUtilises, ')
+          ..write('isPlanned: $isPlanned, ')
+          ..write('startHour: $startHour, ')
+          ..write('durationMinutes: $durationMinutes, ')
           ..write('imagePath: $imagePath, ')
           ..write('remoteId: $remoteId, ')
           ..write('status: $status, ')
@@ -7978,6 +8124,9 @@ typedef $$MaintenancesTableCreateCompanionBuilder =
       Value<int> sacsMantoUtilises,
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
+      Value<bool> isPlanned,
+      Value<int> startHour,
+      Value<int> durationMinutes,
       Value<String?> imagePath,
       Value<String?> remoteId,
       Value<String?> status,
@@ -8000,6 +8149,9 @@ typedef $$MaintenancesTableUpdateCompanionBuilder =
       Value<int> sacsMantoUtilises,
       Value<int> sacsSottomantoUtilises,
       Value<int> sacsSiliceUtilises,
+      Value<bool> isPlanned,
+      Value<int> startHour,
+      Value<int> durationMinutes,
       Value<String?> imagePath,
       Value<String?> remoteId,
       Value<String?> status,
@@ -8059,6 +8211,21 @@ class $$MaintenancesTableFilterComposer
 
   ColumnFilters<int> get sacsSiliceUtilises => $composableBuilder(
     column: $table.sacsSiliceUtilises,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isPlanned => $composableBuilder(
+    column: $table.isPlanned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startHour => $composableBuilder(
+    column: $table.startHour,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8167,6 +8334,21 @@ class $$MaintenancesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isPlanned => $composableBuilder(
+    column: $table.isPlanned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startHour => $composableBuilder(
+    column: $table.startHour,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get imagePath => $composableBuilder(
     column: $table.imagePath,
     builder: (column) => ColumnOrderings(column),
@@ -8264,6 +8446,17 @@ class $$MaintenancesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<bool> get isPlanned =>
+      $composableBuilder(column: $table.isPlanned, builder: (column) => column);
+
+  GeneratedColumn<int> get startHour =>
+      $composableBuilder(column: $table.startHour, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMinutes => $composableBuilder(
+    column: $table.durationMinutes,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get imagePath =>
       $composableBuilder(column: $table.imagePath, builder: (column) => column);
 
@@ -8345,6 +8538,9 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsMantoUtilises = const Value.absent(),
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
+                Value<bool> isPlanned = const Value.absent(),
+                Value<int> startHour = const Value.absent(),
+                Value<int> durationMinutes = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<String?> status = const Value.absent(),
@@ -8365,6 +8561,9 @@ class $$MaintenancesTableTableManager
                 sacsMantoUtilises: sacsMantoUtilises,
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
+                isPlanned: isPlanned,
+                startHour: startHour,
+                durationMinutes: durationMinutes,
                 imagePath: imagePath,
                 remoteId: remoteId,
                 status: status,
@@ -8387,6 +8586,9 @@ class $$MaintenancesTableTableManager
                 Value<int> sacsMantoUtilises = const Value.absent(),
                 Value<int> sacsSottomantoUtilises = const Value.absent(),
                 Value<int> sacsSiliceUtilises = const Value.absent(),
+                Value<bool> isPlanned = const Value.absent(),
+                Value<int> startHour = const Value.absent(),
+                Value<int> durationMinutes = const Value.absent(),
                 Value<String?> imagePath = const Value.absent(),
                 Value<String?> remoteId = const Value.absent(),
                 Value<String?> status = const Value.absent(),
@@ -8407,6 +8609,9 @@ class $$MaintenancesTableTableManager
                 sacsMantoUtilises: sacsMantoUtilises,
                 sacsSottomantoUtilises: sacsSottomantoUtilises,
                 sacsSiliceUtilises: sacsSiliceUtilises,
+                isPlanned: isPlanned,
+                startHour: startHour,
+                durationMinutes: durationMinutes,
                 imagePath: imagePath,
                 remoteId: remoteId,
                 status: status,

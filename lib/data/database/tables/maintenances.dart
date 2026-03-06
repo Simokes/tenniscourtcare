@@ -15,6 +15,11 @@ class Maintenances extends Table {
   IntColumn get sacsSiliceUtilises =>
       integer().withDefault(const Constant(0))();
 
+  BoolColumn get isPlanned => boolean().withDefault(const Constant(false))();
+
+  IntColumn get startHour => integer().withDefault(const Constant(8))();
+  IntColumn get durationMinutes => integer().withDefault(const Constant(60))();
+
   TextColumn get imagePath => text().nullable()();
 
   // New fields for Firestore sync

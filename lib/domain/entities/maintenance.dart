@@ -12,6 +12,15 @@ class Maintenance {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
 
+  /// Indique si la maintenance est planifiée dans le futur (true) ou déjà réalisée (false)
+  final bool isPlanned;
+
+  /// Heure de début (0-23)
+  final int startHour;
+
+  /// Durée en minutes
+  final int durationMinutes;
+
   /// Chemin vers la photo de preuve (optionnel)
   final String? imagePath;
 
@@ -38,6 +47,9 @@ class Maintenance {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.isPlanned = false,
+    this.startHour = 8,
+    this.durationMinutes = 60,
     this.imagePath,
     this.weather,
     this.terrainGele,
@@ -59,6 +71,9 @@ class Maintenance {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
+    bool? isPlanned,
+    int? startHour,
+    int? durationMinutes,
     String? imagePath,
     WeatherSnapshot? weather,
     bool? terrainGele,
@@ -79,6 +94,9 @@ class Maintenance {
       sacsSottomantoUtilises:
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+      isPlanned: isPlanned ?? this.isPlanned,
+      startHour: startHour ?? this.startHour,
+      durationMinutes: durationMinutes ?? this.durationMinutes,
       imagePath: imagePath ?? this.imagePath,
       weather: weather ?? this.weather,
       terrainGele: terrainGele ?? this.terrainGele,
@@ -104,6 +122,9 @@ class Maintenance {
           sacsMantoUtilises == other.sacsMantoUtilises &&
           sacsSottomantoUtilises == other.sacsSottomantoUtilises &&
           sacsSiliceUtilises == other.sacsSiliceUtilises &&
+          isPlanned == other.isPlanned &&
+          startHour == other.startHour &&
+          durationMinutes == other.durationMinutes &&
           imagePath == other.imagePath &&
           weather == other.weather &&
           terrainGele == other.terrainGele &&
@@ -124,6 +145,9 @@ class Maintenance {
       sacsMantoUtilises.hashCode ^
       sacsSottomantoUtilises.hashCode ^
       sacsSiliceUtilises.hashCode ^
+      isPlanned.hashCode ^
+      startHour.hashCode ^
+      durationMinutes.hashCode ^
       imagePath.hashCode ^
       weather.hashCode ^
       terrainGele.hashCode ^
@@ -138,7 +162,7 @@ class Maintenance {
   String toString() =>
       'Maintenance(id: $id, terrainId: $terrainId, type: $type, date: $date, '
       'manto: $sacsMantoUtilises, sotto: $sacsSottomantoUtilises, silice: $sacsSiliceUtilises, '
-      'imagePath: $imagePath, '
+      'isPlanned: $isPlanned, startHour: $startHour, durationMinutes: $durationMinutes, imagePath: $imagePath, '
       'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable, '
       'createdAt: $createdAt, updatedAt: $updatedAt)';
 }

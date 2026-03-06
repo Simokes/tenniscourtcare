@@ -66,6 +66,36 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
             ],
           ),
 
+          // Planned Section
+          SliverToBoxAdapter(
+            child: Consumer(
+              builder: (context, ref, child) {
+                final planned = ref.watch(plannedMaintenancesByTerrainProvider(terrain.id));
+                if (planned.isEmpty) return const SizedBox.shrink();
+
+                final nextPlanned = planned.first;
+                final date = DateTime.fromMillisecondsSinceEpoch(nextPlanned.date);
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: Card(
+                    color: Colors.orange.shade50,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.orange.shade200),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: const Icon(Icons.schedule, color: Colors.orange),
+                      title: const Text('Prochaine maintenance prévue', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                      subtitle: Text('${nextPlanned.type} — le ${DateFormat('dd MMM yyyy', 'fr_FR').format(date)}'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
           // Stats Section (Charts)
           SliverToBoxAdapter(
             child: Padding(
@@ -284,7 +314,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                               isScrollControlled: true,
                               builder: (_) => AddMaintenanceSheet(
                                 terrain: terrain,
-                                maintenance: maintenance,
+                            existingMaintenance: maintenance,
                               ),
                             );
                           },

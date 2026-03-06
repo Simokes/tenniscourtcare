@@ -40,6 +40,8 @@ class ClubInfoRepositoryImpl implements ClubInfoRepository {
         longitude: (data['longitude'] as num?)?.toDouble(),
         phone: data['phone'] as String?,
         email: data['email'] as String?,
+        openingHour: data['openingHour'] as int?,
+        closingHour: data['closingHour'] as int?,
         updatedAt: (data['updatedAt'] as Timestamp).toDate(),
         updatedBy: data['updatedBy'] as String?,
       );
@@ -84,6 +86,8 @@ class ClubInfoRepositoryImpl implements ClubInfoRepository {
             'longitude': updatedInfo.longitude,
             'phone': updatedInfo.phone,
             'email': updatedInfo.email,
+            'openingHour': updatedInfo.openingHour,
+            'closingHour': updatedInfo.closingHour,
             'updatedAt': Timestamp.fromDate(updatedInfo.updatedAt),
             'updatedBy': updatedInfo.updatedBy,
           }, SetOptions(merge: true));

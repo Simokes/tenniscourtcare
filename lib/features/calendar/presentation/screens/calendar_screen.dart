@@ -300,15 +300,28 @@ class _CalendarItemCard extends ConsumerWidget {
               terrainProvider(item.terrainId!).future,
             );
             if (terrain != null && context.mounted) {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => AddMaintenanceSheet(
-                  terrain: terrain,
-                  maintenance: item.originalObject as Maintenance,
-                ),
-              );
+              if (item.isPlanned) {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddMaintenanceSheet(
+                    terrain: terrain,
+                    existingMaintenance: item.originalObject as Maintenance,
+                    forceCompleteMode: true,
+                  ),
+                );
+              } else {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => AddMaintenanceSheet(
+                    terrain: terrain,
+                    existingMaintenance: item.originalObject as Maintenance,
+                  ),
+                );
+              }
             }
           }
         }
@@ -352,19 +365,30 @@ class _CalendarItemCard extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.1),
+                              color: item.color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
-                                color: Colors.orange.withValues(alpha: 0.3),
+                                color: item.color.withValues(alpha: 0.3),
                               ),
                             ),
-                            child: const Text(
-                              'Maintenance',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.orange,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  item.isPlanned ? Icons.schedule : Icons.check_circle,
+                                  size: 12,
+                                  color: item.color,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  item.isPlanned ? 'Prévue' : 'Réalisée',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: item.color,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                       ],

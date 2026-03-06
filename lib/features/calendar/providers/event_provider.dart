@@ -91,6 +91,7 @@ class CalendarItem {
   final dynamic originalObject;
   final int? terrainId;
   final String? location;
+  final bool isPlanned;
 
   CalendarItem({
     required this.id,
@@ -103,6 +104,7 @@ class CalendarItem {
     required this.originalObject,
     this.terrainId,
     this.location,
+    this.isPlanned = false,
   });
 }
 
@@ -113,11 +115,13 @@ final calendarItemsProvider =
     >((ref, range) {
       final eventsAsync = ref.watch(eventsProvider);
       final maintenancesAsync = ref.watch(maintenancesProvider);
+      final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
       final terrainsAsync = ref.watch(terrainsProvider);
 
       // If any is loading, return loading
       if (eventsAsync.isLoading ||
           maintenancesAsync.isLoading ||
+          plannedMaintenancesAsync.isLoading ||
           terrainsAsync.isLoading) {
         return const AsyncValue.loading();
       }
@@ -132,6 +136,12 @@ final calendarItemsProvider =
           maintenancesAsync.stackTrace!,
         );
       }
+      if (plannedMaintenancesAsync.hasError) {
+        return AsyncValue.error(
+          plannedMaintenancesAsync.error!,
+          plannedMaintenancesAsync.stackTrace!,
+        );
+      }
       if (terrainsAsync.hasError) {
         return AsyncValue.error(
           terrainsAsync.error!,
@@ -142,9 +152,10 @@ final calendarItemsProvider =
       // If we have data (even empty)
       if (eventsAsync.hasValue &&
           maintenancesAsync.hasValue &&
+          plannedMaintenancesAsync.hasValue &&
           terrainsAsync.hasValue) {
         final events = eventsAsync.value!;
-        final maintenances = maintenancesAsync.value!;
+        final maintenances = [...maintenancesAsync.value!, ...plannedMaintenancesAsync.value!];
         final terrains = terrainsAsync.value!;
 
         final items = <CalendarItem>[];
@@ -190,12 +201,16 @@ final calendarItemsProvider =
               updatedAt: DateTime.now(),
             ),
           );
-          final startTime = DateTime.fromMillisecondsSinceEpoch(
-            maintenance.date,
+          final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+          final startTime = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            maintenance.startHour,
           );
           final endTime = startTime.add(
-            const Duration(hours: 1),
-          ); // Default duration
+            Duration(minutes: maintenance.durationMinutes),
+          );
 
           if (startTime.isBefore(range.end) && endTime.isAfter(range.start)) {
             items.add(
@@ -205,11 +220,12 @@ final calendarItemsProvider =
                 description: maintenance.commentaire ?? maintenance.type,
                 startTime: startTime,
                 endTime: endTime,
-                color: Colors.orange,
+                color: maintenance.isPlanned ? TerrainStatus.maintenance.color : Colors.green,
                 type: CalendarItemType.maintenance,
                 originalObject: maintenance,
                 terrainId: maintenance.terrainId,
                 location: terrain.nom,
+                isPlanned: maintenance.isPlanned,
               ),
             );
           }

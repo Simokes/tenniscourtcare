@@ -20,6 +20,9 @@ class MaintenanceMapper {
       sacsMantoUtilises: model.sacsMantoUtilises,
       sacsSottomantoUtilises: model.sacsSottomantoUtilises,
       sacsSiliceUtilises: model.sacsSiliceUtilises,
+      isPlanned: model.isPlanned,
+      startHour: model.startHour,
+      durationMinutes: model.durationMinutes,
       imagePath: model.imagePath,
       weather: model.weather != null
           ? WeatherSnapshot.fromJson(model.weather!)
@@ -45,6 +48,9 @@ class MaintenanceMapper {
       sacsMantoUtilises: domain.sacsMantoUtilises,
       sacsSottomantoUtilises: domain.sacsSottomantoUtilises,
       sacsSiliceUtilises: domain.sacsSiliceUtilises,
+      isPlanned: domain.isPlanned,
+      startHour: domain.startHour,
+      durationMinutes: domain.durationMinutes,
       imagePath: domain.imagePath,
       weather: domain.weather?.toJson(),
       terrainGele: domain.terrainGele,
@@ -68,6 +74,9 @@ class MaintenanceMapper {
       sacsMantoUtilises: driftEntity.sacsMantoUtilises,
       sacsSottomantoUtilises: driftEntity.sacsSottomantoUtilises,
       sacsSiliceUtilises: driftEntity.sacsSiliceUtilises,
+      isPlanned: driftEntity.isPlanned,
+      startHour: driftEntity.startHour,
+      durationMinutes: driftEntity.durationMinutes,
       imagePath: driftEntity.imagePath,
       // Weather and flags are not stored in SQLite currently
       weather: null,
@@ -91,6 +100,9 @@ class MaintenanceMapper {
       'sacsMantoUtilises': item.sacsMantoUtilises,
       'sacsSottomantoUtilises': item.sacsSottomantoUtilises,
       'sacsSiliceUtilises': item.sacsSiliceUtilises,
+      'isPlanned': item.isPlanned,
+      'startHour': item.startHour,
+      'durationMinutes': item.durationMinutes,
       'imagePath': item.imagePath,
       'weather': item.weather?.toJson(),
       'terrainGele': item.terrainGele,
@@ -124,6 +136,9 @@ class MaintenanceMapper {
       sacsMantoUtilises: drift.Value(data['sacsMantoUtilises'] as int? ?? 0),
       sacsSottomantoUtilises: drift.Value(data['sacsSottomantoUtilises'] as int? ?? 0),
       sacsSiliceUtilises: drift.Value(data['sacsSiliceUtilises'] as int? ?? 0),
+      isPlanned: drift.Value(data['isPlanned'] as bool? ?? false),
+      startHour: drift.Value(data['startHour'] as int? ?? 8),
+      durationMinutes: drift.Value(data['durationMinutes'] as int? ?? 60),
       imagePath: data['imagePath'] != null
           ? drift.Value(data['imagePath'] as String)
           : const drift.Value.absent(),
@@ -164,6 +179,9 @@ extension MaintenanceMapperX on Maintenance {
       sacsMantoUtilises: drift.Value(sacsMantoUtilises),
       sacsSottomantoUtilises: drift.Value(sacsSottomantoUtilises),
       sacsSiliceUtilises: drift.Value(sacsSiliceUtilises),
+      isPlanned: drift.Value(isPlanned),
+      startHour: drift.Value(startHour),
+      durationMinutes: drift.Value(durationMinutes),
       imagePath: imagePath == null
           ? const drift.Value.absent()
           : drift.Value(imagePath),

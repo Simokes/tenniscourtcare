@@ -90,6 +90,14 @@ class ClubInfoSection extends ConsumerWidget {
                     title: const Text('Email contact'),
                     subtitle: Text(info.email ?? 'Non renseigné'),
                   ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.access_time),
+                    title: const Text('Horaires d\'ouverture'),
+                    subtitle: Text(
+                      '${info.openingHour ?? 8}h00 - ${info.closingHour ?? 21}h00',
+                    ),
+                  ),
                 ],
               );
             },
@@ -134,6 +142,8 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
   String? _city;
   String? _phone;
   String? _email;
+  int _openingHour = 8;
+  int _closingHour = 21;
 
   @override
   void initState() {
@@ -144,6 +154,8 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
     _city = widget.currentInfo?.city;
     _phone = widget.currentInfo?.phone;
     _email = widget.currentInfo?.email;
+    _openingHour = widget.currentInfo?.openingHour ?? 8;
+    _closingHour = widget.currentInfo?.closingHour ?? 21;
   }
 
   @override
@@ -218,6 +230,34 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 },
                 onSaved: (value) => _email = value?.trim().isEmpty ?? true ? null : value!.trim(),
               ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<int>(
+                value: _openingHour,
+                decoration: const InputDecoration(labelText: 'Heure d\'ouverture'),
+                items: List.generate(5, (index) => index + 6).map((hour) {
+                  return DropdownMenuItem(
+                    value: hour,
+                    child: Text('${hour}h00'),
+                  );
+                }).toList(),
+                onChanged: isLoading ? null : (val) {
+                  if (val != null) setState(() => _openingHour = val);
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<int>(
+                value: _closingHour,
+                decoration: const InputDecoration(labelText: 'Heure de fermeture'),
+                items: List.generate(6, (index) => index + 18).map((hour) {
+                  return DropdownMenuItem(
+                    value: hour,
+                    child: Text('${hour}h00'),
+                  );
+                }).toList(),
+                onChanged: isLoading ? null : (val) {
+                  if (val != null) setState(() => _closingHour = val);
+                },
+              ),
               if (isLoading) ...[
                 const SizedBox(height: 16),
                 const Center(child: CircularProgressIndicator()),
@@ -248,6 +288,8 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 longitude: widget.currentInfo?.longitude,
                 phone: _phone,
                 email: _email,
+                openingHour: _openingHour,
+                closingHour: _closingHour,
                 updatedAt: DateTime.now(),
                 updatedBy: widget.userEmail,
               );

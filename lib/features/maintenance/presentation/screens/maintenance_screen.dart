@@ -1,105 +1,238 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../../terrain/providers/terrain_provider.dart';
+import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../../../terrain/presentation/widgets/terrain_card.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
 import './terrain_maintenance_history_screen.dart';
 
-class MaintenanceScreen extends ConsumerWidget {
+class MaintenanceScreen extends ConsumerStatefulWidget {
   const MaintenanceScreen({super.key});
 
+  @override
+  ConsumerState<MaintenanceScreen> createState() => _MaintenanceScreenState();
+}
+
+class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              title: const Text('Maintenances'),
+              floating: true,
+              pinned: true,
+              expandedHeight: 120,
+              actions: const [
+                ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
+                SizedBox(width: 8),
+              ],
+              flexibleSpace: FlexibleSpaceBar(
+                background: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        const Color(0xFFE0E0E0), // Light grey or theme color
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              bottom: TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'À venir'),
+                  Tab(text: 'Historique'),
+                ],
+              ),
+            ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _UpcomingMaintenancesTab(),
+            _HistoryTab(),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add),
+        label: const Text('Nouvelle maintenance'),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          useSafeArea: true,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (_) => const AddMaintenanceSheet(),
+        ),
+      ),
+    );
+  }
+}
+
+class _UpcomingMaintenancesTab extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
+    final terrainsAsync = ref.watch(terrainsProvider);
+
+    if (plannedMaintenancesAsync.isLoading || terrainsAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (plannedMaintenancesAsync.hasError) {
+      return Center(child: Text('Erreur: ${plannedMaintenancesAsync.error}'));
+    }
+
+    final maintenances = plannedMaintenancesAsync.value ?? [];
+    final terrains = terrainsAsync.value ?? [];
+
+    if (maintenances.isEmpty) {
+      return const Center(
+        child: Text('Aucune maintenance planifiée à venir.'),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: maintenances.length,
+      itemBuilder: (context, index) {
+        final maintenance = maintenances[index];
+        final terrain = terrains.firstWhere(
+          (t) => t.id == maintenance.terrainId,
+          orElse: () => throw Exception('Terrain not found'),
+        );
+        final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+
+        final now = DateTime.now();
+        final isOverdue = date.isBefore(DateTime(now.year, now.month, now.day));
+
+        final color = isOverdue ? Colors.red.shade100 : Colors.white;
+        final iconColor = isOverdue ? Colors.red : Colors.orangeAccent;
+        final icon = isOverdue ? Icons.warning_amber : Icons.schedule;
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          elevation: 0,
+          color: color,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200),
+          ),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: iconColor,
+              child: Icon(icon, color: Colors.white),
+            ),
+            title: Row(
+              children: [
+                Expanded(child: Text('${terrain.nom} — ${maintenance.type}')),
+                if (isOverdue)
+                  Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'En retard',
+                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Text('Prévu le ${DateFormat('dd/MM/yyyy').format(date)}'),
+            trailing: FilledButton.tonal(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  useSafeArea: true,
+                  isScrollControlled: true,
+                  showDragHandle: true,
+                  builder: (_) => AddMaintenanceSheet(
+                    terrain: terrain,
+                    existingMaintenance: maintenance,
+                    forceCompleteMode: true,
+                  ),
+                );
+              },
+              child: const Text('Effectuer'),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HistoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final terrainsAsync = ref.watch(terrainsProvider);
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          const SliverAppBar(
-            title: Text('Maintenances'),
-            floating: true,
-            snap: true,
-            expandedHeight: 120,
-            actions: [
-               ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
-               SizedBox(width: 8),
-            ],
-            flexibleSpace: FlexibleSpaceBar(
-              background: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFFE0E0E0), // Light grey or theme color
-                      Colors.white,
-                    ],
-                  ),
+    return terrainsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => _ErrorView(
+        message: 'Erreur: $error',
+        onRetry: () => ref.refresh(terrainsProvider),
+      ),
+      data: (terrains) {
+        if (terrains.isEmpty) {
+          return _EmptyState(
+            onAddCourt: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Fonctionnalité non implémentée'),
                 ),
-              ),
-            ),
-          ),
-          terrainsAsync.when(
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (error, stack) => SliverFillRemaining(
-              child: _ErrorView(
-                message: 'Erreur: $error',
-                onRetry: () => ref.refresh(terrainsProvider),
-              ),
-            ),
-            data: (terrains) {
-              if (terrains.isEmpty) {
-                return SliverFillRemaining(
-                  child: _EmptyState(
-                    onAddCourt: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fonctionnalité non implémentée'),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }
-
-              return SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final terrain = terrains[index];
-                  return TerrainCard(
-                    terrain: terrain,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              TerrainMaintenanceHistoryScreen(terrain: terrain),
-                        ),
-                      );
-                    },
-                    onAddMaintenance: () async {
-                      final success = await showModalBottomSheet<bool>(
-                        context: context,
-                        useSafeArea: true,
-                        isScrollControlled: true,
-                        showDragHandle: true,
-                        builder: (_) => AddMaintenanceSheet(terrain: terrain),
-                      );
-
-                      if (success == true && context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Maintenance ajoutée')),
-                        );
-                      }
-                    },
-                  );
-                }, childCount: terrains.length),
               );
             },
-          ),
-        ],
-      ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: terrains.length,
+          itemBuilder: (context, index) {
+            final terrain = terrains[index];
+            return TerrainCard(
+              terrain: terrain,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        TerrainMaintenanceHistoryScreen(terrain: terrain),
+                  ),
+                );
+              },
+              onAddMaintenance: () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
+            );
+          },
+        );
+      },
     );
   }
 }
