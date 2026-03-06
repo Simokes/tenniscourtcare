@@ -1,7 +1,7 @@
 # AI_RULES.md
 
-**Version:** 3.0
-**Last Updated:** 2025
+**Version:** 3.1
+**Last Updated:** 2026-03-06
 **Review cycle:** Every major project phase or quarterly
 
 ---
@@ -176,6 +176,85 @@ Claude approuve si:
 ✅ Tests passants
 ```
 
+### Étape 4 — Rapport de Non-Conformité (Claude → Jules)
+
+Si la PR est **non conforme**, Claude doit **obligatoirement** poster un commentaire GitHub structuré sur la PR avec la mention `@jules`.
+
+Cette mention agit comme un **ordre automatique de correction** pour Jules.
+Jules doit reprendre l'implémentation **sans nouvelle instruction humaine**.
+
+**Format obligatoire du commentaire Claude:**
+
+```
+@jules — RÉVISION REQUISE ❌
+
+La PR [#numéro] ne peut pas être approuvée pour les raisons suivantes:
+
+══════════════════════════════════════════
+RAPPORT DE NON-CONFORMITÉ
+══════════════════════════════════════════
+
+[Pour chaque problème détecté:]
+
+🔴 PROBLÈME [N]
+   Fichier    : [chemin/fichier.dart]
+   Ligne      : [X] (si applicable)
+   Type       : [ARCHITECTURE | CODING_RULES | TESTS | DOC | ERROR_HANDLING]
+   Problème   : [description précise du problème]
+   Correction : [ce que Jules doit faire exactement]
+
+══════════════════════════════════════════
+ACTIONS REQUISES
+══════════════════════════════════════════
+
+☐ [Action 1 — fichier + correction]
+☐ [Action 2 — fichier + correction]
+☐ [Action N — fichier + correction]
+
+══════════════════════════════════════════
+RAPPEL DES RÈGLES VIOLÉES
+══════════════════════════════════════════
+
+→ [Référence exacte dans ARCHITECTURE.md ou CODING_RULES.md]
+→ [Ex: CODING_RULES.md §4.2 — pas de print(), utiliser debugPrint()]
+
+══════════════════════════════════════════
+
+⚠️ Instructions pour Jules:
+1. Corriger tous les points listés ci-dessus
+2. Pousser les corrections sur la même branche (nouveau commit)
+3. Ne pas ouvrir une nouvelle PR
+4. Format de commit: fix: [description des corrections]
+5. Exécuter flutter analyze + flutter test avant de repousser
+
+Claude effectuera une nouvelle revue automatiquement après le push.
+```
+
+**Règles du rapport:**
+```
+✅ Un problème = une entrée structurée (pas de liste vague)
+✅ Toujours référencer le fichier + ligne exacte
+✅ Toujours indiquer la correction attendue (pas juste le problème)
+✅ Toujours référencer la règle violée (ARCHITECTURE.md §X ou CODING_RULES.md §Y)
+✅ Toujours inclure @jules en début de commentaire
+❌ Jamais approuver une PR partiellement conforme
+❌ Jamais merger sans tous les points résolus
+```
+
+**Cycle de correction:**
+```
+Claude poste rapport @jules
+        ↓
+Jules corrige sur la même branche
+        ↓
+Jules pousse (nouveau commit)
+        ↓
+Claude re-review automatiquement
+        ↓
+Si conforme → APPROVED ✅
+Si non conforme → nouveau rapport @jules ❌ (répéter)
+```
+
 ---
 
 ## 4. Workflow d'Implémentation Feature
@@ -249,6 +328,8 @@ Claude approuve si:
 │ • Vérifier patterns async/await                         │
 │                                                         │
 │ Décision: APPROVED | NEEDS_REVISION (→ Étape 3)         │
+│ Si NEEDS_REVISION → poster rapport @jules               │
+│   conformément à §3.4 avant retour à Jules              │
 └─────────────────────────────────────────────────────────┘
                             ↓
                     (Si APPROVED)
@@ -318,6 +399,8 @@ Claude approuve si:
 │ • Vérifier regressions                                  │
 │                                                         │
 │ Décision: APPROVED | NEEDS_FIX (→ Étape 3)              │
+│ Si NEEDS_FIX → poster rapport @jules (même format       │
+│   que §3.4, scope minimal bug fix)                      │
 └─────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────┐
@@ -456,8 +539,7 @@ TESTS:
 ☐ flutter test → 0 failures
 
 SYNC & OFFLINE:
-☐ Entrées SyncQueue créées pour les mutations
-☐ ref.invalidate() appelé après mutations
+☐ ref.invalidate() appelé après mutations si nécessaire
 ☐ Error handling pour les échecs de sync
 ☐ Comportement offline testé
 

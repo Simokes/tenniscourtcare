@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(for f in lib/data/database/tables/maintenances.dart lib/data/database/tables/terrain_table.dart lib/data/database/tables/stock_items.dart lib/data/database/tables/events_table.dart lib/data/database/tables/users_table.dart)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//c/Users/planc/Documents/CourtCare/tenniscourtcare/**)",
+      "Bash(done)",
+      "Bash(python:*)"
     ]
   }
 }
