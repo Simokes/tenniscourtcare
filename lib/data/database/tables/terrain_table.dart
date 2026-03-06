@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 @DataClassName(
   'TerrainRow',
 ) // 👈 évite la collision avec l’entity domaine `Terrain`
+@TableIndex(name: 'idx_terrains_firebase_id', columns: {#firebaseId})
 class Terrains extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get nom => text().withLength(min: 1, max: 100)();

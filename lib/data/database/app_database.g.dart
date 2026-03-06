@@ -7587,6 +7587,26 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LoginAttemptsTable loginAttempts = $LoginAttemptsTable(this);
   late final $OtpRecordsTable otpRecords = $OtpRecordsTable(this);
   late final $ReservationsTable reservations = $ReservationsTable(this);
+  late final Index idxTerrainsFirebaseId = Index(
+    'idx_terrains_firebase_id',
+    'CREATE INDEX idx_terrains_firebase_id ON terrains (firebase_id)',
+  );
+  late final Index idxMaintenancesFirebaseId = Index(
+    'idx_maintenances_firebase_id',
+    'CREATE INDEX idx_maintenances_firebase_id ON maintenances (firebase_id)',
+  );
+  late final Index idxStockItemsFirebaseId = Index(
+    'idx_stock_items_firebase_id',
+    'CREATE INDEX idx_stock_items_firebase_id ON stock_items (firebase_id)',
+  );
+  late final Index idxUsersFirestoreUid = Index(
+    'idx_users_firestore_uid',
+    'CREATE INDEX idx_users_firestore_uid ON users (firestore_uid)',
+  );
+  late final Index idxEventsFirebaseId = Index(
+    'idx_events_firebase_id',
+    'CREATE INDEX idx_events_firebase_id ON events (firebase_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7602,6 +7622,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     loginAttempts,
     otpRecords,
     reservations,
+    idxTerrainsFirebaseId,
+    idxMaintenancesFirebaseId,
+    idxStockItemsFirebaseId,
+    idxUsersFirestoreUid,
+    idxEventsFirebaseId,
   ];
 }
 

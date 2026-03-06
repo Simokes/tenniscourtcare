@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-*Last updated: schema v20*
+*Last updated: schema v23*
 
 ## 1. Architecture Pattern
 
@@ -979,7 +979,8 @@ lib/
 
 ### 9.2 Schema Version
 
-**Current schema version:** 20
+**Current schema version:** 23
+- v23: Performance : index non-unique sur firebaseId (maintenances, terrains, stock_items, events) et firestoreUid (users). Accélère tous les upserts FirebaseCacheService.
 - v20: Added `users.status`, `users.approvedAt`, `users.approvedBy`.
 
 **Rule:** Bump schema version when:
@@ -1294,6 +1295,6 @@ RISK: Low (incremental, parallel before remove)
 
 ---
 
-**Last updated:** schema v20 (Firebase as Source of Truth, Drift as cache)
+**Last updated:** schema v23 (Firebase as Source of Truth, Drift as cache)
 **Valid for:** Flutter 3.x, Dart 3.x, Riverpod 2.4.x, Drift 2.13.x, Firebase 4.x
 **Architecture version:** 2.0 (simplified from bidirectional sync)

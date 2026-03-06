@@ -177,7 +177,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 22; // Maintenance time slots
+  int get schemaVersion => 23; // v23: firebaseId indexes
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -353,6 +353,23 @@ class AppDatabase extends _$AppDatabase {
       if (from < 22) {
         await m.addColumn(maintenances, maintenances.startHour);
         await m.addColumn(maintenances, maintenances.durationMinutes);
+      }
+      if (from < 23) {
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_maintenances_firebase_id ON maintenances(firebase_id);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_terrains_firebase_id ON terrains(firebase_id);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_stock_items_firebase_id ON stock_items(firebase_id);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_events_firebase_id ON events(firebase_id);',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_users_firestore_uid ON users(firestore_uid);',
+        );
       }
     },
     // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
