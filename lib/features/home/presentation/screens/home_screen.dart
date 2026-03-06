@@ -19,6 +19,7 @@ import '../widgets/current_events_banner.dart';
 import '../widgets/day_timeline.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
+import '../../../../shared/widgets/common/offline_warning_banner.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -122,6 +123,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         slivers: [
           // 1. Sticky Header
           const DashboardHeader(),
+
+          // 1.4 Offline Warning Banner
+          const SliverToBoxAdapter(
+            child: OfflineWarningBanner(),
+          ),
 
           // 1.5 Overdue Maintenance Alert
           SliverToBoxAdapter(
