@@ -905,6 +905,14 @@ Stream<List<domm.Maintenance>> watchMaintenancesForTerrain(int terrainId) {
     return row?.toDomain();
   }
 
+  Future<domm.Maintenance?> getMaintenanceByFirebaseId(String firebaseId) async {
+    final row = await (select(maintenances)
+          ..where((m) => m.firebaseId.equals(firebaseId))
+          ..limit(1))
+        .getSingleOrNull();
+    return row?.toDomain();
+  }
+
   Future<int> insertMaintenance(domm.Maintenance m) {
     return into(maintenances).insert(m.toCompanion());
   }

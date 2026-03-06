@@ -73,14 +73,28 @@ Future<String> addMaintenance(Maintenance maintenance) async {
 
   @override
   Future<void> deleteMaintenance(String firebaseId) async {
-  try {
-    await _fs.collection('maintenance').doc(firebaseId).delete();
-    await _db.deleteMaintenanceByFirebaseId(firebaseId); // ✅ Drift immédiat
-  } on FirebaseException catch (e) {
-    debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
-    throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
+    try {
+      final maintenance = await _db.getMaintenanceByFirebaseId(firebaseId);
+
+      await _fs.collection('maintenance').doc(firebaseId).delete();
+
+      if (maintenance != null && !maintenance.isPlanned) {
+        await _db.deleteMaintenanceWithStockRestoration(maintenance.id!);
+      } else {
+        await _db.deleteMaintenanceByFirebaseId(firebaseId); // ✅ Drift immédiat
+      }
+
+      if (maintenance != null && maintenance.isPlanned) {
+        await _terrainRepository.updateTerrainStatus(
+          maintenance.terrainId,
+          TerrainStatus.playable,
+        );
+      }
+    } on FirebaseException catch (e) {
+      debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
+      throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
+    }
   }
-}
 
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
     return _db.getMaintenancesForTerrain(terrainId);
