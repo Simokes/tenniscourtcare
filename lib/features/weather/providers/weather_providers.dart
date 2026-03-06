@@ -47,7 +47,9 @@ final weatherForTerrainProvider =
       );
 
       final windyStrong = WeatherRules.isWindyStrong(ctx.snapshot.windSpeed);
-      final windyModerate = WeatherRules.isWindyModerate(ctx.snapshot.windSpeed);
+      final windyModerate = WeatherRules.isWindyModerate(
+        ctx.snapshot.windSpeed,
+      );
 
       final label = WeatherRules.conditionLabel(
         frozen: frozen,

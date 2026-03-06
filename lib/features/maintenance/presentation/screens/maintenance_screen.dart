@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../../../domain/entities/maintenance.dart';
+import '../../../../domain/entities/terrain.dart';
 import '../../../terrain/providers/terrain_provider.dart';
 import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
@@ -72,10 +74,7 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
         },
         body: TabBarView(
           controller: _tabController,
-          children: [
-            _UpcomingMaintenancesTab(),
-            _HistoryTab(),
-          ],
+          children: [_UpcomingMaintenancesTab(), _HistoryTab()],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -94,6 +93,26 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
 }
 
 class _UpcomingMaintenancesTab extends ConsumerWidget {
+  void _openRescheduleSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Maintenance maintenance,
+    Terrain terrain,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => AddMaintenanceSheet(
+        terrain: terrain,
+        existingMaintenance: maintenance,
+        forceCompleteMode: false,
+        rescheduleMode: true,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
@@ -111,9 +130,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
     final terrains = terrainsAsync.value ?? [];
 
     if (maintenances.isEmpty) {
-      return const Center(
-        child: Text('Aucune maintenance planifiée à venir.'),
-      );
+      return const Center(child: Text('Aucune maintenance planifiée à venir.'));
     }
 
     return ListView.builder(
@@ -126,49 +143,128 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
           orElse: () => throw Exception('Terrain not found'),
         );
         final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+        final maintenanceStart = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          maintenance.startHour,
+        );
+        final maintenanceEnd = maintenanceStart.add(
+          Duration(minutes: maintenance.durationMinutes),
+        );
 
         final now = DateTime.now();
-        final isOverdue = date.isBefore(DateTime(now.year, now.month, now.day));
+        final isOverdue = maintenanceEnd.isBefore(now);
 
         final color = isOverdue ? Colors.red.shade100 : Colors.white;
         final iconColor = isOverdue ? Colors.red : Colors.orangeAccent;
         final icon = isOverdue ? Icons.warning_amber : Icons.schedule;
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: 0,
-          color: color,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200),
+        return Dismissible(
+          key: ValueKey(maintenance.id ?? maintenance.date),
+          direction: DismissDirection.horizontal,
+          secondaryBackground: Container(
+            color: Colors.red,
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: iconColor,
-              child: Icon(icon, color: Colors.white),
-            ),
-            title: Row(
-              children: [
-                Expanded(child: Text('${terrain.nom} — ${maintenance.type}')),
-                if (isOverdue)
-                  Container(
-                    margin: const EdgeInsets.only(left: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'En retard',
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                    ),
+          background: Container(
+            color: Colors.blue,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 20),
+            child: const Icon(Icons.edit_calendar, color: Colors.white),
+          ),
+          confirmDismiss: (direction) async {
+            if (direction == DismissDirection.endToStart) {
+              return showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Supprimer la maintenance'),
+                  content: Text(
+                    'Supprimer la maintenance prévue pour ${terrain.nom} '
+                    'le ${DateFormat('dd/MM/yyyy').format(date)} ?',
                   ),
-              ],
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Annuler'),
+                    ),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Supprimer'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            if (direction == DismissDirection.startToEnd) {
+              _openRescheduleSheet(context, ref, maintenance, terrain);
+              return false;
+            }
+            return false;
+          },
+          onDismissed: (direction) async {
+            if (direction == DismissDirection.endToStart) {
+              if (maintenance.firebaseId != null) {
+                await ref
+                    .read(maintenanceNotifierProvider.notifier)
+                    .deleteMaintenance(maintenance.firebaseId!);
+              }
+            }
+          },
+          child: Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            elevation: 0,
+            color: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200,
+              ),
             ),
-            subtitle: Text('Prévu le ${DateFormat('dd/MM/yyyy').format(date)}'),
-            trailing: FilledButton.tonal(
-              onPressed: () {
-                showModalBottomSheet(
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor: iconColor,
+                child: Icon(icon, color: Colors.white),
+              ),
+              title: Row(
+                children: [
+                  Expanded(child: Text('${terrain.nom} — ${maintenance.type}')),
+                  if (isOverdue)
+                    Container(
+                      margin: const EdgeInsets.only(left: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'En retard',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              subtitle: Text(
+                'Prévu le ${DateFormat('dd/MM/yyyy').format(date)}',
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.check_circle_outline),
+                color: Colors.green,
+                iconSize: 32,
+                tooltip: 'Marquer comme effectuée',
+                onPressed: () => showModalBottomSheet(
                   context: context,
                   useSafeArea: true,
                   isScrollControlled: true,
@@ -178,9 +274,8 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
                     existingMaintenance: maintenance,
                     forceCompleteMode: true,
                   ),
-                );
-              },
-              child: const Text('Effectuer'),
+                ),
+              ),
             ),
           ),
         );
@@ -205,9 +300,7 @@ class _HistoryTab extends ConsumerWidget {
           return _EmptyState(
             onAddCourt: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fonctionnalité non implémentée'),
-                ),
+                const SnackBar(content: Text('Fonctionnalité non implémentée')),
               );
             },
           );
@@ -228,7 +321,8 @@ class _HistoryTab extends ConsumerWidget {
                   ),
                 );
               },
-              onAddMaintenance: () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
+              onAddMaintenance:
+                  () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
             );
           },
         );

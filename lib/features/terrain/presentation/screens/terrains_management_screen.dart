@@ -14,10 +14,7 @@ class TerrainsManagementScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestion des terrains'),
-        actions: const [
-          ConnectionStatusIndicator(),
-          SizedBox(width: 8),
-        ],
+        actions: const [ConnectionStatusIndicator(), SizedBox(width: 8)],
       ),
       body: terrainsAsync.when(
         data: (terrains) {
@@ -198,11 +195,15 @@ class _TerrainDialogState extends State<_TerrainDialog> {
               _formKey.currentState!.save();
 
               if (isEditing) {
-                await ref.read(terrainNotifierProvider.notifier).updateTerrain(
-                  widget.terrain!.copyWith(nom: _name, type: _type),
-                );
+                await ref
+                    .read(terrainNotifierProvider.notifier)
+                    .updateTerrain(
+                      widget.terrain!.copyWith(nom: _name, type: _type),
+                    );
               } else {
-                await ref.read(terrainNotifierProvider.notifier).addTerrain(_name, _type);
+                await ref
+                    .read(terrainNotifierProvider.notifier)
+                    .addTerrain(_name, _type);
               }
               if (context.mounted) Navigator.pop(context);
             },

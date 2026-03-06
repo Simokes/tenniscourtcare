@@ -70,11 +70,15 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
           SliverToBoxAdapter(
             child: Consumer(
               builder: (context, ref, child) {
-                final planned = ref.watch(plannedMaintenancesByTerrainProvider(terrain.id));
+                final planned = ref.watch(
+                  plannedMaintenancesByTerrainProvider(terrain.id),
+                );
                 if (planned.isEmpty) return const SizedBox.shrink();
 
                 final nextPlanned = planned.first;
-                final date = DateTime.fromMillisecondsSinceEpoch(nextPlanned.date);
+                final date = DateTime.fromMillisecondsSinceEpoch(
+                  nextPlanned.date,
+                );
 
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -87,8 +91,16 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                     ),
                     child: ListTile(
                       leading: const Icon(Icons.schedule, color: Colors.orange),
-                      title: const Text('Prochaine maintenance prévue', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
-                      subtitle: Text('${nextPlanned.type} — le ${DateFormat('dd MMM yyyy', 'fr_FR').format(date)}'),
+                      title: const Text(
+                        'Prochaine maintenance prévue',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${nextPlanned.type} — le ${DateFormat('dd MMM yyyy', 'fr_FR').format(date)}',
+                      ),
                     ),
                   ),
                 );
@@ -314,7 +326,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                               isScrollControlled: true,
                               builder: (_) => AddMaintenanceSheet(
                                 terrain: terrain,
-                            existingMaintenance: maintenance,
+                                existingMaintenance: maintenance,
                               ),
                             );
                           },

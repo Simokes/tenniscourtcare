@@ -21,7 +21,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   Widget build(BuildContext context) {
     final stockAsync = ref.watch(stockItemsProvider);
     final items = ref.watch(filteredStockItemsProvider);
-    
+
     ref.listen(stockItemsProvider, (_, next) {
       next.whenData((items) {
         debugPrint('📦 Total Drift rows: ${items.length}');

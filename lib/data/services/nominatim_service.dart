@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../domain/models/repository_exception.dart';
-import '../../features/settings/providers/app_settings_provider.dart' show ClubLocation;
+import '../../features/settings/providers/app_settings_provider.dart'
+    show ClubLocation;
 
 class NominatimService {
   final http.Client _client;
@@ -23,17 +24,21 @@ class NominatimService {
         'limit': '1',
       };
 
-      final uri = Uri.https('nominatim.openstreetmap.org', '/search', queryParams);
+      final uri = Uri.https(
+        'nominatim.openstreetmap.org',
+        '/search',
+        queryParams,
+      );
 
       final response = await _client.get(
         uri,
-        headers: {
-          'User-Agent': 'TennisCourtCare/1.0',
-        },
+        headers: {'User-Agent': 'TennisCourtCare/1.0'},
       );
 
       if (response.statusCode != 200) {
-        throw RepositoryException('Erreur HTTP lors du géocodage: ${response.statusCode}');
+        throw RepositoryException(
+          'Erreur HTTP lors du géocodage: ${response.statusCode}',
+        );
       }
 
       final data = json.decode(response.body) as List<dynamic>;

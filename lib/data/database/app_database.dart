@@ -874,14 +874,14 @@ class AppDatabase extends _$AppDatabase {
         .map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
-Stream<List<domm.Maintenance>> watchMaintenancesForTerrain(int terrainId) {
-  return (select(maintenances)
-        ..where((m) => m.terrainId.equals(terrainId))
-        ..where((m) => m.isPlanned.equals(false))
-        ..orderBy([(m) => OrderingTerm.desc(m.date)]))
-      .watch()
-      .map((rows) => rows.map((r) => r.toDomain()).toList());
-}
+  Stream<List<domm.Maintenance>> watchMaintenancesForTerrain(int terrainId) {
+    return (select(maintenances)
+          ..where((m) => m.terrainId.equals(terrainId))
+          ..where((m) => m.isPlanned.equals(false))
+          ..orderBy([(m) => OrderingTerm.desc(m.date)]))
+        .watch()
+        .map((rows) => rows.map((r) => r.toDomain()).toList());
+  }
 
   Future<List<domm.Maintenance>> getMaintenancesInPeriod(
     DateTime start,
@@ -905,11 +905,14 @@ Stream<List<domm.Maintenance>> watchMaintenancesForTerrain(int terrainId) {
     return row?.toDomain();
   }
 
-  Future<domm.Maintenance?> getMaintenanceByFirebaseId(String firebaseId) async {
-    final row = await (select(maintenances)
-          ..where((m) => m.firebaseId.equals(firebaseId))
-          ..limit(1))
-        .getSingleOrNull();
+  Future<domm.Maintenance?> getMaintenanceByFirebaseId(
+    String firebaseId,
+  ) async {
+    final row =
+        await (select(maintenances)
+              ..where((m) => m.firebaseId.equals(firebaseId))
+              ..limit(1))
+            .getSingleOrNull();
     return row?.toDomain();
   }
 

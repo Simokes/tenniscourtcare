@@ -7,6 +7,7 @@ class RepositoryException implements Exception {
   final Object? cause;
 
   @override
-  String toString() => 'RepositoryException: $message'
+  String toString() =>
+      'RepositoryException: $message'
       '${cause != null ? ' (cause: $cause)' : ''}';
 }

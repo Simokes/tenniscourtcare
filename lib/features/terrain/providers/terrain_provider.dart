@@ -84,7 +84,9 @@ class TerrainNotifier extends AsyncNotifier<void> {
   Future<void> updateTerrain(Terrain terrain) async {
     try {
       if (terrain.firebaseId == null) {
-        throw const RepositoryException('Cannot update terrain without a firebaseId');
+        throw const RepositoryException(
+          'Cannot update terrain without a firebaseId',
+        );
       }
 
       state = const AsyncValue.loading();
@@ -108,20 +110,27 @@ class TerrainNotifier extends AsyncNotifier<void> {
   }
 }
 
-final terrainNotifierProvider = AsyncNotifierProvider<TerrainNotifier, void>(() {
-  return TerrainNotifier();
-});
+final terrainNotifierProvider = AsyncNotifierProvider<TerrainNotifier, void>(
+  () {
+    return TerrainNotifier();
+  },
+);
 
 /// Provider pour mettre à jour le status d'un terrain
-final updateTerrainStatusProvider = Provider<Future<void> Function(int, TerrainStatus)>((ref) {
-  return (int terrainId, TerrainStatus newStatus) async {
-    final currentTerrain = await ref.read(terrainProvider(terrainId).future);
-    if (currentTerrain != null) {
-      final updated = currentTerrain.copyWith(
-        status: newStatus,
-        updatedAt: DateTime.now(),
-      );
-      await ref.read(terrainNotifierProvider.notifier).updateTerrain(updated);
-    }
-  };
-});
+final updateTerrainStatusProvider =
+    Provider<Future<void> Function(int, TerrainStatus)>((ref) {
+      return (int terrainId, TerrainStatus newStatus) async {
+        final currentTerrain = await ref.read(
+          terrainProvider(terrainId).future,
+        );
+        if (currentTerrain != null) {
+          final updated = currentTerrain.copyWith(
+            status: newStatus,
+            updatedAt: DateTime.now(),
+          );
+          await ref
+              .read(terrainNotifierProvider.notifier)
+              .updateTerrain(updated);
+        }
+      };
+    });

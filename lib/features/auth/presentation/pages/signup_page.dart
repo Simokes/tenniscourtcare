@@ -44,12 +44,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final password = _passwordController.text.trim();
 
     try {
-      await ref.read(authStateProvider.notifier).signUp(
-            email,
-            name,
-            password,
-            _selectedRole,
-          );
+      await ref
+          .read(authStateProvider.notifier)
+          .signUp(email, name, password, _selectedRole);
 
       if (!mounted) return;
 
@@ -94,8 +91,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final backgroundColor = isDarkMode ? _backgroundDarkColor : Colors.white;
     final cardColor = isDarkMode ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDarkMode ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
-    final borderColor = isDarkMode ? const Color(0xFF475569) : const Color(0xFFE2E8F0);
+    final subtitleColor = isDarkMode
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
+    final borderColor = isDarkMode
+        ? const Color(0xFF475569)
+        : const Color(0xFFE2E8F0);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -144,7 +145,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   Text(
                     'Rejoignez CourtCare',
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.inter(fontSize: 14, color: subtitleColor),
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: subtitleColor,
+                    ),
                   ),
                   const SizedBox(height: 32),
 
@@ -186,7 +190,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       if (value == null || value.isEmpty) {
                         return 'L\'email est requis';
                       }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
                         return 'Format d\'email invalide';
                       }
                       return null;
@@ -208,7 +214,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       borderColor: borderColor,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: subtitleColor,
                         ),
                         onPressed: () {
@@ -228,7 +236,11 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   const SizedBox(height: 20),
 
                   // Confirm Password Field
-                  _buildLabel('Confirmer le mot de passe', isDarkMode, textColor),
+                  _buildLabel(
+                    'Confirmer le mot de passe',
+                    isDarkMode,
+                    textColor,
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
@@ -241,12 +253,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       borderColor: borderColor,
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isConfirmPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                           color: subtitleColor,
                         ),
                         onPressed: () {
                           setState(() {
-                            _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                            _isConfirmPasswordVisible =
+                                !_isConfirmPasswordVisible;
                           });
                         },
                       ),
@@ -268,7 +283,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     items: [Role.agent, Role.secretary].map((role) {
                       return DropdownMenuItem(
                         value: role,
-                        child: Text(role.label, style: TextStyle(color: textColor)),
+                        child: Text(
+                          role.label,
+                          style: TextStyle(color: textColor),
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -281,7 +299,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       isDarkMode: isDarkMode,
                       borderColor: borderColor,
                     ),
-                    dropdownColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
+                    dropdownColor: isDarkMode
+                        ? const Color(0xFF334155)
+                        : Colors.white,
                   ),
                   const SizedBox(height: 24),
 
@@ -292,7 +312,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         error.toString(),
@@ -312,24 +334,27 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: isLoading ? null : _signup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ).copyWith(
-                        backgroundColor: WidgetStateProperty.resolveWith((states) {
-                          if (states.contains(WidgetState.hovered)) {
-                            return _primaryDarkColor;
-                          }
-                          if (states.contains(WidgetState.disabled)) {
-                            return _primaryColor.withValues(alpha: 0.6);
-                          }
-                          return _primaryColor;
-                        }),
-                      ),
+                      style:
+                          ElevatedButton.styleFrom(
+                            backgroundColor: _primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            elevation: 0,
+                          ).copyWith(
+                            backgroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              if (states.contains(WidgetState.hovered)) {
+                                return _primaryDarkColor;
+                              }
+                              if (states.contains(WidgetState.disabled)) {
+                                return _primaryColor.withValues(alpha: 0.6);
+                              }
+                              return _primaryColor;
+                            }),
+                          ),
                       child: isLoading
                           ? const SizedBox(
                               height: 20,
@@ -376,9 +401,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: GoogleFonts.inter(
-        color: const Color(0xFF94A3B8),
-      ),
+      hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
       filled: true,
       fillColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

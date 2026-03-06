@@ -25,12 +25,14 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain? terrain;
   final Maintenance? existingMaintenance;
   final bool forceCompleteMode;
+  final bool rescheduleMode;
 
   const AddMaintenanceSheet({
     super.key,
     this.terrain,
     this.existingMaintenance,
     this.forceCompleteMode = false,
+    this.rescheduleMode = false,
   });
 
   @override
@@ -90,6 +92,14 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _sacsSottomanto = 0;
       _sacsSilice = 0;
       _isPlanned = false;
+    }
+
+    if (widget.forceCompleteMode) {
+      _date = DateTime.now();
+    }
+
+    if (widget.rescheduleMode) {
+      _isPlanned = true;
     }
   }
 
@@ -167,10 +177,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Supprimer',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -185,10 +192,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -199,7 +203,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       context: context,
       initialDate: _date,
       firstDate: DateTime(2020),
-      lastDate: _isPlanned ? DateTime.now().add(const Duration(days: 365)) : DateTime.now(),
+      lastDate: _isPlanned || widget.rescheduleMode
+          ? DateTime.now().add(const Duration(days: 365))
+          : DateTime.now(),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -231,14 +237,12 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
     if (_selectedTerrain == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez sélectionner un terrain'),
-        ),
+        const SnackBar(content: Text('Veuillez sélectionner un terrain')),
       );
       return;
     }
 
-    if (_type.isEmpty) {
+    if (!widget.rescheduleMode && _type.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un type de maintenance'),
@@ -262,41 +266,58 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
         ? 60
         : _duration.durationMinutes(openingHour, closingHour);
 
-    final maintenance = Maintenance(
-      id: widget.existingMaintenance?.id,
-      terrainId: _selectedTerrain!.id,
-      type: _type.trim(),
-      commentaire: _commentController.text.trim().isEmpty
-          ? null
-          : _commentController.text.trim(),
-      date: _date.millisecondsSinceEpoch,
-      sacsMantoUtilises: _sacsManto,
-      sacsSottomantoUtilises: _sacsSottomanto,
-      sacsSiliceUtilises: _sacsSilice,
-      isPlanned: _isPlanned,
-      startHour: computedStartHour,
-      durationMinutes: computedDurationMinutes,
-      imagePath: _imagePath,
-      weather: _weather,
-      terrainGele: _frozen,
-      terrainImpraticable: _unplayable,
-      createdAt: widget.existingMaintenance?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
-      firebaseId: widget.existingMaintenance?.firebaseId,
-    );
-
     try {
       final notifier = ref.read(maintenanceNotifierProvider.notifier);
-      if (widget.forceCompleteMode && widget.existingMaintenance?.firebaseId != null) {
-        await notifier.markAsCompleted(
-          firebaseId: widget.existingMaintenance!.firebaseId!,
-          completed: maintenance,
+
+      if (widget.rescheduleMode && widget.existingMaintenance != null) {
+        final updated = widget.existingMaintenance!.copyWith(
+          date: _date.millisecondsSinceEpoch,
+          startHour: computedStartHour,
+          durationMinutes: computedDurationMinutes,
+          updatedAt: DateTime.now(),
         );
-      } else if (widget.existingMaintenance != null) {
-        await notifier.updateMaintenance(maintenance);
+        await notifier.updateMaintenance(updated);
       } else {
-        await notifier.addMaintenance(maintenance);
+        final maintenance = Maintenance(
+          id: widget.existingMaintenance?.id,
+          terrainId: _selectedTerrain!.id,
+          type: widget.forceCompleteMode
+              ? widget.existingMaintenance?.type ?? _type.trim()
+              : _type.trim(),
+          commentaire: _commentController.text.trim().isEmpty
+              ? null
+              : _commentController.text.trim(),
+          date: widget.forceCompleteMode
+              ? DateTime.now().millisecondsSinceEpoch
+              : _date.millisecondsSinceEpoch,
+          sacsMantoUtilises: _sacsManto,
+          sacsSottomantoUtilises: _sacsSottomanto,
+          sacsSiliceUtilises: _sacsSilice,
+          isPlanned: _isPlanned,
+          startHour: computedStartHour,
+          durationMinutes: computedDurationMinutes,
+          imagePath: _imagePath,
+          weather: _weather,
+          terrainGele: _frozen,
+          terrainImpraticable: _unplayable,
+          createdAt: widget.existingMaintenance?.createdAt ?? DateTime.now(),
+          updatedAt: DateTime.now(),
+          firebaseId: widget.existingMaintenance?.firebaseId,
+        );
+
+        if (widget.forceCompleteMode &&
+            widget.existingMaintenance?.firebaseId != null) {
+          await notifier.markAsCompleted(
+            firebaseId: widget.existingMaintenance!.firebaseId!,
+            completed: maintenance,
+          );
+        } else if (widget.existingMaintenance != null) {
+          await notifier.updateMaintenance(maintenance);
+        } else {
+          await notifier.addMaintenance(maintenance);
+        }
       }
+
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -312,7 +333,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     final isTerreBattue = _selectedTerrain?.type == TerrainType.terreBattue;
     final isSynthetique = _selectedTerrain?.type == TerrainType.synthetique;
     final isDur = _selectedTerrain?.type == TerrainType.dur;
-    final types = _selectedTerrain != null ? allowedTypesFor(_selectedTerrain!.type) : <String>[];
+    final types = _selectedTerrain != null
+        ? allowedTypesFor(_selectedTerrain!.type)
+        : <String>[];
 
     final allTerrains = ref.watch(terrainsProvider).valueOrNull ?? [];
 
@@ -357,15 +380,19 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                         widget.forceCompleteMode
                             ? 'Effectuer maintenance'
                             : widget.existingMaintenance != null
-                                ? 'Modifier la maintenance'
-                                : 'Nouvelle maintenance',
+                            ? 'Modifier la maintenance'
+                            : 'Nouvelle maintenance',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    if (widget.existingMaintenance?.firebaseId != null && !widget.forceCompleteMode)
+                    if (widget.existingMaintenance?.firebaseId != null &&
+                        !widget.forceCompleteMode)
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
                         onPressed: _delete,
                       ),
                     IconButton.filledTonal(
@@ -398,8 +425,13 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           DropdownButtonFormField<Terrain>(
                             value: _selectedTerrain,
                             decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                             items: allTerrains.map((t) {
                               return DropdownMenuItem(
@@ -407,17 +439,21 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                 child: Text(t.nom),
                               );
                             }).toList(),
-                            onChanged: widget.existingMaintenance != null ? null : (val) {
-                              setState(() {
-                                _selectedTerrain = val;
-                                _type = ''; // Reset type as options change
-                              });
-                            },
+                            onChanged: widget.existingMaintenance != null
+                                ? null
+                                : (val) {
+                                    setState(() {
+                                      _selectedTerrain = val;
+                                      _type =
+                                          ''; // Reset type as options change
+                                    });
+                                  },
                           ),
                           const SizedBox(height: 24),
                         ],
 
-                        if (!widget.forceCompleteMode) ...[
+                        if (!widget.forceCompleteMode &&
+                            !widget.rescheduleMode) ...[
                           Center(
                             child: SegmentedButton<bool>(
                               segments: const [
@@ -437,7 +473,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                 setState(() {
                                   _isPlanned = newSelection.first;
                                   // Reset date appropriately
-                                  if (!_isPlanned && _date.isAfter(DateTime.now())) {
+                                  if (!_isPlanned &&
+                                      _date.isAfter(DateTime.now())) {
                                     _date = DateTime.now();
                                   }
                                 });
@@ -461,15 +498,19 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                               segments: MaintenanceDuration.values.map((d) {
                                 return ButtonSegment(
                                   value: d,
-                                  label: Text(d.label, style: const TextStyle(fontSize: 12)),
+                                  label: Text(
+                                    d.label,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
                                 );
                               }).toList(),
                               selected: {_duration},
-                              onSelectionChanged: (Set<MaintenanceDuration> newSelection) {
-                                setState(() {
-                                  _duration = newSelection.first;
-                                });
-                              },
+                              onSelectionChanged:
+                                  (Set<MaintenanceDuration> newSelection) {
+                                    setState(() {
+                                      _duration = newSelection.first;
+                                    });
+                                  },
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -484,24 +525,39 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                   padding: const EdgeInsets.all(12),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.access_time, color: Colors.blueGrey),
+                                      const Icon(
+                                        Icons.access_time,
+                                        color: Colors.blueGrey,
+                                      ),
                                       const SizedBox(width: 12),
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             'Heure de début',
-                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey.shade600),
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelSmall
+                                                ?.copyWith(
+                                                  color: Colors.grey.shade600,
+                                                ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
                                             _startTime.format(context),
-                                            style: Theme.of(context).textTheme.titleMedium,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium,
                                           ),
                                         ],
                                       ),
                                       const Spacer(),
-                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                      const Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 16,
+                                        color: Colors.grey,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -511,20 +567,22 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           ],
                         ],
 
-                        // Type Selector
-                        Text(
-                          'Type d\'intervention',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        MaintenanceTypeSelector(
-                          selectedType: _type.isEmpty ? null : _type,
-                          types: types,
-                          onSelected: (val) => setState(() => _type = val),
-                        ),
+                        if (!widget.rescheduleMode) ...[
+                          // Type Selector
+                          Text(
+                            'Type d\'intervention',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          MaintenanceTypeSelector(
+                            selectedType: _type.isEmpty ? null : _type,
+                            types: types,
+                            onSelected: (val) => setState(() => _type = val),
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Date Picker Row
                         PremiumCard(
@@ -591,181 +649,182 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
                           // Materials Section (Conditionals)
                           if (!isDur) ...[
+                            Text(
+                              'Matériaux utilisés',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
+
+                          if (isTerreBattue) ...[
+                            // SMART REFILL RECOMMENDATION
+                            if (_type == 'Recharge')
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: ref
+                                    .watch(
+                                      refillRecommendationProvider(
+                                        _selectedTerrain!.id,
+                                      ),
+                                    )
+                                    .when(
+                                      data: (recommendation) =>
+                                          RefillRecommendationCard(
+                                            recommendation: recommendation,
+                                          ),
+                                      loading: () => const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      ),
+                                      error: (err, stack) =>
+                                          const SizedBox.shrink(), // Silent error for cleaner UI
+                                    ),
+                              ),
+
+                            QuantitySelector(
+                              label: 'Manto',
+                              value: _sacsManto,
+                              onChanged: (val) =>
+                                  setState(() => _sacsManto = val),
+                            ),
+                            const SizedBox(height: 12),
+                            QuantitySelector(
+                              label: 'Sottomanto',
+                              value: _sacsSottomanto,
+                              onChanged: (val) =>
+                                  setState(() => _sacsSottomanto = val),
+                            ),
+                          ] else if (isSynthetique) ...[
+                            QuantitySelector(
+                              label: 'Silice',
+                              value: _sacsSilice,
+                              onChanged: (val) =>
+                                  setState(() => _sacsSilice = val),
+                            ),
+                          ],
+
+                          if (isDur)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHighest
+                                    .withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.outlineVariant,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      'Aucun matériau n\'est requis pour ce type de terrain.',
+                                      style: TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          const SizedBox(height: 24),
+
+                          // Photo de preuve
                           Text(
-                            'Matériaux utilisés',
+                            'Photo de preuve',
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 12),
-                        ],
-
-                        if (isTerreBattue) ...[
-                          // SMART REFILL RECOMMENDATION
-                          if (_type == 'Recharge')
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: ref
-                                  .watch(
-                                    refillRecommendationProvider(
-                                        _selectedTerrain!.id,
+                          if (_imagePath != null)
+                            Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => showDialog(
+                                    context: context,
+                                    builder: (context) => ImageViewerDialog(
+                                      imagePath: _imagePath!,
                                     ),
-                                  )
-                                  .when(
-                                    data: (recommendation) =>
-                                        RefillRecommendationCard(
-                                          recommendation: recommendation,
-                                        ),
-                                    loading: () => const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: CircularProgressIndicator(),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      File(_imagePath!),
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () =>
+                                      setState(() => _imagePath = null),
+                                  icon: Icon(
+                                    Icons.remove_circle,
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                                  style: IconButton.styleFrom(
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                  ),
+                                ),
+                              ],
+                            )
+                          else
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _pickImage(true),
+                                    icon: const Icon(Icons.camera_alt),
+                                    label: const Text('Caméra'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
-                                    error: (err, stack) =>
-                                        const SizedBox.shrink(), // Silent error for cleaner UI
                                   ),
-                            ),
-
-                          QuantitySelector(
-                            label: 'Manto',
-                            value: _sacsManto,
-                            onChanged: (val) =>
-                                setState(() => _sacsManto = val),
-                          ),
-                          const SizedBox(height: 12),
-                          QuantitySelector(
-                            label: 'Sottomanto',
-                            value: _sacsSottomanto,
-                            onChanged: (val) =>
-                                setState(() => _sacsSottomanto = val),
-                          ),
-                        ] else if (isSynthetique) ...[
-                          QuantitySelector(
-                            label: 'Silice',
-                            value: _sacsSilice,
-                            onChanged: (val) =>
-                                setState(() => _sacsSilice = val),
-                          ),
-                        ],
-
-                        if (isDur)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest
-                                  .withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
-                                  child: Text(
-                                    'Aucun matériau n\'est requis pour ce type de terrain.',
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
+                                  child: OutlinedButton.icon(
+                                    onPressed: () => _pickImage(false),
+                                    icon: const Icon(Icons.photo_library),
+                                    label: const Text('Galerie'),
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-
-                        const SizedBox(height: 24),
-
-                        // Photo de preuve
-                        Text(
-                          'Photo de preuve',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        if (_imagePath != null)
-                          Stack(
-                            alignment: Alignment.topRight,
-                            children: [
-                              GestureDetector(
-                                onTap: () => showDialog(
-                                  context: context,
-                                  builder: (context) =>
-                                      ImageViewerDialog(imagePath: _imagePath!),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.file(
-                                    File(_imagePath!),
-                                    height: 200,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () =>
-                                    setState(() => _imagePath = null),
-                                icon: Icon(
-                                  Icons.remove_circle,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                                style: IconButton.styleFrom(
-                                  backgroundColor: Theme.of(
-                                    context,
-                                  ).colorScheme.surface,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () => _pickImage(true),
-                                  icon: const Icon(Icons.camera_alt),
-                                  label: const Text('Caméra'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () => _pickImage(false),
-                                  icon: const Icon(Icons.photo_library),
-                                  label: const Text('Galerie'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 16,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
                         ],
 
                         const SizedBox(height: 24),

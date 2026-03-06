@@ -20,18 +20,20 @@ final clubInfoProvider = StreamProvider<ClubInfo?>((ref) {
 });
 
 final clubLocationFromInfoProvider = Provider<ClubLocation?>((ref) {
-  return ref.watch(clubInfoProvider).maybeWhen(
-    data: (info) {
-      if (info?.latitude != null && info?.longitude != null) {
-        return ClubLocation(
-          latitude: info!.latitude!,
-          longitude: info.longitude!,
-        );
-      }
-      return null;
-    },
-    orElse: () => null,
-  );
+  return ref
+      .watch(clubInfoProvider)
+      .maybeWhen(
+        data: (info) {
+          if (info?.latitude != null && info?.longitude != null) {
+            return ClubLocation(
+              latitude: info!.latitude!,
+              longitude: info.longitude!,
+            );
+          }
+          return null;
+        },
+        orElse: () => null,
+      );
 });
 
 class ClubInfoNotifier extends AsyncNotifier<void> {
@@ -54,7 +56,8 @@ class ClubInfoNotifier extends AsyncNotifier<void> {
   }
 }
 
-final clubInfoNotifierProvider =
-    AsyncNotifierProvider<ClubInfoNotifier, void>(() {
-      return ClubInfoNotifier();
-    });
+final clubInfoNotifierProvider = AsyncNotifierProvider<ClubInfoNotifier, void>(
+  () {
+    return ClubInfoNotifier();
+  },
+);

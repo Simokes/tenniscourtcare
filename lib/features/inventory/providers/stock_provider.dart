@@ -25,7 +25,9 @@ final stockItemsProvider = StreamProvider<List<StockItem>>((ref) {
 final stockProvider = stockItemsProvider;
 
 // ✅ ADD STOCK ITEM
-final addStockItemProvider = Provider<Future<String> Function(StockItem)>((ref) {
+final addStockItemProvider = Provider<Future<String> Function(StockItem)>((
+  ref,
+) {
   return (StockItem item) async {
     try {
       final repo = ref.read(stockRepositoryProvider);

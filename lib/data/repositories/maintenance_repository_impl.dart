@@ -16,48 +16,52 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     required AppDatabase db,
     required FirebaseFirestore fs,
     required TerrainRepository terrainRepository,
-  })  : _db = db,
-        _fs = fs,
-        _terrainRepository = terrainRepository;
+  }) : _db = db,
+       _fs = fs,
+       _terrainRepository = terrainRepository;
 
   final AppDatabase _db;
   final FirebaseFirestore _fs;
   final TerrainRepository _terrainRepository;
 
   @override
-Future<String> addMaintenance(Maintenance maintenance) async {
-  try {
-    final docRef = await _fs
-        .collection('maintenance')
-        .add(MaintenanceMapper.toFirestore(maintenance));
+  Future<String> addMaintenance(Maintenance maintenance) async {
+    try {
+      final docRef = await _fs
+          .collection('maintenance')
+          .add(MaintenanceMapper.toFirestore(maintenance));
 
-    // ✅ FIX: Sauvegarder dans Drift immédiatement avec firebaseId
-    final maintenanceWithId = maintenance.copyWith(firebaseId: docRef.id);
-    await _db.upsertMaintenance(maintenanceWithId.toCompanion());
+      // ✅ FIX: Sauvegarder dans Drift immédiatement avec firebaseId
+      final maintenanceWithId = maintenance.copyWith(firebaseId: docRef.id);
+      await _db.upsertMaintenance(maintenanceWithId.toCompanion());
 
-    if (maintenance.isPlanned) {
-      await _terrainRepository.updateTerrainStatus(
-        maintenance.terrainId,
-        TerrainStatus.maintenance,
+      if (!maintenance.isPlanned) {
+        // Done immediately → terrain back to playable
+        await _terrainRepository.updateTerrainStatus(
+          maintenance.terrainId,
+          TerrainStatus.playable,
+        );
+        // isPlanned=true → terrain status managed by scheduler ✅
+      }
+
+      return docRef.id;
+    } on FirebaseException catch (e) {
+      debugPrint(
+        '❌ MaintenanceRepository: Failed to add maintenance: ${e.message}',
       );
-    } else {
-      await _terrainRepository.updateTerrainStatus(
-        maintenance.terrainId,
-        TerrainStatus.playable,
+      throw RepositoryException(
+        'Failed to add maintenance: ${e.message}',
+        cause: e,
       );
     }
-
-    return docRef.id;
-  } on FirebaseException catch (e) {
-    debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
-    throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
   }
-}
 
   @override
   Future<void> updateMaintenance(Maintenance maintenance) async {
     if (maintenance.firebaseId == null) {
-      throw const RepositoryException('Cannot update maintenance without a firebaseId');
+      throw const RepositoryException(
+        'Cannot update maintenance without a firebaseId',
+      );
     }
 
     try {
@@ -66,8 +70,13 @@ Future<String> addMaintenance(Maintenance maintenance) async {
           .doc(maintenance.firebaseId)
           .update(MaintenanceMapper.toFirestore(maintenance));
     } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to update maintenance: ${e.message}');
-      throw RepositoryException('Failed to update maintenance: ${e.message}', cause: e);
+      debugPrint(
+        '❌ MaintenanceRepository: Failed to update maintenance: ${e.message}',
+      );
+      throw RepositoryException(
+        'Failed to update maintenance: ${e.message}',
+        cause: e,
+      );
     }
   }
 
@@ -91,8 +100,13 @@ Future<String> addMaintenance(Maintenance maintenance) async {
         );
       }
     } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
-      throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
+      debugPrint(
+        '❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}',
+      );
+      throw RepositoryException(
+        'Failed to delete maintenance: ${e.message}',
+        cause: e,
+      );
     }
   }
 
@@ -121,7 +135,12 @@ Future<String> addMaintenance(Maintenance maintenance) async {
   Stream<List<Maintenance>> watchPlannedMaintenances() {
     final query = _db.select(_db.maintenances)
       ..where((t) => t.isPlanned.equals(true))
-      ..orderBy([(t) => drift.OrderingTerm(expression: t.date, mode: drift.OrderingMode.asc)]);
+      ..orderBy([
+        (t) => drift.OrderingTerm(
+          expression: t.date,
+          mode: drift.OrderingMode.asc,
+        ),
+      ]);
     return query.watch().map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
@@ -143,8 +162,13 @@ Future<String> addMaintenance(Maintenance maintenance) async {
         TerrainStatus.playable,
       );
     } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to mark maintenance as completed: ${e.message}');
-      throw RepositoryException('Failed to mark maintenance as completed: ${e.message}', cause: e);
+      debugPrint(
+        '❌ MaintenanceRepository: Failed to mark maintenance as completed: ${e.message}',
+      );
+      throw RepositoryException(
+        'Failed to mark maintenance as completed: ${e.message}',
+        cause: e,
+      );
     }
   }
 }

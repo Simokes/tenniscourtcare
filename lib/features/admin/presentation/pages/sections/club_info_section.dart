@@ -22,13 +22,20 @@ class ClubInfoSection extends ConsumerWidget {
             children: [
               Text(
                 'Informations du club',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () {
                   final currentInfo = clubInfoAsync.valueOrNull;
-                  _showEditClubInfoDialog(context, ref, currentInfo, user?.email);
+                  _showEditClubInfoDialog(
+                    context,
+                    ref,
+                    currentInfo,
+                    user?.email,
+                  );
                 },
               ),
             ],
@@ -44,7 +51,12 @@ class ClubInfoSection extends ConsumerWidget {
                       child: Center(child: Text('Aucune info configurée')),
                     ),
                     ElevatedButton(
-                      onPressed: () => _showEditClubInfoDialog(context, ref, null, user?.email),
+                      onPressed: () => _showEditClubInfoDialog(
+                        context,
+                        ref,
+                        null,
+                        user?.email,
+                      ),
                       child: const Text('Configurer'),
                     ),
                   ],
@@ -65,15 +77,22 @@ class ClubInfoSection extends ConsumerWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text([info.street, info.postalCode, info.city]
-                            .where((e) => e != null && e.isNotEmpty)
-                            .join(', ').isEmpty ? 'Non renseignée' : [info.street, info.postalCode, info.city]
-                            .where((e) => e != null && e.isNotEmpty)
-                            .join(', ')),
+                        Text(
+                          [info.street, info.postalCode, info.city]
+                                  .where((e) => e != null && e.isNotEmpty)
+                                  .join(', ')
+                                  .isEmpty
+                              ? 'Non renseignée'
+                              : [info.street, info.postalCode, info.city]
+                                    .where((e) => e != null && e.isNotEmpty)
+                                    .join(', '),
+                        ),
                         if (info.latitude != null && info.longitude != null)
                           Text(
                             '📍 Coordonnées GPS: ${info.latitude}, ${info.longitude}',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
                           ),
                       ],
                     ),
@@ -102,21 +121,25 @@ class ClubInfoSection extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+            error: (err, stack) =>
+                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  void _showEditClubInfoDialog(BuildContext context, WidgetRef ref, ClubInfo? currentInfo, String? userEmail) {
+  void _showEditClubInfoDialog(
+    BuildContext context,
+    WidgetRef ref,
+    ClubInfo? currentInfo,
+    String? userEmail,
+  ) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (ctx) => _EditClubInfoDialog(
-        currentInfo: currentInfo,
-        userEmail: userEmail,
-      ),
+      builder: (ctx) =>
+          _EditClubInfoDialog(currentInfo: currentInfo, userEmail: userEmail),
     );
   }
 }
@@ -125,13 +148,11 @@ class _EditClubInfoDialog extends ConsumerStatefulWidget {
   final ClubInfo? currentInfo;
   final String? userEmail;
 
-  const _EditClubInfoDialog({
-    this.currentInfo,
-    this.userEmail,
-  });
+  const _EditClubInfoDialog({this.currentInfo, this.userEmail});
 
   @override
-  ConsumerState<_EditClubInfoDialog> createState() => _EditClubInfoDialogState();
+  ConsumerState<_EditClubInfoDialog> createState() =>
+      _EditClubInfoDialogState();
 }
 
 class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
@@ -188,7 +209,9 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 initialValue: _street,
                 decoration: const InputDecoration(labelText: 'Rue et numéro'),
                 enabled: !isLoading,
-                onSaved: (value) => _street = value?.trim().isEmpty ?? true ? null : value!.trim(),
+                onSaved: (value) => _street = value?.trim().isEmpty ?? true
+                    ? null
+                    : value!.trim(),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -196,14 +219,18 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 decoration: const InputDecoration(labelText: 'Code postal'),
                 keyboardType: TextInputType.number,
                 enabled: !isLoading,
-                onSaved: (value) => _postalCode = value?.trim().isEmpty ?? true ? null : value!.trim(),
+                onSaved: (value) => _postalCode = value?.trim().isEmpty ?? true
+                    ? null
+                    : value!.trim(),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 initialValue: _city,
                 decoration: const InputDecoration(labelText: 'Ville'),
                 enabled: !isLoading,
-                onSaved: (value) => _city = value?.trim().isEmpty ?? true ? null : value!.trim(),
+                onSaved: (value) => _city = value?.trim().isEmpty ?? true
+                    ? null
+                    : value!.trim(),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -211,7 +238,9 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 decoration: const InputDecoration(labelText: 'Téléphone'),
                 keyboardType: TextInputType.phone,
                 enabled: !isLoading,
-                onSaved: (value) => _phone = value?.trim().isEmpty ?? true ? null : value!.trim(),
+                onSaved: (value) => _phone = value?.trim().isEmpty ?? true
+                    ? null
+                    : value!.trim(),
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -221,42 +250,54 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                 enabled: !isLoading,
                 validator: (value) {
                   if (value != null && value.trim().isNotEmpty) {
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
                     if (!emailRegex.hasMatch(value.trim())) {
                       return 'Format d\'email invalide';
                     }
                   }
                   return null;
                 },
-                onSaved: (value) => _email = value?.trim().isEmpty ?? true ? null : value!.trim(),
+                onSaved: (value) => _email = value?.trim().isEmpty ?? true
+                    ? null
+                    : value!.trim(),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
                 value: _openingHour,
-                decoration: const InputDecoration(labelText: 'Heure d\'ouverture'),
+                decoration: const InputDecoration(
+                  labelText: 'Heure d\'ouverture',
+                ),
                 items: List.generate(5, (index) => index + 6).map((hour) {
                   return DropdownMenuItem(
                     value: hour,
                     child: Text('${hour}h00'),
                   );
                 }).toList(),
-                onChanged: isLoading ? null : (val) {
-                  if (val != null) setState(() => _openingHour = val);
-                },
+                onChanged: isLoading
+                    ? null
+                    : (val) {
+                        if (val != null) setState(() => _openingHour = val);
+                      },
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
                 value: _closingHour,
-                decoration: const InputDecoration(labelText: 'Heure de fermeture'),
+                decoration: const InputDecoration(
+                  labelText: 'Heure de fermeture',
+                ),
                 items: List.generate(6, (index) => index + 18).map((hour) {
                   return DropdownMenuItem(
                     value: hour,
                     child: Text('${hour}h00'),
                   );
                 }).toList(),
-                onChanged: isLoading ? null : (val) {
-                  if (val != null) setState(() => _closingHour = val);
-                },
+                onChanged: isLoading
+                    ? null
+                    : (val) {
+                        if (val != null) setState(() => _closingHour = val);
+                      },
               ),
               if (isLoading) ...[
                 const SizedBox(height: 16),
@@ -274,43 +315,45 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
           child: const Text('Annuler'),
         ),
         TextButton(
-          onPressed: isLoading ? null : () async {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
+          onPressed: isLoading
+              ? null
+              : () async {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
 
-              final newInfo = ClubInfo(
-                id: widget.currentInfo?.id ?? 'main',
-                name: _name,
-                street: _street,
-                postalCode: _postalCode,
-                city: _city,
-                latitude: widget.currentInfo?.latitude,
-                longitude: widget.currentInfo?.longitude,
-                phone: _phone,
-                email: _email,
-                openingHour: _openingHour,
-                closingHour: _closingHour,
-                updatedAt: DateTime.now(),
-                updatedBy: widget.userEmail,
-              );
+                    final newInfo = ClubInfo(
+                      id: widget.currentInfo?.id ?? 'main',
+                      name: _name,
+                      street: _street,
+                      postalCode: _postalCode,
+                      city: _city,
+                      latitude: widget.currentInfo?.latitude,
+                      longitude: widget.currentInfo?.longitude,
+                      phone: _phone,
+                      email: _email,
+                      openingHour: _openingHour,
+                      closingHour: _closingHour,
+                      updatedAt: DateTime.now(),
+                      updatedBy: widget.userEmail,
+                    );
 
-              try {
-                await ref
-                    .read(clubInfoNotifierProvider.notifier)
-                    .saveClubInfo(newInfo);
-                if (context.mounted) Navigator.pop(context);
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erreur: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
-            }
-          },
+                    try {
+                      await ref
+                          .read(clubInfoNotifierProvider.notifier)
+                          .saveClubInfo(newInfo);
+                      if (context.mounted) Navigator.pop(context);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Erreur: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
           child: const Text('Enregistrer'),
         ),
       ],

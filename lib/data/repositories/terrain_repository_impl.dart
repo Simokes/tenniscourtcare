@@ -11,8 +11,8 @@ class TerrainRepositoryImpl implements TerrainRepository {
   const TerrainRepositoryImpl({
     required AppDatabase db,
     required FirebaseFirestore fs,
-  })  : _db = db,
-        _fs = fs;
+  }) : _db = db,
+       _fs = fs;
 
   final AppDatabase _db;
   final FirebaseFirestore _fs;
@@ -26,14 +26,19 @@ class TerrainRepositoryImpl implements TerrainRepository {
       return docRef.id;
     } on FirebaseException catch (e) {
       debugPrint('❌ TerrainRepository: Failed to add terrain: ${e.message}');
-      throw RepositoryException('Failed to add terrain: ${e.message}', cause: e);
+      throw RepositoryException(
+        'Failed to add terrain: ${e.message}',
+        cause: e,
+      );
     }
   }
 
   @override
   Future<void> updateTerrain(Terrain terrain) async {
     if (terrain.firebaseId == null) {
-      throw const RepositoryException('Cannot update terrain without a firebaseId');
+      throw const RepositoryException(
+        'Cannot update terrain without a firebaseId',
+      );
     }
 
     try {
@@ -41,9 +46,19 @@ class TerrainRepositoryImpl implements TerrainRepository {
           .collection('terrains')
           .doc(terrain.firebaseId)
           .update(TerrainMapper.toFirestore(terrain));
+
+      await _db.upsertTerrain(
+        TerrainMapper.toCompanion(
+          terrain.firebaseId!,
+          TerrainMapper.toFirestore(terrain),
+        ),
+      );
     } on FirebaseException catch (e) {
       debugPrint('❌ TerrainRepository: Failed to update terrain: ${e.message}');
-      throw RepositoryException('Failed to update terrain: ${e.message}', cause: e);
+      throw RepositoryException(
+        'Failed to update terrain: ${e.message}',
+        cause: e,
+      );
     }
   }
 
@@ -53,7 +68,10 @@ class TerrainRepositoryImpl implements TerrainRepository {
       await _fs.collection('terrains').doc(firebaseId).delete();
     } on FirebaseException catch (e) {
       debugPrint('❌ TerrainRepository: Failed to delete terrain: ${e.message}');
-      throw RepositoryException('Failed to delete terrain: ${e.message}', cause: e);
+      throw RepositoryException(
+        'Failed to delete terrain: ${e.message}',
+        cause: e,
+      );
     }
   }
 

@@ -37,7 +37,9 @@ class ConnectionStatusIndicator extends ConsumerWidget {
       return ListTile(
         leading: Icon(iconData, color: color),
         title: Text(isOnline ? 'Connected' : 'Disconnected'),
-        subtitle: Text(isOnline ? 'Receiving real-time updates' : 'Working offline'),
+        subtitle: Text(
+          isOnline ? 'Receiving real-time updates' : 'Working offline',
+        ),
       );
     }
   }

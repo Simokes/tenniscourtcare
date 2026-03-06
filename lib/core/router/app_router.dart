@@ -135,7 +135,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
       ),
-       GoRoute(
+      GoRoute(
         path: '/calendar',
         builder: (context, state) => const CalendarScreen(),
       ),

@@ -1,7 +1,1 @@
-enum SetupStatus {
-  loading,
-  needsAdminSetup,
-  needsLogin,
-  authenticated,
-  error,
-}
+enum SetupStatus { loading, needsAdminSetup, needsLogin, authenticated, error }

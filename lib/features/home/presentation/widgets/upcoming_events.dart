@@ -43,17 +43,14 @@ class UpcomingEventsList extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           eventsAsync.when(
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => Text('Erreur: $e'),
             data: (events) {
               // ✅ Filtre + sort événements à venir
               final now = DateTime.now();
-              final upcoming = events
-                  .where((e) => e.startTime.isAfter(now))
-                  .toList()
-                ..sort((a, b) => a.startTime.compareTo(b.startTime));
+              final upcoming =
+                  events.where((e) => e.startTime.isAfter(now)).toList()
+                    ..sort((a, b) => a.startTime.compareTo(b.startTime));
 
               final display = upcoming.take(3).toList();
 
@@ -62,9 +59,7 @@ class UpcomingEventsList extends ConsumerWidget {
               }
 
               return Column(
-                children: display
-                    .map((e) => _EventTile(event: e))
-                    .toList(),
+                children: display.map((e) => _EventTile(event: e)).toList(),
               );
             },
           ),
@@ -181,8 +176,18 @@ class _EventTile extends StatelessWidget {
   String _formatDateTime(DateTime dt) {
     final days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
     final months = [
-      'jan', 'fév', 'mar', 'avr', 'mai', 'jun',
-      'jul', 'aoû', 'sep', 'oct', 'nov', 'déc',
+      'jan',
+      'fév',
+      'mar',
+      'avr',
+      'mai',
+      'jun',
+      'jul',
+      'aoû',
+      'sep',
+      'oct',
+      'nov',
+      'déc',
     ];
     final day = days[dt.weekday - 1];
     final month = months[dt.month - 1];

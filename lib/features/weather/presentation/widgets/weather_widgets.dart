@@ -4,7 +4,6 @@ import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
 import 'package:tenniscourtcare/domain/services/weather_rules.dart';
 
-
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;
   final double precipitationLast24h;
@@ -33,14 +32,19 @@ class CurrentWeatherCard extends StatelessWidget {
 
     // Colored border if bad conditions
     final bool hasBadConditions = frozen || unplayable || windyStrong;
-    final Color borderColor = hasBadConditions ? conditionColor : Colors.grey.shade200;
+    final Color borderColor = hasBadConditions
+        ? conditionColor
+        : Colors.grey.shade200;
 
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor, width: hasBadConditions ? 2.0 : 1.0),
+        border: Border.all(
+          color: borderColor,
+          width: hasBadConditions ? 2.0 : 1.0,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -137,18 +141,17 @@ class CurrentWeatherCard extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: conditionColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            conditionIcon,
-                            color: conditionColor,
-                            size: 14,
-                          ),
+                          Icon(conditionIcon, color: conditionColor, size: 14),
                           const SizedBox(width: 4),
                           Text(
                             conditionLabel.toUpperCase(),
@@ -245,7 +248,9 @@ class RainHistoryChart extends StatelessWidget {
     // Generate bars to match the design. If we have actual data, map it to bar heights.
     // The max height of the container is 96 (h-24 in tailwind).
     // Let's find the max precipitation to scale the bars.
-    final double maxPrecip = dailyPrecipitation.isEmpty ? 1.0 : dailyPrecipitation.reduce((a, b) => a > b ? a : b);
+    final double maxPrecip = dailyPrecipitation.isEmpty
+        ? 1.0
+        : dailyPrecipitation.reduce((a, b) => a > b ? a : b);
     final double effectiveMax = maxPrecip > 0 ? maxPrecip : 1.0;
 
     return Container(
@@ -279,10 +284,7 @@ class RainHistoryChart extends StatelessWidget {
               ),
               Text(
                 'Total: ${totalPrecipitation.round()}mm',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
               ),
             ],
           ),
@@ -296,7 +298,8 @@ class RainHistoryChart extends StatelessWidget {
                 // If we don't have exactly 30 days of data, pad with 0s.
                 // Assuming dailyPrecipitation is ordered chronologically (oldest to newest).
                 final int dataIndex = dailyPrecipitation.length - 30 + index;
-                final double precip = dataIndex >= 0 && dataIndex < dailyPrecipitation.length
+                final double precip =
+                    dataIndex >= 0 && dataIndex < dailyPrecipitation.length
                     ? dailyPrecipitation[dataIndex]
                     : 0.0;
 
@@ -310,10 +313,13 @@ class RainHistoryChart extends StatelessWidget {
 
                 // The design uses blue-500 for significant, slate-200 for none/low.
                 final Color barColor = isSignificant
-                    ? const Color(0xFF00419A) // navy-500 equivalent in the design
+                    ? const Color(
+                        0xFF00419A,
+                      ) // navy-500 equivalent in the design
                     : Colors.blue.shade100.withValues(alpha: 0.5);
 
-                if (!isSignificant && pct < 0.1) pct = 0.1; // tiny bump for visual
+                if (!isSignificant && pct < 0.1)
+                  pct = 0.1; // tiny bump for visual
 
                 return Expanded(
                   child: Padding(
@@ -324,7 +330,9 @@ class RainHistoryChart extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           color: barColor,
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(2),
+                          ),
                         ),
                       ),
                     ),
@@ -383,9 +391,13 @@ class _ForecastListItem extends StatelessWidget {
     String dayLabel = DateFormat('E d MMM', 'fr').format(date);
     dayLabel = dayLabel[0].toUpperCase() + dayLabel.substring(1);
 
-    if (date.year == now.year && date.month == now.month && date.day == now.day) {
+    if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
       dayLabel = 'Aujourd\'hui';
-    } else if (date.year == now.year && date.month == now.month && date.day == now.day + 1) {
+    } else if (date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day + 1) {
       dayLabel = 'Demain';
     }
 
@@ -398,7 +410,8 @@ class _ForecastListItem extends StatelessWidget {
     Color labelColor;
     if (forecastLabel.startsWith('Éviter')) {
       labelColor = Colors.red.shade600;
-    } else if (forecastLabel.startsWith('Prudence') || forecastLabel.startsWith('Conditions dégradées')) {
+    } else if (forecastLabel.startsWith('Prudence') ||
+        forecastLabel.startsWith('Conditions dégradées')) {
       labelColor = Colors.orange.shade600;
     } else {
       labelColor = Colors.green.shade600;
@@ -450,10 +463,7 @@ class _ForecastListItem extends StatelessWidget {
                       color: iconBgColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
-                      weatherIcon,
-                      color: iconColor,
-                    ),
+                    child: Icon(weatherIcon, color: iconColor),
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -497,7 +507,8 @@ class _ForecastListItem extends StatelessWidget {
                       ],
                     ),
                   if (forecast.windSpeed >= 25) ...[
-                    if (forecast.precipitationSum > 0) const SizedBox(height: 4),
+                    if (forecast.precipitationSum > 0)
+                      const SizedBox(height: 4),
                     Row(
                       children: [
                         const Text('💨 '),
@@ -511,7 +522,7 @@ class _ForecastListItem extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ]
+                  ],
                 ],
               ),
             ],
@@ -590,10 +601,7 @@ class _WeatherDetailItem extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               unit,
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
             ),
           ],
         ),

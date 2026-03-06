@@ -12,9 +12,7 @@ class PendingUsersPage extends ConsumerWidget {
     final pendingUsersAsync = ref.watch(pendingUsersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inscriptions en attente'),
-      ),
+      appBar: AppBar(title: const Text('Inscriptions en attente')),
       body: pendingUsersAsync.when(
         data: (users) {
           if (users.isEmpty) {
@@ -36,9 +34,7 @@ class PendingUsersPage extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Text('Erreur: $error'),
-        ),
+        error: (error, stack) => Center(child: Text('Erreur: $error')),
       ),
     );
   }
@@ -77,7 +73,9 @@ class _UserCard extends ConsumerWidget {
                     user.role.label,
                     style: const TextStyle(fontSize: 12),
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                 ),
               ],
             ),
@@ -147,17 +145,16 @@ class _UserCard extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
-              'Refuser',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Refuser', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
 
     if (confirmed == true && user.firebaseId != null) {
-      ref.read(userApprovalNotifierProvider.notifier).rejectUser(user.firebaseId!);
+      ref
+          .read(userApprovalNotifierProvider.notifier)
+          .rejectUser(user.firebaseId!);
     }
   }
 }

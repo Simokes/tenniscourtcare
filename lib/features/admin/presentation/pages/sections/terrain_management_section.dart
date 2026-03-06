@@ -48,16 +48,24 @@ class TerrainManagementSection extends ConsumerWidget {
                   final terrain = terrains[index];
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text(terrain.nom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      terrain.nom,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Row(
                       children: [
                         Text(terrain.type.displayName),
                         const SizedBox(width: 8),
                         Chip(
-                          label: Text(terrain.status.displayName, style: const TextStyle(fontSize: 12)),
+                          label: Text(
+                            terrain.status.displayName,
+                            style: const TextStyle(fontSize: 12),
+                          ),
                           padding: EdgeInsets.zero,
                           visualDensity: VisualDensity.compact,
-                          backgroundColor: terrain.status.color.withValues(alpha: 0.2),
+                          backgroundColor: terrain.status.color.withValues(
+                            alpha: 0.2,
+                          ),
                           labelStyle: TextStyle(
                             color: terrain.status.color,
                             fontWeight: FontWeight.bold,
@@ -70,7 +78,8 @@ class TerrainManagementSection extends ConsumerWidget {
                       children: [
                         IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showEditTerrainDialog(context, ref, terrain),
+                          onPressed: () =>
+                              _showEditTerrainDialog(context, ref, terrain),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -79,7 +88,9 @@ class TerrainManagementSection extends ConsumerWidget {
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: const Text('Confirmer'),
-                                content: Text('Voulez-vous vraiment supprimer le terrain "${terrain.nom}" ?'),
+                                content: Text(
+                                  'Voulez-vous vraiment supprimer le terrain "${terrain.nom}" ?',
+                                ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx),
@@ -89,10 +100,17 @@ class TerrainManagementSection extends ConsumerWidget {
                                     onPressed: () {
                                       Navigator.pop(ctx);
                                       if (terrain.firebaseId != null) {
-                                        ref.read(terrainNotifierProvider.notifier).deleteTerrain(terrain.firebaseId!);
+                                        ref
+                                            .read(
+                                              terrainNotifierProvider.notifier,
+                                            )
+                                            .deleteTerrain(terrain.firebaseId!);
                                       }
                                     },
-                                    child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+                                    child: const Text(
+                                      'Supprimer',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -106,7 +124,8 @@ class TerrainManagementSection extends ConsumerWidget {
               );
             },
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+            error: (err, stack) =>
+                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -130,13 +149,18 @@ class TerrainManagementSection extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Nom du terrain'),
-                    validator: (value) => value == null || value.isEmpty ? 'Champ requis' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Nom du terrain',
+                    ),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Champ requis' : null,
                     onSaved: (value) => nom = value!,
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TerrainType>(
-                    decoration: const InputDecoration(labelText: 'Type de terrain'),
+                    decoration: const InputDecoration(
+                      labelText: 'Type de terrain',
+                    ),
                     initialValue: type,
                     items: TerrainType.values.map((t) {
                       return DropdownMenuItem(
@@ -155,7 +179,7 @@ class TerrainManagementSection extends ConsumerWidget {
                 ],
               ),
             );
-          }
+          },
         ),
         actions: [
           TextButton(
@@ -166,7 +190,9 @@ class TerrainManagementSection extends ConsumerWidget {
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 formKey.currentState!.save();
-                ref.read(terrainNotifierProvider.notifier).addTerrain(nom, type);
+                ref
+                    .read(terrainNotifierProvider.notifier)
+                    .addTerrain(nom, type);
                 Navigator.pop(ctx);
               }
             },
@@ -177,7 +203,11 @@ class TerrainManagementSection extends ConsumerWidget {
     );
   }
 
-  void _showEditTerrainDialog(BuildContext context, WidgetRef ref, Terrain terrain) {
+  void _showEditTerrainDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Terrain terrain,
+  ) {
     final formKey = GlobalKey<FormState>();
     String nom = terrain.nom;
     TerrainType type = terrain.type;
@@ -196,13 +226,18 @@ class TerrainManagementSection extends ConsumerWidget {
                 children: [
                   TextFormField(
                     initialValue: nom,
-                    decoration: const InputDecoration(labelText: 'Nom du terrain'),
-                    validator: (value) => value == null || value.isEmpty ? 'Champ requis' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Nom du terrain',
+                    ),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Champ requis' : null,
                     onSaved: (value) => nom = value!,
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<TerrainType>(
-                    decoration: const InputDecoration(labelText: 'Type de terrain'),
+                    decoration: const InputDecoration(
+                      labelText: 'Type de terrain',
+                    ),
                     initialValue: type,
                     items: TerrainType.values.map((t) {
                       return DropdownMenuItem(
@@ -239,7 +274,7 @@ class TerrainManagementSection extends ConsumerWidget {
                 ],
               ),
             );
-          }
+          },
         ),
         actions: [
           TextButton(
@@ -256,7 +291,9 @@ class TerrainManagementSection extends ConsumerWidget {
                   status: status,
                   updatedAt: DateTime.now(),
                 );
-                ref.read(terrainNotifierProvider.notifier).updateTerrain(updatedTerrain);
+                ref
+                    .read(terrainNotifierProvider.notifier)
+                    .updateTerrain(updatedTerrain);
                 Navigator.pop(ctx);
               }
             },
