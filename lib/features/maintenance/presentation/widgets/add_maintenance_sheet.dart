@@ -25,12 +25,14 @@ class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain? terrain;
   final Maintenance? existingMaintenance;
   final bool forceCompleteMode;
+  final bool rescheduleMode;
 
   const AddMaintenanceSheet({
     super.key,
     this.terrain,
     this.existingMaintenance,
     this.forceCompleteMode = false,
+    this.rescheduleMode = false,
   });
 
   @override
@@ -90,6 +92,14 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _sacsSottomanto = 0;
       _sacsSilice = 0;
       _isPlanned = false;
+    }
+
+    if (widget.forceCompleteMode) {
+      _date = DateTime.now();
+    }
+
+    if (widget.rescheduleMode) {
+      _isPlanned = true;
     }
   }
 
@@ -193,7 +203,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       context: context,
       initialDate: _date,
       firstDate: DateTime(2020),
-      lastDate: _isPlanned
+      lastDate: _isPlanned || widget.rescheduleMode
           ? DateTime.now().add(const Duration(days: 365))
           : DateTime.now(),
       builder: (context, child) {
@@ -232,7 +242,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       return;
     }
 
-    if (_type.isEmpty) {
+    if (!widget.rescheduleMode && _type.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Veuillez sélectionner un type de maintenance'),
@@ -256,42 +266,58 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
         ? 60
         : _duration.durationMinutes(openingHour, closingHour);
 
-    final maintenance = Maintenance(
-      id: widget.existingMaintenance?.id,
-      terrainId: _selectedTerrain!.id,
-      type: _type.trim(),
-      commentaire: _commentController.text.trim().isEmpty
-          ? null
-          : _commentController.text.trim(),
-      date: _date.millisecondsSinceEpoch,
-      sacsMantoUtilises: _sacsManto,
-      sacsSottomantoUtilises: _sacsSottomanto,
-      sacsSiliceUtilises: _sacsSilice,
-      isPlanned: _isPlanned,
-      startHour: computedStartHour,
-      durationMinutes: computedDurationMinutes,
-      imagePath: _imagePath,
-      weather: _weather,
-      terrainGele: _frozen,
-      terrainImpraticable: _unplayable,
-      createdAt: widget.existingMaintenance?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now(),
-      firebaseId: widget.existingMaintenance?.firebaseId,
-    );
-
     try {
       final notifier = ref.read(maintenanceNotifierProvider.notifier);
-      if (widget.forceCompleteMode &&
-          widget.existingMaintenance?.firebaseId != null) {
-        await notifier.markAsCompleted(
-          firebaseId: widget.existingMaintenance!.firebaseId!,
-          completed: maintenance,
+
+      if (widget.rescheduleMode && widget.existingMaintenance != null) {
+        final updated = widget.existingMaintenance!.copyWith(
+          date: _date.millisecondsSinceEpoch,
+          startHour: computedStartHour,
+          durationMinutes: computedDurationMinutes,
+          updatedAt: DateTime.now(),
         );
-      } else if (widget.existingMaintenance != null) {
-        await notifier.updateMaintenance(maintenance);
+        await notifier.updateMaintenance(updated);
       } else {
-        await notifier.addMaintenance(maintenance);
+        final maintenance = Maintenance(
+          id: widget.existingMaintenance?.id,
+          terrainId: _selectedTerrain!.id,
+          type: widget.forceCompleteMode
+              ? widget.existingMaintenance?.type ?? _type.trim()
+              : _type.trim(),
+          commentaire: _commentController.text.trim().isEmpty
+              ? null
+              : _commentController.text.trim(),
+          date: widget.forceCompleteMode
+              ? DateTime.now().millisecondsSinceEpoch
+              : _date.millisecondsSinceEpoch,
+          sacsMantoUtilises: _sacsManto,
+          sacsSottomantoUtilises: _sacsSottomanto,
+          sacsSiliceUtilises: _sacsSilice,
+          isPlanned: _isPlanned,
+          startHour: computedStartHour,
+          durationMinutes: computedDurationMinutes,
+          imagePath: _imagePath,
+          weather: _weather,
+          terrainGele: _frozen,
+          terrainImpraticable: _unplayable,
+          createdAt: widget.existingMaintenance?.createdAt ?? DateTime.now(),
+          updatedAt: DateTime.now(),
+          firebaseId: widget.existingMaintenance?.firebaseId,
+        );
+
+        if (widget.forceCompleteMode &&
+            widget.existingMaintenance?.firebaseId != null) {
+          await notifier.markAsCompleted(
+            firebaseId: widget.existingMaintenance!.firebaseId!,
+            completed: maintenance,
+          );
+        } else if (widget.existingMaintenance != null) {
+          await notifier.updateMaintenance(maintenance);
+        } else {
+          await notifier.addMaintenance(maintenance);
+        }
       }
+
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;
@@ -426,7 +452,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           const SizedBox(height: 24),
                         ],
 
-                        if (!widget.forceCompleteMode) ...[
+                        if (!widget.forceCompleteMode &&
+                            !widget.rescheduleMode) ...[
                           Center(
                             child: SegmentedButton<bool>(
                               segments: const [
@@ -540,20 +567,22 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           ],
                         ],
 
-                        // Type Selector
-                        Text(
-                          'Type d\'intervention',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        MaintenanceTypeSelector(
-                          selectedType: _type.isEmpty ? null : _type,
-                          types: types,
-                          onSelected: (val) => setState(() => _type = val),
-                        ),
+                        if (!widget.rescheduleMode) ...[
+                          // Type Selector
+                          Text(
+                            'Type d\'intervention',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          MaintenanceTypeSelector(
+                            selectedType: _type.isEmpty ? null : _type,
+                            types: types,
+                            onSelected: (val) => setState(() => _type = val),
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Date Picker Row
                         PremiumCard(
