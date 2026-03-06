@@ -116,7 +116,7 @@ class MaintenanceMapper {
   }
 
   // Firestore Snapshot → Drift Companion
-   static db.MaintenancesCompanion toCompanion(
+  static db.MaintenancesCompanion toCompanion(
     String docId,
     Map<String, dynamic> data,
   ) {
@@ -132,9 +132,13 @@ class MaintenanceMapper {
       commentaire: data['commentaire'] != null
           ? drift.Value(data['commentaire'] as String)
           : const drift.Value.absent(),
-      date: drift.Value(data['date'] as int? ?? DateTime.now().millisecondsSinceEpoch),
+      date: drift.Value(
+        data['date'] as int? ?? DateTime.now().millisecondsSinceEpoch,
+      ),
       sacsMantoUtilises: drift.Value(data['sacsMantoUtilises'] as int? ?? 0),
-      sacsSottomantoUtilises: drift.Value(data['sacsSottomantoUtilises'] as int? ?? 0),
+      sacsSottomantoUtilises: drift.Value(
+        data['sacsSottomantoUtilises'] as int? ?? 0,
+      ),
       sacsSiliceUtilises: drift.Value(data['sacsSiliceUtilises'] as int? ?? 0),
       isPlanned: drift.Value(data['isPlanned'] as bool? ?? false),
       startHour: drift.Value(data['startHour'] as int? ?? 8),

@@ -138,7 +138,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<UserEntity> createAdminUser({
     required String email,
     required String name,
-    required String password
+    required String password,
   }) async {
     // 1. Validation des entrées
     AuthValidator.validateEmail(email);
@@ -163,7 +163,6 @@ class AuthRepositoryImpl implements AuthRepository {
         role: const drift.Value(Role.admin),
         createdAt: drift.Value(now),
         updatedAt: drift.Value(now),
-        
       ),
     );
 
@@ -274,17 +273,23 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required Role role,
   }) async {
-    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+    throw UnimplementedError(
+      'Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository',
+    );
   }
 
   @override
   Future<void> approveUser(String userId) async {
-    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+    throw UnimplementedError(
+      'Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository',
+    );
   }
 
   @override
   Future<void> rejectUser(String userId) async {
-    throw UnimplementedError('Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository');
+    throw UnimplementedError(
+      'Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository',
+    );
   }
 
   @override

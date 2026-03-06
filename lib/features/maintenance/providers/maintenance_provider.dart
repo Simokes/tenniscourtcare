@@ -34,11 +34,19 @@ final plannedMaintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
 final overdueMaintenancesProvider = Provider<List<Maintenance>>((ref) {
   final planned = ref.watch(plannedMaintenancesProvider).valueOrNull ?? [];
   final now = DateTime.now();
-  final todayStart = DateTime(now.year, now.month, now.day);
 
   return planned.where((m) {
     final date = DateTime.fromMillisecondsSinceEpoch(m.date);
-    return date.isBefore(todayStart);
+    final maintenanceStart = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      m.startHour,
+    );
+    final maintenanceEnd = maintenanceStart.add(
+      Duration(minutes: m.durationMinutes),
+    );
+    return maintenanceEnd.isBefore(now);
   }).toList();
 });
 
@@ -56,7 +64,8 @@ final maintenancesByTerrainProvider =
 
 final plannedMaintenancesByTerrainProvider =
     Provider.family<List<Maintenance>, int>((ref, terrainId) {
-      final allPlanned = ref.watch(plannedMaintenancesProvider).valueOrNull ?? [];
+      final allPlanned =
+          ref.watch(plannedMaintenancesProvider).valueOrNull ?? [];
       return allPlanned.where((m) => m.terrainId == terrainId).toList()
         ..sort((a, b) => a.date.compareTo(b.date)); // Sort by date asc
     });
@@ -94,7 +103,9 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(maintenanceRepositoryProvider);
-      await repo.addMaintenance(maintenance); // ✅ repo gère déjà le upsert Drift
+      await repo.addMaintenance(
+        maintenance,
+      ); // ✅ repo gère déjà le upsert Drift
     });
   }
 
@@ -120,7 +131,7 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     });
   }
 
- Future<void> markAsCompleted({
+  Future<void> markAsCompleted({
     required String firebaseId,
     required Maintenance completed,
   }) async {

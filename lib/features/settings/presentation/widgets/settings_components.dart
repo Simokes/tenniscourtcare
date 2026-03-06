@@ -47,9 +47,7 @@ class SettingsContainer extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -71,9 +69,7 @@ class ProfileCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: theme.dividerColor.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -202,8 +198,9 @@ class PreferenceTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: (iconColor ?? colorScheme.primary)
-                      .withValues(alpha: 0.1),
+                  color: (iconColor ?? colorScheme.primary).withValues(
+                    alpha: 0.1,
+                  ),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -292,7 +289,7 @@ class LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       child: Material(
@@ -304,13 +301,13 @@ class LogoutButton extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
-              color: isDark 
-                  ? Colors.red.withValues(alpha: 0.1) 
+              color: isDark
+                  ? Colors.red.withValues(alpha: 0.1)
                   : Colors.red.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDark 
-                    ? Colors.red.withValues(alpha: 0.3) 
+                color: isDark
+                    ? Colors.red.withValues(alpha: 0.3)
                     : Colors.red.withValues(alpha: 0.1),
               ),
             ),

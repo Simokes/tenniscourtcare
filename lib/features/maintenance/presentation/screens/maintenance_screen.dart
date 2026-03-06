@@ -72,10 +72,7 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
         },
         body: TabBarView(
           controller: _tabController,
-          children: [
-            _UpcomingMaintenancesTab(),
-            _HistoryTab(),
-          ],
+          children: [_UpcomingMaintenancesTab(), _HistoryTab()],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -111,9 +108,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
     final terrains = terrainsAsync.value ?? [];
 
     if (maintenances.isEmpty) {
-      return const Center(
-        child: Text('Aucune maintenance planifiée à venir.'),
-      );
+      return const Center(child: Text('Aucune maintenance planifiée à venir.'));
     }
 
     return ListView.builder(
@@ -126,9 +121,18 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
           orElse: () => throw Exception('Terrain not found'),
         );
         final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+        final maintenanceStart = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          maintenance.startHour,
+        );
+        final maintenanceEnd = maintenanceStart.add(
+          Duration(minutes: maintenance.durationMinutes),
+        );
 
         final now = DateTime.now();
-        final isOverdue = date.isBefore(DateTime(now.year, now.month, now.day));
+        final isOverdue = maintenanceEnd.isBefore(now);
 
         final color = isOverdue ? Colors.red.shade100 : Colors.white;
         final iconColor = isOverdue ? Colors.red : Colors.orangeAccent;
@@ -140,7 +144,9 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
           color: color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200),
+            side: BorderSide(
+              color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200,
+            ),
           ),
           child: ListTile(
             leading: CircleAvatar(
@@ -153,14 +159,21 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
                 if (isOverdue)
                   Container(
                     margin: const EdgeInsets.only(left: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: const Text(
                       'En retard',
-                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
               ],
@@ -205,9 +218,7 @@ class _HistoryTab extends ConsumerWidget {
           return _EmptyState(
             onAddCourt: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Fonctionnalité non implémentée'),
-                ),
+                const SnackBar(content: Text('Fonctionnalité non implémentée')),
               );
             },
           );
@@ -228,7 +239,8 @@ class _HistoryTab extends ConsumerWidget {
                   ),
                 );
               },
-              onAddMaintenance: () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
+              onAddMaintenance:
+                  () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
             );
           },
         );

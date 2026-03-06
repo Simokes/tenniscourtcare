@@ -67,10 +67,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           createdAt: DateTime.now(),
           category: _category,
         );
-        
+
         // Add item to database
         await ref.read(stockNotifierProvider.notifier).addItem(newItem);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -91,10 +91,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           updatedAt: DateTime.now(),
           category: _category,
         );
-        
+
         // Update item in database
         await ref.read(stockNotifierProvider.notifier).updateItem(updated);
-        
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -108,10 +108,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('❌ Erreur: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -146,8 +143,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     try {
       if (widget.item?.firebaseId != null) {
         // Delete from database
-        await ref.read(stockNotifierProvider.notifier).deleteItem(widget.item!.firebaseId!);
-        
+        await ref
+            .read(stockNotifierProvider.notifier)
+            .deleteItem(widget.item!.firebaseId!);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -170,10 +169,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Erreur: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('❌ Erreur: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -234,7 +230,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                       ),
                     ),
                     IconButton.filledTonal(
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
                     ),
                   ],
@@ -377,8 +375,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                                   width: 20,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2,
-                                    valueColor:
-                                        AlwaysStoppedAnimation(Colors.white),
+                                    valueColor: AlwaysStoppedAnimation(
+                                      Colors.white,
+                                    ),
                                   ),
                                 )
                               : const Text(
@@ -398,8 +397,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                               onPressed: _isSaving ? null : _deleteItem,
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(color: Colors.red),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

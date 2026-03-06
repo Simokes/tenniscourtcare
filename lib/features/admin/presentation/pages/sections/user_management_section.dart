@@ -116,7 +116,9 @@ class UserManagementSection extends ConsumerWidget {
                                 (r) => r.name == action.split(':')[1],
                               );
                               ref
-                                  .read(userManagementControllerProvider.notifier)
+                                  .read(
+                                    userManagementControllerProvider.notifier,
+                                  )
                                   .updateUserRole(user.id, newRole);
                             } else if (action == 'delete') {
                               showDialog(
@@ -139,7 +141,10 @@ class UserManagementSection extends ConsumerWidget {
                                               userManagementControllerProvider
                                                   .notifier,
                                             )
-                                            .deleteUser(user.id, user.firebaseId);
+                                            .deleteUser(
+                                              user.id,
+                                              user.firebaseId,
+                                            );
                                       },
                                       child: const Text(
                                         'Supprimer',
@@ -149,11 +154,13 @@ class UserManagementSection extends ConsumerWidget {
                                   ],
                                 ),
                               );
-                            } else if (action == 'approve' && user.firebaseId != null) {
+                            } else if (action == 'approve' &&
+                                user.firebaseId != null) {
                               ref
                                   .read(userApprovalNotifierProvider.notifier)
                                   .approveUser(user.firebaseId!);
-                            } else if (action == 'reject' && user.firebaseId != null) {
+                            } else if (action == 'reject' &&
+                                user.firebaseId != null) {
                               showDialog(
                                 context: context,
                                 builder: (ctx) => AlertDialog(
@@ -192,8 +199,11 @@ class UserManagementSection extends ConsumerWidget {
                             items.add(
                               const PopupMenuItem(
                                 enabled: false,
-                                child: Text('Changer de rôle', style: TextStyle(fontWeight: FontWeight.bold)),
-                              )
+                                child: Text(
+                                  'Changer de rôle',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             );
 
                             for (var role in Role.values) {
@@ -207,7 +217,8 @@ class UserManagementSection extends ConsumerWidget {
 
                             items.add(const PopupMenuDivider());
 
-                            if (user.status == UserStatus.inactive && user.firebaseId != null) {
+                            if (user.status == UserStatus.inactive &&
+                                user.firebaseId != null) {
                               items.add(
                                 const PopupMenuItem(
                                   value: 'approve',

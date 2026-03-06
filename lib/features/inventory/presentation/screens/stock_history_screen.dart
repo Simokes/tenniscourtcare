@@ -68,7 +68,7 @@ class StockHistoryScreen extends ConsumerWidget {
       context: context,
       builder: (context) => const Padding(
         padding: EdgeInsets.all(16.0),
-       child: Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(

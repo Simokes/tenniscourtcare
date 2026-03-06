@@ -28,7 +28,8 @@ class StatsCarousel extends ConsumerWidget {
             icon: Icons.check_circle,
             iconColor: const Color(0xFF003580), // Primary
             value: operationalTerrainsCount.when(
-              data: (list) => '${list.length}/${list.length}', // Placeholder total
+              data: (list) =>
+                  '${list.length}/${list.length}', // Placeholder total
               loading: () => '-',
               error: (_, _) => '!',
             ),

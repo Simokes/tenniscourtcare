@@ -15,12 +15,16 @@ import '../widgets/upcoming_events.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
+import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Activer le scheduler en gardant le timer actif tant que cet écran est affiché
+    ref.watch(maintenanceSchedulerProvider);
+
     // Providers
     final todayMaintenanceCount = ref.watch(todayMaintenanceCountProvider);
     final terrainsAsync = ref.watch(terrainsProvider);

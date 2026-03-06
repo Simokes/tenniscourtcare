@@ -47,7 +47,8 @@ class InvalidCredentialsException extends AuthException {
 
 class PendingApprovalException extends AuthException {
   const PendingApprovalException({
-    String message = 'Votre compte est en attente de validation par un administrateur.',
+    String message =
+        'Votre compte est en attente de validation par un administrateur.',
   }) : super(
          message,
          code: 'PENDING_APPROVAL',

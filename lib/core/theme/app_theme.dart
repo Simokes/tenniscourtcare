@@ -4,7 +4,9 @@ import './dashboard_theme_extension.dart';
 
 class AppTheme {
   static const Color _primary = Color(0xFF094CAA); // Primary Blue from design
-  static const Color _backgroundLight = Color(0xFFF5F7F8); // bg-background-light
+  static const Color _backgroundLight = Color(
+    0xFFF5F7F8,
+  ); // bg-background-light
   static const Color _backgroundDark = Color(0xFF101722); // bg-background-dark
   static const Color _surfaceDark = Color(0xFF0F172A); // bg-slate-900
 

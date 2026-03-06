@@ -253,9 +253,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddEditEventScreen(
-                initialDate: _selectedDay,
-              ),
+              builder: (context) =>
+                  AddEditEventScreen(initialDate: _selectedDay),
             ),
           );
         },
@@ -375,7 +374,9 @@ class _CalendarItemCard extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  item.isPlanned ? Icons.schedule : Icons.check_circle,
+                                  item.isPlanned
+                                      ? Icons.schedule
+                                      : Icons.check_circle,
                                   size: 12,
                                   color: item.color,
                                 ),

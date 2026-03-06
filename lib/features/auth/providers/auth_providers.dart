@@ -57,15 +57,19 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
     } catch (e, st) {
-    // ✅ Émettre error state pour que setupStatusProvider peut réagir
-    state = AsyncValue.error(e, st);
-  }
+      // ✅ Émettre error state pour que setupStatusProvider peut réagir
+      state = AsyncValue.error(e, st);
+    }
   }
 
   Future<void> registerAdmin(String email, String name, String password) async {
     state = const AsyncValue.loading();
     try {
-      final user = await _repo.createAdminUser(email: email, name: name, password: password);
+      final user = await _repo.createAdminUser(
+        email: email,
+        name: name,
+        password: password,
+      );
 
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
     } catch (e, st) {
@@ -81,9 +85,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
   ) async {
     state = const AsyncValue.loading();
     try {
-      await _repo.signUp(email: email, name: name, password: password, role: role);
+      await _repo.signUp(
+        email: email,
+        name: name,
+        password: password,
+        role: role,
+      );
       // Stay on login page after signup, user is inactive
-      state = const AsyncValue.data(AuthState(user: null, isSetupRequired: false));
+      state = const AsyncValue.data(
+        AuthState(user: null, isSetupRequired: false),
+      );
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
@@ -139,10 +150,9 @@ final pendingUsersProvider = StreamProvider<List<UserEntity>>((ref) {
 });
 
 final pendingCountProvider = Provider<int>((ref) {
-  return ref.watch(pendingUsersProvider).maybeWhen(
-    data: (users) => users.length,
-    orElse: () => 0,
-  );
+  return ref
+      .watch(pendingUsersProvider)
+      .maybeWhen(data: (users) => users.length, orElse: () => 0);
 });
 
 class UserApprovalNotifier extends AsyncNotifier<void> {
@@ -177,6 +187,4 @@ class UserApprovalNotifier extends AsyncNotifier<void> {
 }
 
 final userApprovalNotifierProvider =
-    AsyncNotifierProvider<UserApprovalNotifier, void>(
-      UserApprovalNotifier.new,
-    );
+    AsyncNotifierProvider<UserApprovalNotifier, void>(UserApprovalNotifier.new);

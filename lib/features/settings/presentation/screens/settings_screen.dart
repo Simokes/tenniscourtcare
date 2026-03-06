@@ -75,9 +75,11 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Mode sombre',
                     value: settings.themeMode == ThemeMode.dark,
                     onChanged: (value) {
-                      ref.read(appSettingsProvider.notifier).setThemeMode(
-                        value ? ThemeMode.dark : ThemeMode.light,
-                      );
+                      ref
+                          .read(appSettingsProvider.notifier)
+                          .setThemeMode(
+                            value ? ThemeMode.dark : ThemeMode.light,
+                          );
                     },
                   ),
                   loading: () => const Padding(
@@ -146,7 +148,9 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: 'Gérer terrains, utilisateurs et club',
                     onTap: () => context.push('/admin'),
                     trailing: ref.watch(pendingCountProvider) > 0
-                        ? Badge(label: Text('${ref.watch(pendingCountProvider)}'))
+                        ? Badge(
+                            label: Text('${ref.watch(pendingCountProvider)}'),
+                          )
                         : null,
                   ),
                   const Divider(height: 1, indent: 56),

@@ -118,8 +118,8 @@ class StockItemMapper {
           ? drift.Value(data['category'] as String)
           : const drift.Value.absent(),
       sortOrder: drift.Value(data['sortOrder'] as int? ?? 0),
-      firebaseId: drift.Value(docId),       // ✅ docId direct
-      remoteId: drift.Value(docId),         // ✅ docId direct
+      firebaseId: drift.Value(docId), // ✅ docId direct
+      remoteId: drift.Value(docId), // ✅ docId direct
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
       updatedAt: drift.Value(parseTimestamp(data['updatedAt'])),
       createdBy: data['createdBy'] != null

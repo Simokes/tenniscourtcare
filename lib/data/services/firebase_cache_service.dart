@@ -19,7 +19,7 @@ class FirebaseCacheService {
   final AppDatabase _db;
   final FirebaseFirestore _fs;
   final List<StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
-      _subscriptions = [];
+  _subscriptions = [];
 
   bool get isListening => _subscriptions.isNotEmpty;
 
@@ -47,28 +47,25 @@ class FirebaseCacheService {
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
-    return _fs.collection('stocks').snapshots().listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          try {
-            if (change.type == DocumentChangeType.added ||
-                change.type == DocumentChangeType.modified) {
-              // ✅ pattern uniforme: id + data() — zéro cast
-              final data = change.doc.data();
-              if (data == null) continue;
-              await _db.upsertStockItem(
-                StockItemMapper.toCompanion(change.doc.id, data),
-              );
-            } else if (change.type == DocumentChangeType.removed) {
-              await _db.deleteStockItemByFirebaseId(change.doc.id);
-            }
-          } catch (e) {
-            debugPrint('❌ CacheService: Error processing stock change: $e');
+    return _fs.collection('stocks').snapshots().listen((snapshot) async {
+      for (final change in snapshot.docChanges) {
+        try {
+          if (change.type == DocumentChangeType.added ||
+              change.type == DocumentChangeType.modified) {
+            // ✅ pattern uniforme: id + data() — zéro cast
+            final data = change.doc.data();
+            if (data == null) continue;
+            await _db.upsertStockItem(
+              StockItemMapper.toCompanion(change.doc.id, data),
+            );
+          } else if (change.type == DocumentChangeType.removed) {
+            await _db.deleteStockItemByFirebaseId(change.doc.id);
           }
+        } catch (e) {
+          debugPrint('❌ CacheService: Error processing stock change: $e');
         }
-      },
-      onError: (e) => debugPrint('❌ CacheService: Stock listener error: $e'),
-    );
+      }
+    }, onError: (e) => debugPrint('❌ CacheService: Stock listener error: $e'));
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenTerrains() {
@@ -96,7 +93,8 @@ class FirebaseCacheService {
     );
   }
 
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenMaintenances() {
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
+  _listenMaintenances() {
     return _fs.collection('maintenance').snapshots().listen(
       (snapshot) async {
         for (final change in snapshot.docChanges) {
@@ -113,7 +111,9 @@ class FirebaseCacheService {
               await _db.deleteMaintenanceByFirebaseId(change.doc.id);
             }
           } catch (e) {
-            debugPrint('❌ CacheService: Error processing maintenance change: $e');
+            debugPrint(
+              '❌ CacheService: Error processing maintenance change: $e',
+            );
           }
         }
       },
@@ -123,72 +123,71 @@ class FirebaseCacheService {
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenEvents() {
-    return _fs.collection('events').snapshots().listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          try {
-            if (change.type == DocumentChangeType.added ||
-                change.type == DocumentChangeType.modified) {
-              // ✅ FIX: id + data() au lieu de cast QueryDocumentSnapshot
-              final data = change.doc.data();
-              if (data == null) continue;
-              await _db.upsertEvent(
-                EventMapper.toCompanion(change.doc.id, data),
-              );
-            } else if (change.type == DocumentChangeType.removed) {
-              await _db.deleteEventByFirebaseId(change.doc.id);
-            }
-          } catch (e) {
-            debugPrint('❌ CacheService: Error processing events change: $e');
+    return _fs.collection('events').snapshots().listen((snapshot) async {
+      for (final change in snapshot.docChanges) {
+        try {
+          if (change.type == DocumentChangeType.added ||
+              change.type == DocumentChangeType.modified) {
+            // ✅ FIX: id + data() au lieu de cast QueryDocumentSnapshot
+            final data = change.doc.data();
+            if (data == null) continue;
+            await _db.upsertEvent(EventMapper.toCompanion(change.doc.id, data));
+          } else if (change.type == DocumentChangeType.removed) {
+            await _db.deleteEventByFirebaseId(change.doc.id);
           }
+        } catch (e) {
+          debugPrint('❌ CacheService: Error processing events change: $e');
         }
-      },
-      onError: (e) => debugPrint('❌ CacheService: Events listener error: $e'),
-    );
+      }
+    }, onError: (e) => debugPrint('❌ CacheService: Events listener error: $e'));
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenUsers() {
-    return _fs.collection('users').snapshots().listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          try {
-            if (change.type == DocumentChangeType.added ||
-                change.type == DocumentChangeType.modified) {
-              final data = change.doc.data();
-              if (data == null) continue;
+    return _fs.collection('users').snapshots().listen((snapshot) async {
+      for (final change in snapshot.docChanges) {
+        try {
+          if (change.type == DocumentChangeType.added ||
+              change.type == DocumentChangeType.modified) {
+            final data = change.doc.data();
+            if (data == null) continue;
 
-              final uid = data['uid'] as String? ?? change.doc.id;
-              final roleStr = data['role'] as String? ?? 'agent';
-              final role = Role.values.firstWhere((r) => r.name == roleStr, orElse: () => Role.agent);
+            final uid = data['uid'] as String? ?? change.doc.id;
+            final roleStr = data['role'] as String? ?? 'agent';
+            final role = Role.values.firstWhere(
+              (r) => r.name == roleStr,
+              orElse: () => Role.agent,
+            );
 
-              DateTime? parseTimestamp(dynamic ts) {
-                if (ts == null) return null;
-                if (ts is Timestamp) return ts.toDate();
-                return null;
-              }
-
-              final companion = UsersCompanion(
-                email: drift.Value(data['email'] as String? ?? ''),
-                firestoreUid: drift.Value(uid),
-                name: drift.Value(data['name'] ?? data['firstName'] ?? 'Utilisateur'),
-                role: drift.Value(role),
-                status: drift.Value(data['status'] as String? ?? 'inactive'),
-                approvedAt: drift.Value(parseTimestamp(data['approvedAt'])),
-                approvedBy: drift.Value(data['approvedBy'] as String?),
-                createdAt: drift.Value(parseTimestamp(data['createdAt']) ?? DateTime.now()),
-                passwordHash: const drift.Value('FIREBASE_AUTH'),
-              );
-
-              await _db.upsertUser(companion);
-            } else if (change.type == DocumentChangeType.removed) {
-              await _db.deleteUserByFirebaseId(change.doc.id);
+            DateTime? parseTimestamp(dynamic ts) {
+              if (ts == null) return null;
+              if (ts is Timestamp) return ts.toDate();
+              return null;
             }
-          } catch (e) {
-            debugPrint('❌ CacheService: Error processing users change: $e');
+
+            final companion = UsersCompanion(
+              email: drift.Value(data['email'] as String? ?? ''),
+              firestoreUid: drift.Value(uid),
+              name: drift.Value(
+                data['name'] ?? data['firstName'] ?? 'Utilisateur',
+              ),
+              role: drift.Value(role),
+              status: drift.Value(data['status'] as String? ?? 'inactive'),
+              approvedAt: drift.Value(parseTimestamp(data['approvedAt'])),
+              approvedBy: drift.Value(data['approvedBy'] as String?),
+              createdAt: drift.Value(
+                parseTimestamp(data['createdAt']) ?? DateTime.now(),
+              ),
+              passwordHash: const drift.Value('FIREBASE_AUTH'),
+            );
+
+            await _db.upsertUser(companion);
+          } else if (change.type == DocumentChangeType.removed) {
+            await _db.deleteUserByFirebaseId(change.doc.id);
           }
+        } catch (e) {
+          debugPrint('❌ CacheService: Error processing users change: $e');
         }
-      },
-      onError: (e) => debugPrint('❌ CacheService: Users listener error: $e'),
-    );
+      }
+    }, onError: (e) => debugPrint('❌ CacheService: Users listener error: $e'));
   }
 }

@@ -226,35 +226,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 // Error Message
                 if (error != null) ...[
                   const SizedBox(height: 24),
-                  Builder(builder: (context) {
-                    Color errorBgColor = Colors.red.withValues(alpha: 0.1);
-                    Color errorBorderColor = Colors.red.withValues(alpha: 0.3);
-                    Color errorTextColor = Colors.red;
+                  Builder(
+                    builder: (context) {
+                      Color errorBgColor = Colors.red.withValues(alpha: 0.1);
+                      Color errorBorderColor = Colors.red.withValues(
+                        alpha: 0.3,
+                      );
+                      Color errorTextColor = Colors.red;
 
-                    if (error is AuthException && error.type == AuthExceptionType.pendingApproval) {
-                      errorBgColor = Colors.orange.withValues(alpha: 0.1);
-                      errorBorderColor = Colors.orange.withValues(alpha: 0.3);
-                      errorTextColor = Colors.orange.shade800;
-                    }
+                      if (error is AuthException &&
+                          error.type == AuthExceptionType.pendingApproval) {
+                        errorBgColor = Colors.orange.withValues(alpha: 0.1);
+                        errorBorderColor = Colors.orange.withValues(alpha: 0.3);
+                        errorTextColor = Colors.orange.shade800;
+                      }
 
-                    return Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: errorBgColor,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: errorBorderColor),
-                      ),
-                      child: Text(
-                        error is AuthException ? error.message : error.toString(),
-                        style: GoogleFonts.inter(
-                          color: errorTextColor,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: errorBgColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: errorBorderColor),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }),
+                        child: Text(
+                          error is AuthException
+                              ? error.message
+                              : error.toString(),
+                          style: GoogleFonts.inter(
+                            color: errorTextColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
                 ],
 
                 const SizedBox(height: 24),

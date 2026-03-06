@@ -66,10 +66,7 @@ class DashboardHeader extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey.shade200),
               ),
-              child: const Icon(
-                Icons.person,
-                color: Color(0xFF003580),
-              ),
+              child: const Icon(Icons.person, color: Color(0xFF003580)),
             ),
           ),
         ),
@@ -77,4 +74,3 @@ class DashboardHeader extends ConsumerWidget {
     );
   }
 }
-

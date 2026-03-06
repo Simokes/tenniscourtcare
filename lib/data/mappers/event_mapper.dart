@@ -63,7 +63,7 @@ class EventMapper {
   }
 
   // Domain Entity → Firestore Map
-    static Map<String, dynamic> toFirestore(AppEvent item) {
+  static Map<String, dynamic> toFirestore(AppEvent item) {
     return {
       'title': item.title,
       if (item.description != null) 'description': item.description,
@@ -79,7 +79,7 @@ class EventMapper {
   }
 
   // Firestore Snapshot → Drift Companion
-static db.EventsCompanion toCompanion(
+  static db.EventsCompanion toCompanion(
     String docId,
     Map<String, dynamic> data,
   ) {
@@ -99,9 +99,10 @@ static db.EventsCompanion toCompanion(
       color: drift.Value(data['color'] as int? ?? 0xFFFFFFFF),
       terrainIds: drift.Value(
         (data['terrainIds'] as List<dynamic>?)
-            ?.map((e) => int.tryParse(e.toString()) ?? 0)
-            .where((id) => id != 0)
-            .toList() ?? [],
+                ?.map((e) => int.tryParse(e.toString()) ?? 0)
+                .where((id) => id != 0)
+                .toList() ??
+            [],
       ),
       firebaseId: drift.Value(docId),
       createdAt: drift.Value(parseTimestamp(data['createdAt'])),
@@ -125,7 +126,9 @@ extension AppEventModelX on AppEventModel {
 extension AppEventMapperX on AppEvent {
   db.EventsCompanion toCompanion({bool includeId = true}) {
     return db.EventsCompanion(
-      id: includeId && id != null ? drift.Value(id!) : const drift.Value.absent(),
+      id: includeId && id != null
+          ? drift.Value(id!)
+          : const drift.Value.absent(),
       title: drift.Value(title),
       description: description == null
           ? const drift.Value.absent()

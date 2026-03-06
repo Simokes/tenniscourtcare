@@ -15,8 +15,8 @@ class ClubInfoRepositoryImpl implements ClubInfoRepository {
   ClubInfoRepositoryImpl({
     FirebaseFirestore? firestore,
     required NominatimService nominatimService,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _nominatimService = nominatimService;
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _nominatimService = nominatimService;
 
   @override
   Stream<ClubInfo?> watchClubInfo() {
@@ -25,27 +25,27 @@ class ClubInfoRepositoryImpl implements ClubInfoRepository {
         .doc(_documentId)
         .snapshots()
         .map((snapshot) {
-      if (!snapshot.exists) return null;
+          if (!snapshot.exists) return null;
 
-      final data = snapshot.data();
-      if (data == null) return null;
+          final data = snapshot.data();
+          if (data == null) return null;
 
-      return ClubInfo(
-        id: snapshot.id,
-        name: data['name'] as String,
-        street: data['street'] as String?,
-        postalCode: data['postalCode'] as String?,
-        city: data['city'] as String?,
-        latitude: (data['latitude'] as num?)?.toDouble(),
-        longitude: (data['longitude'] as num?)?.toDouble(),
-        phone: data['phone'] as String?,
-        email: data['email'] as String?,
-        openingHour: data['openingHour'] as int?,
-        closingHour: data['closingHour'] as int?,
-        updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-        updatedBy: data['updatedBy'] as String?,
-      );
-    });
+          return ClubInfo(
+            id: snapshot.id,
+            name: data['name'] as String,
+            street: data['street'] as String?,
+            postalCode: data['postalCode'] as String?,
+            city: data['city'] as String?,
+            latitude: (data['latitude'] as num?)?.toDouble(),
+            longitude: (data['longitude'] as num?)?.toDouble(),
+            phone: data['phone'] as String?,
+            email: data['email'] as String?,
+            openingHour: data['openingHour'] as int?,
+            closingHour: data['closingHour'] as int?,
+            updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+            updatedBy: data['updatedBy'] as String?,
+          );
+        });
   }
 
   @override
@@ -74,23 +74,20 @@ class ClubInfoRepositoryImpl implements ClubInfoRepository {
         }
       }
 
-      await _firestore
-          .collection(_collectionPath)
-          .doc(_documentId)
-          .set({
-            'name': updatedInfo.name,
-            'street': updatedInfo.street,
-            'postalCode': updatedInfo.postalCode,
-            'city': updatedInfo.city,
-            'latitude': updatedInfo.latitude,
-            'longitude': updatedInfo.longitude,
-            'phone': updatedInfo.phone,
-            'email': updatedInfo.email,
-            'openingHour': updatedInfo.openingHour,
-            'closingHour': updatedInfo.closingHour,
-            'updatedAt': Timestamp.fromDate(updatedInfo.updatedAt),
-            'updatedBy': updatedInfo.updatedBy,
-          }, SetOptions(merge: true));
+      await _firestore.collection(_collectionPath).doc(_documentId).set({
+        'name': updatedInfo.name,
+        'street': updatedInfo.street,
+        'postalCode': updatedInfo.postalCode,
+        'city': updatedInfo.city,
+        'latitude': updatedInfo.latitude,
+        'longitude': updatedInfo.longitude,
+        'phone': updatedInfo.phone,
+        'email': updatedInfo.email,
+        'openingHour': updatedInfo.openingHour,
+        'closingHour': updatedInfo.closingHour,
+        'updatedAt': Timestamp.fromDate(updatedInfo.updatedAt),
+        'updatedBy': updatedInfo.updatedBy,
+      }, SetOptions(merge: true));
     } catch (e) {
       if (e is RepositoryException) {
         rethrow;

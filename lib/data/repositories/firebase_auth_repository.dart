@@ -172,7 +172,9 @@ class FirebaseAuthRepository implements AuthRepository {
   }) async {
     try {
       if (role == Role.admin) {
-        throw const ValidationException('Impossible de s\'inscrire en tant qu\'administrateur.');
+        throw const ValidationException(
+          'Impossible de s\'inscrire en tant qu\'administrateur.',
+        );
       }
 
       // 1. Firebase Auth createUserWithEmailAndPassword
@@ -183,7 +185,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
       final user = userCredential.user;
       if (user == null) {
-        throw const SecurityException('Erreur lors de la création de l\'utilisateur.');
+        throw const SecurityException(
+          'Erreur lors de la création de l\'utilisateur.',
+        );
       }
 
       // Update displayName
@@ -204,18 +208,20 @@ class FirebaseAuthRepository implements AuthRepository {
       });
 
       // 3. Write Drift local user row (status: inactive)
-      await _db.into(_db.users).insert(
-        UsersCompanion.insert(
-          email: email,
-          name: name,
-          passwordHash: 'FIREBASE_AUTH',
-          role: role,
-          status: const drift.Value('inactive'),
-          firestoreUid: drift.Value(uid),
-          createdAt: drift.Value(now),
-          updatedAt: drift.Value(now),
-        ),
-      );
+      await _db
+          .into(_db.users)
+          .insert(
+            UsersCompanion.insert(
+              email: email,
+              name: name,
+              passwordHash: 'FIREBASE_AUTH',
+              role: role,
+              status: const drift.Value('inactive'),
+              firestoreUid: drift.Value(uid),
+              createdAt: drift.Value(now),
+              updatedAt: drift.Value(now),
+            ),
+          );
 
       // 4. Sign out immediately after signup
       await _auth.signOut();

@@ -45,7 +45,9 @@ class EventNotifier extends AsyncNotifier<void> {
 
   Future<void> updateEvent(AppEvent event) async {
     if (event.firebaseId == null) {
-      throw const RepositoryException('Cannot update event without a firebaseId');
+      throw const RepositoryException(
+        'Cannot update event without a firebaseId',
+      );
     }
     state = const AsyncValue.loading();
     try {
@@ -74,7 +76,6 @@ class EventNotifier extends AsyncNotifier<void> {
 final eventNotifierProvider = AsyncNotifierProvider<EventNotifier, void>(
   () => EventNotifier(),
 );
-
 
 // --- Calendar Helpers ---
 
@@ -155,7 +156,10 @@ final calendarItemsProvider =
           plannedMaintenancesAsync.hasValue &&
           terrainsAsync.hasValue) {
         final events = eventsAsync.value!;
-        final maintenances = [...maintenancesAsync.value!, ...plannedMaintenancesAsync.value!];
+        final maintenances = [
+          ...maintenancesAsync.value!,
+          ...plannedMaintenancesAsync.value!,
+        ];
         final terrains = terrainsAsync.value!;
 
         final items = <CalendarItem>[];
@@ -220,7 +224,9 @@ final calendarItemsProvider =
                 description: maintenance.commentaire ?? maintenance.type,
                 startTime: startTime,
                 endTime: endTime,
-                color: maintenance.isPlanned ? TerrainStatus.maintenance.color : Colors.green,
+                color: maintenance.isPlanned
+                    ? TerrainStatus.maintenance.color
+                    : Colors.green,
                 type: CalendarItemType.maintenance,
                 originalObject: maintenance,
                 terrainId: maintenance.terrainId,

@@ -13,11 +13,7 @@ class AddEditEventScreen extends ConsumerStatefulWidget {
   final AppEvent? eventToEdit;
   final DateTime? initialDate;
 
-  const AddEditEventScreen({
-    super.key,
-    this.eventToEdit,
-    this.initialDate,
-  });
+  const AddEditEventScreen({super.key, this.eventToEdit, this.initialDate});
 
   @override
   ConsumerState<AddEditEventScreen> createState() => _AddEditEventScreenState();
@@ -53,7 +49,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     _descController = TextEditingController(text: event?.description ?? '');
 
     final now = DateTime.now();
-    _startTime = event?.startTime ??
+    _startTime =
+        event?.startTime ??
         widget.initialDate ??
         DateTime(now.year, now.month, now.day, 9, 0);
     _endTime = event?.endTime ?? _startTime.add(const Duration(hours: 1));
@@ -138,7 +135,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       terrainIds: _selectedTerrainIds,
       createdAt: widget.eventToEdit?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
-      createdBy: widget.eventToEdit?.createdBy ?? currentUser?.email, // ✅ AJOUTÉ
+      createdBy:
+          widget.eventToEdit?.createdBy ?? currentUser?.email, // ✅ AJOUTÉ
       modifiedBy: currentUser?.email, // ✅ AJOUTÉ
     );
     try {
@@ -325,8 +323,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(right: 12),
                             child: InkWell(
-                              onTap: () =>
-                                  setState(() => _selectedColor = color.toARGB32()),
+                              onTap: () => setState(
+                                () => _selectedColor = color.toARGB32(),
+                              ),
                               customBorder: const CircleBorder(),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),

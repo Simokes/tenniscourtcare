@@ -11,8 +11,8 @@ class EventRepositoryImpl implements EventRepository {
   const EventRepositoryImpl({
     required AppDatabase db,
     required FirebaseFirestore fs,
-  })  : _db = db,
-        _fs = fs;
+  }) : _db = db,
+       _fs = fs;
 
   final AppDatabase _db;
   final FirebaseFirestore _fs;
@@ -48,7 +48,9 @@ class EventRepositoryImpl implements EventRepository {
   @override
   Future<void> updateEvent(AppEvent event) async {
     if (event.firebaseId == null) {
-      throw const RepositoryException('Cannot update event without a firebaseId');
+      throw const RepositoryException(
+        'Cannot update event without a firebaseId',
+      );
     }
 
     try {
@@ -58,7 +60,10 @@ class EventRepositoryImpl implements EventRepository {
           .update(EventMapper.toFirestore(event));
     } on FirebaseException catch (e) {
       debugPrint('❌ EventRepository: Failed to update event: ${e.message}');
-      throw RepositoryException('Failed to update event: ${e.message}', cause: e);
+      throw RepositoryException(
+        'Failed to update event: ${e.message}',
+        cause: e,
+      );
     }
   }
 
@@ -68,7 +73,10 @@ class EventRepositoryImpl implements EventRepository {
       await _fs.collection('events').doc(firebaseId).delete();
     } on FirebaseException catch (e) {
       debugPrint('❌ EventRepository: Failed to delete event: ${e.message}');
-      throw RepositoryException('Failed to delete event: ${e.message}', cause: e);
+      throw RepositoryException(
+        'Failed to delete event: ${e.message}',
+        cause: e,
+      );
     }
   }
 

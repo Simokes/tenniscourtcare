@@ -12,8 +12,6 @@ class StockItemTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-  
-   
     final isLow = item.isLowOnStock;
     final iconData = _getIconForName(item.name);
 

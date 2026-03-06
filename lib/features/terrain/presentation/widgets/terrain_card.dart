@@ -54,16 +54,29 @@ class TerrainCard extends ConsumerWidget {
                             ),
                             if (terrain.status == TerrainStatus.maintenance)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: terrain.status.color.withValues(alpha: 0.1),
+                                  color: terrain.status.color.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: terrain.status.color.withValues(alpha: 0.3)),
+                                  border: Border.all(
+                                    color: terrain.status.color.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(terrain.status.icon, size: 12, color: terrain.status.color),
+                                    Icon(
+                                      terrain.status.icon,
+                                      size: 12,
+                                      color: terrain.status.color,
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
                                       terrain.status.displayName,

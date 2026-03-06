@@ -23,7 +23,8 @@ final adminExistsProvider = FutureProvider<bool>((ref) async {
 
     return querySnapshot.docs.isNotEmpty;
   } catch (e) {
-    final isNetworkError = e is SocketException ||
+    final isNetworkError =
+        e is SocketException ||
         e is TimeoutException ||
         (e is FirebaseException && e.code == 'unavailable');
 
