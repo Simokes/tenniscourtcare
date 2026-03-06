@@ -29,7 +29,6 @@ import '../mappers/stock_item_mapper.dart';
 import '../mappers/user_mapper.dart';
 import '../mappers/maintenance_mapper.dart';
 
-
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -47,7 +46,6 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-
   // === FIREBASE CACHE SERVICE METHODS ===
 
   Future<void> upsertTerrain(TerrainsCompanion companion) async {
@@ -57,21 +55,23 @@ class AppDatabase extends _$AppDatabase {
       return;
     }
 
-    final existing = await (select(terrains)
-          ..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final existing = await (select(
+      terrains,
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     if (existing != null) {
-      await (update(terrains)
-            ..where((t) => t.firebaseId.equals(firebaseId)))
-          .write(companion);
+      await (update(
+        terrains,
+      )..where((t) => t.firebaseId.equals(firebaseId))).write(companion);
     } else {
       await into(terrains).insert(companion);
     }
   }
 
   Future<void> deleteTerrainByFirebaseId(String firebaseId) async {
-    await (delete(terrains)..where((t) => t.firebaseId.equals(firebaseId))).go();
+    await (delete(
+      terrains,
+    )..where((t) => t.firebaseId.equals(firebaseId))).go();
   }
 
   Future<void> upsertMaintenance(MaintenancesCompanion companion) async {
@@ -81,21 +81,23 @@ class AppDatabase extends _$AppDatabase {
       return;
     }
 
-    final existing = await (select(maintenances)
-          ..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final existing = await (select(
+      maintenances,
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     if (existing != null) {
-      await (update(maintenances)
-            ..where((t) => t.firebaseId.equals(firebaseId)))
-          .write(companion);
+      await (update(
+        maintenances,
+      )..where((t) => t.firebaseId.equals(firebaseId))).write(companion);
     } else {
       await into(maintenances).insert(companion);
     }
   }
 
   Future<void> deleteMaintenanceByFirebaseId(String firebaseId) async {
-    await (delete(maintenances)..where((t) => t.firebaseId.equals(firebaseId))).go();
+    await (delete(
+      maintenances,
+    )..where((t) => t.firebaseId.equals(firebaseId))).go();
   }
 
   Future<void> upsertStockItem(StockItemsCompanion companion) async {
@@ -105,21 +107,23 @@ class AppDatabase extends _$AppDatabase {
       return;
     }
 
-    final existing = await (select(stockItems)
-          ..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final existing = await (select(
+      stockItems,
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     if (existing != null) {
-      await (update(stockItems)
-            ..where((t) => t.firebaseId.equals(firebaseId)))
-          .write(companion);
+      await (update(
+        stockItems,
+      )..where((t) => t.firebaseId.equals(firebaseId))).write(companion);
     } else {
       await into(stockItems).insert(companion);
     }
   }
 
   Future<void> deleteStockItemByFirebaseId(String firebaseId) async {
-    await (delete(stockItems)..where((t) => t.firebaseId.equals(firebaseId))).go();
+    await (delete(
+      stockItems,
+    )..where((t) => t.firebaseId.equals(firebaseId))).go();
   }
 
   Future<void> upsertEvent(EventsCompanion companion) async {
@@ -129,14 +133,14 @@ class AppDatabase extends _$AppDatabase {
       return;
     }
 
-    final existing = await (select(events)
-          ..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final existing = await (select(
+      events,
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     if (existing != null) {
-      await (update(events)
-            ..where((t) => t.firebaseId.equals(firebaseId)))
-          .write(companion);
+      await (update(
+        events,
+      )..where((t) => t.firebaseId.equals(firebaseId))).write(companion);
     } else {
       await into(events).insert(companion);
     }
@@ -153,14 +157,14 @@ class AppDatabase extends _$AppDatabase {
       return;
     }
 
-    final existing = await (select(users)
-          ..where((t) => t.firestoreUid.equals(firebaseId)))
-        .getSingleOrNull();
+    final existing = await (select(
+      users,
+    )..where((t) => t.firestoreUid.equals(firebaseId))).getSingleOrNull();
 
     if (existing != null) {
-      await (update(users)
-            ..where((t) => t.firestoreUid.equals(firebaseId)))
-          .write(companion);
+      await (update(
+        users,
+      )..where((t) => t.firestoreUid.equals(firebaseId))).write(companion);
     } else {
       await into(users).insert(companion);
     }
@@ -351,7 +355,7 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(maintenances, maintenances.durationMinutes);
       }
     },
-      // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
+    // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
     beforeOpen: (details) async {
       if (details.wasCreated) {
         // Nouvelle installation → tables vides → rien à faire
@@ -364,13 +368,13 @@ class AppDatabase extends _$AppDatabase {
         'DELETE FROM stock_items WHERE firebase_id IS NULL;',
       );
       await customStatement(
-        'DELETE FROM maintenances WHERE firebase_id IS NULL;',  // ✅ AJOUTÉ
+        'DELETE FROM maintenances WHERE firebase_id IS NULL;', // ✅ AJOUTÉ
       );
       await customStatement(
-        'DELETE FROM terrains WHERE firebase_id IS NULL;',      // ✅ AJOUTÉ
+        'DELETE FROM terrains WHERE firebase_id IS NULL;', // ✅ AJOUTÉ
       );
       await customStatement(
-        'DELETE FROM events WHERE firebase_id IS NULL;',        // ✅ AJOUTÉ
+        'DELETE FROM events WHERE firebase_id IS NULL;', // ✅ AJOUTÉ
       );
       debugPrint('🗄️ DB: Purge seeds orphelins au démarrage ✅');
     },
@@ -804,7 +808,9 @@ class AppDatabase extends _$AppDatabase {
   // ========== TERRAINS ==========
 
   Stream<List<dom.Terrain>> watchAllTerrains() {
-    return select(terrains).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
+    return select(
+      terrains,
+    ).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
   Future<List<dom.Terrain>> getAllTerrains() async {
@@ -844,7 +850,9 @@ class AppDatabase extends _$AppDatabase {
   // ========== MAINTENANCES ==========
 
   Stream<List<domm.Maintenance>> watchAllMaintenances() {
-    return select(maintenances).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
+    return select(
+      maintenances,
+    ).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
   Future<List<domm.Maintenance>> getMaintenancesForTerrain(
@@ -865,6 +873,15 @@ class AppDatabase extends _$AppDatabase {
         .watch()
         .map((rows) => rows.map((r) => r.toDomain()).toList());
   }
+
+Stream<List<domm.Maintenance>> watchMaintenancesForTerrain(int terrainId) {
+  return (select(maintenances)
+        ..where((m) => m.terrainId.equals(terrainId))
+        ..where((m) => m.isPlanned.equals(false))
+        ..orderBy([(m) => OrderingTerm.desc(m.date)]))
+      .watch()
+      .map((rows) => rows.map((r) => r.toDomain()).toList());
+}
 
   Future<List<domm.Maintenance>> getMaintenancesInPeriod(
     DateTime start,
@@ -903,9 +920,9 @@ class AppDatabase extends _$AppDatabase {
   // ========== EVENTS ==========
 
   Stream<List<AppEvent>> watchAllEvents() {
-    return select(events).watch().map(
-      (rows) => rows.map((r) => r.toDomain()).toList(),
-    );
+    return select(
+      events,
+    ).watch().map((rows) => rows.map((r) => r.toDomain()).toList());
   }
 
   // ========== WATCHERS & AGRÉGATIONS ==========

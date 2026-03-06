@@ -51,15 +51,8 @@ final overdueCountProvider = Provider<int>((ref) {
 
 final maintenancesByTerrainProvider =
     StreamProvider.family<List<Maintenance>, int>((ref, terrainId) {
-      final allMaintenances = ref.watch(maintenancesProvider);
-      return allMaintenances.when(
-        data: (maintenances) => Stream.value(
-          maintenances.where((m) => m.terrainId == terrainId && !m.isPlanned).toList()
-            ..sort((a, b) => b.date.compareTo(a.date)), // Sort by date desc
-        ),
-        loading: () => Stream.value([]),
-        error: (error, stack) => Stream.value([]),
-      );
+      final db = ref.watch(databaseProvider);
+      return db.watchMaintenancesForTerrain(terrainId); // ✅ Stream Drift direct
     });
 
 final plannedMaintenancesByTerrainProvider =
@@ -102,12 +95,7 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(maintenanceRepositoryProvider);
-      final db = ref.read(databaseProvider);
-
-      final firebaseId = await repo.addMaintenance(maintenance);
-      final updatedMaintenance = maintenance.copyWith(firebaseId: firebaseId);
-
-      await db.upsertMaintenance(updatedMaintenance.toCompanion());
+      await repo.addMaintenance(maintenance); // ✅ repo gère déjà le upsert Drift
     });
   }
 
@@ -133,21 +121,17 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> markAsCompleted({
+ Future<void> markAsCompleted({
     required String firebaseId,
     required Maintenance completed,
   }) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(maintenanceRepositoryProvider);
-      final db = ref.read(databaseProvider);
       await repo.markAsCompleted(
         firebaseId: firebaseId,
         completed: completed,
-      );
-
-      final updatedMaintenance = completed.copyWith(isPlanned: false, firebaseId: firebaseId);
-      await db.upsertMaintenance(updatedMaintenance.toCompanion());
+      ); // ✅ repo gère déjà le upsert Drift
     });
   }
 }

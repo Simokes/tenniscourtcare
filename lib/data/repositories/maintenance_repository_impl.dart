@@ -25,30 +25,34 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
   final TerrainRepository _terrainRepository;
 
   @override
-  Future<String> addMaintenance(Maintenance maintenance) async {
-    try {
-      final docRef = await _fs
-          .collection('maintenance')
-          .add(MaintenanceMapper.toFirestore(maintenance));
+Future<String> addMaintenance(Maintenance maintenance) async {
+  try {
+    final docRef = await _fs
+        .collection('maintenance')
+        .add(MaintenanceMapper.toFirestore(maintenance));
 
-      if (maintenance.isPlanned) {
-        await _terrainRepository.updateTerrainStatus(
-          maintenance.terrainId,
-          TerrainStatus.maintenance,
-        );
-      } else {
-        await _terrainRepository.updateTerrainStatus(
-          maintenance.terrainId,
-          TerrainStatus.playable,
-        );
-      }
+    // ✅ FIX: Sauvegarder dans Drift immédiatement avec firebaseId
+    final maintenanceWithId = maintenance.copyWith(firebaseId: docRef.id);
+    await _db.upsertMaintenance(maintenanceWithId.toCompanion());
 
-      return docRef.id;
-    } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
-      throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
+    if (maintenance.isPlanned) {
+      await _terrainRepository.updateTerrainStatus(
+        maintenance.terrainId,
+        TerrainStatus.maintenance,
+      );
+    } else {
+      await _terrainRepository.updateTerrainStatus(
+        maintenance.terrainId,
+        TerrainStatus.playable,
+      );
     }
+
+    return docRef.id;
+  } on FirebaseException catch (e) {
+    debugPrint('❌ MaintenanceRepository: Failed to add maintenance: ${e.message}');
+    throw RepositoryException('Failed to add maintenance: ${e.message}', cause: e);
   }
+}
 
   @override
   Future<void> updateMaintenance(Maintenance maintenance) async {
@@ -69,13 +73,14 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<void> deleteMaintenance(String firebaseId) async {
-    try {
-      await _fs.collection('maintenance').doc(firebaseId).delete();
-    } on FirebaseException catch (e) {
-      debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
-      throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
-    }
+  try {
+    await _fs.collection('maintenance').doc(firebaseId).delete();
+    await _db.deleteMaintenanceByFirebaseId(firebaseId); // ✅ Drift immédiat
+  } on FirebaseException catch (e) {
+    debugPrint('❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}');
+    throw RepositoryException('Failed to delete maintenance: ${e.message}', cause: e);
   }
+}
 
   Future<List<Maintenance>> getMaintenancesForTerrain(int terrainId) async {
     return _db.getMaintenancesForTerrain(terrainId);
