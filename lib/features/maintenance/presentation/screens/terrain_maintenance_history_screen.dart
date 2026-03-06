@@ -3,9 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entities/terrain.dart';
 import '../../providers/maintenance_provider.dart';
-import '../../../stats/providers/stats_providers.dart';
 import '../widgets/add_maintenance_sheet.dart';
-import '../../../stats/presentation/widgets/maintenance_stats_chart.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
@@ -19,28 +17,6 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final maintenancesAsync = ref.watch(
       maintenancesByTerrainProvider(terrain.id),
-    );
-
-    // Calculate stats periods
-    final now = DateTime.now();
-    final todayStart = DateUtils.startOfDay(now);
-    final todayEnd = DateUtils.endOfDay(now);
-    final weekStart = DateUtils.startOfWeek(now);
-    final weekEnd = DateUtils.endOfWeek(now);
-
-    final todayTotalsAsync = ref.watch(
-      sacsTotalsProvider((
-        terrainId: terrain.id,
-        start: todayStart,
-        end: todayEnd,
-      )),
-    );
-    final weekTotalsAsync = ref.watch(
-      sacsTotalsProvider((
-        terrainId: terrain.id,
-        start: weekStart,
-        end: weekEnd,
-      )),
     );
 
     return Scaffold(
@@ -108,58 +84,59 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
             ),
           ),
 
-          // Stats Section (Charts)
+          // Stats Section (KPI Cards)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Card(
-                elevation: 1, // Minimalist elevation
+                elevation: 1,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    vertical: 24,
+                    vertical: 16,
                     horizontal: 16,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // Today Chart
-                      Expanded(
-                        child: todayTotalsAsync.when(
-                          data: (totals) => MaintenanceStatsChart(
-                            title: "Aujourd'hui",
-                            manto: totals.manto,
-                            sottomanto: totals.sottomanto,
-                            silice: totals.silice,
+                  child: maintenancesAsync.when(
+                    data: (maintenances) {
+                      final monthStart = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfMonth(DateTime.now()));
+
+                      final totalCount = maintenances.length;
+
+                      final monthMaintenances = maintenances.where((m) {
+                         final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+                         return !date.isBefore(monthStart);
+                      }).toList();
+
+                      final monthCount = monthMaintenances.length;
+
+                      final monthSacs = monthMaintenances.fold<int>(0, (sum, m) =>
+                          sum + m.sacsMantoUtilises + m.sacsSottomantoUtilises + m.sacsSiliceUtilises);
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildKPIChip(
+                            icon: Icons.build,
+                            color: Colors.blueGrey,
+                            label: '$totalCount total',
                           ),
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
-                          error: (_, _) => const Center(child: Text('Erreur')),
-                        ),
-                      ),
-                      // Divider
-                      Container(
-                        height: 100,
-                        width: 1,
-                        color: Colors.grey.withValues(alpha: 0.2),
-                      ),
-                      // Week Chart
-                      Expanded(
-                        child: weekTotalsAsync.when(
-                          data: (totals) => MaintenanceStatsChart(
-                            title: 'Cette semaine',
-                            manto: totals.manto,
-                            sottomanto: totals.sottomanto,
-                            silice: totals.silice,
+                          _buildKPIChip(
+                            icon: Icons.check_circle,
+                            color: Colors.green,
+                            label: '$monthCount ce mois',
                           ),
-                          loading: () =>
-                              const Center(child: CircularProgressIndicator()),
-                          error: (_, _) => const Center(child: Text('Erreur')),
-                        ),
-                      ),
-                    ],
+                          _buildKPIChip(
+                            icon: Icons.inventory_2,
+                            color: Colors.brown,
+                            label: '$monthSacs sacs ce mois',
+                          ),
+                        ],
+                      );
+                    },
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (_, __) => const Center(child: Text('Erreur de chargement')),
                   ),
                 ),
               ),
@@ -352,6 +329,36 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
           );
         },
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildKPIChip({
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
