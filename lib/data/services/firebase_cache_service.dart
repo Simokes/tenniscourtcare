@@ -21,13 +21,64 @@ class FirebaseCacheService {
   final List<StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
   _subscriptions = [];
 
+  bool _shouldListen = false;
+  int _restartAttempts = 0;
+  Timer? _restartTimer;
+  StreamSubscription<bool>? _connectivitySubscription;
+
+  static const _baseRestartDelay = Duration(seconds: 3);
+  static const _maxRestartDelay = Duration(seconds: 30);
+
   bool get isListening => _subscriptions.isNotEmpty;
+
+  Duration get _nextRestartDelay {
+    final seconds =
+        _baseRestartDelay.inSeconds * (1 << _restartAttempts.clamp(0, 3));
+    return Duration(
+      seconds: seconds.clamp(
+        _baseRestartDelay.inSeconds,
+        _maxRestartDelay.inSeconds,
+      ),
+    );
+  }
+
+  void _scheduleRestart() {
+    if (!_shouldListen) return; // Arrêt volontaire → ne pas redémarrer
+    _restartTimer?.cancel();
+    final delay = _nextRestartDelay;
+    debugPrint(
+      '⚠️ CacheService: Restart scheduled in ${delay.inSeconds}s (attempt ${_restartAttempts + 1})',
+    );
+    _restartTimer = Timer(delay, () {
+      if (!_shouldListen) return;
+      _restartAttempts++;
+      stopListening();
+      startListening();
+      debugPrint(
+        '🔄 CacheService: Listeners restarted (attempt $_restartAttempts)',
+      );
+    });
+  }
+
+  void startConnectivityMonitoring(Stream<bool> connectivityStream) {
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = connectivityStream.listen((isOnline) {
+      if (isOnline && _shouldListen && !isListening) {
+        debugPrint('🌐 CacheService: Back online — restarting listeners');
+        _restartAttempts = 0; // Reset backoff on manual reconnect
+        startListening();
+      }
+    });
+  }
 
   void startListening() {
     if (isListening) {
       debugPrint('⚠️ CacheService: Already listening, skipping');
       return;
     }
+    _shouldListen = true;
+    _restartAttempts = 0;
+    _restartTimer?.cancel();
     _subscriptions.addAll([
       _listenStock(),
       _listenTerrains(),
@@ -39,6 +90,11 @@ class FirebaseCacheService {
   }
 
   void stopListening() {
+    _shouldListen = false;
+    _restartTimer?.cancel();
+    _restartTimer = null;
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
     for (final sub in _subscriptions) {
       sub.cancel();
     }
@@ -65,7 +121,10 @@ class FirebaseCacheService {
           debugPrint('❌ CacheService: Error processing stock change: $e');
         }
       }
-    }, onError: (e) => debugPrint('❌ CacheService: Stock listener error: $e'));
+    }, onError: (e) {
+      debugPrint('❌ CacheService: Stock listener error: $e');
+      _scheduleRestart();
+    });
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenTerrains() {
@@ -89,7 +148,10 @@ class FirebaseCacheService {
           }
         }
       },
-      onError: (e) => debugPrint('❌ CacheService: Terrains listener error: $e'),
+      onError: (e) {
+        debugPrint('❌ CacheService: Terrains listener error: $e');
+        _scheduleRestart();
+      },
     );
   }
 
@@ -117,8 +179,10 @@ class FirebaseCacheService {
           }
         }
       },
-      onError: (e) =>
-          debugPrint('❌ CacheService: Maintenance listener error: $e'),
+      onError: (e) {
+        debugPrint('❌ CacheService: Maintenance listener error: $e');
+        _scheduleRestart();
+      },
     );
   }
 
@@ -139,7 +203,10 @@ class FirebaseCacheService {
           debugPrint('❌ CacheService: Error processing events change: $e');
         }
       }
-    }, onError: (e) => debugPrint('❌ CacheService: Events listener error: $e'));
+    }, onError: (e) {
+      debugPrint('❌ CacheService: Events listener error: $e');
+      _scheduleRestart();
+    });
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenUsers() {
@@ -188,6 +255,9 @@ class FirebaseCacheService {
           debugPrint('❌ CacheService: Error processing users change: $e');
         }
       }
-    }, onError: (e) => debugPrint('❌ CacheService: Users listener error: $e'));
+    }, onError: (e) {
+      debugPrint('❌ CacheService: Users listener error: $e');
+      _scheduleRestart();
+    });
   }
 }

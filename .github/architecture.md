@@ -299,6 +299,20 @@ class FirebaseCacheService {
 }
 ```
 
+### Résilience du Cache (v3.1+)
+
+FirebaseCacheService implémente deux mécanismes de récupération :
+
+1. Auto-restart sur erreur listener
+   - Chaque onError callback appelle `_scheduleRestart()`
+   - Backoff exponentiel : 3s → 6s → 12s → 24s → 30s (cap)
+   - Respecte `_shouldListen` pour ne pas redémarrer après `signOut()`
+
+2. Restart sur reconnexion réseau
+   - `startConnectivityMonitoring(Stream<bool>)` appelé depuis `AuthNotifier.signIn()`
+   - Redémarre les listeners si `isOnline=true && _shouldListen && !isListening`
+   - Reset du compteur backoff à chaque reconnexion manuelle
+
 **Rules:**
 - `FirebaseCacheService` is the ONLY component that writes to Drift
 - Repositories write to Firestore ONLY

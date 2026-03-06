@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
+import '../../../core/providers/connectivity_providers.dart';
 import '../../../domain/repositories/auth_repository.dart';
 import 'dart:async';
 import '../../../domain/entities/user_entity.dart';
@@ -108,6 +109,11 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         // ✅ Start FirebaseCacheService
         final cacheService = ref.read(firebaseCacheServiceProvider);
         cacheService.startListening();
+
+        // ✅ Start connectivity monitoring for listener resilience
+        final connectivityStream = ref.read(isOnlineStatusProvider.stream);
+        cacheService.startConnectivityMonitoring(connectivityStream);
+
         debugPrint('🔥 AuthNotifier: Cache listeners started');
 
         state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
