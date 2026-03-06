@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../../calendar/providers/event_provider.dart';
-import '../../../calendar/presentation/screens/calendar_screen.dart';
 import '../../../../shared/widgets/premium/premium_card.dart';
 import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
@@ -114,12 +114,7 @@ class UpcomingEventsList extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CalendarScreen(),
-                ),
-              );
+              context.push('/calendar');
             },
             style: TextButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.primary,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
+import 'package:tenniscourtcare/domain/entities/app_event.dart';
+import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
@@ -50,52 +52,32 @@ class CourtListSliver extends ConsumerWidget {
         .where((e) => e.terrainIds.contains(terrain.id))
         .toList();
 
-    Color leftBorderColor = Colors.grey.shade300;
-    String subtitle = 'Disponible';
+    final statusDisplay = _CourtStatusDisplay.resolve(
+      terrain: terrain,
+      todayMaintenances: todayTerrainMaintenances,
+      currentEvents: terrainEvents,
+      context: context,
+    );
+
     Widget? actionWidget;
 
-    if (terrain.status == TerrainStatus.maintenance) {
-      leftBorderColor = Colors.blue;
-      subtitle = '🔧 En maintenance';
-
-      if (todayTerrainMaintenances.isNotEmpty) {
-        final m = todayTerrainMaintenances.first;
-        final start = TimeOfDay(hour: m.startHour, minute: 0).format(context);
-        final end = TimeOfDay(hour: m.startHour + (m.durationMinutes ~/ 60), minute: m.durationMinutes % 60).format(context);
-        subtitle = 'Maintenance • $start → $end';
-        actionWidget = IconButton(
-          icon: const Icon(Icons.check_circle_outline, color: Colors.green),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => AddMaintenanceSheet(
-                terrain: terrain,
-                existingMaintenance: m,
-                forceCompleteMode: true,
-              ),
-            );
-          },
-        );
-      }
-    } else if (terrainEvents.isNotEmpty) {
-      final e = terrainEvents.first;
-      leftBorderColor = Color(e.color);
-      subtitle = '🎾 ${e.title} en cours';
-    } else if (terrain.status == TerrainStatus.playable) {
-      leftBorderColor = Colors.green;
-      if (todayTerrainMaintenances.isNotEmpty) {
-        final m = todayTerrainMaintenances.first;
-        final start = TimeOfDay(hour: m.startHour, minute: 0).format(context);
-        subtitle = '📅 Maintenance prévue à $start';
-      }
-    } else if (terrain.status == TerrainStatus.frozen) {
-      leftBorderColor = Colors.cyan;
-      subtitle = '❄️ Gelé';
-    } else if (terrain.status == TerrainStatus.unavailable) {
-      leftBorderColor = Colors.red;
-      subtitle = '❌ Indisponible';
+    if (terrain.status == TerrainStatus.maintenance && todayTerrainMaintenances.isNotEmpty) {
+      final m = todayTerrainMaintenances.first;
+      actionWidget = IconButton(
+        icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+        onPressed: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => AddMaintenanceSheet(
+              terrain: terrain,
+              existingMaintenance: m,
+              forceCompleteMode: true,
+            ),
+          );
+        },
+      );
     }
 
     return Container(
@@ -119,7 +101,7 @@ class CourtListSliver extends ConsumerWidget {
             width: 6,
             height: 56,
             decoration: BoxDecoration(
-              color: leftBorderColor,
+              color: statusDisplay.color,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 bottomLeft: Radius.circular(16),
@@ -158,7 +140,7 @@ class CourtListSliver extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  subtitle,
+                  statusDisplay.subtitle,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -186,6 +168,74 @@ class CourtListSliver extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CourtStatusDisplay {
+  final Color color;
+  final String subtitle;
+
+  const _CourtStatusDisplay({required this.color, required this.subtitle});
+
+  static _CourtStatusDisplay resolve({
+    required Terrain terrain,
+    required List<Maintenance> todayMaintenances,
+    required List<AppEvent> currentEvents,
+    required BuildContext context,
+  }) {
+    if (terrain.status == TerrainStatus.maintenance) {
+      if (todayMaintenances.isNotEmpty) {
+        final m = todayMaintenances.first;
+        final start = TimeOfDay(hour: m.startHour, minute: 0).format(context);
+        final end = TimeOfDay(
+          hour: m.startHour + (m.durationMinutes ~/ 60),
+          minute: m.durationMinutes % 60,
+        ).format(context);
+        return _CourtStatusDisplay(
+          color: Colors.blue,
+          subtitle: 'Maintenance · $start → $end',
+        );
+      }
+      return const _CourtStatusDisplay(
+        color: Colors.blue,
+        subtitle: 'En maintenance',
+      );
+    }
+    if (currentEvents.isNotEmpty) {
+      return _CourtStatusDisplay(
+        color: Color(currentEvents.first.color),
+        subtitle: '${currentEvents.first.title} en cours',
+      );
+    }
+    if (terrain.status == TerrainStatus.playable) {
+      if (todayMaintenances.isNotEmpty) {
+        final start = TimeOfDay(
+          hour: todayMaintenances.first.startHour,
+          minute: 0,
+        ).format(context);
+        return _CourtStatusDisplay(
+          color: Colors.green,
+          subtitle: 'Maintenance prévue à $start',
+        );
+      }
+      return const _CourtStatusDisplay(
+        color: Colors.green,
+        subtitle: 'Disponible',
+      );
+    }
+    if (terrain.status == TerrainStatus.frozen) {
+      return const _CourtStatusDisplay(color: Colors.cyan, subtitle: 'Gelé');
+    }
+    if (terrain.status == TerrainStatus.unavailable) {
+      return const _CourtStatusDisplay(
+        color: Colors.red,
+        subtitle: 'Indisponible',
+      );
+    }
+    return _CourtStatusDisplay(
+      color: Colors.grey.shade300,
+      subtitle: 'Disponible',
     );
   }
 }
