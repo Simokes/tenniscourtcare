@@ -17,15 +17,18 @@ import '../../providers/refill_recommendation_provider.dart';
 import './refill_recommendation_card.dart';
 import '../../../../shared/services/image_picker_service.dart';
 import '../../../../shared/widgets/common/image_viewer_dialog.dart';
+import '../../../../domain/enums/maintenance_duration.dart';
+import '../../../admin/providers/club_info_provider.dart';
+import '../../../terrain/providers/terrain_provider.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
-  final Terrain terrain;
+  final Terrain? terrain;
   final Maintenance? existingMaintenance;
   final bool forceCompleteMode;
 
   const AddMaintenanceSheet({
     super.key,
-    required this.terrain,
+    this.terrain,
     this.existingMaintenance,
     this.forceCompleteMode = false,
   });
@@ -51,12 +54,17 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   bool? _unplayable;
   late bool _isPlanned;
 
+  Terrain? _selectedTerrain;
+  MaintenanceDuration _duration = MaintenanceDuration.oneHour;
+  TimeOfDay _startTime = const TimeOfDay(hour: 8, minute: 0);
+
   final _dateFormat = DateFormat('dd MMM yyyy', 'fr_FR');
   final _imagePickerService = ImagePickerService();
 
   @override
   void initState() {
     super.initState();
+    _selectedTerrain = widget.terrain;
     final m = widget.existingMaintenance;
     if (m != null) {
       _type = m.type;
@@ -70,6 +78,11 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _frozen = m.terrainGele;
       _unplayable = m.terrainImpraticable;
       _isPlanned = widget.forceCompleteMode ? false : m.isPlanned;
+
+      // Determine duration strategy based on stored values vs opening hours could be complex.
+      // For editing, we'll default to oneHour and set time picker to match if it doesn't align cleanly.
+      _duration = MaintenanceDuration.oneHour;
+      _startTime = TimeOfDay(hour: m.startHour, minute: 0);
     } else {
       _type = '';
       _date = DateTime.now();
@@ -104,9 +117,10 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   }
 
   Future<void> _loadWeather() async {
+    if (_selectedTerrain == null) return;
     try {
       final computed = await ref.read(
-        weatherForClubProvider(widget.terrain.type).future,
+        weatherForClubProvider(_selectedTerrain!.type).future,
       );
 
       if (computed == null) {
@@ -202,8 +216,27 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     }
   }
 
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _startTime,
+    );
+    if (picked != null) {
+      setState(() => _startTime = picked);
+    }
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedTerrain == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez sélectionner un terrain'),
+        ),
+      );
+      return;
+    }
 
     if (_type.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -217,9 +250,21 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     // Save form fields not needed for standard widgets, but good practice
     _formKey.currentState!.save();
 
+    final clubInfo = ref.read(clubInfoProvider).valueOrNull;
+    final openingHour = clubInfo?.openingHour ?? 8;
+    final closingHour = clubInfo?.closingHour ?? 21;
+
+    final computedStartHour = _duration == MaintenanceDuration.oneHour
+        ? _startTime.hour
+        : _duration.startHour(openingHour);
+
+    final computedDurationMinutes = _duration == MaintenanceDuration.oneHour
+        ? 60
+        : _duration.durationMinutes(openingHour, closingHour);
+
     final maintenance = Maintenance(
       id: widget.existingMaintenance?.id,
-      terrainId: widget.terrain.id,
+      terrainId: _selectedTerrain!.id,
       type: _type.trim(),
       commentaire: _commentController.text.trim().isEmpty
           ? null
@@ -229,6 +274,8 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       sacsSottomantoUtilises: _sacsSottomanto,
       sacsSiliceUtilises: _sacsSilice,
       isPlanned: _isPlanned,
+      startHour: computedStartHour,
+      durationMinutes: computedDurationMinutes,
       imagePath: _imagePath,
       weather: _weather,
       terrainGele: _frozen,
@@ -261,10 +308,13 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isTerreBattue = widget.terrain.type == TerrainType.terreBattue;
-    final isSynthetique = widget.terrain.type == TerrainType.synthetique;
-    final isDur = widget.terrain.type == TerrainType.dur;
-    final types = allowedTypesFor(widget.terrain.type);
+    // Determine current terrain properties based on selection
+    final isTerreBattue = _selectedTerrain?.type == TerrainType.terreBattue;
+    final isSynthetique = _selectedTerrain?.type == TerrainType.synthetique;
+    final isDur = _selectedTerrain?.type == TerrainType.dur;
+    final types = _selectedTerrain != null ? allowedTypesFor(_selectedTerrain!.type) : <String>[];
+
+    final allTerrains = ref.watch(terrainsProvider).valueOrNull ?? [];
 
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
@@ -338,6 +388,35 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (widget.terrain == null) ...[
+                          Text(
+                            'Sélectionnez le terrain',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<Terrain>(
+                            value: _selectedTerrain,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            items: allTerrains.map((t) {
+                              return DropdownMenuItem(
+                                value: t,
+                                child: Text(t.nom),
+                              );
+                            }).toList(),
+                            onChanged: widget.existingMaintenance != null ? null : (val) {
+                              setState(() {
+                                _selectedTerrain = val;
+                                _type = ''; // Reset type as options change
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
                         if (!widget.forceCompleteMode) ...[
                           Center(
                             child: SegmentedButton<bool>(
@@ -366,6 +445,70 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                             ),
                           ),
                           const SizedBox(height: 24),
+                        ],
+
+                        if (_selectedTerrain != null) ...[
+                          // Duration Selector
+                          Text(
+                            'Durée de l\'intervention',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: SegmentedButton<MaintenanceDuration>(
+                              segments: MaintenanceDuration.values.map((d) {
+                                return ButtonSegment(
+                                  value: d,
+                                  label: Text(d.label, style: const TextStyle(fontSize: 12)),
+                                );
+                              }).toList(),
+                              selected: {_duration},
+                              onSelectionChanged: (Set<MaintenanceDuration> newSelection) {
+                                setState(() {
+                                  _duration = newSelection.first;
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          if (_duration == MaintenanceDuration.oneHour) ...[
+                            PremiumCard(
+                              padding: const EdgeInsets.all(4),
+                              child: InkWell(
+                                onTap: _pickTime,
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.access_time, color: Colors.blueGrey),
+                                      const SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Heure de début',
+                                            style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.grey.shade600),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            _startTime.format(context),
+                                            style: Theme.of(context).textTheme.titleMedium,
+                                          ),
+                                        ],
+                                      ),
+                                      const Spacer(),
+                                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
                         ],
 
                         // Type Selector
@@ -464,7 +607,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                               child: ref
                                   .watch(
                                     refillRecommendationProvider(
-                                      widget.terrain.id,
+                                        _selectedTerrain!.id,
                                     ),
                                   )
                                   .when(

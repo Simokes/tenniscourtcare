@@ -8,6 +8,8 @@ class ClubInfo {
   final double? longitude;
   final String? phone;
   final String? email;
+  final int? openingHour;
+  final int? closingHour;
   final DateTime updatedAt;
   final String? updatedBy;
 
@@ -21,6 +23,8 @@ class ClubInfo {
     this.longitude,
     this.phone,
     this.email,
+    this.openingHour,
+    this.closingHour,
     required this.updatedAt,
     this.updatedBy,
   });
@@ -35,6 +39,8 @@ class ClubInfo {
     double? longitude,
     String? phone,
     String? email,
+    int? openingHour,
+    int? closingHour,
     DateTime? updatedAt,
     String? updatedBy,
   }) {
@@ -48,6 +54,8 @@ class ClubInfo {
       longitude: longitude ?? this.longitude,
       phone: phone ?? this.phone,
       email: email ?? this.email,
+      openingHour: openingHour ?? this.openingHour,
+      closingHour: closingHour ?? this.closingHour,
       updatedAt: updatedAt ?? this.updatedAt,
       updatedBy: updatedBy ?? this.updatedBy,
     );
@@ -67,6 +75,8 @@ class ClubInfo {
         other.longitude == longitude &&
         other.phone == phone &&
         other.email == email &&
+        other.openingHour == openingHour &&
+        other.closingHour == closingHour &&
         other.updatedAt == updatedAt &&
         other.updatedBy == updatedBy;
   }
@@ -82,6 +92,8 @@ class ClubInfo {
         longitude.hashCode ^
         phone.hashCode ^
         email.hashCode ^
+        openingHour.hashCode ^
+        closingHour.hashCode ^
         updatedAt.hashCode ^
         updatedBy.hashCode;
   }

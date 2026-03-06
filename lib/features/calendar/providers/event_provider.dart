@@ -201,12 +201,16 @@ final calendarItemsProvider =
               updatedAt: DateTime.now(),
             ),
           );
-          final startTime = DateTime.fromMillisecondsSinceEpoch(
-            maintenance.date,
+          final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
+          final startTime = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            maintenance.startHour,
           );
           final endTime = startTime.add(
-            const Duration(hours: 1),
-          ); // Default duration
+            Duration(minutes: maintenance.durationMinutes),
+          );
 
           if (startTime.isBefore(range.end) && endTime.isAfter(range.start)) {
             items.add(

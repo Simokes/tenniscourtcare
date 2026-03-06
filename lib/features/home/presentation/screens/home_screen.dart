@@ -14,6 +14,7 @@ import 'package:tenniscourtcare/features/weather/presentation/widgets/weather_ca
 import '../widgets/upcoming_events.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
+import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -50,6 +51,47 @@ class HomeScreen extends ConsumerWidget {
         slivers: [
           // 1. Sticky Header
           const DashboardHeader(),
+
+          // 1.5 Overdue Maintenance Alert
+          SliverToBoxAdapter(
+            child: Consumer(
+              builder: (context, ref, child) {
+                final overdueCount = ref.watch(overdueCountProvider);
+                if (overdueCount == 0) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: InkWell(
+                    onTap: () => context.push('/maintenance'),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.red.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning_amber, color: Colors.red),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              '⚠️ $overdueCount maintenance(s) en retard',
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: Colors.red),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
 
           // 2. Stats Carousel
           SliverToBoxAdapter(

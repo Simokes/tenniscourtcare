@@ -78,6 +78,17 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.add),
+        label: const Text('Nouvelle maintenance'),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          useSafeArea: true,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (_) => const AddMaintenanceSheet(),
+        ),
+      ),
     );
   }
 }
@@ -116,19 +127,44 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
         );
         final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
 
+        final now = DateTime.now();
+        final isOverdue = date.isBefore(DateTime(now.year, now.month, now.day));
+
+        final color = isOverdue ? Colors.red.shade100 : Colors.white;
+        final iconColor = isOverdue ? Colors.red : Colors.orangeAccent;
+        final icon = isOverdue ? Icons.warning_amber : Icons.schedule;
+
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           elevation: 0,
+          color: color,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
+            side: BorderSide(color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200),
           ),
           child: ListTile(
-            leading: const CircleAvatar(
-              backgroundColor: Colors.orangeAccent,
-              child: Icon(Icons.schedule, color: Colors.white),
+            leading: CircleAvatar(
+              backgroundColor: iconColor,
+              child: Icon(icon, color: Colors.white),
             ),
-            title: Text('${terrain.nom} — ${maintenance.type}'),
+            title: Row(
+              children: [
+                Expanded(child: Text('${terrain.nom} — ${maintenance.type}')),
+                if (isOverdue)
+                  Container(
+                    margin: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'En retard',
+                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+              ],
+            ),
             subtitle: Text('Prévu le ${DateFormat('dd/MM/yyyy').format(date)}'),
             trailing: FilledButton.tonal(
               onPressed: () {
@@ -192,21 +228,7 @@ class _HistoryTab extends ConsumerWidget {
                   ),
                 );
               },
-              onAddMaintenance: () async {
-                final success = await showModalBottomSheet<bool>(
-                  context: context,
-                  useSafeArea: true,
-                  isScrollControlled: true,
-                  showDragHandle: true,
-                  builder: (_) => AddMaintenanceSheet(terrain: terrain),
-                );
-
-                if (success == true && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Maintenance ajoutée')),
-                  );
-                }
-              },
+              onAddMaintenance: () {}, // Handled by FAB now, or could keep it. Better to leave empty as requested.
             );
           },
         );

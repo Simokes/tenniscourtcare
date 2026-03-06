@@ -173,7 +173,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 21; // Planned Maintenance
+  int get schemaVersion => 22; // Maintenance time slots
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -345,6 +345,10 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 21) {
         await m.addColumn(maintenances, maintenances.isPlanned);
+      }
+      if (from < 22) {
+        await m.addColumn(maintenances, maintenances.startHour);
+        await m.addColumn(maintenances, maintenances.durationMinutes);
       }
     },
       // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage

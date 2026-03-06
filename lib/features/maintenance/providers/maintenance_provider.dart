@@ -32,6 +32,21 @@ final plannedMaintenancesProvider = StreamProvider<List<Maintenance>>((ref) {
   return ref.watch(maintenanceRepositoryProvider).watchPlannedMaintenances();
 });
 
+final overdueMaintenancesProvider = Provider<List<Maintenance>>((ref) {
+  final planned = ref.watch(plannedMaintenancesProvider).valueOrNull ?? [];
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+
+  return planned.where((m) {
+    final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+    return date.isBefore(todayStart);
+  }).toList();
+});
+
+final overdueCountProvider = Provider<int>((ref) {
+  return ref.watch(overdueMaintenancesProvider).length;
+});
+
 // --- Maintenance Helpers ---
 
 final maintenancesByTerrainProvider =
@@ -39,12 +54,19 @@ final maintenancesByTerrainProvider =
       final allMaintenances = ref.watch(maintenancesProvider);
       return allMaintenances.when(
         data: (maintenances) => Stream.value(
-          maintenances.where((m) => m.terrainId == terrainId).toList()
+          maintenances.where((m) => m.terrainId == terrainId && !m.isPlanned).toList()
             ..sort((a, b) => b.date.compareTo(a.date)), // Sort by date desc
         ),
         loading: () => Stream.value([]),
         error: (error, stack) => Stream.value([]),
       );
+    });
+
+final plannedMaintenancesByTerrainProvider =
+    Provider.family<List<Maintenance>, int>((ref, terrainId) {
+      final allPlanned = ref.watch(plannedMaintenancesProvider).valueOrNull ?? [];
+      return allPlanned.where((m) => m.terrainId == terrainId).toList()
+        ..sort((a, b) => a.date.compareTo(b.date)); // Sort by date asc
     });
 
 final lastMajorMaintenanceProvider = StreamProvider.family<Maintenance?, int>((
