@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 @DataClassName('StockItemRow')
+@TableIndex(name: 'idx_stock_items_firebase_id', columns: {#firebaseId})
 class StockItems extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 100)();

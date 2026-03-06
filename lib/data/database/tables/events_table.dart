@@ -22,6 +22,7 @@ class IntListConverter extends TypeConverter<List<int>, String> {
 }
 
 @DataClassName('EventRow')
+@TableIndex(name: 'idx_events_firebase_id', columns: {#firebaseId})
 class Events extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();

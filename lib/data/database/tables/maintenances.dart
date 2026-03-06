@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 @DataClassName(
   'MaintenanceRow',
 ) // 👈 très important pour éviter le conflit avec ton entity domaine
+@TableIndex(name: 'idx_maintenances_firebase_id', columns: {#firebaseId})
 class Maintenances extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get terrainId => integer()();

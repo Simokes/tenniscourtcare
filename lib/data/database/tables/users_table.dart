@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import '../../../domain/enums/role.dart';
 
 @DataClassName('UserRow')
+@TableIndex(name: 'idx_users_firestore_uid', columns: {#firestoreUid})
 class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get email => text().unique()();
