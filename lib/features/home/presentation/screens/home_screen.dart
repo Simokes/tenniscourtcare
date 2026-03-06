@@ -181,43 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: StatsCarousel(),
             ),
           ),
-
-          // 3. Weather Card
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: weatherAsync.when(
-                data: (weatherData) => WeatherCard(
-                  weather: weatherData?.context.snapshot,
-                  precip24h: weatherData?.context.precipitationLast24h, // ✅
-                  frozen: weatherData?.frozen, // ✅
-                  unplayable: weatherData?.unplayable, // ✅
-                  onRefresh: () =>
-                      ref.refresh(weatherForClubProvider(terrainType!)),
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => const Center(child: Text('Erreur météo')),
-              ),
-            ),
-          ),
-
-          // 4. Upcoming Events
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 24),
-              child: UpcomingEventsList(),
-            ),
-          ),
-
-          // 5. Stock Alert (Conditional)
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 24),
-              child: StockAlertCard(),
-            ),
-          ),
-
-          // 6. Court Availability Header
+          // 3. Court Availability Header
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -238,8 +202,54 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 7. Court List (Sliver)
+          // 4. Court List (Sliver)
           const CourtListSliver(),
+
+          // 5. Weather Card
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: weatherAsync.when(
+                data: (weatherData) => WeatherCard(
+                  weather: weatherData?.context.snapshot,
+                  precip24h: weatherData?.context.precipitationLast24h, // ✅
+                  frozen: weatherData?.frozen, // ✅
+                  unplayable: weatherData?.unplayable, // ✅
+                  onRefresh: () =>
+                      ref.refresh(weatherForClubProvider(terrainType!)),
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => const Center(child: Text('Erreur météo')),
+              ),
+            ),
+          ),
+
+          // 6. Upcoming Events
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 24),
+              child: UpcomingEventsList(),
+            ),
+          ),
+
+          // 7. Stock Alert (Conditional)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 24),
+              child: StockAlertCard(),
+            ),
+          ),
+
+
+
+
+
+
+
+
+
+
+
         ],
       ),
       floatingActionButton: speedDialChildren.isEmpty
