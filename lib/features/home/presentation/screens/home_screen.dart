@@ -2,9 +2,7 @@ import 'package:tenniscourtcare/features/weather/providers/weather_for_club_prov
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tenniscourtcare/features/home/providers/dashboard_providers.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -31,7 +29,6 @@ class HomeScreen extends ConsumerWidget {
     ref.watch(maintenanceSchedulerProvider);
 
     // Providers
-    final todayMaintenanceCount = ref.watch(todayMaintenanceCountProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
     final terrains = terrainsAsync.valueOrNull ?? const <Terrain>[];
     final TerrainType? terrainType = terrains.isNotEmpty
@@ -40,19 +37,6 @@ class HomeScreen extends ConsumerWidget {
     final weatherAsync = terrainType != null
         ? ref.watch(weatherForClubProvider(terrainType))
         : const AsyncValue.loading();
-
-    // New Stock Provider Logic
-    final lowStockCount = ref.watch(lowStockCountProvider);
-    // Convert List<StockItem> to int for the carousel
-    final stockAlertCountAsync = ref
-        .watch(stockItemsProvider)
-        .whenData((_) => lowStockCount);
-
-    // Calculate operational courts for the stats card
-    final operationalCountAsync = terrainsAsync.whenData(
-      (terrains) =>
-          terrains.where((t) => t.status == TerrainStatus.playable).toList(),
-    );
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -113,14 +97,10 @@ class HomeScreen extends ConsumerWidget {
           ),
 
           // 2. Stats Carousel
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: StatsCarousel(
-                todayMaintenanceCount: todayMaintenanceCount,
-                stockAlertCount: stockAlertCountAsync,
-                operationalTerrainsCount: operationalCountAsync,
-              ),
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: StatsCarousel(),
             ),
           ),
 

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/core_providers.dart';
-import '../../../domain/entities/terrain.dart';
+import '../../terrain/providers/terrain_provider.dart';
 import '../../../domain/entities/app_event.dart';
 import '../../../domain/entities/maintenance.dart';
 import '../../calendar/providers/event_provider.dart';
@@ -25,34 +25,27 @@ final todayMaintenanceCountProvider = StreamProvider<int>((ref) {
     59,
   ).millisecondsSinceEpoch;
 
-  // We need a set of all terrain IDs to use watchDailyMaintenanceTypeCounts
-  // or we need to modify the DB method to accept an optional set.
-  // For now, let's get all terrains first.
-  final terrainsAsync = ref.watch(dashboardTerrainsProvider);
+  final terrains = ref.watch(terrainsProvider).valueOrNull ?? [];
+  final ids = terrains.map((t) => t.id).toSet();
+  if (ids.isEmpty) return Stream.value(0);
 
-  return terrainsAsync.when(
-    data: (terrains) {
-      final ids = terrains.map((t) => t.id).toSet();
-      if (ids.isEmpty) return Stream.value(0);
-
-      return database
-          .watchDailyMaintenanceTypeCounts(
-            terrainIds: ids,
-            start: startOfDay,
-            end: endOfDay,
-          )
-          .map((list) => list.fold(0, (sum, item) => sum + item.count));
-    },
-    loading: () => Stream.value(0),
-    error: (context, index) => Stream.value(0),
-  );
+  return database
+      .watchDailyMaintenanceTypeCounts(
+        terrainIds: ids,
+        start: startOfDay,
+        end: endOfDay,
+      )
+      .map((list) => list.fold(0, (sum, item) => sum + item.count));
 });
 
-/// Provider for all terrains
-final dashboardTerrainsProvider = FutureProvider<List<Terrain>>((ref) async {
-  final database = ref.watch(databaseProvider);
-  return database.getAllTerrains();
-});
+/// Stats terrains opérationnels : ({int playable, int total}).
+/// Utilisé par StatsCarousel pour afficher "X/Y opérationnels".
+final operationalTerrainsStatsProvider =
+    Provider<({int playable, int total})>((ref) {
+      final total = ref.watch(terrainsProvider).valueOrNull?.length ?? 0;
+      final playable = ref.watch(playableTerrainCountProvider);
+      return (playable: playable, total: total);
+    });
 
 // Events happening RIGHT NOW (today, within current time)
 final currentEventsProvider = Provider<List<AppEvent>>((ref) {

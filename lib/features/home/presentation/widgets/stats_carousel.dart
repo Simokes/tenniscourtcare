@@ -3,22 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
-class StatsCarousel extends ConsumerWidget {
-  final AsyncValue<int> todayMaintenanceCount;
-  final AsyncValue<int> stockAlertCount;
-  final AsyncValue<List<dynamic>> operationalTerrainsCount; // Ideally typed
+import '../../providers/dashboard_providers.dart';
+import '../../../inventory/providers/stock_provider.dart';
 
-  const StatsCarousel({
-    super.key,
-    required this.todayMaintenanceCount,
-    required this.stockAlertCount,
-    required this.operationalTerrainsCount,
-  });
+class StatsCarousel extends ConsumerWidget {
+  const StatsCarousel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(operationalTerrainsStatsProvider);
+    final todayMaintenanceAsync = ref.watch(todayMaintenanceCountProvider);
+    final lowStockCount = ref.watch(lowStockCountProvider);
+
     return SizedBox(
-      height: 120, // Adjust height as needed
+      height: 120,
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -26,47 +24,33 @@ class StatsCarousel extends ConsumerWidget {
           _buildStatCard(
             context,
             icon: Icons.check_circle,
-            iconColor: const Color(0xFF003580), // Primary
-            value: operationalTerrainsCount.when(
-              data: (list) =>
-                  '${list.length}/${list.length}', // Placeholder total
-              loading: () => '-',
-              error: (_, _) => '!',
-            ),
-            label: 'Operational',
-            onTap: () {
-              // Could navigate to terrains/status list
-            },
+            iconColor: const Color(0xFF003580),
+            value: stats.total == 0
+                ? '-'
+                : '${stats.playable}/${stats.total}',
+            label: 'Opérationnels',
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             context,
             icon: Icons.construction,
-            iconColor: const Color(0xFF0EA5E9), // Secondary
-            value: todayMaintenanceCount.when(
+            iconColor: const Color(0xFF0EA5E9),
+            value: todayMaintenanceAsync.when(
               data: (val) => '$val',
               loading: () => '-',
-              error: (_, _) => '!',
+              error: (_, __) => '!',
             ),
-            label: 'Maintenance',
-            onTap: () {
-              context.push('/maintenance');
-            },
+            label: 'Maintenances',
+            onTap: () => context.push('/maintenance'),
           ),
           const SizedBox(width: 12),
           _buildStatCard(
             context,
             icon: Icons.inventory_2,
-            iconColor: Colors.orange,
-            value: stockAlertCount.when(
-              data: (val) => '$val',
-              loading: () => '-',
-              error: (_, _) => '!',
-            ),
-            label: 'Low Stocks',
-            onTap: () {
-              context.push('/stock');
-            },
+            iconColor: lowStockCount > 0 ? Colors.red : Colors.orange,
+            value: '$lowStockCount',
+            label: 'Stocks bas',
+            onTap: () => context.push('/stock'),
           ),
         ],
       ),

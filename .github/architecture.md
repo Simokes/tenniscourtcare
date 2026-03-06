@@ -603,6 +603,7 @@ final terrainProvider = StreamProvider<List<Terrain>>(...);
 // Filtered/computed providers
 final filteredStockItemsProvider = StreamProvider<List<StockItem>>(...);
 final lowStockItemsProvider = StreamProvider.autoDispose<List<StockItem>>(...);
+final operationalTerrainsStatsProvider = Provider<({int playable, int total})>(...);
 
 // State providers (mutable UI)
 final stockFilterProvider = StateProvider<StockFilter>(...);
