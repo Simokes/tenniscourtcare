@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-**Version:** 2.0
-**Last Updated:** 2025
-**Target:** Claude 3.5 Sonnet & Jules Agent (jules.google.com)
+**Version:** 2.1
+**Last Updated:** 2026-03-06
+**Target:** Claude Sonnet 4.6 & Jules Agent (jules.google.com)
 
 ---
 
@@ -12,11 +12,11 @@ Before performing **any** task, you **MUST** read and strictly adhere to these d
 
 | Priority | Document | Purpose |
 |----------|----------|---------|
-| 1 | `AI_RULES.md` | Roles, autorisation, workflow Claude ↔ Jules |
-| 2 | `ARCHITECTURE.md` | Schema v22, layer boundaries, patterns |
-| 3 | `CODING_RULES.md` | Naming, widget structure, forbidden patterns |
-| 4 | `PROJECT_SUMMARY.md` | Roadmap, priorités critiques, dette technique |
-| 5 | `FEATURE_WORKFLOW.md` | Processus feature complète (analyse → merge) |
+| 1 | `.github/ai_rules.md` | Roles, autorisation, workflow Claude ↔ Jules |
+| 2 | `.github/architecture.md` | Schema v22, layer boundaries, patterns |
+| 3 | `.github/coding_rules.md` | Naming, widget structure, forbidden patterns |
+| 4 | `.github/project_summary.md` | Roadmap, priorités critiques, dette technique |
+| 5 | `.github/feature_workflow.md` | Processus feature complète (analyse → merge) |
 
 **Conflict resolution:**
 ```
@@ -251,28 +251,12 @@ class Terrain {
 
 | Responsibility | Path |
 |----------------|------|
-| Router & Navigation Gates | 
-
-app_router.dart
-
- |
-| Database Schema (v22) | 
-
-app_database.dart
-
- |
-| Firebase Cache Service | 
-
-firebase_cache_service.dart
-
- |
-| Auth Logic & Providers | 
-
-providers
-
- |
-| AI Decisions Log | `/ai_log/decisions.md` |
-| Feature Roadmap | `PROJECT_SUMMARY.md` |
+| Router & Navigation Gates | `lib/core/router/app_router.dart` |
+| Database Schema (v22) | `lib/data/database/app_database.dart` |
+| Firebase Cache Service | `lib/data/services/firebase_cache_service.dart` |
+| Auth Logic & Providers | `lib/features/auth/providers/` |
+| AI Decisions Log | `.github/ai_log/decisions.md` |
+| Feature Roadmap | `.github/project_summary.md` |
 
 ---
 
@@ -340,7 +324,7 @@ lib/
 
 ---
 
-**Last Updated:** 2025
-**Target:** Claude 3.5 Sonnet & Jules Agent
+**Last Updated:** 2026-03-06
+**Target:** Claude Sonnet 4.6 & Jules Agent
 **Schema Version:** v22
 ```
