@@ -16,6 +16,7 @@ import '../../features/inventory/presentation/screens/stock_screen.dart';
 import '../../features/weather/presentation/screens/weather_screen.dart';
 import '../../features/calendar/presentation/screens/calendar_screen.dart';
 import '../../features/maintenance/presentation/screens/maintenance_screen.dart';
+import '../../features/maintenance/presentation/screens/maintenance_history_screen.dart';
 import '../../features/stats/presentation/screens/stats_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/terrain/presentation/screens/add_terrain_screen.dart';
@@ -129,6 +130,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/maintenance',
         builder: (context, state) => const MaintenanceScreen(),
+        routes: [
+          GoRoute(
+            path: 'history',
+            builder: (context, state) => const MaintenanceHistoryScreen(),
+          ),
+        ],
       ),
       GoRoute(path: '/stats', builder: (context, state) => const StatsScreen()),
       GoRoute(

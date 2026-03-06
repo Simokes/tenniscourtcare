@@ -192,6 +192,10 @@ void main() {
     testWidgets('redirects to /admin-setup when status is needsAdminSetup', (tester) async {
       await mockNetworkImagesFor(() async {
         late GoRouter router;
+        tester.view.physicalSize = const Size(3000, 4000);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
@@ -246,15 +250,15 @@ void main() {
             ],
             child: Consumer(builder: (context, ref, _) {
               router = ref.watch(goRouterProvider);
-              return MaterialApp.router(routerConfig: router);
+              return Directionality(textDirection: TextDirection.ltr, child: MaterialApp.router(routerConfig: router));
             }),
           ),
         );
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await tester.pump();
 
         // Try to navigate to login
         router.go('/login');
-        await tester.pumpAndSettle(const Duration(seconds: 1));
+        await tester.pump();
         expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
       });
     });
