@@ -1,4 +1,9 @@
 import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
+
+import 'package:tenniscourtcare/domain/enums/permission.dart';
+import 'package:tenniscourtcare/domain/logic/permission_resolver.dart';
+import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,11 +25,83 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _scrollController = ScrollController();
+  final _courtsKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    // 1. Lire le rôle courant
+    final user = ref.watch(currentUserProvider);
+    final userRole = user?.role;
+    final canEditMaintenance = userRole != null &&
+        PermissionResolver.hasPermission(userRole, Permission.canEditMaintenance);
+    final canManageReservations = userRole != null &&
+        PermissionResolver.hasPermission(userRole, Permission.canManageReservations);
+
+    // 2. Construire la liste conditionnellement
+    final speedDialChildren = <SpeedDialChild>[
+      if (canEditMaintenance)
+        SpeedDialChild(
+          child: const Icon(Icons.build_outlined, color: Colors.white),
+          backgroundColor: Colors.orange,
+          label: 'Nouvelle maintenance',
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const AddMaintenanceSheet(),
+            );
+          },
+        ),
+      if (canManageReservations)
+        SpeedDialChild(
+          child: const Icon(Icons.event_outlined, color: Colors.white),
+          backgroundColor: Colors.blue,
+          label: 'Nouvel événement',
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AddEditEventScreen(),
+              ),
+            );
+          },
+        ),
+      if (canEditMaintenance)
+        SpeedDialChild(
+          child: const Icon(Icons.warning_amber_outlined, color: Colors.white),
+          backgroundColor: Colors.red,
+          label: 'Signaler problème',
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => const AddMaintenanceSheet(urgentMode: true),
+            );
+          },
+        ),
+    ];
+
     // Activer le scheduler en gardant le timer actif tant que cet écran est affiché
     ref.watch(maintenanceSchedulerProvider);
 
@@ -41,6 +118,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           // 1. Sticky Header
           const DashboardHeader(),
@@ -103,8 +181,31 @@ class HomeScreen extends ConsumerWidget {
               child: StatsCarousel(),
             ),
           ),
+          // 3. Court Availability Header
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    key: _courtsKey,
+                    'Disponibilité des courts',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
-          // 3. Weather Card
+          // 4. Court List (Sliver)
+          const CourtListSliver(),
+
+          // 5. Weather Card
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 24),
@@ -123,7 +224,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // 4. Upcoming Events
+          // 6. Upcoming Events
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(bottom: 24),
@@ -131,7 +232,7 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // 5. Stock Alert (Conditional)
+          // 7. Stock Alert (Conditional)
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.only(bottom: 24),
@@ -139,31 +240,21 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // 6. Court Availability Header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Court Availability',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
 
-          // 7. Court List (Sliver)
-          const CourtListSliver(),
+
+
+
+
+
+
+
+
+
         ],
       ),
-      floatingActionButton: SpeedDial(
+      floatingActionButton: speedDialChildren.isEmpty
+          ? null
+          : SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
         backgroundColor: const Color(0xFF003580),
@@ -172,50 +263,7 @@ class HomeScreen extends ConsumerWidget {
         activeForegroundColor: Colors.white,
         elevation: 8.0,
         shape: const CircleBorder(),
-        children: [
-          SpeedDialChild(
-            child: const Icon(Icons.build_outlined, color: Colors.white),
-            backgroundColor: Colors.orange,
-            label: 'Nouvelle maintenance',
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const AddMaintenanceSheet(),
-              );
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.event_outlined, color: Colors.white),
-            backgroundColor: Colors.blue,
-            label: 'Nouvel événement',
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddEditEventScreen(),
-                ),
-              );
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Icons.warning_amber_outlined, color: Colors.white),
-            backgroundColor: Colors.red,
-            label: 'Signaler problème',
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            onTap: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => const AddMaintenanceSheet(urgentMode: true),
-              );
-            },
-          ),
-        ],
+        children: speedDialChildren,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
@@ -242,7 +290,14 @@ class HomeScreen extends ConsumerWidget {
               IconButton(
                 icon: Icon(Icons.stadium_rounded, color: Colors.grey.shade400),
                 onPressed: () {
-                  // Scroll to Courts? Or navigate? For now placeholder
+                  if (_courtsKey.currentContext != null) {
+                    Scrollable.ensureVisible(
+                      _courtsKey.currentContext!,
+                      duration: const Duration(milliseconds: 400),
+                      curve: Curves.easeInOut,
+                      alignment: 0.0,
+                    );
+                  }
                 },
               ),
               const SizedBox(width: 40), // Spacer for FAB
