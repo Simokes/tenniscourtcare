@@ -20,6 +20,7 @@ class MaintenanceMapper {
       sacsMantoUtilises: model.sacsMantoUtilises,
       sacsSottomantoUtilises: model.sacsSottomantoUtilises,
       sacsSiliceUtilises: model.sacsSiliceUtilises,
+      isPlanned: model.isPlanned,
       imagePath: model.imagePath,
       weather: model.weather != null
           ? WeatherSnapshot.fromJson(model.weather!)
@@ -45,6 +46,7 @@ class MaintenanceMapper {
       sacsMantoUtilises: domain.sacsMantoUtilises,
       sacsSottomantoUtilises: domain.sacsSottomantoUtilises,
       sacsSiliceUtilises: domain.sacsSiliceUtilises,
+      isPlanned: domain.isPlanned,
       imagePath: domain.imagePath,
       weather: domain.weather?.toJson(),
       terrainGele: domain.terrainGele,
@@ -68,6 +70,7 @@ class MaintenanceMapper {
       sacsMantoUtilises: driftEntity.sacsMantoUtilises,
       sacsSottomantoUtilises: driftEntity.sacsSottomantoUtilises,
       sacsSiliceUtilises: driftEntity.sacsSiliceUtilises,
+      isPlanned: driftEntity.isPlanned,
       imagePath: driftEntity.imagePath,
       // Weather and flags are not stored in SQLite currently
       weather: null,
@@ -91,6 +94,7 @@ class MaintenanceMapper {
       'sacsMantoUtilises': item.sacsMantoUtilises,
       'sacsSottomantoUtilises': item.sacsSottomantoUtilises,
       'sacsSiliceUtilises': item.sacsSiliceUtilises,
+      'isPlanned': item.isPlanned,
       'imagePath': item.imagePath,
       'weather': item.weather?.toJson(),
       'terrainGele': item.terrainGele,
@@ -124,6 +128,7 @@ class MaintenanceMapper {
       sacsMantoUtilises: drift.Value(data['sacsMantoUtilises'] as int? ?? 0),
       sacsSottomantoUtilises: drift.Value(data['sacsSottomantoUtilises'] as int? ?? 0),
       sacsSiliceUtilises: drift.Value(data['sacsSiliceUtilises'] as int? ?? 0),
+      isPlanned: drift.Value(data['isPlanned'] as bool? ?? false),
       imagePath: data['imagePath'] != null
           ? drift.Value(data['imagePath'] as String)
           : const drift.Value.absent(),
@@ -164,6 +169,7 @@ extension MaintenanceMapperX on Maintenance {
       sacsMantoUtilises: drift.Value(sacsMantoUtilises),
       sacsSottomantoUtilises: drift.Value(sacsSottomantoUtilises),
       sacsSiliceUtilises: drift.Value(sacsSiliceUtilises),
+      isPlanned: drift.Value(isPlanned),
       imagePath: imagePath == null
           ? const drift.Value.absent()
           : drift.Value(imagePath),

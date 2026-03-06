@@ -15,6 +15,8 @@ class MaintenanceModel {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
 
+  final bool isPlanned;
+
   final String? imagePath;
   final Map<String, dynamic>? weather; // JSON ready
 
@@ -37,6 +39,7 @@ class MaintenanceModel {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.isPlanned = false,
     this.imagePath,
     this.weather,
     this.terrainGele,
@@ -67,6 +70,7 @@ class MaintenanceModel {
       sacsMantoUtilises: json['sacsMantoUtilises'] as int,
       sacsSottomantoUtilises: json['sacsSottomantoUtilises'] as int,
       sacsSiliceUtilises: json['sacsSiliceUtilises'] as int,
+      isPlanned: json['isPlanned'] as bool? ?? false,
       imagePath: json['imagePath'] as String?,
       weather: json['weather'] as Map<String, dynamic>?,
       terrainGele: json['terrainGele'] as bool?,
@@ -92,6 +96,7 @@ class MaintenanceModel {
       'sacsMantoUtilises': sacsMantoUtilises,
       'sacsSottomantoUtilises': sacsSottomantoUtilises,
       'sacsSiliceUtilises': sacsSiliceUtilises,
+      'isPlanned': isPlanned,
       'imagePath': imagePath,
       'weather': weather,
       'terrainGele': terrainGele,
@@ -115,6 +120,7 @@ class MaintenanceModel {
       sacsMantoUtilises: sacsMantoUtilises,
       sacsSottomantoUtilises: sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises,
+      isPlanned: isPlanned,
       imagePath: imagePath,
       weather: weather != null ? WeatherSnapshot.fromJson(weather!) : null,
       terrainGele: terrainGele,
@@ -140,6 +146,7 @@ class MaintenanceModel {
       sacsMantoUtilises: maintenance.sacsMantoUtilises,
       sacsSottomantoUtilises: maintenance.sacsSottomantoUtilises,
       sacsSiliceUtilises: maintenance.sacsSiliceUtilises,
+      isPlanned: maintenance.isPlanned,
       imagePath: maintenance.imagePath,
       weather: maintenance.weather?.toJson(),
       terrainGele: maintenance.terrainGele,

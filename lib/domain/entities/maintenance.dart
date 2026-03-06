@@ -12,6 +12,9 @@ class Maintenance {
   final int sacsSottomantoUtilises;
   final int sacsSiliceUtilises;
 
+  /// Indique si la maintenance est planifiée dans le futur (true) ou déjà réalisée (false)
+  final bool isPlanned;
+
   /// Chemin vers la photo de preuve (optionnel)
   final String? imagePath;
 
@@ -38,6 +41,7 @@ class Maintenance {
     required this.sacsMantoUtilises,
     required this.sacsSottomantoUtilises,
     required this.sacsSiliceUtilises,
+    this.isPlanned = false,
     this.imagePath,
     this.weather,
     this.terrainGele,
@@ -59,6 +63,7 @@ class Maintenance {
     int? sacsMantoUtilises,
     int? sacsSottomantoUtilises,
     int? sacsSiliceUtilises,
+    bool? isPlanned,
     String? imagePath,
     WeatherSnapshot? weather,
     bool? terrainGele,
@@ -79,6 +84,7 @@ class Maintenance {
       sacsSottomantoUtilises:
           sacsSottomantoUtilises ?? this.sacsSottomantoUtilises,
       sacsSiliceUtilises: sacsSiliceUtilises ?? this.sacsSiliceUtilises,
+      isPlanned: isPlanned ?? this.isPlanned,
       imagePath: imagePath ?? this.imagePath,
       weather: weather ?? this.weather,
       terrainGele: terrainGele ?? this.terrainGele,
@@ -104,6 +110,7 @@ class Maintenance {
           sacsMantoUtilises == other.sacsMantoUtilises &&
           sacsSottomantoUtilises == other.sacsSottomantoUtilises &&
           sacsSiliceUtilises == other.sacsSiliceUtilises &&
+          isPlanned == other.isPlanned &&
           imagePath == other.imagePath &&
           weather == other.weather &&
           terrainGele == other.terrainGele &&
@@ -124,6 +131,7 @@ class Maintenance {
       sacsMantoUtilises.hashCode ^
       sacsSottomantoUtilises.hashCode ^
       sacsSiliceUtilises.hashCode ^
+      isPlanned.hashCode ^
       imagePath.hashCode ^
       weather.hashCode ^
       terrainGele.hashCode ^
@@ -138,7 +146,7 @@ class Maintenance {
   String toString() =>
       'Maintenance(id: $id, terrainId: $terrainId, type: $type, date: $date, '
       'manto: $sacsMantoUtilises, sotto: $sacsSottomantoUtilises, silice: $sacsSiliceUtilises, '
-      'imagePath: $imagePath, '
+      'isPlanned: $isPlanned, imagePath: $imagePath, '
       'weather: $weather, gele: $terrainGele, impraticable: $terrainImpraticable, '
       'createdAt: $createdAt, updatedAt: $updatedAt)';
 }

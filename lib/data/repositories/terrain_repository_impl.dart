@@ -66,4 +66,15 @@ class TerrainRepositoryImpl implements TerrainRepository {
   Future<Terrain?> getTerrainById(int id) async {
     return _db.getTerrainById(id);
   }
+
+  @override
+  Future<void> updateTerrainStatus(int terrainId, TerrainStatus status) async {
+    final terrain = await _db.getTerrainById(terrainId);
+    if (terrain != null && terrain.firebaseId != null) {
+      final updatedTerrain = terrain.copyWith(status: status);
+      await updateTerrain(updatedTerrain);
+    } else {
+      throw const RepositoryException('Terrain not found or lacks firebaseId');
+    }
+  }
 }

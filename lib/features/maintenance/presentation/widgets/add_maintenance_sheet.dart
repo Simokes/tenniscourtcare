@@ -20,12 +20,14 @@ import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain terrain;
-  final Maintenance? maintenance;
+  final Maintenance? existingMaintenance;
+  final bool forceCompleteMode;
 
   const AddMaintenanceSheet({
     super.key,
     required this.terrain,
-    this.maintenance,
+    this.existingMaintenance,
+    this.forceCompleteMode = false,
   });
 
   @override
@@ -47,6 +49,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   double? _precip24h;
   bool? _frozen;
   bool? _unplayable;
+  late bool _isPlanned;
 
   final _dateFormat = DateFormat('dd MMM yyyy', 'fr_FR');
   final _imagePickerService = ImagePickerService();
@@ -54,7 +57,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   @override
   void initState() {
     super.initState();
-    final m = widget.maintenance;
+    final m = widget.existingMaintenance;
     if (m != null) {
       _type = m.type;
       _commentController.text = m.commentaire ?? '';
@@ -66,12 +69,14 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       _weather = m.weather;
       _frozen = m.terrainGele;
       _unplayable = m.terrainImpraticable;
+      _isPlanned = widget.forceCompleteMode ? false : m.isPlanned;
     } else {
       _type = '';
       _date = DateTime.now();
       _sacsManto = 0;
       _sacsSottomanto = 0;
       _sacsSilice = 0;
+      _isPlanned = false;
     }
   }
 
@@ -131,7 +136,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
   }
 
   Future<void> _delete() async {
-    final firebaseId = widget.maintenance?.firebaseId;
+    final firebaseId = widget.existingMaintenance?.firebaseId;
     if (firebaseId == null) return;
 
     final confirm = await showDialog<bool>(
@@ -180,7 +185,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       context: context,
       initialDate: _date,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: _isPlanned ? DateTime.now().add(const Duration(days: 365)) : DateTime.now(),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -213,7 +218,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     _formKey.currentState!.save();
 
     final maintenance = Maintenance(
-      id: widget.maintenance?.id,
+      id: widget.existingMaintenance?.id,
       terrainId: widget.terrain.id,
       type: _type.trim(),
       commentaire: _commentController.text.trim().isEmpty
@@ -223,17 +228,24 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       sacsMantoUtilises: _sacsManto,
       sacsSottomantoUtilises: _sacsSottomanto,
       sacsSiliceUtilises: _sacsSilice,
+      isPlanned: _isPlanned,
       imagePath: _imagePath,
       weather: _weather,
       terrainGele: _frozen,
       terrainImpraticable: _unplayable,
-      createdAt: widget.maintenance?.createdAt ?? DateTime.now(),
+      createdAt: widget.existingMaintenance?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
+      firebaseId: widget.existingMaintenance?.firebaseId,
     );
 
     try {
       final notifier = ref.read(maintenanceNotifierProvider.notifier);
-      if (widget.maintenance != null) {
+      if (widget.forceCompleteMode && widget.existingMaintenance?.firebaseId != null) {
+        await notifier.markAsCompleted(
+          firebaseId: widget.existingMaintenance!.firebaseId!,
+          completed: maintenance,
+        );
+      } else if (widget.existingMaintenance != null) {
         await notifier.updateMaintenance(maintenance);
       } else {
         await notifier.addMaintenance(maintenance);
@@ -292,14 +304,16 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        widget.maintenance != null
-                            ? 'Modifier la maintenance'
-                            : 'Nouvelle maintenance',
+                        widget.forceCompleteMode
+                            ? 'Effectuer maintenance'
+                            : widget.existingMaintenance != null
+                                ? 'Modifier la maintenance'
+                                : 'Nouvelle maintenance',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    if (widget.maintenance?.firebaseId != null)
+                    if (widget.existingMaintenance?.firebaseId != null && !widget.forceCompleteMode)
                       IconButton(
                         icon: const Icon(Icons.delete_outline, color: Colors.red),
                         onPressed: _delete,
@@ -324,6 +338,36 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (!widget.forceCompleteMode) ...[
+                          Center(
+                            child: SegmentedButton<bool>(
+                              segments: const [
+                                ButtonSegment(
+                                  value: false,
+                                  label: Text('Réalisée maintenant'),
+                                  icon: Icon(Icons.check_circle_outline),
+                                ),
+                                ButtonSegment(
+                                  value: true,
+                                  label: Text('Planifier'),
+                                  icon: Icon(Icons.schedule),
+                                ),
+                              ],
+                              selected: {_isPlanned},
+                              onSelectionChanged: (Set<bool> newSelection) {
+                                setState(() {
+                                  _isPlanned = newSelection.first;
+                                  // Reset date appropriately
+                                  if (!_isPlanned && _date.isAfter(DateTime.now())) {
+                                    _date = DateTime.now();
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+
                         // Type Selector
                         Text(
                           'Type d\'intervention',
@@ -390,19 +434,20 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
 
                         const SizedBox(height: 24),
 
-                        // Weather Section
-                        WeatherCard(
-                          weather: _weather,
-                          precip24h: _precip24h,
-                          frozen: _frozen,
-                          unplayable: _unplayable,
-                          onRefresh: _loadWeather,
-                        ),
+                        if (!_isPlanned) ...[
+                          // Weather Section
+                          WeatherCard(
+                            weather: _weather,
+                            precip24h: _precip24h,
+                            frozen: _frozen,
+                            unplayable: _unplayable,
+                            onRefresh: _loadWeather,
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                        // Materials Section (Conditionals)
-                        if (!isDur) ...[
+                          // Materials Section (Conditionals)
+                          if (!isDur) ...[
                           Text(
                             'Matériaux utilisés',
                             style: Theme.of(context).textTheme.titleMedium
@@ -578,6 +623,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                               ),
                             ],
                           ),
+                        ],
 
                         const SizedBox(height: 24),
 
@@ -597,7 +643,10 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                 padding: const EdgeInsets.all(24.0),
                 child: SizedBox(
                   width: double.infinity,
-                  child: PremiumButton(label: 'Enregistrer', onPressed: _save),
+                  child: PremiumButton(
+                    label: _isPlanned ? 'Planifier' : 'Enregistrer',
+                    onPressed: _save,
+                  ),
                 ),
               ),
             ],

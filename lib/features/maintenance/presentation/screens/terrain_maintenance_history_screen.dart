@@ -284,7 +284,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                               isScrollControlled: true,
                               builder: (_) => AddMaintenanceSheet(
                                 terrain: terrain,
-                                maintenance: maintenance,
+                            existingMaintenance: maintenance,
                               ),
                             );
                           },

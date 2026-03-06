@@ -6,4 +6,5 @@ abstract class TerrainRepository {
   Future<void> deleteTerrain(String firebaseId);
   Future<List<Terrain>> getAllTerrains();
   Future<Terrain?> getTerrainById(int id);
+  Future<void> updateTerrainStatus(int terrainId, TerrainStatus status);
 }

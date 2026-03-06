@@ -132,7 +132,7 @@ class _EventItem extends ConsumerWidget {
                   backgroundColor: Colors.transparent,
                   builder: (context) => AddMaintenanceSheet(
                     terrain: terrain,
-                    maintenance: item.originalObject,
+                    existingMaintenance: item.originalObject,
                   ),
                 );
               }

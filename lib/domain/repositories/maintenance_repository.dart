@@ -6,4 +6,9 @@ abstract class MaintenanceRepository {
   Future<void> deleteMaintenance(String firebaseId);
   Future<List<Maintenance>> getAllMaintenances();
   Future<Maintenance?> getMaintenanceById(int id);
+  Stream<List<Maintenance>> watchPlannedMaintenances();
+  Future<void> markAsCompleted({
+    required String firebaseId,
+    required Maintenance completed,
+  });
 }

@@ -173,7 +173,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 20; // Signup Flow
+  int get schemaVersion => 21; // Planned Maintenance
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -343,8 +343,11 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(users, users.approvedAt);
         await m.addColumn(users, users.approvedBy);
       }
+      if (from < 21) {
+        await m.addColumn(maintenances, maintenances.isPlanned);
+      }
     },
-     // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
+      // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage
     beforeOpen: (details) async {
       if (details.wasCreated) {
         // Nouvelle installation → tables vides → rien à faire
