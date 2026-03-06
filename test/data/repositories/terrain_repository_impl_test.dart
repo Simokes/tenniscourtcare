@@ -10,9 +10,15 @@ import 'package:tenniscourtcare/domain/models/repository_exception.dart';
 import '../../fixtures/test_data.dart';
 
 class MockAppDatabase extends Mock implements AppDatabase {}
+
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-class MockCollectionReference extends Mock implements CollectionReference<Map<String, dynamic>> {}
-class MockDocumentReference extends Mock implements DocumentReference<Map<String, dynamic>> {}
+
+class MockCollectionReference extends Mock
+    implements CollectionReference<Map<String, dynamic>> {}
+
+class MockDocumentReference extends Mock
+    implements DocumentReference<Map<String, dynamic>> {}
+
 class FakeTerrainsCompanion extends Fake implements TerrainsCompanion {}
 
 void main() {
@@ -43,7 +49,9 @@ void main() {
     group('getAllTerrains', () {
       test('returns list of terrains on success', () async {
         // Arrange
-        when(() => mockDb.getAllTerrains()).thenAnswer((_) async => TestData.testTerrains);
+        when(
+          () => mockDb.getAllTerrains(),
+        ).thenAnswer((_) async => TestData.testTerrains);
 
         // Act
         final result = await repository.getAllTerrains();
@@ -81,8 +89,9 @@ void main() {
 
       test('throws RepositoryException on FirebaseException', () async {
         // Arrange
-        when(() => mockCollection.add(any()))
-            .thenThrow(FirebaseException(plugin: 'firestore', code: 'unavailable'));
+        when(() => mockCollection.add(any())).thenThrow(
+          FirebaseException(plugin: 'firestore', code: 'unavailable'),
+        );
 
         // Act & Assert
         await expectLater(
@@ -98,7 +107,9 @@ void main() {
         when(() => mockDoc.update(any())).thenAnswer((_) async {});
         when(() => mockDb.upsertTerrain(any())).thenAnswer((_) async => 1);
 
-        final testTerrainWithId = TestData.testTerrain.copyWith(firebaseId: 'test_id');
+        final testTerrainWithId = TestData.testTerrain.copyWith(
+          firebaseId: 'test_id',
+        );
 
         // Act
         await repository.updateTerrain(testTerrainWithId);
@@ -112,8 +123,8 @@ void main() {
       test('throws RepositoryException if firebaseId is null', () async {
         // Arrange
         final testTerrainWithoutId = TestData.testTerrain.copyWith(
-            // Provide a custom copyWith that actually clears the field if necessary,
-            // but copyWith usually doesn't clear if null is passed. Let's do it manually.
+          // Provide a custom copyWith that actually clears the field if necessary,
+          // but copyWith usually doesn't clear if null is passed. Let's do it manually.
         );
 
         final testTerrainWithoutId2 = Terrain(

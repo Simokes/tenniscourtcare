@@ -67,13 +67,9 @@ void main() {
         expect(result.unit, original.unit);
       });
 
-      
-
       test('handles low stock items', () {
         // Arrange
-        final lowStockItem = TestData.testStockItem.copyWith(
-          quantity: 5,
-        );
+        final lowStockItem = TestData.testStockItem.copyWith(quantity: 5);
 
         // Act
         final model = StockItemMapper.toModel(lowStockItem);

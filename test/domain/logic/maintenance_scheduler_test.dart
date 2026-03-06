@@ -7,7 +7,12 @@ void main() {
     final now = DateTime(2023, 10, 27, 10, 0); // Oct 27, 2023, 10:00 AM
 
     Maintenance createMaintenance(
-        int id, int terrainId, DateTime date, int startHour, int durationMinutes) {
+      int id,
+      int terrainId,
+      DateTime date,
+      int startHour,
+      int durationMinutes,
+    ) {
       return Maintenance(
         id: id,
         terrainId: terrainId,
@@ -32,7 +37,9 @@ void main() {
       ];
 
       final result = MaintenanceScheduler.terrainsToSetInMaintenance(
-          plannedMaintenances, now);
+        plannedMaintenances,
+        now,
+      );
 
       expect(result, contains(102));
       expect(result, isNot(contains(101)));
@@ -40,14 +47,15 @@ void main() {
     });
 
     test('terrainsToRestoreToPlayable returns correct terrain IDs', () {
-      final plannedMaintenances = [
-        createMaintenance(2, 102, now, 9, 90),
-      ];
+      final plannedMaintenances = [createMaintenance(2, 102, now, 9, 90)];
 
       final currentMaintenanceTerrainIds = [101, 102, 104];
 
       final result = MaintenanceScheduler.terrainsToRestoreToPlayable(
-          plannedMaintenances, currentMaintenanceTerrainIds, now);
+        plannedMaintenances,
+        currentMaintenanceTerrainIds,
+        now,
+      );
 
       expect(result, contains(101));
       expect(result, contains(104));

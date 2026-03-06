@@ -57,19 +57,19 @@ final overdueCountProvider = Provider<int>((ref) {
 // All maintenances grouped by terrainId (done only)
 final maintenancesGroupedByTerrainProvider =
     Provider<Map<int, List<Maintenance>>>((ref) {
-  final all = ref.watch(maintenancesProvider).valueOrNull ?? [];
-  final map = <int, List<Maintenance>>{};
-  for (final m in all) {
-    if (!m.isPlanned) {
-      map.putIfAbsent(m.terrainId, () => []).add(m);
-    }
-  }
-  // Sort each list by date desc
-  for (final list in map.values) {
-    list.sort((a, b) => b.date.compareTo(a.date));
-  }
-  return map;
-});
+      final all = ref.watch(maintenancesProvider).valueOrNull ?? [];
+      final map = <int, List<Maintenance>>{};
+      for (final m in all) {
+        if (!m.isPlanned) {
+          map.putIfAbsent(m.terrainId, () => []).add(m);
+        }
+      }
+      // Sort each list by date desc
+      for (final list in map.values) {
+        list.sort((a, b) => b.date.compareTo(a.date));
+      }
+      return map;
+    });
 
 // All unique maintenance types across all maintenances
 final maintenanceTypesProvider = Provider<List<String>>((ref) {

@@ -100,19 +100,29 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                   ),
                   child: maintenancesAsync.when(
                     data: (maintenances) {
-                      final monthStart = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfMonth(DateTime.now()));
+                      final monthStart = DateTime.fromMillisecondsSinceEpoch(
+                        DateUtils.startOfMonth(DateTime.now()),
+                      );
 
                       final totalCount = maintenances.length;
 
                       final monthMaintenances = maintenances.where((m) {
-                         final date = DateTime.fromMillisecondsSinceEpoch(m.date);
-                         return !date.isBefore(monthStart);
+                        final date = DateTime.fromMillisecondsSinceEpoch(
+                          m.date,
+                        );
+                        return !date.isBefore(monthStart);
                       }).toList();
 
                       final monthCount = monthMaintenances.length;
 
-                      final monthSacs = monthMaintenances.fold<int>(0, (sum, m) =>
-                          sum + m.sacsMantoUtilises + m.sacsSottomantoUtilises + m.sacsSiliceUtilises);
+                      final monthSacs = monthMaintenances.fold<int>(
+                        0,
+                        (sum, m) =>
+                            sum +
+                            m.sacsMantoUtilises +
+                            m.sacsSottomantoUtilises +
+                            m.sacsSiliceUtilises,
+                      );
 
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -135,8 +145,10 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                         ],
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (_, __) => const Center(child: Text('Erreur de chargement')),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (_, __) =>
+                        const Center(child: Text('Erreur de chargement')),
                   ),
                 ),
               ),

@@ -11,11 +11,16 @@ import 'package:google_fonts/google_fonts.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/stats_carousel.dart';
 import 'package:tenniscourtcare/features/weather/presentation/widgets/weather_card.dart';
-import '../widgets/upcoming_events.dart';
+import '../widgets/upcoming_events_list.dart';
+import '../widgets/current_events_banner.dart';
+import '../widgets/day_timeline.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
+import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -97,6 +102,16 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
+          // 1.6 Current Events Banner
+          const SliverToBoxAdapter(
+            child: CurrentEventsBanner(),
+          ),
+
+          // 1.7 Day Timeline
+          const SliverToBoxAdapter(
+            child: DayTimeline(),
+          ),
+
           // 2. Stats Carousel
           SliverToBoxAdapter(
             child: Padding(
@@ -168,18 +183,59 @@ class HomeScreen extends ConsumerWidget {
           const CourtListSliver(),
         ],
       ),
-      floatingActionButton: SizedBox(
-        width: 56,
-        height: 56,
-        child: FloatingActionButton(
-          onPressed: () {
-            context.push('/maintenance');
-          },
-          backgroundColor: const Color(0xFF003580),
-          shape: const CircleBorder(),
-          elevation: 4,
-          child: const Icon(Icons.add, color: Colors.white, size: 32),
-        ),
+      floatingActionButton: SpeedDial(
+        icon: Icons.add,
+        activeIcon: Icons.close,
+        backgroundColor: const Color(0xFF003580),
+        foregroundColor: Colors.white,
+        activeBackgroundColor: Colors.red,
+        activeForegroundColor: Colors.white,
+        elevation: 8.0,
+        shape: const CircleBorder(),
+        children: [
+          SpeedDialChild(
+            child: const Icon(Icons.build_outlined, color: Colors.white),
+            backgroundColor: Colors.orange,
+            label: 'Nouvelle maintenance',
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const AddMaintenanceSheet(),
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.event_outlined, color: Colors.white),
+            backgroundColor: Colors.blue,
+            label: 'Nouvel événement',
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddEditEventScreen(),
+                ),
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Icons.warning_amber_outlined, color: Colors.white),
+            backgroundColor: Colors.red,
+            label: 'Signaler problème',
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const AddMaintenanceSheet(urgentMode: true),
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(

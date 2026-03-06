@@ -125,7 +125,8 @@ void main() {
   testWidgets(
     'Integration: SignIn syncs firestore_uid and creates local user',
     (tester) async {
-      final email = 'sync_test_${DateTime.now().millisecondsSinceEpoch}@example.com';
+      final email =
+          'sync_test_${DateTime.now().millisecondsSinceEpoch}@example.com';
       const password = 'StrongPassword123!';
 
       try {
@@ -154,10 +155,11 @@ void main() {
 
   testWidgets('Integration: hasAnyUser returns correct state', (tester) async {
     expect(await repository.hasAnyUser(), isFalse);
-    final email = 'has_user_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final email =
+        'has_user_${DateTime.now().millisecondsSinceEpoch}@example.com';
     await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
-      password: 'Password123!'
+      password: 'Password123!',
     );
     await repository.signIn(email, 'Password123!');
     expect(await repository.hasAnyUser(), isTrue);
@@ -170,7 +172,8 @@ void main() {
     expect(await repository.hasAnyUser(), isFalse);
 
     // Create admin via repository
-    final adminEmail = 'fresh_admin_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final adminEmail =
+        'fresh_admin_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const adminName = 'Fresh Admin';
     const adminPass = 'AdminPass123!';
 
@@ -207,14 +210,19 @@ void main() {
   });
 
   testWidgets('Integration: createUser (Admin) succeeds', (tester) async {
-    final adminEmail = 'admin_create_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final adminEmail =
+        'admin_create_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const adminPass = 'AdminPass123!';
 
-    final cred = await createAndLoginAdmin(email: adminEmail, password: adminPass);
+    final cred = await createAndLoginAdmin(
+      email: adminEmail,
+      password: adminPass,
+    );
     final adminUser = cred.user!;
 
     // Create new user via repository
-    final newUserEmail = 'new_agent_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final newUserEmail =
+        'new_agent_${DateTime.now().millisecondsSinceEpoch}@example.com';
 
     await repository.createUser(
       email: newUserEmail,
@@ -246,7 +254,8 @@ void main() {
   });
 
   testWidgets('Integration: createUser (Non-admin) denied', (tester) async {
-    final agentEmail = 'agent_fail_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final agentEmail =
+        'agent_fail_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const agentPass = 'AgentPass123!';
 
     UserCredential cred;
@@ -296,14 +305,19 @@ void main() {
   testWidgets('Integration: deleteUser removes from all places', (
     tester,
   ) async {
-    final adminEmail = 'admin_delete_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final adminEmail =
+        'admin_delete_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const adminPass = 'AdminPass123!';
 
-    final cred = await createAndLoginAdmin(email: adminEmail, password: adminPass);
+    final cred = await createAndLoginAdmin(
+      email: adminEmail,
+      password: adminPass,
+    );
     final adminUser = cred.user!;
 
     // Create user to delete
-    final deleteEmail = 'user_del_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final deleteEmail =
+        'user_del_${DateTime.now().millisecondsSinceEpoch}@example.com';
     await repository.createUser(
       email: deleteEmail,
       name: 'User To Delete',
@@ -340,13 +354,18 @@ void main() {
   testWidgets('Integration: updateRole changes role everywhere', (
     tester,
   ) async {
-    final adminEmail = 'admin_role_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final adminEmail =
+        'admin_role_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const adminPass = 'AdminPass123!';
 
-    final cred = await createAndLoginAdmin(email: adminEmail, password: adminPass);
+    final cred = await createAndLoginAdmin(
+      email: adminEmail,
+      password: adminPass,
+    );
     final adminUser = cred.user!;
 
-    final promoteEmail = 'promote_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final promoteEmail =
+        'promote_${DateTime.now().millisecondsSinceEpoch}@example.com';
     await repository.createUser(
       email: promoteEmail,
       name: 'Agent To Promote',
@@ -396,13 +415,18 @@ void main() {
   });
 
   testWidgets('Integration: resetPassword works', (tester) async {
-    final adminEmail = 'admin_pw_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final adminEmail =
+        'admin_pw_${DateTime.now().millisecondsSinceEpoch}@example.com';
     const adminPass = 'AdminPass123!';
 
-    final cred = await createAndLoginAdmin(email: adminEmail, password: adminPass);
+    final cred = await createAndLoginAdmin(
+      email: adminEmail,
+      password: adminPass,
+    );
     final adminUser = cred.user!;
 
-    final userEmail = 'user_pw_${DateTime.now().millisecondsSinceEpoch}@example.com';
+    final userEmail =
+        'user_pw_${DateTime.now().millisecondsSinceEpoch}@example.com';
     await repository.createUser(
       email: userEmail,
       name: 'User Password',
