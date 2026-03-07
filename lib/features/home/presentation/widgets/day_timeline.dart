@@ -4,12 +4,16 @@ import 'package:intl/intl.dart';
 import '../../providers/dashboard_providers.dart';
 import '../../models/timeline_item.dart';
 import '../../../admin/providers/club_info_provider.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class DayTimeline extends ConsumerWidget {
   const DayTimeline({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
+
     final timelineItems = ref.watch(todayTimelineProvider);
     if (timelineItems.isEmpty) {
       return const SizedBox.shrink();
@@ -65,15 +69,15 @@ class DayTimeline extends ConsumerWidget {
                         children: [
                           Text(
                             '${openingHour + i}h',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              color: Colors.grey,
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
                           Expanded(
                             child: Container(
                               width: 1,
-                              color: Colors.grey.withOpacity(0.2),
+                              color: cs.outlineVariant.withValues(alpha: 0.3),
                             ),
                           ),
                         ],
@@ -92,8 +96,8 @@ class DayTimeline extends ConsumerWidget {
                         final width = (durationMinutes / 60) * hourWidth;
 
                         final color = item.type == TimelineItemType.maintenance
-                            ? Colors.orange
-                            : Color(item.originalEvent?.color ?? Colors.blue.value);
+                            ? dc?.maintenanceColor ?? Colors.orange
+                            : Color(item.originalEvent?.color ?? cs.primary.toARGB32());
 
                         return Positioned(
                           left: left,
@@ -112,7 +116,7 @@ class DayTimeline extends ConsumerWidget {
                               boxShadow: item.isNow
                                   ? [
                                       BoxShadow(
-                                        color: color.withOpacity(0.5),
+                                        color: color.withValues(alpha: 0.5),
                                         blurRadius: 4,
                                         spreadRadius: 1,
                                       )
@@ -143,14 +147,14 @@ class DayTimeline extends ConsumerWidget {
                       bottom: 0,
                       child: Container(
                         width: 2,
-                        color: Colors.red,
+                        color: dc?.dangerColor ?? Colors.red,
                         child: Column(
                           children: [
                             Container(
                               width: 6,
                               height: 6,
-                              decoration: const BoxDecoration(
-                                color: Colors.red,
+                              decoration: BoxDecoration(
+                                color: dc?.dangerColor ?? Colors.red,
                                 shape: BoxShape.circle,
                               ),
                               transform: Matrix4.translationValues(-2, 0, 0),

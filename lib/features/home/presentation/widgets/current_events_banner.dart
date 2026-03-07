@@ -23,6 +23,8 @@ class _CurrentEventsBannerState extends ConsumerState<CurrentEventsBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     final currentEvents = ref.watch(currentEventsProvider);
     if (currentEvents.isEmpty) {
       return const SizedBox.shrink();
@@ -45,13 +47,13 @@ class _CurrentEventsBannerState extends ConsumerState<CurrentEventsBanner> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(event.color).withOpacity(0.15),
-              Colors.white,
+              Color(event.color).withValues(alpha: 0.15),
+              cs.surface,
             ],
           ),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Color(currentEvents.first.color).withOpacity(0.4),
+            color: Color(currentEvents.first.color).withValues(alpha: 0.4),
           ),
         ),
         child: Row(
@@ -138,7 +140,7 @@ class _CurrentEventsBannerState extends ConsumerState<CurrentEventsBanner> {
               height: 8,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _currentPage == index ? Colors.blue : Colors.grey,
+                color: _currentPage == index ? cs.primary : cs.onSurfaceVariant,
               ),
             );
           }),

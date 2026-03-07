@@ -12,6 +12,8 @@ class DashboardTerrainItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -52,10 +54,10 @@ class DashboardTerrainItem extends StatelessWidget {
                     score: state.score,
                     warningMessage: state.warningMessage,
                   ),
-                  loading: () => const SizedBox(
+                  loading: () => SizedBox(
                     height: 6,
                     width: 100,
-                    child: LinearProgressIndicator(color: Colors.grey),
+                    child: LinearProgressIndicator(color: cs.onSurfaceVariant),
                   ),
                   error: (error, stack) => const SizedBox.shrink(),
                 );
@@ -63,7 +65,7 @@ class DashboardTerrainItem extends StatelessWidget {
             ),
           ],
         ),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        trailing: Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
       ),
     );
   }
