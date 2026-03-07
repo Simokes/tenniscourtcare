@@ -260,7 +260,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         activeIcon: Icons.close,
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
-        activeBackgroundColor: Colors.red,
+        activeBackgroundColor: dc.dangerColor,
         activeForegroundColor: Colors.white,
         elevation: 8.0,
         shape: const CircleBorder(),

@@ -45,3 +45,4 @@ app.*.map.json
 /android/app/release
 tests/firestore_rules/node_modules/
 tests/firestore_rules/coverage/
+test_output.txt
