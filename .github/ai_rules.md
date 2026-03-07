@@ -257,6 +257,65 @@ Si non conforme → nouveau rapport @jules ❌ (répéter)
 
 ---
 
+## 3.5 Règles Opérationnelles Jules CLI
+
+### Base Stale — Règle Absolue
+
+Jules prend un snapshot du repo au moment de la création de la session.
+Il ne voit PAS les commits/merges effectués après ce snapshot.
+
+```
+1 session Jules = 1 PR = 1 phase = 1 merge humain
+```
+
+### Stratégie Multi-Sessions selon les Dépendances
+
+**Phases SÉQUENTIELLES** (dépendances de code entre phases) :
+
+```
+Session Ph1 -> PR -> merge humain -> Session Ph2 -> PR -> merge humain
+```
+
+Règle : ne créer la Session Ph2 QU'APRÈS le merge de Ph1.
+Ne jamais grouper plusieurs phases dépendantes dans une seule session.
+
+**Phases PARALLÈLES** (fichiers/layers disjoints, aucune dépendance) :
+
+```
+Session Ph1A --+
+               +-- merge dans n'importe quel ordre
+Session Ph1B --+
+```
+
+Règle : créer toutes les sessions simultanément, merger indépendamment.
+
+### Identification Obligatoire par Claude
+
+Avant chaque envoi à Jules, Claude DOIT classifier chaque phase dans son plan :
+
+- [PARALLÈLE] — fichiers disjoints, aucune dépendance inter-phases
+- [SÉQUENTIEL après Ph_X] — dépend du merge de Ph_X
+
+Exemple :
+```
+Ph1A [PARALLÈLE] — domain/entities/ + data/mappers/
+Ph1B [PARALLÈLE] — shared/widgets/ (aucune dépendance avec Ph1A)
+Ph2  [SÉQUENTIEL après Ph1A + Ph1B] — data/repositories/ (dépend des entités)
+```
+
+### Format d'Envoi Jules CLI (Technique)
+
+Utiliser un fichier temp pour éviter les erreurs d'échappement bash (backticks interdits dans le prompt) :
+
+```
+1. Write prompt -> C:\Users\planc\AppData\Local\Temp\jules_task.txt
+2. cat "C:\Users\planc\AppData\Local\Temp\jules_task.txt" | jules new
+3. Récupérer le Session ID dans l'output
+4. Suivi : https://jules.google.com/session/[SESSION_ID]
+```
+
+---
+
 ## 4. Workflow d'Implémentation Feature
 
 ```
