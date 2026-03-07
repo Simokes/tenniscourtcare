@@ -793,7 +793,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                       setState(() => _imagePath = null),
                                   icon: Icon(
                                     Icons.remove_circle,
-                                    color: dc?.dangerColor ?? Colors.red,
+                                    color: Theme.of(context).colorScheme.error,
                                   ),
                                   style: IconButton.styleFrom(
                                     backgroundColor: Theme.of(

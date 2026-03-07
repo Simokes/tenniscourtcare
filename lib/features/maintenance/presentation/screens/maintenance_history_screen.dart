@@ -373,7 +373,7 @@ class _TerrainHistoryTile extends ConsumerWidget {
             ),
             title: Text(
               terrain.nom,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Wrap(
               spacing: 8,
@@ -489,7 +489,7 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         maintenance.type,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (maintenance.imagePath != null) ...[
                         const SizedBox(width: 4),
@@ -570,21 +570,21 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text('Confirmer la suppression'),
-                        content: Text(
+                        title: const Text('Confirmer la suppression'),
+                        content: const Text(
                           'Voulez-vous vraiment supprimer cette maintenance ?',
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: Text('Annuler'),
+                            child: const Text('Annuler'),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
                             style: TextButton.styleFrom(
                               foregroundColor: dc?.dangerColor ?? Colors.red,
                             ),
-                            child: Text('Supprimer'),
+                            child: const Text('Supprimer'),
                           ),
                         ],
                       ),
