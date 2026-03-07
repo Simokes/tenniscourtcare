@@ -18,6 +18,7 @@ class _SacksLineChartState extends State<SacksLineChart> {
       return const Center(child: Text('Aucune donnée'));
     }
 
+    final cs = Theme.of(context).colorScheme;
     final data = widget.data;
     double maxY = 0;
     for (final item in data) {
@@ -46,10 +47,10 @@ class _SacksLineChartState extends State<SacksLineChart> {
               horizontalInterval: maxY / 5,
               verticalInterval: 1,
               getDrawingHorizontalLine: (value) {
-                return const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1);
+                return FlLine(color: cs.outlineVariant.withValues(alpha: 0.5), strokeWidth: 1);
               },
               getDrawingVerticalLine: (value) {
-                return const FlLine(color: Color(0xffe7e8ec), strokeWidth: 1);
+                return FlLine(color: cs.outlineVariant.withValues(alpha: 0.5), strokeWidth: 1);
               },
             ),
             titlesData: FlTitlesData(
