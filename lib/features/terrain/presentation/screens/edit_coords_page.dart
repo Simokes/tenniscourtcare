@@ -52,6 +52,7 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
   }
 
   Future<void> _save() async {
+    final cs = Theme.of(context).colorScheme;
     if (!_formKey.currentState!.validate()) return;
 
     final lat = double.parse(_latCtrl.text.replaceAll(',', '.'));
@@ -64,7 +65,7 @@ class _EditCoordsPageState extends ConsumerState<EditCoordsPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: cs.error),
       );
     }
   }

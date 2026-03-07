@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 
 class TerrainHealthGauge extends StatelessWidget {
   final int score;
@@ -10,15 +12,16 @@ class TerrainHealthGauge extends StatelessWidget {
     this.warningMessage,
   });
 
-  Color _getColor(int score) {
-    if (score >= 80) return Colors.green;
-    if (score >= 50) return Colors.orange;
-    return Colors.red;
+  Color _getColor(int score, DashboardColors? dc) {
+    if (score >= 80) return dc?.successColor ?? Colors.green;
+    if (score >= 50) return dc?.warningColor ?? Colors.orange;
+    return dc?.dangerColor ?? Colors.red;
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _getColor(score);
+    final dc = Theme.of(context).extension<DashboardColors>();
+    final color = _getColor(score, dc);
     final value = score / 100.0;
 
     return Tooltip(

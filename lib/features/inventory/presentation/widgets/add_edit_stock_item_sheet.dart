@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 import 'package:tenniscourtcare/domain/logic/stock_categorizer.dart';
 import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import './category_selector.dart';
@@ -73,9 +75,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Article ajouté'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('✅ Article ajouté'),
+              backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
           Navigator.pop(context);
@@ -97,9 +99,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Article mis à jour'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('✅ Article mis à jour'),
+              backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
           Navigator.pop(context);
@@ -149,9 +151,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Article supprimé'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: const Text('✅ Article supprimé'),
+              backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
           Navigator.pop(context);
@@ -159,9 +161,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Impossible de supprimer: firebaseId manquant.'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: const Text('Impossible de supprimer: firebaseId manquant.'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -179,6 +181,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final categories = [
       StockCategorizer.materiaux,
       StockCategorizer.produitsEntretien,
@@ -193,9 +196,9 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -206,7 +209,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: cs.onSurface.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -275,7 +278,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             filled: true,
-                            fillColor: Colors.grey.shade50,
+                            fillColor: cs.surfaceContainerHighest,
                           ),
                           validator: (v) =>
                               (v == null || v.isEmpty) ? 'Requis' : null,
@@ -396,7 +399,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                             child: OutlinedButton(
                               onPressed: _isSaving ? null : _deleteItem,
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Colors.red),
+                                side: BorderSide(color: cs.error),
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 16,
                                 ),
@@ -404,10 +407,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Supprimer',
                                 style: TextStyle(
-                                  color: Colors.red,
+                                  color: cs.error,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

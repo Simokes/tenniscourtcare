@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import './add_edit_stock_item_sheet.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 
 class StockAlertSection extends ConsumerWidget {
   const StockAlertSection({super.key});
@@ -14,6 +16,9 @@ class StockAlertSection extends ConsumerWidget {
     return stockAsync.when(
       data: (_) {
         if (criticalItems.isEmpty) return const SizedBox.shrink();
+
+
+        final dc = Theme.of(context).extension<DashboardColors>();
 
         // Take the first item (most critical as it is sorted by quantity)
         final item = criticalItems.first;
@@ -35,9 +40,9 @@ class StockAlertSection extends ConsumerWidget {
               const SizedBox(height: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.red.shade50,
+                  color: dc?.dangerBgColor ?? Colors.red.shade50,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.red.shade100),
+                  border: Border.all(color: (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.3)),
                 ),
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -51,7 +56,7 @@ class StockAlertSection extends ConsumerWidget {
                             children: [
                               Icon(
                                 Icons.warning_rounded,
-                                color: Colors.red.shade600,
+                                color: dc?.dangerColor ?? Colors.red,
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
@@ -59,7 +64,7 @@ class StockAlertSection extends ConsumerWidget {
                                 child: Text(
                                   item.name,
                                   style: TextStyle(
-                                    color: Colors.red.shade900,
+                                    color: dc?.dangerColor ?? Colors.red,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
@@ -72,7 +77,7 @@ class StockAlertSection extends ConsumerWidget {
                           Text(
                             'Stock dangereusement bas. Plus que ${item.quantity} ${item.unit} disponible${item.quantity > 1 ? 's' : ''}.',
                             style: TextStyle(
-                              color: Colors.red.shade700,
+                              color: dc?.dangerColor ?? Colors.red,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -83,7 +88,7 @@ class StockAlertSection extends ConsumerWidget {
                               child: Text(
                                 '+ $otherCount autre${otherCount > 1 ? 's' : ''} article${otherCount > 1 ? 's' : ''} critique${otherCount > 1 ? 's' : ''}',
                                 style: TextStyle(
-                                  color: Colors.red.shade700,
+                                  color: dc?.dangerColor ?? Colors.red,
                                   fontSize: 12,
                                   fontStyle: FontStyle.italic,
                                 ),
@@ -102,7 +107,7 @@ class StockAlertSection extends ConsumerWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade600,
+                        backgroundColor: dc?.dangerColor ?? Colors.red,
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(
