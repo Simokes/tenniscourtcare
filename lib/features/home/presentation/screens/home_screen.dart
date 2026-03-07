@@ -45,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final dc = Theme.of(context).extension<DashboardColors>()!;
 
     // 1. Lire le rôle courant
@@ -195,7 +196,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: cs.onSurface,
                     ),
                   ),
                 ],
@@ -270,9 +271,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
-        color: Colors.white,
+        color: cs.surface,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withValues(alpha: 0.1),
+        shadowColor: cs.onSurface.withValues(alpha: 0.1),
         elevation: 10,
         child: SizedBox(
           height: 60,

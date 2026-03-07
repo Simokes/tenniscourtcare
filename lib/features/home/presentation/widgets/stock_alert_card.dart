@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 
 class StockAlertCard extends ConsumerWidget {
@@ -24,28 +25,30 @@ class StockAlertCard extends ConsumerWidget {
         final isCritical = criticalItemsCount > 0;
         final topItem = lowStockItems.first;
 
+        final dc = Theme.of(context).extension<DashboardColors>();
+
         // Colors
         final backgroundColor = isCritical
-            ? const Color(0xFFFEF2F2)
-            : const Color(0xFFFEFCE8);
+            ? dc?.dangerBgColor ?? Colors.red.shade50
+            : dc?.warningBgColor ?? Colors.yellow.shade50;
         final borderColor = isCritical
-            ? const Color(0xFFFECACA)
-            : const Color(0xFFFEF08A);
+            ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.3)
+            : (dc?.warningColor ?? Colors.yellow).withValues(alpha: 0.5);
         final iconBackgroundColor = isCritical
-            ? const Color(0xFFEF4444)
-            : const Color(0xFFEAB308);
+            ? dc?.dangerColor ?? Colors.red
+            : dc?.warningColor ?? Colors.yellow;
         final titleColor = isCritical
-            ? const Color(0xFF7F1D1D)
-            : const Color(0xFF713F12);
+            ? dc?.dangerColor ?? Colors.red
+            : dc?.warningColor ?? Colors.yellow.shade900;
         final subtitleColor = isCritical
-            ? const Color(0xFFB91C1C)
-            : const Color(0xFF854D0E);
+            ? dc?.dangerColor ?? Colors.red
+            : dc?.warningColor ?? Colors.yellow.shade800;
         final progressColor = isCritical
-            ? const Color(0xFFDC2626)
-            : const Color(0xFFCA8A04);
+            ? dc?.dangerColor ?? Colors.red
+            : dc?.warningColor ?? Colors.yellow;
         final progressBackgroundColor = isCritical
-            ? const Color(0xFFFECACA)
-            : const Color(0xFFFEF08A);
+            ? dc?.dangerBgColor ?? Colors.red.shade100
+            : dc?.warningBgColor ?? Colors.yellow.shade100;
 
         final titleText =
             '${lowStockItems.length} ${isCritical ? "Critical Items" : "Low Stock Items"}';

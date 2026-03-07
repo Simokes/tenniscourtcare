@@ -9,21 +9,23 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+
     return SliverAppBar(
       pinned: true,
-      backgroundColor: Colors.white.withValues(alpha: 0.95),
+      backgroundColor: cs.surface.withValues(alpha: 0.95),
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1.0),
-        child: Container(color: Colors.grey.shade50, height: 1.0),
+        child: Container(color: cs.surfaceContainerHighest, height: 1.0),
       ),
       title: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: const Color(0xFF003580), // Primary Navy Blue
+              color: cs.primary, // Primary
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
@@ -39,7 +41,7 @@ class DashboardHeader extends ConsumerWidget {
               Text(
                 'CourtCare',
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF003580),
+                  color: cs.primary,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   height: 1.0,
@@ -64,9 +66,9 @@ class DashboardHeader extends ConsumerWidget {
               height: 40,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: cs.outlineVariant),
               ),
-              child: const Icon(Icons.person, color: Color(0xFF003580)),
+              child: Icon(Icons.person, color: cs.primary),
             ),
           ),
         ),

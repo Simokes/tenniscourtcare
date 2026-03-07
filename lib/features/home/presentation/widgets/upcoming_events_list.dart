@@ -8,12 +8,16 @@ import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../../terrain/providers/terrain_provider.dart';
 import '../../providers/dashboard_providers.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class UpcomingEventsList extends ConsumerWidget {
   const UpcomingEventsList({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
+
     // SECTION A — "Aujourd'hui"
     final todayUpcomingEvents = ref.watch(todayUpcomingEventsProvider);
 
@@ -58,14 +62,14 @@ class UpcomingEventsList extends ConsumerWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: PremiumCard(
-                  color: Colors.white,
+                  color: cs.surface,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Center(
                       child: Text(
                         'Aucun événement prévu prochainement.',
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: cs.onSurfaceVariant,
                           fontSize: 14,
                         ),
                       ),
@@ -89,7 +93,7 @@ class UpcomingEventsList extends ConsumerWidget {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Erreur: $err',
-                style: const TextStyle(color: Colors.red),
+                style: TextStyle(color: dc?.dangerColor ?? Colors.red),
               ),
             ),
           ),
@@ -100,6 +104,7 @@ class UpcomingEventsList extends ConsumerWidget {
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
@@ -109,7 +114,7 @@ class UpcomingEventsList extends ConsumerWidget {
             title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
+              color: cs.onSurface,
             ),
           ),
           TextButton(
@@ -135,6 +140,8 @@ class _EventItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final dateFormat = DateFormat('dd MMM HH:mm', 'fr_FR');
     final isMaintenance = item.type == CalendarItemType.maintenance;
 
@@ -205,10 +212,10 @@ class _EventItem extends ConsumerWidget {
                             ),
                           ),
                           if (isMaintenance)
-                            const Icon(
+                            Icon(
                               Icons.build_circle,
                               size: 16,
-                              color: Colors.orange,
+                              color: dc?.warningColor ?? Colors.orange,
                             ),
                         ],
                       ),
@@ -218,14 +225,14 @@ class _EventItem extends ConsumerWidget {
                           Icon(
                             Icons.access_time,
                             size: 14,
-                            color: Colors.grey.shade500,
+                            color: cs.onSurfaceVariant,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             dateFormat.format(item.startTime),
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey.shade600,
+                              color: cs.onSurfaceVariant,
                             ),
                           ),
                           if (item.location != null) ...[
@@ -233,7 +240,7 @@ class _EventItem extends ConsumerWidget {
                             Icon(
                               Icons.location_on,
                               size: 14,
-                              color: Colors.grey.shade500,
+                              color: cs.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -241,7 +248,7 @@ class _EventItem extends ConsumerWidget {
                                 item.location!,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  color: cs.onSurfaceVariant,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -253,7 +260,7 @@ class _EventItem extends ConsumerWidget {
                   ),
                 ),
               ),
-              Icon(Icons.chevron_right, size: 20, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, size: 20, color: cs.onSurfaceVariant),
               const SizedBox(width: 12),
             ],
           ),
