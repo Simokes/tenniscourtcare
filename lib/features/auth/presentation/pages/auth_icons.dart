@@ -34,6 +34,8 @@ class GoogleIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     // Simple Google "G" icon representation
     // Using a ShaderMask to give it multi-color look if possible, or just a colored G
     return Container(
@@ -42,7 +44,7 @@ class GoogleIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: cs.outlineVariant),
       ),
       alignment: Alignment.center,
       child: ShaderMask(

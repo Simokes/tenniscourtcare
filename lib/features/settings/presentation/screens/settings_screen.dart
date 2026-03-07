@@ -15,6 +15,7 @@ class SettingsScreen extends ConsumerWidget {
     final settingsAsync = ref.watch(appSettingsProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final cs = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -55,14 +56,14 @@ class SettingsScreen extends ConsumerWidget {
                   title: 'Langue',
                   subtitle: 'Français',
                   onTap: () {}, // Visual only
-                  trailing: const Row(
+                  trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         'Français',
-                        style: TextStyle(color: Colors.grey, fontSize: 13),
+                        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
                       ),
-                      Icon(Icons.chevron_right, color: Colors.grey),
+                      Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
                     ],
                   ),
                 ),
@@ -195,7 +196,7 @@ class SettingsScreen extends ConsumerWidget {
                 PreferenceTile(
                   icon: Icons.delete_forever,
                   title: 'Réinitialiser les données',
-                  iconColor: Colors.red,
+                  iconColor: cs.error,
                   onTap: () {
                     showDialog(
                       context: context,
@@ -214,9 +215,9 @@ class SettingsScreen extends ConsumerWidget {
                               Navigator.pop(ctx);
                               // Implement reset logic if needed
                             },
-                            child: const Text(
+                            child: Text(
                               'Effacer',
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: cs.error),
                             ),
                           ),
                         ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import '../../../../domain/entities/user_entity.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -30,6 +31,8 @@ class SettingsContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
@@ -40,7 +43,7 @@ class SettingsContainer extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: cs.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -62,6 +65,7 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final cs = colorScheme;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -72,7 +76,7 @@ class ProfileCard extends StatelessWidget {
         border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: cs.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -121,7 +125,7 @@ class ProfileCard extends StatelessWidget {
                         border: Border.all(color: theme.cardColor, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
+                            color: cs.onSurface.withValues(alpha: 0.15),
                             blurRadius: 4,
                           ),
                         ],
@@ -289,6 +293,7 @@ class LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dc = Theme.of(context).extension<DashboardColors>();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -302,13 +307,13 @@ class LogoutButton extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.red.withValues(alpha: 0.1)
-                  : Colors.red.withValues(alpha: 0.05),
+                  ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.1)
+                  : dc?.dangerBgColor ?? Colors.red.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
                 color: isDark
-                    ? Colors.red.withValues(alpha: 0.3)
-                    : Colors.red.withValues(alpha: 0.1),
+                    ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.3)
+                    : (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -316,13 +321,13 @@ class LogoutButton extends StatelessWidget {
               children: [
                 Icon(
                   Icons.logout,
-                  color: isDark ? Colors.red.shade300 : Colors.red.shade600,
+                  color: dc?.dangerColor ?? Colors.red,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   'Déconnexion',
                   style: TextStyle(
-                    color: isDark ? Colors.red.shade300 : Colors.red.shade600,
+                    color: dc?.dangerColor ?? Colors.red,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
