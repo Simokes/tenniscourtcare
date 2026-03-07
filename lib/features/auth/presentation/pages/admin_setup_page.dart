@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:tenniscourtcare/data/repositories/firebase_auth_repository.dart';
 import 'package:tenniscourtcare/features/auth/providers/setup_providers.dart';
 import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
@@ -118,7 +119,7 @@ class _AdminSetupPageState extends ConsumerState<AdminSetupPage> {
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
+                  style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                 ),
               ),
             ElevatedButton(

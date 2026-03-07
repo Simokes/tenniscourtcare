@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:intl/intl.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../../../../domain/entities/user_entity.dart';
@@ -16,10 +17,10 @@ class PendingUsersPage extends ConsumerWidget {
       body: pendingUsersAsync.when(
         data: (users) {
           if (users.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 'Aucune inscription en attente',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             );
           }
@@ -100,10 +101,10 @@ class _UserCard extends ConsumerWidget {
               children: [
                 TextButton.icon(
                   onPressed: () => _confirmReject(context, ref),
-                  icon: const Icon(Icons.close, color: Colors.red),
-                  label: const Text(
+                  icon: Icon(Icons.close, color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
+                  label: Text(
                     'Refuser',
-                    style: TextStyle(color: Colors.red),
+                    style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -118,7 +119,7 @@ class _UserCard extends ConsumerWidget {
                   icon: const Icon(Icons.check, color: Colors.white),
                   label: const Text('Approuver'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -145,7 +146,7 @@ class _UserCard extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Refuser', style: TextStyle(color: Colors.red)),
+            child: Text('Refuser', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),

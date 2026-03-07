@@ -62,8 +62,8 @@ class SeasonComparisonCard extends ConsumerWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withValues(alpha: 0.3)
-                : Colors.grey.withValues(alpha: 0.1),
+                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -82,7 +82,7 @@ class SeasonComparisonCard extends ConsumerWidget {
           Text(
             state.message,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 24),
@@ -94,7 +94,7 @@ class SeasonComparisonCard extends ConsumerWidget {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) =>
-                        Colors.blueGrey.withValues(alpha: 0.8),
+                        Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final String yearLabel = rodIndex == 0
                           ? '${state.yearN - 1}'
@@ -213,14 +213,14 @@ class SeasonComparisonCard extends ConsumerWidget {
             children: [
               _buildLegendItem(
                 context,
-                Colors.grey,
+                Theme.of(context).colorScheme.onSurfaceVariant,
                 'Année N-1 (${state.yearN - 1})',
                 isLight: true,
               ),
               const SizedBox(width: 24),
               _buildLegendItem(
                 context,
-                isDark ? Colors.grey.shade400 : Colors.grey.shade800,
+                Theme.of(context).colorScheme.onSurface,
                 'Année N (${state.yearN})',
                 isLight: false,
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import './sections/user_management_section.dart';
 import './sections/terrain_management_section.dart';
 import './sections/club_info_section.dart';
@@ -46,8 +47,8 @@ class AdminDashboardPage extends ConsumerWidget {
                         top: 8,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red,
                             shape: BoxShape.circle,
                           ),
                           child: Text(
