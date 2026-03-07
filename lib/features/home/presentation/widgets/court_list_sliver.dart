@@ -5,6 +5,7 @@ import 'package:tenniscourtcare/domain/entities/app_event.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../providers/dashboard_providers.dart';
 
@@ -42,6 +43,9 @@ class CourtListSliver extends ConsumerWidget {
   }
 
   Widget _buildCourtItem(BuildContext context, WidgetRef ref, Terrain terrain) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
+
     final currentEvents = ref.watch(currentEventsProvider);
     final todayMaintenances = ref.watch(todayPlannedMaintenancesProvider);
 
@@ -64,7 +68,7 @@ class CourtListSliver extends ConsumerWidget {
     if (terrain.status == TerrainStatus.maintenance && todayTerrainMaintenances.isNotEmpty) {
       final m = todayTerrainMaintenances.first;
       actionWidget = IconButton(
-        icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+        icon: Icon(Icons.check_circle_outline, color: dc?.successColor ?? Colors.green),
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -84,12 +88,12 @@ class CourtListSliver extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.only(right: 12, top: 12, bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: cs.onSurface.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -113,7 +117,7 @@ class CourtListSliver extends ConsumerWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: cs.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
               image: terrain.photoUrl != null
                   ? DecorationImage(
@@ -123,7 +127,7 @@ class CourtListSliver extends ConsumerWidget {
                   : null,
             ),
             child: terrain.photoUrl == null
-                ? const Icon(Icons.sports_tennis, color: Colors.grey)
+                ? Icon(Icons.sports_tennis, color: cs.onSurfaceVariant)
                 : null,
           ),
           const SizedBox(width: 16),
@@ -136,7 +140,7 @@ class CourtListSliver extends ConsumerWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: cs.onSurface,
                   ),
                 ),
                 Text(
@@ -144,7 +148,7 @@ class CourtListSliver extends ConsumerWidget {
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Colors.grey.shade500,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -152,7 +156,7 @@ class CourtListSliver extends ConsumerWidget {
           ),
           ?actionWidget,
           IconButton(
-            icon: const Icon(Icons.add, size: 20, color: Colors.grey),
+            icon: Icon(Icons.add, size: 20, color: cs.onSurfaceVariant),
             tooltip: 'Maintenance urgente',
             onPressed: () {
               showModalBottomSheet(
@@ -184,6 +188,9 @@ class _CourtStatusDisplay {
     required List<AppEvent> currentEvents,
     required BuildContext context,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
+
     if (terrain.status == TerrainStatus.maintenance) {
       if (todayMaintenances.isNotEmpty) {
         final m = todayMaintenances.first;
@@ -193,12 +200,12 @@ class _CourtStatusDisplay {
           minute: m.durationMinutes % 60,
         ).format(context);
         return _CourtStatusDisplay(
-          color: Colors.blue,
+          color: dc?.maintenanceColor ?? Colors.blue,
           subtitle: 'Maintenance · $start → $end',
         );
       }
-      return const _CourtStatusDisplay(
-        color: Colors.blue,
+      return _CourtStatusDisplay(
+        color: dc?.maintenanceColor ?? Colors.blue,
         subtitle: 'En maintenance',
       );
     }
@@ -215,26 +222,26 @@ class _CourtStatusDisplay {
           minute: 0,
         ).format(context);
         return _CourtStatusDisplay(
-          color: Colors.green,
+          color: dc?.successColor ?? Colors.green,
           subtitle: 'Maintenance prévue à $start',
         );
       }
-      return const _CourtStatusDisplay(
-        color: Colors.green,
+      return _CourtStatusDisplay(
+        color: dc?.successColor ?? Colors.green,
         subtitle: 'Disponible',
       );
     }
     if (terrain.status == TerrainStatus.frozen) {
-      return const _CourtStatusDisplay(color: Colors.cyan, subtitle: 'Gelé');
+      return _CourtStatusDisplay(color: cs.secondary, subtitle: 'Gelé');
     }
     if (terrain.status == TerrainStatus.unavailable) {
-      return const _CourtStatusDisplay(
-        color: Colors.red,
+      return _CourtStatusDisplay(
+        color: dc?.dangerColor ?? Colors.red,
         subtitle: 'Indisponible',
       );
     }
     return _CourtStatusDisplay(
-      color: Colors.grey.shade300,
+      color: cs.outlineVariant,
       subtitle: 'Disponible',
     );
   }
