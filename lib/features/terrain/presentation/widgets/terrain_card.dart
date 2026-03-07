@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../domain/entities/terrain.dart';
 import '../../../maintenance/providers/maintenance_provider.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class TerrainCard extends ConsumerWidget {
   final Terrain terrain;
@@ -188,6 +189,7 @@ class _TerrainIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dc = Theme.of(context).extension<DashboardColors>()!;
     IconData icon;
     Color color;
 
@@ -195,15 +197,15 @@ class _TerrainIcon extends StatelessWidget {
     switch (type) {
       case TerrainType.terreBattue:
         icon = Icons.landscape;
-        color = Colors.orange.shade800;
+        color = dc.terreBattueColor;
         break;
       case TerrainType.synthetique:
         icon = Icons.layers;
-        color = Colors.blue.shade700;
+        color = dc.synthetiqueColor;
         break;
       case TerrainType.dur:
         icon = Icons.sports_tennis;
-        color = Colors.blueGrey.shade700;
+        color = dc.durColor;
         break;
     }
 

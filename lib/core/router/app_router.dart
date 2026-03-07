@@ -20,6 +20,9 @@ import '../../features/maintenance/presentation/screens/maintenance_history_scre
 import '../../features/stats/presentation/screens/stats_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/terrain/presentation/screens/add_terrain_screen.dart';
+import '../../features/terrain/presentation/screens/edit_coords_page.dart';
+import '../../features/admin/presentation/screens/security_log_screen.dart';
+import '../../features/calendar/presentation/screens/add_edit_event_screen.dart';
 import '../../features/maintenance/presentation/screens/terrain_maintenance_history_screen.dart';
 import '../../domain/enums/role.dart';
 import '../../domain/entities/terrain.dart';
@@ -149,6 +152,18 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add-terrain',
         builder: (context, state) => const AddTerrainScreen(),
+      ),
+      GoRoute(
+        path: '/edit-coords',
+        builder: (context, state) => const EditCoordsPage(),
+      ),
+      GoRoute(
+        path: '/security-log',
+        builder: (context, state) => const SecurityLogScreen(),
+      ),
+      GoRoute(
+        path: '/add-edit-event',
+        builder: (context, state) => const AddEditEventScreen(),
       ),
       GoRoute(
         path: '/terrain/:id',
