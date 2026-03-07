@@ -107,7 +107,7 @@ class StatsScreen extends ConsumerWidget {
                           colorScheme: isDark
                               ? ColorScheme.dark(
                                   primary: cs.primary,
-                                  onPrimary: cs.onSurface,
+                                  onPrimary: cs.onPrimary,
                                 )
                               : ColorScheme.light(
                                   primary: cs.primary,
