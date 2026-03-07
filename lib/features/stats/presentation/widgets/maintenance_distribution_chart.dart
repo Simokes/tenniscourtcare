@@ -91,7 +91,7 @@ class _MaintenanceDistributionChartState
                         fontWeight: isTouched
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: Colors.grey.shade800,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],

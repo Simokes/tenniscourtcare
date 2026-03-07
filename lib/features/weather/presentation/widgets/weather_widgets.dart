@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tenniscourtcare/core/theme/app_theme.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
@@ -36,12 +34,12 @@ class CurrentWeatherCard extends StatelessWidget {
     final bool hasBadConditions = frozen || unplayable || windyStrong;
     final Color borderColor = hasBadConditions
         ? conditionColor
-        : Theme.of(context).colorScheme.outlineVariant;
+        : Colors.grey.shade200;
 
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: borderColor,
@@ -75,7 +73,7 @@ class CurrentWeatherCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          AppColors.primaryDark.withValues(alpha: 0.8),
+                          const Color(0xFF001A3D).withValues(alpha: 0.8),
                           Colors.transparent,
                         ],
                         begin: Alignment.bottomCenter,
@@ -139,7 +137,7 @@ class CurrentWeatherCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
+                        color: Color(0xFF001A3D),
                       ),
                     ),
                     Container(
@@ -183,7 +181,7 @@ class CurrentWeatherCard extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 40,
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                      color: Colors.grey.shade200,
                     ),
                     Expanded(
                       child: _WeatherDetailItem(
@@ -196,7 +194,7 @@ class CurrentWeatherCard extends StatelessWidget {
                     Container(
                       width: 1,
                       height: 40,
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                      color: Colors.grey.shade200,
                     ),
                     Expanded(
                       child: _WeatherDetailItem(
@@ -259,9 +257,9 @@ class RainHistoryChart extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -280,13 +278,13 @@ class RainHistoryChart extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryDark,
+                  color: Color(0xFF001A3D),
                   letterSpacing: 0.5,
                 ),
               ),
               Text(
                 'Total: ${totalPrecipitation.round()}mm',
-                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
               ),
             ],
           ),
@@ -370,7 +368,7 @@ class ForecastSection extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.primaryDark,
+              color: Color(0xFF001A3D),
             ),
           ),
           const SizedBox(height: 12),
@@ -412,12 +410,12 @@ class _ForecastListItem extends StatelessWidget {
 
     Color labelColor;
     if (forecastLabel.startsWith('Éviter')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red;
+      labelColor = Colors.red.shade600;
     } else if (forecastLabel.startsWith('Prudence') ||
         forecastLabel.startsWith('Conditions dégradées')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange;
+      labelColor = Colors.orange.shade600;
     } else {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green;
+      labelColor = Colors.green.shade600;
     }
 
     // Icon and background color based on weather
@@ -432,17 +430,17 @@ class _ForecastListItem extends StatelessWidget {
       iconColor = Colors.blue.shade500;
       iconBgColor = Colors.blue.shade50;
     } else {
-      iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
-      iconBgColor = Theme.of(context).colorScheme.surfaceContainerHighest;
+      iconColor = Colors.grey.shade500;
+      iconBgColor = Colors.grey.shade100;
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -477,14 +475,14 @@ class _ForecastListItem extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: AppColors.primaryDark,
+                          color: Color(0xFF001A3D),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '↑${forecast.tempMax.round()}° ↓${forecast.tempMin.round()}°',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Colors.grey.shade500,
                           fontSize: 13,
                         ),
                       ),
@@ -503,7 +501,7 @@ class _ForecastListItem extends StatelessWidget {
                           '${forecast.precipitationSum.toStringAsFixed(1)} mm',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: Colors.grey.shade700,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -519,7 +517,7 @@ class _ForecastListItem extends StatelessWidget {
                           '${forecast.windSpeed.round()} km/h',
                           style: TextStyle(
                             fontSize: 13,
-                            color: Theme.of(context).colorScheme.onSurface,
+                            color: Colors.grey.shade700,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -574,12 +572,12 @@ class _WeatherDetailItem extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 16),
+            Icon(icon, color: Colors.grey.shade500, size: 16),
             const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: Colors.grey.shade500,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
@@ -596,7 +594,7 @@ class _WeatherDetailItem extends StatelessWidget {
             Text(
               value,
               style: const TextStyle(
-                color: AppColors.primaryDark,
+                color: Color(0xFF001A3D),
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
@@ -604,7 +602,7 @@ class _WeatherDetailItem extends StatelessWidget {
             const SizedBox(width: 4),
             Text(
               unit,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
             ),
           ],
         ),

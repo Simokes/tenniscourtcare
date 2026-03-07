@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/club_info_provider.dart';
 import '../../../../../domain/entities/club_info.dart';
@@ -92,7 +93,7 @@ class ClubInfoSection extends ConsumerWidget {
                             '📍 Coordonnées GPS: ${info.latitude}, ${info.longitude}',
                             style: Theme.of(
                               context,
-                            ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                            ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                           ),
                       ],
                     ),
@@ -122,7 +123,7 @@ class ClubInfoSection extends ConsumerWidget {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) =>
-                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+                Text('Erreur: $err', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),
@@ -347,7 +348,7 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Erreur: $e'),
-                            backgroundColor: Colors.red,
+                            backgroundColor: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red,
                           ),
                         );
                       }

@@ -45,14 +45,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final itemsAsync = ref.watch(calendarItemsProvider(_range));
 
     return Scaffold(
-
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(
           'Calendrier',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: false,
         actions: [
@@ -79,7 +79,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           // Calendar Widget
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: Colors.white,
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(24),
               ),
@@ -166,7 +166,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 formatButtonVisible: true,
                 formatButtonShowsNext: false,
                 formatButtonDecoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 formatButtonTextStyle: const TextStyle(fontSize: 12),
@@ -175,13 +175,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
-                leftChevronIcon: Icon(
+                leftChevronIcon: const Icon(
                   Icons.chevron_left,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: Colors.black87,
                 ),
-                rightChevronIcon: Icon(
+                rightChevronIcon: const Icon(
                   Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: Colors.black87,
                 ),
               ),
             ),
@@ -215,13 +215,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         Icon(
                           Icons.event_busy,
                           size: 64,
-                          color: Theme.of(context).colorScheme.outlineVariant,
+                          color: Colors.grey.shade300,
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'Aucun événement ce jour.',
                           style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Colors.grey.shade500,
                             fontSize: 16,
                           ),
                         ),
@@ -259,7 +259,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           );
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        foregroundColor: Colors.white,
         elevation: 4,
         icon: const Icon(Icons.add),
         label: const Text('Événement'),
@@ -403,7 +403,7 @@ class _CalendarItemCard extends ConsumerWidget {
                           item.description!,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Colors.grey.shade600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -415,7 +415,7 @@ class _CalendarItemCard extends ConsumerWidget {
                         Icon(
                           Icons.access_time,
                           size: 14,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Colors.grey.shade500,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -424,7 +424,7 @@ class _CalendarItemCard extends ConsumerWidget {
                               : '${dateFormat.format(item.startTime)} - ${dateFormat.format(item.endTime)}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Colors.grey.shade600,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -433,7 +433,7 @@ class _CalendarItemCard extends ConsumerWidget {
                           Icon(
                             Icons.location_on,
                             size: 14,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Colors.grey.shade500,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -441,7 +441,7 @@ class _CalendarItemCard extends ConsumerWidget {
                               item.location!,
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
