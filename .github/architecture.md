@@ -527,7 +527,8 @@ core/
 │   ├── token_service.dart
 │   └── auth_exceptions.dart
 └── theme/
-    └── app_theme.dart
+    ├── app_theme.dart              # ThemeData light/dark + classe AppColors (tokens centralisés)
+    └── dashboard_theme_extension.dart  # ThemeExtension : couleurs métier, sémantiques, terrains
 ```
 
 ---
