@@ -147,7 +147,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (_, __) =>
+                    error: (_, _) =>
                         const Center(child: Text('Erreur de chargement')),
                   ),
                 ),

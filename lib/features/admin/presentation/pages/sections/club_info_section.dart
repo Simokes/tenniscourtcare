@@ -265,7 +265,7 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
-                value: _openingHour,
+                initialValue: _openingHour,
                 decoration: const InputDecoration(
                   labelText: 'Heure d\'ouverture',
                 ),
@@ -283,7 +283,7 @@ class _EditClubInfoDialogState extends ConsumerState<_EditClubInfoDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<int>(
-                value: _closingHour,
+                initialValue: _closingHour,
                 decoration: const InputDecoration(
                   labelText: 'Heure de fermeture',
                 ),

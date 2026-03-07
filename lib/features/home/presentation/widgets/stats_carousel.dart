@@ -38,7 +38,7 @@ class StatsCarousel extends ConsumerWidget {
             value: todayMaintenanceAsync.when(
               data: (val) => '$val',
               loading: () => '-',
-              error: (_, __) => '!',
+              error: (_, _) => '!',
             ),
             label: 'Maintenances',
             onTap: () => context.push('/maintenance'),

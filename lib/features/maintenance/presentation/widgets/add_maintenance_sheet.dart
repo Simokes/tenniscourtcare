@@ -432,7 +432,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<Terrain>(
-                            value: _selectedTerrain,
+                            initialValue: _selectedTerrain,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16,

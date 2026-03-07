@@ -150,7 +150,7 @@ class CourtListSliver extends ConsumerWidget {
               ],
             ),
           ),
-          if (actionWidget != null) actionWidget,
+          ?actionWidget,
           IconButton(
             icon: const Icon(Icons.add, size: 20, color: Colors.grey),
             tooltip: 'Maintenance urgente',

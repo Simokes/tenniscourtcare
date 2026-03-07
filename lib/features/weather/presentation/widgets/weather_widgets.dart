@@ -318,8 +318,9 @@ class RainHistoryChart extends StatelessWidget {
                       ) // navy-500 equivalent in the design
                     : Colors.blue.shade100.withValues(alpha: 0.5);
 
-                if (!isSignificant && pct < 0.1)
+                if (!isSignificant && pct < 0.1) {
                   pct = 0.1; // tiny bump for visual
+                }
 
                 return Expanded(
                   child: Padding(

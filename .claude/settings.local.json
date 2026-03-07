@@ -6,7 +6,8 @@
       "Bash(do echo \"=== $f ===\")",
       "Read(//c/Users/planc/Documents/CourtCare/tenniscourtcare/**)",
       "Bash(done)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(grep:*)"
     ]
   }
 }

@@ -145,8 +145,9 @@ void main() {
 
     if (!stockStreamController.isClosed) stockStreamController.close();
     if (!terrainsStreamController.isClosed) terrainsStreamController.close();
-    if (!maintenancesStreamController.isClosed)
+    if (!maintenancesStreamController.isClosed) {
       maintenancesStreamController.close();
+    }
     if (!eventsStreamController.isClosed) eventsStreamController.close();
     if (!usersStreamController.isClosed) usersStreamController.close();
   });

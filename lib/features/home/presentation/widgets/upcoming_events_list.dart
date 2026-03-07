@@ -50,7 +50,7 @@ class UpcomingEventsList extends ConsumerWidget {
           const SizedBox(height: 16),
         ],
 
-        _buildSectionHeader(context, "À venir"),
+        _buildSectionHeader(context, 'À venir'),
         futureItemsAsync.when(
           data: (items) {
             final futureItems = items.take(3).toList();
