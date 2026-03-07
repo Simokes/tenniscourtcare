@@ -5,6 +5,8 @@ import 'package:tenniscourtcare/data/database/stock_history_queries.dart';
 import 'package:tenniscourtcare/core/providers/core_providers.dart';
 import 'package:tenniscourtcare/shared/widgets/premium/premium_card.dart';
 import 'package:tenniscourtcare/shared/widgets/common/sync_status_indicator.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 
 final stockHistoryProvider =
     StreamProvider.autoDispose<List<StockMovementWithDetails>>((ref) {
@@ -18,6 +20,7 @@ class StockHistoryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(stockHistoryProvider);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -35,12 +38,12 @@ class StockHistoryScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey.shade400),
+                  Icon(Icons.history, size: 64, color: cs.onSurfaceVariant),
                   const SizedBox(height: 16),
                   Text(
                     'Aucun mouvement enregistré',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -89,9 +92,11 @@ class StockHistoryScreen extends ConsumerWidget {
     StockMovementWithDetails item,
   ) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final dc = theme.extension<DashboardColors>();
     final movement = item.movement;
     final isPositive = movement.quantityChange > 0;
-    final changeColor = isPositive ? Colors.green : Colors.red;
+    final changeColor = isPositive ? (dc?.successColor ?? Colors.green) : (dc?.dangerColor ?? Colors.red);
     final icon = isPositive
         ? Icons.add_circle_outline
         : Icons.remove_circle_outline;
@@ -176,22 +181,22 @@ class StockHistoryScreen extends ConsumerWidget {
                 Text(
                   dateFormat.format(movement.occurredAt),
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: Colors.grey.shade500,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
                 if (item.userName != null)
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.person_outline,
                         size: 14,
-                        color: Colors.grey,
+                        color: cs.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         item.userName!,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.grey,
+                          color: cs.onSurfaceVariant,
                         ),
                       ),
                     ],

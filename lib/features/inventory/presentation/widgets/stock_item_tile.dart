@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/stock_item.dart';
 import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import './add_edit_stock_item_sheet.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 
 class StockItemTile extends ConsumerWidget {
   final StockItem item;
@@ -13,6 +15,9 @@ class StockItemTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isLow = item.isLowOnStock;
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
+
     final iconData = _getIconForName(item.name);
 
     return InkWell(
@@ -26,12 +31,12 @@ class StockItemTile extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: isLow ? Colors.red.shade100 : Colors.blue.shade50,
+                color: isLow ? (dc?.dangerBgColor ?? Colors.red.shade100) : cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 iconData,
-                color: isLow ? Colors.red.shade600 : Colors.blue.shade800,
+                color: isLow ? (dc?.dangerColor ?? Colors.red) : cs.primary,
                 size: 24,
               ),
             ),
@@ -47,7 +52,7 @@ class StockItemTile extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: isLow ? Colors.red.shade800 : Colors.grey.shade900,
+                      color: isLow ? (dc?.dangerColor ?? Colors.red) : cs.onSurface,
                     ),
                   ),
                   if (item.comment != null && item.comment!.isNotEmpty)
@@ -56,8 +61,8 @@ class StockItemTile extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 12,
                         color: isLow
-                            ? Colors.red.shade400
-                            : Colors.grey.shade500,
+                            ? (dc?.dangerColor ?? Colors.red)
+                            : cs.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -69,7 +74,7 @@ class StockItemTile extends ConsumerWidget {
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
-                        color: Colors.red.shade600,
+                        color: dc?.dangerColor ?? Colors.red,
                       ),
                     )
                   else
@@ -77,7 +82,7 @@ class StockItemTile extends ConsumerWidget {
                       item.category ?? 'Autre',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                 ],
@@ -89,10 +94,10 @@ class StockItemTile extends ConsumerWidget {
               width: 70,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isLow ? Colors.red.shade200 : Colors.grey.shade300,
+                  color: isLow ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.5) : cs.outlineVariant,
                 ),
               ),
               child: InkWell(
@@ -105,7 +110,7 @@ class StockItemTile extends ConsumerWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       color: isLow
-                          ? Colors.red.shade600
+                          ? (dc?.dangerColor ?? Colors.red)
                           : Theme.of(context).primaryColor,
                     ),
                   ),

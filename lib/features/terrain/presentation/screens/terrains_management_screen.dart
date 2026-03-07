@@ -30,7 +30,7 @@ class TerrainsManagementScreen extends ConsumerWidget {
                 title: Text(terrain.nom),
                 subtitle: Text(_getTerrainTypeName(terrain.type)),
                 trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   onPressed: () => _confirmDelete(context, ref, terrain),
                 ),
                 onTap: () => _showEditTerrainDialog(context, ref, terrain),
@@ -90,7 +90,7 @@ class TerrainsManagementScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
