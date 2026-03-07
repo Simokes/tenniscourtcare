@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
 import '../widgets/weather_widgets.dart';
+import 'package:tenniscourtcare/core/theme/app_theme.dart';
 
 class WeatherScreen extends ConsumerWidget {
   final String titre;
@@ -18,23 +20,19 @@ class WeatherScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsync = ref.watch(weatherForClubProvider(terrainType));
 
-    // We get colors matching the design's tailwind config
-    final Color backgroundColorLight = const Color(0xFFF5F7F8);
-    final Color navy800 = const Color(0xFF001A3D);
-
     return Scaffold(
-      backgroundColor: backgroundColorLight,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.black.withValues(alpha: 0.05),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.grey.shade100, height: 1.0),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1.0),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: navy800),
+          icon: const Icon(Icons.arrow_back, color: AppColors.primaryDark),
           onPressed: () {
             if (Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
@@ -43,8 +41,8 @@ class WeatherScreen extends ConsumerWidget {
         ),
         title: Text(
           titre,
-          style: TextStyle(
-            color: navy800,
+          style: const TextStyle(
+            color: AppColors.primaryDark,
             fontWeight: FontWeight.bold,
             fontSize: 20,
             letterSpacing: -0.5,
@@ -52,7 +50,7 @@ class WeatherScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, color: navy800),
+            icon: const Icon(Icons.settings, color: AppColors.primaryDark),
             onPressed: () {
               // Action pour rafraîchir ou paramètres
               ref.invalidate(weatherForClubProvider(terrainType));
@@ -64,13 +62,13 @@ class WeatherScreen extends ConsumerWidget {
       body: weatherAsync.when(
         data: (data) {
           if (data == null) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text(
                   "Configurez l'adresse du club",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 16),
                 ),
               ),
             );
@@ -112,7 +110,7 @@ class WeatherScreen extends ConsumerWidget {
             child: Text(
               'Impossible de charger la météo.\nVérifiez votre connexion ou les coordonnées du club.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red.shade400),
+              style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
             ),
           ),
         ),

@@ -81,7 +81,7 @@ class MaintenanceStatsChart extends StatelessWidget {
                         ]
                       : [
                           PieChartSectionData(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                            color: Colors.grey.shade300,
                             value: 1,
                             title: '',
                             radius: 15,
@@ -98,9 +98,9 @@ class MaintenanceStatsChart extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'Sacs',
-                    style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: TextStyle(fontSize: 10, color: Colors.grey),
                   ),
                 ],
               ),
@@ -124,9 +124,9 @@ class MaintenanceStatsChart extends StatelessWidget {
             ],
           )
         else
-          Text(
+          const Text(
             'Aucune donnée',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
+            style: TextStyle(color: Colors.grey, fontSize: 12),
           ),
       ],
     );
