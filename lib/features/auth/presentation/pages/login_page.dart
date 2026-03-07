@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_providers.dart';
 import '../../../../core/security/auth_exceptions.dart';
 import 'package:tenniscourtcare/shared/widgets/premium/premium_button.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -43,6 +44,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authStateProvider);
     final isLoading = authState.isLoading;
     final error = authState.error;
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -244,17 +247,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 24),
                   Builder(
                     builder: (context) {
-                      Color errorBgColor = Colors.red.withValues(alpha: 0.1);
-                      Color errorBorderColor = Colors.red.withValues(
+                      Color errorBgColor = cs.errorContainer.withValues(alpha: 0.3);
+                      Color errorBorderColor = cs.error.withValues(
                         alpha: 0.3,
                       );
-                      Color errorTextColor = Colors.red;
+                      Color errorTextColor = cs.error;
 
                       if (error is AuthException &&
                           error.type == AuthExceptionType.pendingApproval) {
-                        errorBgColor = Colors.orange.withValues(alpha: 0.1);
-                        errorBorderColor = Colors.orange.withValues(alpha: 0.3);
-                        errorTextColor = Colors.orange.shade800;
+                        errorBgColor = dc?.warningBgColor ?? Colors.orange.withValues(alpha: 0.1);
+                        errorBorderColor = (dc?.warningColor ?? Colors.orange).withValues(alpha: 0.3);
+                        errorTextColor = dc?.warningColor ?? Colors.orange;
                       }
 
                       return Container(

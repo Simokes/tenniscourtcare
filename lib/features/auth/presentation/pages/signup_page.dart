@@ -22,11 +22,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  // Design specific colors
-  static const _primaryColor = Color(0xFF003E85);
-  static const _primaryDarkColor = Color(0xFF002A5C);
-  static const _backgroundDarkColor = Color(0xFF0F1823);
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -87,24 +82,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final isLoading = authState.isLoading;
     final error = authState.error;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final backgroundColor = isDarkMode ? _backgroundDarkColor : Colors.white;
-    final cardColor = isDarkMode ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDarkMode ? Colors.white : const Color(0xFF0F172A);
-    final subtitleColor = isDarkMode
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B);
-    final borderColor = isDarkMode
-        ? const Color(0xFF475569)
-        : const Color(0xFFE2E8F0);
+    final cs = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: cs.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor),
+          icon: Icon(Icons.arrow_back, color: cs.onSurface),
           onPressed: () => context.go('/login'),
         ),
       ),
@@ -115,13 +101,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             constraints: const BoxConstraints(maxWidth: 448),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: cardColor,
+              color: cs.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
               boxShadow: isDarkMode
                   ? []
                   : [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: cs.onSurface.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -138,7 +124,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     style: GoogleFonts.inter(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: textColor,
+                      color: cs.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -147,23 +133,19 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: subtitleColor,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 32),
 
                   // Name Field
-                  _buildLabel('Nom', isDarkMode, textColor),
+                  _buildLabel('Nom', cs),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
                     textInputAction: TextInputAction.next,
-                    style: TextStyle(color: textColor),
-                    decoration: _inputDecoration(
-                      hintText: 'Votre nom complet',
-                      isDarkMode: isDarkMode,
-                      borderColor: borderColor,
-                    ),
+                    style: TextStyle(color: cs.onSurface),
+                    decoration: _inputDecoration(cs, hintText: 'Votre nom complet'),
                     validator: (value) {
                       if (value == null || value.trim().length < 2) {
                         return 'Le nom doit contenir au moins 2 caractères';
@@ -174,18 +156,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   const SizedBox(height: 20),
 
                   // Email Field
-                  _buildLabel('Email', isDarkMode, textColor),
+                  _buildLabel('Email', cs),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    style: TextStyle(color: textColor),
-                    decoration: _inputDecoration(
-                      hintText: 'Votre adresse email',
-                      isDarkMode: isDarkMode,
-                      borderColor: borderColor,
-                    ),
+                    style: TextStyle(color: cs.onSurface),
+                    decoration: _inputDecoration(cs, hintText: 'Votre adresse email'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'L\'email est requis';
@@ -201,23 +179,22 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   const SizedBox(height: 20),
 
                   // Password Field
-                  _buildLabel('Mot de passe', isDarkMode, textColor),
+                  _buildLabel('Mot de passe', cs),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     textInputAction: TextInputAction.next,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: _inputDecoration(
+                      cs,
                       hintText: 'Minimum 6 caractères',
-                      isDarkMode: isDarkMode,
-                      borderColor: borderColor,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isPasswordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: subtitleColor,
+                          color: cs.onSurfaceVariant,
                         ),
                         onPressed: () {
                           setState(() {
@@ -236,27 +213,22 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   const SizedBox(height: 20),
 
                   // Confirm Password Field
-                  _buildLabel(
-                    'Confirmer le mot de passe',
-                    isDarkMode,
-                    textColor,
-                  ),
+                  _buildLabel('Confirmer le mot de passe', cs),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
                     textInputAction: TextInputAction.done,
-                    style: TextStyle(color: textColor),
+                    style: TextStyle(color: cs.onSurface),
                     decoration: _inputDecoration(
+                      cs,
                       hintText: 'Répétez votre mot de passe',
-                      isDarkMode: isDarkMode,
-                      borderColor: borderColor,
                       suffixIcon: IconButton(
                         icon: Icon(
                           _isConfirmPasswordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: subtitleColor,
+                          color: cs.onSurfaceVariant,
                         ),
                         onPressed: () {
                           setState(() {
@@ -276,7 +248,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                   const SizedBox(height: 20),
 
                   // Role Dropdown
-                  _buildLabel('Rôle', isDarkMode, textColor),
+                  _buildLabel('Rôle', cs),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<Role>(
                     initialValue: _selectedRole,
@@ -285,7 +257,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         value: role,
                         child: Text(
                           role.label,
-                          style: TextStyle(color: textColor),
+                          style: TextStyle(color: cs.onSurface),
                         ),
                       );
                     }).toList(),
@@ -294,14 +266,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                         setState(() => _selectedRole = value);
                       }
                     },
-                    decoration: _inputDecoration(
-                      hintText: 'Sélectionnez un rôle',
-                      isDarkMode: isDarkMode,
-                      borderColor: borderColor,
-                    ),
-                    dropdownColor: isDarkMode
-                        ? const Color(0xFF334155)
-                        : Colors.white,
+                    decoration: _inputDecoration(cs, hintText: 'Sélectionnez un rôle'),
+                    dropdownColor: cs.surfaceContainerLow,
                   ),
                   const SizedBox(height: 24),
 
@@ -310,16 +276,16 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
+                        color: cs.errorContainer,
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: Colors.red.withValues(alpha: 0.3),
+                          color: cs.error.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Text(
                         error.toString(),
                         style: GoogleFonts.inter(
-                          color: Colors.red,
+                          color: cs.error,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -336,7 +302,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                       onPressed: isLoading ? null : _signup,
                       style:
                           ElevatedButton.styleFrom(
-                            backgroundColor: _primaryColor,
+                            backgroundColor: cs.primary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -347,12 +313,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                               states,
                             ) {
                               if (states.contains(WidgetState.hovered)) {
-                                return _primaryDarkColor;
+                                return cs.primaryContainer;
                               }
                               if (states.contains(WidgetState.disabled)) {
-                                return _primaryColor.withValues(alpha: 0.6);
+                                return cs.primary.withValues(alpha: 0.6);
                               }
-                              return _primaryColor;
+                              return cs.primary;
                             }),
                           ),
                       child: isLoading
@@ -382,44 +348,43 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
-  Widget _buildLabel(String text, bool isDarkMode, Color textColor) {
+  Widget _buildLabel(String text, ColorScheme cs) {
     return Text(
       text,
       style: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: textColor,
+        color: cs.onSurface,
       ),
     );
   }
 
-  InputDecoration _inputDecoration({
+  InputDecoration _inputDecoration(
+    ColorScheme cs, {
     required String hintText,
-    required bool isDarkMode,
-    required Color borderColor,
     Widget? suffixIcon,
   }) {
     return InputDecoration(
       hintText: hintText,
-      hintStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+      hintStyle: GoogleFonts.inter(color: cs.onSurfaceVariant),
       filled: true,
-      fillColor: isDarkMode ? const Color(0xFF334155) : Colors.white,
+      fillColor: cs.surfaceContainerLow,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: borderColor),
+        borderSide: BorderSide(color: cs.outlineVariant),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryColor, width: 2),
+        borderSide: BorderSide(color: cs.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red),
+        borderSide: BorderSide(color: cs.error),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
+        borderSide: BorderSide(color: cs.error, width: 2),
       ),
       suffixIcon: suffixIcon,
     );
