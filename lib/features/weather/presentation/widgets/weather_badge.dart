@@ -1,5 +1,6 @@
 // lib/presentation/widgets/weather_badge.dart
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class WeatherBadge extends StatelessWidget {
   final bool frozen;
@@ -18,13 +19,13 @@ class WeatherBadge extends StatelessWidget {
 
     if (frozen) {
       text = 'Terrain gelé';
-      color = Colors.blue;
+      color = Theme.of(context).extension<DashboardColors>()!.maintenanceColor;
     } else if (unplayable) {
       text = 'Terrain impraticable';
-      color = Colors.orange;
+      color = Theme.of(context).extension<DashboardColors>()!.warningColor;
     } else {
       text = 'Terrain praticable';
-      color = Colors.green;
+      color = Theme.of(context).extension<DashboardColors>()!.successColor;
     }
 
     return Chip(
