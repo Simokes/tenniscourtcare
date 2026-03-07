@@ -83,7 +83,6 @@
 - Synchronisation queue avancée: retry logic incomplete (voir section 7)
 - Export CSV rapports
 - Filtres multi-critères avancés
-- Admin setup auto-detection (setupStatusProvider) - **À IMPLÉMENTER EN PRIORITÉ**
 
 ---
 
@@ -94,7 +93,7 @@
 | **Framework** | Flutter 3.x | iOS/Android |
 | **Language** | Dart 3.x | Null safety, records |
 | **State Mgmt** | Riverpod 2.4.x | Provider, FutureProvider, StreamProvider (deprecation: .stream → .future en v3.0) |
-| **Local DB** | Drift 2.13.x | SQLite avec typage fort, migrations auto (current: v20) |
+| **Local DB** | Drift 2.13.x | SQLite avec typage fort, migrations auto (current: v23) |
 | **Cloud DB** | Firestore | Real-time sync, security rules (rules exist but untested - see section 7) |
 | **Auth** | Firebase Auth 4.15.x | Email/password |
 | **Auth Supplement** | Custom TokenService | JWT management (refresh logic: **À DOCUMENTER**) |
@@ -198,17 +197,17 @@ lib/
 - NO database imports, NO Firebase imports
 
 **Data:**
-- Drift: Local persistence, auto-migrations (v20)
-- Firestore: Cloud sync targets, real-time listeners
-- Repositories: Implement domain interfaces
+- Drift: Cache local lecture seule, auto-migrations (v23)
+- Firestore: Source de vérité, real-time listeners via FirebaseCacheService
+- Repositories: Reads depuis Drift, Writes vers Firestore uniquement
 - Mappers: Convert between entities and DTOs
-- Services: Firebase-specific orchestration (sync, batch ops)
+- Services: firebase_cache_service.dart (CORE — seul composant autorisé à écrire dans Drift)
 
 **Presentation:**
-- Riverpod providers: State management (FutureProvider for async data, StreamProvider deprecated)
+- Riverpod providers: State management (StreamProvider pour Drift streams, AsyncNotifier pour mutations)
 - UI screens & widgets: Flutter code
 - Form validation: Input validation (domain validators injected)
-- Navigation: GoRouter declarative routing + conditional redirects
+- Navigation: GoRouter declarative routing + conditional redirects via setupStatusProvider
 
 ---
 
@@ -340,206 +339,68 @@ Max queue size:   1000 items (breach → user notification + oldest purged)
 
 ## 7. Current Technical Challenges
 
-### 7.1 CRITICAL - Sync & Queue Architecture
+### 7.1 RÉSOLUS depuis v23
 
-**Problem:** SyncQueue + retry logic incomplete for production
+| Challenge | Ancien statut | Statut actuel |
+|-----------|--------------|---------------|
+| SyncQueue retry logic | Incomplete | Supprimé — remplacé par FirebaseCacheService |
+| Admin setup auto-detection | Missing | Implémenté (setupStatusProvider + setupStatusStreamProvider) |
+| Concurrent writes | Not handled | Non applicable — Firebase est source de vérité |
+| Stream migration | Partial | Tous les providers de données sont StreamProvider |
+| FirebaseCacheService resilience | Missing | Auto-restart + backoff exponentiel + reconnexion réseau |
 
-| Aspect | Status | Detail | Risk |
-|--------|--------|--------|------|
-| **SyncQueue table** | ✅ Exists (v14) | Stores: operation, entity, entityId, status, retries, lastError | Low |
-| **Retry logic** | ❌ Incomplete | Exponential backoff implemented, but NO handling for: Firestore rate limits, network timeout edge cases | **HIGH** |
-| **Concurrent writes** | ❌ Not handled | If 2 devices modify same item offline → last-write-wins, prior write **data lost** | **CRITICAL** |
-| **Offline persistence** | ⚠️ Partial | Local delete + cloud update = conflict (no resolution strategy) | **HIGH** |
-| **Batch limits** | ⚠️ Acknowledged | Firestore max 500 writes/transaction, SyncQueue batching = **hardcoded, not parameterized** | Medium |
+### 7.2 En cours / À faire
 
-**Workarounds (non-optimal):**
-- Manual retry via UI button
-- Users trained to avoid concurrent edits
-- Pending: Implement optimistic locking (version field per entity)
+| Challenge | Status | Priority |
+|-----------|--------|----------|
+| Firestore security rules validation | No tests | HIGH |
+| Token refresh strategy documentation | Undefined | MEDIUM |
+| Weather API fallback | Partial | MEDIUM |
+| Null safety audit complet | Partiel | MEDIUM |
+| Premium features (feature flags) | Non-implémenté | LOW |
+| Export CSV | Non-implémenté | LOW |
+| Firebase Emulator setup (CI) | Non-configuré | HIGH |
 
-**Fix timeline:** Priority 1 for next release
+### 7.3 Refactors Prévus (Checklist mise à jour)
 
----
-
-### 7.2 Auth Flow - Admin Setup Missing
-
-**Problem:** First-time setup not automated
-
-| Step | Current | Desired |
-|------|---------|---------|
-| 1. App start | Shows login screen | Check: admin exists? |
-| 2. No admin | Manual redirect to AdminSetupPage | Auto-route to AdminSetupScreen |
-| 3. Admin exists | Shows login | Auto-route to LoginScreen |
-| 4. User logged in | Shows home | Auto-route to HomeScreen |
-
-**Provider needed:** `setupStatusProvider` (StreamProvider)
-```dart
-enum SetupStatus { loading, needsAdminSetup, needsLogin, authenticated, error }
-
-// Checks: adminExistsProvider → then authState changes
-// Emits: SetupStatus based on (admin exists?, user logged in?)
-// Used by: GoRouter.redirect() for conditional routing
-```
-
-**Implementation missing:** Routes + provider logic in GoRouter
-
-**Impact:** First-time UX clunky, requires manual navigation
-
----
-
-### 7.3 Stream Deprecation (Riverpod 3.0)
-
-**Problem:** `.stream` deprecated in Riverpod 3.0, app uses it
-
-| File | Deprecated usage | Replacement | Status |
-|------|------------------|-------------|--------|
-| `event_provider.dart:33` | `.stream` | `.watch()` or `.future` | 🔄 Pending |
-| `maintenance_provider.dart:35` | `.stream` | `.future` | 🔄 Pending |
-| `terrain_provider.dart:49` | `.stream` | `.future` | 🔄 Pending |
-| `stock_provider.dart:47, 257, 274, 286` | `.stream` (4x) | `.future` | 🔄 Pending |
-
-**Lint warnings:** ~6 info-level warnings currently suppressed
-
-**Action:** Migrate before Riverpod 3.0 release
-
----
-
-### 7.4 Firestore Security Rules - Untested
-
-**Problem:** Rules exist but no unit tests
-
-**File:** 
-
-firestore.rules
-
- (root project)
-
-**Coverage:** Collection-level + document-level checks mentioned, but specific rules NOT documented
-
-**Risks:**
-- Collections potentially open to unauthorized read/write
-- No validation of document structure
-- No user ownership checks validated
-
-**Required actions:**
-- [ ] Document rules (at least 2-3 examples in PROJECT_SUMMARY)
-- [ ] Test with Firebase Emulator
-- [ ] Add validation rules (required fields, type checks)
-
-**Example rule structure (TO BE VERIFIED):**
-```
-match /stock/{itemId} {
-  allow read: if request.auth.uid != null;  // Any user
-  allow write: if request.auth.uid != null && checkUserRole('manager');  // Manager+ only
-}
-```
-
----
-
-### 7.5 Weather API - No Fallback Specified
-
-**Problem:** API downtime → feature breaks
-
-| Scenario | Current behavior | Expected behavior |
-|----------|-----------------|-------------------|
-| API available | Shows live data | ✅ Works |
-| API timeout | Unknown | Cache + "Stale data (24h)" warning |
-| API rate limit | Unknown | Cache + "Data offline" banner |
-| No cache | First launch offline | Error message (no fallback) |
-
-**Fallback mechanism:**
-- Cache: Last successful API call (TTL: 24 hours)
-- UI feedback: "⚠️ Last update: 20 hours ago" badge
-- **Current code:** WeatherService (lib/features/weather/infrastructure/weather_service.dart) - **implementation details missing**
-
----
-
-### 7.6 Null Safety - Unsafe Widget Access
-
-**File:** `refill_recommendation_card.dart:32` - `unchecked_use_of_nullable_value`
-
-**Issue:** Potential NPE at runtime if item.minThreshold is null
-
-**Fix:** Null-check before comparison (see section 4: Data Layer responsibility)
-
----
-
-### 7.7 Token Management - Refresh Logic Undefined
-
-**Provider:** `TokenService` (lib/core/security/token_service.dart)
-
-**Issues:**
-- JWT refresh endpoint: **Where is it?** (Firebase? Custom backend?)
-- Refresh timing: On expiry? Or proactive before expiry?
-- Storage: SharedPreferences (but encryption level?)
-- Fallback: If refresh fails, force re-login?
-
-**Impact:** Token expiry could cause silent auth failures
-
-**Required documentation:** Specify Firebase JWT refresh strategy
-
----
-
-### 7.8 Dette technique identifiée (Résumé)
-
-| Challenge | Status | Priority | Est. effort |
-|-----------|--------|----------|------------|
-| SyncQueue retry edge cases | ❌ Incomplete | 🔴 CRITICAL | 3-5 days |
-| Admin setup auto-detection | ❌ Missing | 🔴 CRITICAL | 1-2 days |
-| Concurrent writes conflict | ❌ Not handled | 🔴 CRITICAL | 2-3 days |
-| Firestore rules validation | ❌ No tests | 🟠 HIGH | 1-2 days |
-| Stream → Future migration | 🔄 Partial | 🟠 HIGH | 1 day |
-| Token refresh strategy | ❌ Undefined | 🟡 MEDIUM | 0.5 days |
-| Weather API fallback | ⚠️ Partial | 🟡 MEDIUM | 0.5 days |
-| Null safety audit | ⚠️ 1 known issue | 🟡 MEDIUM | 0.5 days |
-
-### 7.9 Refactors Prévus (Checklist)
-
-- [ ] **[CRITICAL]** Implement setupStatusProvider + GoRouter conditional routing
-- [ ] **[CRITICAL]** Complete SyncQueue retry logic (exponential backoff, rate limit handling, concurrent write detection)
-- [ ] **[CRITICAL]** Add optimistic locking (version field on entities)
-- [ ] **[HIGH]** Migrate StreamProviders → FutureProviders + listeners
-- [ ] **[HIGH]** Document + test Firestore security rules (Emulator)
-- [ ] **[HIGH]** Document TokenService JWT refresh strategy
-- [ ] **[MEDIUM]** Parameterize retry strategy (backoff multiplier, max attempts)
-- [ ] **[MEDIUM]** Add circuit breaker for Firestore failures
-- [ ] **[MEDIUM]** Implement Weather API fallback with TTL caching
-- [ ] **[MEDIUM]** Null safety audit + strict-casts enabled in 
-
-analysis_options.yaml
-
-
-- [ ] **[LOW]** Premium features (feature flags) system design
+- [x] Implement setupStatusProvider + GoRouter conditional routing — FAIT
+- [x] Complete SyncQueue retry logic — Supprimé (FirebaseCacheService)
+- [x] Migrate providers — tous en StreamProvider
+- [ ] [HIGH] Document + test Firestore security rules (Emulator)
+- [ ] [HIGH] Document TokenService JWT refresh strategy
+- [ ] [MEDIUM] Implement Weather API fallback with TTL caching
+- [ ] [MEDIUM] Null safety audit + strict-casts enabled
+- [ ] [LOW] Premium features (feature flags) system design
+- [ ] [LOW] Export CSV rapports
 
 ---
 
 ## 8. Database Schema Overview
 
-### 8.1 Current Version: v20
+### 8.1 Current Version: v23
 
 ### Changelog
-- **v20:** users.status (active|inactive|rejected), users.approvedAt, users.approvedBy
-- **v13 → v14:**
-  - Added: `SyncQueue` table (operations queueing for offline)
-  - Modified: Added `updatedAt` field to all tables (sync tracking)
-  - Modified: `StockMovement.reason` nullable (optional movement reason)
-  - See: `lib/data/database/migrations/` for full schema files
+- **v23:** Performance : index non-unique sur firebaseId (maintenances, terrains, stock_items, events) et firestoreUid (users). Accélère tous les upserts FirebaseCacheService.
+- **v22:** Suppression SyncQueue table, syncStatus columns, pendingSync columns, lastSyncedAt columns. Firebase devient source de vérité.
+- **v20:** users.status (active|inactive|rejected), users.approvedAt, users.approvedBy.
 
-**Tables (11 total):**
+**Tables:**
 
-| Table | Rows (estimate) | Key | Indexes | Notes |
-|-------|-----------------|-----|---------|-------|
-| **users** | 10-100 | id (String PK) | email (unique), role | Firebase UID sync |
-| **terrains** | 5-50 | id (String PK) | name (unique), status | Geo-enabled |
-| **stock_items** | 50-500 | id (int PK auto) | name, category, isCustom | No soft-delete |
-| **stock_movements** | 1000+ | id (int PK auto) | itemId (FK), timestamp, type | Append-only history |
-| **maintenances** | 500+ | id (int PK auto) | terrainId (FK), scheduledDate, status | Soft-delete capable |
-| **reservations** | 10000+ | id (int PK auto) | terrainId (FK), startTime, status | Conflict detection possible |
-| **events** | 100+ | id (int PK auto) | terrainId (FK), startTime | Calendar data |
-| **audit_logs** | 5000+ | id (int PK auto) | userId (FK), timestamp, action | Immutable (no deletes) |
-| **sync_queue** | 0-1000 | id (int PK auto) | status, entityId, entity | Offline queue |
-| **login_attempts** | 10000+ | id (int PK auto) | userId (soft), timestamp | Rate limiting |
-| **otp_records** | 100+ | id (int PK auto) | userId (soft), expiresAt | Admin security |
+| Table | Rows (estimate) | Key | Notes |
+|-------|-----------------|-----|-------|
+| users | 10-100 | id (String PK) | Firebase UID sync |
+| terrains | 5-50 | id (int PK auto) | firebaseId indexé |
+| stock_items | 50-500 | id (int PK auto) | firebaseId indexé |
+| stock_movements | 1000+ | id (int PK auto) | Append-only history |
+| maintenances | 500+ | id (int PK auto) | firebaseId indexé |
+| reservations | 10000+ | id (int PK auto) | Calendar data |
+| events | 100+ | id (int PK auto) | firebaseId indexé |
+| audit_logs | 5000+ | id (int PK auto) | Immutable (no deletes) |
+| login_attempts | 10000+ | id (int PK auto) | Rate limiting |
+| otp_records | 100+ | id (int PK auto) | Admin security |
+
+Colonnes supprimées depuis v22 : syncStatus, pendingSync, lastSyncedAt, lastModifiedBy — supprimés de toutes les tables
+Table supprimée depuis v22 : SyncQueueTable — supprimée (remplacée par FirebaseCacheService)
 
 **Constraints:**
 - Foreign keys: **ENABLED** (integrity enforced)
@@ -561,6 +422,8 @@ analysis_options.yaml
 
 ### 9.1 Collections & Sync Strategy
 
+**Overall strategy:** Firebase (Firestore) = Source de vérité. Drift = Cache local lecture seule, alimenté par FirebaseCacheService via listeners temps réel.
+
 | Collection | Document path | Document structure | Sync source | Sync direction |
 |------------|---|---|---|---|
 | **users** | users/{userId} | {id, email, fullName, role, createdAt, updatedAt} | Drift (local source) | **Drift → Firestore (push-only)** |
@@ -572,43 +435,28 @@ analysis_options.yaml
 | **events** | events/{eventId} | {id, terrainId, title, description, startTime, endTime, updatedAt} | Drift | **Drift ↔ Firestore (bidirectional)** |
 | **audit_logs** | audit_logs/{logId} | {id, userId, action, resource, resourceId, timestamp, details (JSON), createdAt} | Drift | **Append-only (Drift → Firestore, immutable)** |
 
-### 9.2 Sync Mechanism
+### 9.2 Sync Mechanism (v23)
 
-**Overall strategy:** Drift is **primary source of truth** (offline-first), Firestore is **reporting/backup**
+**Write flow:**
+UI action -> AsyncNotifier -> Repository.addX/updateX/deleteX() -> Firestore -> listener FirebaseCacheService -> Drift -> UI rebuilt
 
-**Sync flow:**
-1. **Local mutation** (user action in app)
-   - Written to Drift immediately (optimistic update)
-   - Entry added to SyncQueue (operation: CREATE/UPDATE/DELETE, status: PENDING)
-   
-2. **Sync trigger** (automatic, on network change or timer)
-   - FirebaseSyncService reads SyncQueue (status = PENDING)
-   - Batches operations (max 500/batch per Firestore limits)
-   - Calls Firestore write operation
-   - Updates SyncQueue entry: status = SUCCESS (or FAILED if error)
-   
-3. **Pull-on-demand** (periodic or user-initiated)
-   - App checks Firestore for updates from other devices (not implemented yet)
-   - Merges remote updates into Drift (conflict resolution: see section 6.4)
+**Read flow:**
+UI -> ref.watch(xxxProvider) -> StreamProvider -> Drift stream -> UI
 
-**Push timing:**
-- Automatic: On network state change (WiFi/cellular detected)
-- Periodic: Background sync every 15 minutes (when app in foreground)
-- Manual: User-triggered "Sync now" button
+**FirebaseCacheService:**
+- Seul composant autorisé à écrire dans Drift
+- Démarre dans AuthNotifier.signIn() via cacheService.startListening()
+- S'arrête dans AuthNotifier.signOut() via cacheService.stopListening()
+- Resilience : auto-restart avec backoff exponentiel (3s->6s->12s->24s->30s cap)
+- Reconnexion réseau : startConnectivityMonitoring() appelé à la connexion
 
-**Pull timing:** (Currently not implemented - Firestore is **write-only** currently)
+**Exception firebaseId :**
+Après chaque addX(), l'AsyncNotifier persiste immédiatement le firebaseId dans Drift sans attendre le listener.
 
-### 9.3 Conflict Resolution Strategy
+### 9.3 Conflict Resolution
 
-**Current:** Last-write-wins (simple, data-loss risk)
-
-**Implementation:** `updatedAt` timestamp compared, highest timestamp wins
-- If local.updatedAt > remote.updatedAt → keep local, push to cloud
-- If remote.updatedAt > local.updatedAt → keep local (Drift is master, don't pull)
-
-**Limitation:** Multi-device edits → prior write lost (not acceptable for production)
-
-**Planned fix:** Optimistic locking (add `version` field, increment on mutations)
+**Stratégie actuelle :** Non applicable.
+Firebase est source de vérité unique. Les conflits entre devices sont gérés nativement par Firestore. Drift reçoit toujours la version Firestore via FirebaseCacheService — pas de résolution locale nécessaire.
 
 ---
 
@@ -616,62 +464,50 @@ analysis_options.yaml
 
 ### 10.1 Auth & Setup
 
-| Provider | Type | Status | Purpose | Dependencies |
-|----------|------|--------|---------|--------------|
-| `authStateProvider` | StreamProvider | ✅ Exists | Watch Firebase Auth state changes | FirebaseAuth.authStateChanges() |
-| `currentUserProvider` | FutureProvider | ✅ Exists | Fetch logged-in user from Drift | authStateProvider + databaseProvider |
-| `adminExistsProvider` | FutureProvider | ✅ Exists | Check if admin role exists in users table | databaseProvider |
-| `setupStatusProvider` | StreamProvider | ❌ **MISSING** | Emit SetupStatus (needsAdminSetup\|needsLogin\|authenticated) | adminExistsProvider + authStateProvider |
-| `pendingUsersProvider` | StreamProvider | ✅ | Watch inactive users | databaseProvider |
-| `pendingCountProvider` | Provider<int> | ✅ | Count pending users | pendingUsersProvider |
-| `UserApprovalNotifier` | AsyncNotifier | ✅ | approveUser/rejectUser | authRepositoryProvider |
-
-**setupStatusProvider (TO IMPLEMENT):**
-```dart
-enum SetupStatus { loading, needsAdminSetup, needsLogin, authenticated, error }
-
-final setupStatusProvider = StreamProvider<SetupStatus>((ref) async* {
-  final adminExists = await ref.watch(adminExistsProvider.future);
-  if (!adminExists) {
-    yield SetupStatus.needsAdminSetup;
-    return;  // Stop here, don't watch auth
-  }
-  // Admin exists, watch auth state
-  final user = await ref.watch(authStateProvider.future);
-  yield user == null ? SetupStatus.needsLogin : SetupStatus.authenticated;
-});
-```
-
-**Used by:** GoRouter.redirect() for conditional routing
+| Provider | Type | Status | Purpose |
+|----------|------|--------|---------|
+| authStateProvider | StateNotifierProvider | OK | Auth state + signIn/signOut lifecycle |
+| currentUserProvider | Provider<UserEntity?> | OK | Utilisateur connecté courant |
+| isAuthenticatedProvider | Provider<bool> | OK | Booléen auth rapide |
+| adminExistsProvider | FutureProvider<bool> | OK | Vérifie si admin existe (Firestore + fallback Drift) |
+| setupStatusProvider | FutureProvider<SetupStatus> | OK | Statut setup (needsAdminSetup/needsLogin/authenticated/error/loading) |
+| setupStatusStreamProvider | StreamProvider<SetupStatus> | OK | Stream continu de setupStatus pour GoRouter |
+| pendingUsersProvider | StreamProvider<List<UserEntity>> | OK | Utilisateurs inactifs en attente |
+| pendingCountProvider | Provider<int> | OK | Nombre d'utilisateurs en attente |
+| userApprovalNotifierProvider | AsyncNotifierProvider | OK | approveUser/rejectUser |
 
 ---
 
 ### 10.2 Domain Data
 
-| Provider | Type | Status | Purpose | Notes |
-|----------|------|--------|---------|-------|
-| `databaseProvider` | Provider | ✅ | Singleton Drift instance | Initialized in main() |
-| `stockProvider` | FutureProvider | ✅ | All stock items from Drift | Refreshes on mutation |
-| `filteredStockItemsProvider` | FutureProvider | ✅ | Stock with filters (category, search, lowStock) | Depends on: stockProvider, stockFilterProvider, stockSearchQueryProvider |
-| `lowStockItemsProvider` | FutureProvider | ✅ | Items with quantity < minThreshold | Depends on: stockProvider |
-| `criticalStockItemsProvider` | FutureProvider | ✅ | Items with quantity ≤ 5 | Depends on: lowStockItemsProvider |
-| `terrainProvider` | FutureProvider | ⚠️ Partial | All terrains from Drift | .stream deprecated (to migrate) |
-| `maintenanceProvider` | FutureProvider | ⚠️ Partial | All maintenances from Drift | .stream deprecated (to migrate) |
-| `eventProvider` | FutureProvider | ⚠️ Partial | All events from Drift | .stream deprecated (to migrate) |
-| `clubInfoProvider` | StreamProvider<ClubInfo?> | ✅ | Watch club info from Firestore | clubInfoRepositoryProvider |
-| `clubLocationFromInfoProvider` | Provider<ClubLocation?> | ✅ | Club lat/lng for weather | clubInfoProvider |
-| `weatherForClubProvider` | FutureProvider.family | ✅ | Weather with priority logic | clubLocationFromInfoProvider + appSettingsProvider |
+| Provider | Type | Status | Purpose |
+|----------|------|--------|---------|
+| databaseProvider | Provider<AppDatabase> | OK | Singleton Drift |
+| stockItemsProvider / stockProvider | StreamProvider<List<StockItem>> | OK | Stream Drift stock items |
+| filteredStockItemsProvider | StreamProvider<List<StockItem>> | OK | Stock avec filtres |
+| lowStockItemsProvider | StreamProvider<List<StockItem>> | OK | Items quantity < minThreshold |
+| terrainsProvider | StreamProvider<List<Terrain>> | OK | Stream Drift terrains |
+| eventsProvider | StreamProvider<List<AppEvent>> | OK | Stream Drift events |
+| maintenancesProvider | StreamProvider | OK | Maintenances depuis Drift |
+| clubInfoProvider | StreamProvider<ClubInfo?> | OK | Info club depuis Firestore |
+| clubLocationFromInfoProvider | Provider<ClubLocation?> | OK | Coordonnées GPS club |
+| weatherForClubProvider | FutureProvider.family | OK | Météo selon localisation |
+| firebaseCacheServiceProvider | Provider<FirebaseCacheService> | OK | Singleton cache service |
 
 ---
 
-### 10.3 Sync & Services
+### 10.3 Services
 
-| Provider | Type | Status | Purpose | Trigger |
-|----------|------|--------|---------|---------|
-| `firebaseSyncServiceProvider` | Provider | ✅ | Singleton FirebaseSyncService instance | On app init |
-| `syncStockProvider` | FutureProvider | ✅ | Manually trigger stock sync to Firestore | User "Sync now" button |
-| `syncStatusProvider` | StreamProvider | ⚠️ | Real-time sync status (idle\|in-progress\|queued) | Watches SyncQueue.status changes |
-| `queueStatusProvider` | StreamProvider | ⚠️ | SyncQueue statistics (pending count, last sync time) | Watches SyncQueue table |
+| Provider | Type | Status | Purpose |
+|----------|------|--------|---------|
+| firebaseCacheServiceProvider | Provider<FirebaseCacheService> | OK | Singleton — listeners Firestore -> Drift |
+| isOnlineStatusProvider | StreamProvider<bool> | OK | Connectivité réseau (connectivity_plus) |
+
+SUPPRIMÉS depuis v22 :
+- firebaseSyncServiceProvider — remplacé par FirebaseCacheService
+- syncStockProvider — plus de sync manuelle
+- syncStatusProvider — plus de SyncQueue
+- queueStatusProvider — plus de SyncQueue
 
 ---
 
@@ -867,23 +703,24 @@ pubspec.yaml
 
 | Responsibility | File path | Status |
 |---|---|---|
-| Auth flow | `auth_providers.dart` | ✅ |
-| Auth pages | `lib/features/auth/presentation/pages/` | ✅ |
-| Setup detection | `lib/features/admin/providers/admin_setup_provider.dart` | ❌ TO CREATE |
-| Admin dashboard | `lib/features/admin/presentation/pages/` | ✅ |
-| Router | `app_router.dart` | ⚠️ Needs setupStatusProvider |
-| Sync service | `firebase_sync_service.dart` | ⚠️ Retry incomplete |
-| Database | `app_database.dart` | ✅ v20 |
-| Stock screen | `lib/features/inventory/presentation/screens/` | ✅ |
-| Permission logic | `permission_resolver.dart` | ✅ |
-| Token service | `token_service.dart` | ❌ Refresh logic undefined |
-| Firestore rules | `firestore.rules` (root) | ❌ Untested |
-| Settings screen | `lib/features/settings/presentation/screens/` | ✅ |
-| Weather screen | `lib/features/weather/presentation/screens/` | ✅ |
-| Club info repository | `lib/data/repositories/club_info_repository_impl.dart` | ✅ |
-| Nominatim service | `lib/data/services/nominatim_service.dart` | ✅ |
-| Club info provider | `lib/features/admin/providers/club_info_provider.dart` | ✅ |
-| Shared widgets | `lib/shared/widgets/` | ✅ |
+| Auth flow | lib/features/auth/providers/auth_providers.dart | OK |
+| Auth pages | lib/features/auth/presentation/pages/ | OK |
+| Setup detection | lib/features/auth/providers/setup_providers.dart | OK |
+| Admin dashboard | lib/features/admin/presentation/pages/ | OK |
+| Router | lib/core/router/app_router.dart | OK |
+| Firebase Cache Service | lib/data/services/firebase_cache_service.dart | OK |
+| Database | lib/data/database/app_database.dart | OK v23 |
+| Stock screen | lib/features/inventory/presentation/screens/ | OK |
+| Permission logic | lib/domain/logic/permission_resolver.dart | OK |
+| Token service | lib/core/security/token_service.dart | WARN: Refresh logic à documenter |
+| Firestore rules | firestore.rules (root) | NOK: Non testées |
+| Settings screen | lib/features/settings/presentation/screens/ | OK |
+| Weather screen | lib/features/weather/presentation/screens/ | OK |
+| Club info repository | lib/data/repositories/club_info_repository_impl.dart | OK |
+| Nominatim service | lib/data/services/nominatim_service.dart | OK |
+| Club info provider | lib/features/admin/providers/club_info_provider.dart | OK |
+| Shared widgets | lib/shared/widgets/ | OK |
+| Theme | lib/core/theme/app_theme.dart + dashboard_theme_extension.dart | OK |
 
 ---
 
