@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tenniscourtcare/data/database/app_database.dart';
 import 'package:tenniscourtcare/domain/entities/maintenance.dart' as domm;
 
+import 'package:tenniscourtcare/domain/entities/stock_item.dart';
+
 void main() {
   late AppDatabase database;
 
@@ -10,6 +12,17 @@ void main() {
     database = AppDatabase(NativeDatabase.memory());
     // Trigger database creation and seeding
     await database.getAllTerrains();
+
+    // Seed des articles requis par les tests
+    await database.insertStockItem(
+      StockItem(name: 'Manto', quantity: 0, unit: 'sac', isCustom: false),
+    );
+    await database.insertStockItem(
+      StockItem(name: 'Sottomanto', quantity: 0, unit: 'sac', isCustom: false),
+    );
+    await database.insertStockItem(
+      StockItem(name: 'Silice', quantity: 0, unit: 'sac', isCustom: false),
+    );
   });
 
   tearDown(() async {
