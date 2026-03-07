@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_providers.dart';
 import '../../../../core/security/auth_exceptions.dart';
-import './auth_icons.dart';
+import 'package:tenniscourtcare/shared/widgets/premium/premium_button.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -18,12 +18,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
 
-  // Design specific colors
-  static const _primaryColor = Color(0xFF003E85);
-  static const _primaryDarkColor = Color(0xFF002A5C);
-  static const _skyBlueColor = Color(0xFF0EA5E9);
-  static const _backgroundDarkColor = Color(0xFF0F1823);
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -36,7 +30,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final password = _passwordController.text.trim();
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs')),
+        const SnackBar(content: Text('Veuillez remplir tous les champs.')),
       );
       return;
     }
@@ -49,24 +43,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final authState = ref.watch(authStateProvider);
     final isLoading = authState.isLoading;
     final error = authState.error;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final backgroundColor = isDarkMode ? _backgroundDarkColor : Colors.white;
-    final cardColor = isDarkMode
-        ? const Color(0xFF1E293B)
-        : Colors.white; // Slate-800 for dark mode card
-    final textColor = isDarkMode
-        ? Colors.white
-        : const Color(0xFF0F172A); // Slate-900
-    final subtitleColor = isDarkMode
-        ? const Color(0xFF94A3B8)
-        : const Color(0xFF64748B); // Slate-400/500
-    final borderColor = isDarkMode
-        ? const Color(0xFF475569)
-        : const Color(0xFFE2E8F0); // Slate-600/200
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -76,17 +55,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ), // max-w-md (approx 448px)
             padding: const EdgeInsets.all(24), // p-6 sm:p-10
             decoration: BoxDecoration(
-              color: cardColor,
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12), // rounded-xl
-              boxShadow: isDarkMode
-                  ? []
-                  : [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+              boxShadow: [
+                if (Theme.of(context).brightness == Brightness.light)
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,13 +76,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: _primaryColor.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.primaryContainer,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.sports_tennis,
                         size: 32,
-                        color: _primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -114,18 +92,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       style: GoogleFonts.inter(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: isDarkMode ? Colors.white : _primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                         letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Facility management made effortless',
+                      'La gestion de club, simplifiée.',
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: subtitleColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -134,57 +112,95 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
                 // Welcome Text
                 Text(
-                  'Welcome Back',
+                  'Bon retour',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: textColor,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Please enter your details to sign in.',
+                  'Veuillez entrer vos identifiants.',
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(fontSize: 14, color: subtitleColor),
+                  style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 32),
 
                 // Email Field
-                _buildLabel('Email', isDarkMode, textColor),
+                Text(
+                  'Email',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
-                  style: TextStyle(color: textColor),
-                  decoration: _inputDecoration(
-                    hintText: 'Enter your email',
-                    isDarkMode: isDarkMode,
-                    borderColor: borderColor,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: 'Votre adresse email',
+                    hintStyle: GoogleFonts.inter(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
 
                 // Password Field
-                _buildLabel('Password', isDarkMode, textColor),
+                Text(
+                  'Mot de passe',
+                  style: GoogleFonts.inter(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => _login(),
-                  style: TextStyle(color: textColor),
-                  decoration: _inputDecoration(
-                    hintText: 'Enter your password',
-                    isDarkMode: isDarkMode,
-                    borderColor: borderColor,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: 'Votre mot de passe',
+                    hintStyle: GoogleFonts.inter(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).colorScheme.surface,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible
                             ? Icons.visibility
                             : Icons.visibility_off,
-                        color: subtitleColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       onPressed: () {
                         setState(() {
@@ -202,7 +218,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                            'Please contact your administrator for password reset.',
+                            'Contactez votre administrateur pour réinitialiser votre mot de passe.',
                           ),
                         ),
                       );
@@ -213,11 +229,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      'Forgot Password?',
+                      'Mot de passe oublié ?',
                       style: GoogleFonts.inter(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: _skyBlueColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ),
@@ -267,111 +283,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 const SizedBox(height: 24),
 
                 // Sign In Button
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _login,
-                    style:
-                        ElevatedButton.styleFrom(
-                          backgroundColor: _primaryColor,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
-                        ).copyWith(
-                          backgroundColor: WidgetStateProperty.resolveWith((
-                            states,
-                          ) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return _primaryDarkColor;
-                            }
-                            if (states.contains(WidgetState.disabled)) {
-                              return _primaryColor.withValues(alpha: 0.6);
-                            }
-                            return _primaryColor;
-                          }),
-                        ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            'Sign In',
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Divider
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: borderColor)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
-                        'OR CONTINUE WITH',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: subtitleColor,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: borderColor)),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
-
-                // Social Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSocialButton(
-                        context,
-                        icon: const FacebookIcon(size: 20),
-                        label: 'Facebook',
-                        isDarkMode: isDarkMode,
-                        borderColor: borderColor,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Facebook login not implemented'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _buildSocialButton(
-                        context,
-                        icon: const GoogleIcon(size: 20),
-                        label: 'Google',
-                        isDarkMode: isDarkMode,
-                        borderColor: borderColor,
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Google login not implemented'),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                PremiumButton(
+                  label: 'Se connecter',
+                  onPressed: isLoading ? null : _login,
+                  isLoading: isLoading,
                 ),
 
                 const SizedBox(height: 32),
@@ -381,10 +296,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   alignment: WrapAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      'Pas encore de compte ? ',
                       style: GoogleFonts.inter(
                         fontSize: 14,
-                        color: subtitleColor,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     TextButton(
@@ -401,7 +316,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: _skyBlueColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
@@ -415,96 +330,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Text(
-          '© 2024 CourtCare. Premium Tennis Management.',
+          '© 2025 CourtCare. Gestion de club de tennis.',
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(fontSize: 12, color: subtitleColor),
+          style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text, bool isDarkMode, Color textColor) {
-    return Text(
-      text,
-      style: GoogleFonts.inter(
-        fontSize: 14,
-        fontWeight: FontWeight.w500,
-        color: textColor,
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String hintText,
-    required bool isDarkMode,
-    required Color borderColor,
-    Widget? suffixIcon,
-  }) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: GoogleFonts.inter(
-        color: isDarkMode ? const Color(0xFF94A3B8) : const Color(0xFF94A3B8),
-      ),
-      filled: true,
-      fillColor: isDarkMode
-          ? const Color(0xFF334155)
-          : Colors.white, // Slate-700 / White
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: borderColor),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(color: _primaryColor, width: 2),
-      ),
-      suffixIcon: suffixIcon,
-    );
-  }
-
-  Widget _buildSocialButton(
-    BuildContext context, {
-    required Widget icon,
-    required String label,
-    required bool isDarkMode,
-    required Color borderColor,
-    required VoidCallback onPressed,
-  }) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style:
-          OutlinedButton.styleFrom(
-            foregroundColor: isDarkMode
-                ? Colors.white
-                : const Color(0xFF334155),
-            side: BorderSide(color: borderColor),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            backgroundColor: isDarkMode
-                ? const Color(0xFF334155)
-                : Colors.white,
-          ).copyWith(
-            backgroundColor: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.hovered)) {
-                return isDarkMode
-                    ? const Color(0xFF475569)
-                    : const Color(0xFFF8FAFC); // Slate-600 / Slate-50
-              }
-              return isDarkMode ? const Color(0xFF334155) : Colors.white;
-            }),
-          ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          icon,
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: GoogleFonts.inter(fontWeight: FontWeight.w500, fontSize: 14),
-          ),
-        ],
       ),
     );
   }

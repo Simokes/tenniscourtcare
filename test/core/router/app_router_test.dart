@@ -18,6 +18,8 @@ import 'package:tenniscourtcare/domain/repositories/auth_repository.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 import 'package:tenniscourtcare/features/inventory/providers/stock_provider.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import 'package:tenniscourtcare/core/theme/app_theme.dart';
 
 import 'package:tenniscourtcare/data/services/firebase_cache_service.dart';
 
@@ -285,7 +287,10 @@ void main() {
                 router = ref.watch(goRouterProvider);
                 return Directionality(
                   textDirection: TextDirection.ltr,
-                  child: MaterialApp.router(routerConfig: router),
+                  child: MaterialApp.router(
+                    routerConfig: router,
+                    theme: AppTheme.lightTheme,
+                  ),
                 );
               },
             ),
@@ -320,7 +325,10 @@ void main() {
                 router = ref.watch(goRouterProvider);
                 return Directionality(
                   textDirection: TextDirection.ltr,
-                  child: MaterialApp.router(routerConfig: router),
+                  child: MaterialApp.router(
+                    routerConfig: router,
+                    theme: AppTheme.lightTheme,
+                  ),
                 );
               },
             ),
@@ -363,7 +371,10 @@ void main() {
                   router = ref.watch(goRouterProvider);
                   return Directionality(
                     textDirection: TextDirection.ltr,
-                    child: MaterialApp.router(routerConfig: router),
+                    child: MaterialApp.router(
+                      routerConfig: router,
+                      theme: AppTheme.lightTheme,
+                    ),
                   );
                 },
               ),
@@ -401,7 +412,10 @@ void main() {
           child: Consumer(
             builder: (context, ref, _) {
               router = ref.watch(goRouterProvider);
-              return MaterialApp.router(routerConfig: router);
+              return MaterialApp.router(
+                routerConfig: router,
+                theme: AppTheme.lightTheme,
+              );
             },
           ),
         ),
@@ -432,7 +446,10 @@ void main() {
             child: Consumer(
               builder: (context, ref, _) {
                 router = ref.watch(goRouterProvider);
-                return MaterialApp.router(routerConfig: router);
+                return MaterialApp.router(
+                  routerConfig: router,
+                  theme: AppTheme.lightTheme,
+                );
               },
             ),
           ),
@@ -474,7 +491,10 @@ void main() {
               child: Consumer(
                 builder: (context, ref, _) {
                   router = ref.watch(goRouterProvider);
-                  return MaterialApp.router(routerConfig: router);
+                  return MaterialApp.router(
+                    routerConfig: router,
+                    theme: AppTheme.lightTheme,
+                  );
                 },
               ),
             ),
@@ -517,7 +537,10 @@ void main() {
             child: Consumer(
               builder: (context, ref, _) {
                 router = ref.watch(goRouterProvider);
-                return MaterialApp.router(routerConfig: router);
+                return MaterialApp.router(
+                  routerConfig: router,
+                  theme: AppTheme.lightTheme,
+                );
               },
             ),
           ),
@@ -565,7 +588,10 @@ void main() {
                 router = ref.watch(goRouterProvider);
                 return Directionality(
                   textDirection: TextDirection.ltr,
-                  child: MaterialApp.router(routerConfig: router),
+                  child: MaterialApp.router(
+                    routerConfig: router,
+                    theme: AppTheme.lightTheme,
+                  ),
                 );
               },
             ),
@@ -611,7 +637,10 @@ void main() {
                 router = ref.watch(goRouterProvider);
                 return Directionality(
                   textDirection: TextDirection.ltr,
-                  child: MaterialApp.router(routerConfig: router),
+                  child: MaterialApp.router(
+                    routerConfig: router,
+                    theme: AppTheme.lightTheme,
+                  ),
                 );
               },
             ),

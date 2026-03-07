@@ -5,8 +5,6 @@ import '../../providers/app_settings_provider.dart';
 import '../../../auth/providers/auth_providers.dart';
 import '../widgets/settings_components.dart';
 import '../../../../domain/enums/role.dart';
-import '../../../terrain/presentation/screens/edit_coords_page.dart';
-import '../../../admin/presentation/screens/security_log_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -100,12 +98,7 @@ class SettingsScreen extends ConsumerWidget {
                           ? '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}'
                           : 'Non définies',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const EditCoordsPage(),
-                          ),
-                        );
+                        context.push('/edit-coords');
                       },
                     );
                   },
@@ -159,12 +152,7 @@ class SettingsScreen extends ConsumerWidget {
                     title: 'Journal de sécurité',
                     subtitle: 'Audit des connexions',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const SecurityLogScreen(),
-                        ),
-                      );
+                      context.push('/security-log');
                     },
                   ),
                 ],
