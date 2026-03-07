@@ -31,7 +31,6 @@ class _StockScreenState extends ConsumerState<StockScreen> {
       });
     });
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       body: SafeArea(
         child: Column(
           children: [
@@ -49,7 +48,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                   hintText: 'Rechercher un article...',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide.none,
@@ -84,7 +83,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             onPressed: () => context.pop(),
             icon: const Icon(Icons.arrow_back),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               shape: const CircleBorder(),
             ),
           ),
@@ -113,7 +112,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 icon: const Icon(Icons.history),
                 tooltip: 'Historique',
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.surface,
                   shape: const CircleBorder(),
                 ),
               ),
@@ -124,9 +123,9 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                   isScrollControlled: true,
                   builder: (_) => const AddEditStockItemSheet(),
                 ),
-                icon: const Icon(Icons.add, color: Colors.white),
+                icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
                 style: IconButton.styleFrom(
-                  backgroundColor: const Color(0xFF003580), // Primary Blue
+                  backgroundColor: Theme.of(context).colorScheme.primary, // Primary Blue
                   shape: const CircleBorder(),
                 ),
               ),
@@ -142,7 +141,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
       return Center(
         child: Text(
           'Aucun article trouvé',
-          style: TextStyle(color: Colors.grey.shade600),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }
@@ -205,7 +204,7 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             fontSize: 14,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
-            color: Colors.grey.shade600,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         backgroundColor: Colors.transparent,

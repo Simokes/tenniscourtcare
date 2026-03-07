@@ -5,12 +5,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../providers/dashboard_providers.dart';
 import '../../../inventory/providers/stock_provider.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class StatsCarousel extends ConsumerWidget {
   const StatsCarousel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dc = Theme.of(context).extension<DashboardColors>()!;
     final stats = ref.watch(operationalTerrainsStatsProvider);
     final todayMaintenanceAsync = ref.watch(todayMaintenanceCountProvider);
     final lowStockCount = ref.watch(lowStockCountProvider);
@@ -23,8 +25,9 @@ class StatsCarousel extends ConsumerWidget {
         children: [
           _buildStatCard(
             context,
+            dc: dc,
             icon: Icons.check_circle,
-            iconColor: const Color(0xFF003580),
+            iconColor: Theme.of(context).colorScheme.primary,
             value: stats.total == 0
                 ? '-'
                 : '${stats.playable}/${stats.total}',
@@ -33,8 +36,9 @@ class StatsCarousel extends ConsumerWidget {
           const SizedBox(width: 12),
           _buildStatCard(
             context,
+            dc: dc,
             icon: Icons.construction,
-            iconColor: const Color(0xFF0EA5E9),
+            iconColor: dc.maintenanceColor,
             value: todayMaintenanceAsync.when(
               data: (val) => '$val',
               loading: () => '-',
@@ -46,8 +50,9 @@ class StatsCarousel extends ConsumerWidget {
           const SizedBox(width: 12),
           _buildStatCard(
             context,
+            dc: dc,
             icon: Icons.inventory_2,
-            iconColor: lowStockCount > 0 ? Colors.red : Colors.orange,
+            iconColor: lowStockCount > 0 ? dc.dangerColor : dc.stockColor,
             value: '$lowStockCount',
             label: 'Stocks bas',
             onTap: () => context.push('/stock'),
@@ -59,6 +64,7 @@ class StatsCarousel extends ConsumerWidget {
 
   Widget _buildStatCard(
     BuildContext context, {
+    required DashboardColors dc,
     required IconData icon,
     required Color iconColor,
     required String value,
@@ -72,9 +78,9 @@ class StatsCarousel extends ConsumerWidget {
         width: 140,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade100),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,7 +95,7 @@ class StatsCarousel extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -99,7 +105,7 @@ class StatsCarousel extends ConsumerWidget {
                 style: GoogleFonts.inter(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey.shade500,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   letterSpacing: 0.5,
                 ),
               ),

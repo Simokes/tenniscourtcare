@@ -24,7 +24,7 @@ import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provi
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
-import '../../../calendar/presentation/screens/add_edit_event_screen.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dc = Theme.of(context).extension<DashboardColors>()!;
 
     // 1. Lire le rôle courant
     final user = ref.watch(currentUserProvider);
@@ -59,7 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (canEditMaintenance)
         SpeedDialChild(
           child: const Icon(Icons.build_outlined, color: Colors.white),
-          backgroundColor: Colors.orange,
+          backgroundColor: dc.warningColor,
           label: 'Nouvelle maintenance',
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           onTap: () {
@@ -74,22 +75,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (canManageReservations)
         SpeedDialChild(
           child: const Icon(Icons.event_outlined, color: Colors.white),
-          backgroundColor: Colors.blue,
+          backgroundColor: dc.maintenanceColor,
           label: 'Nouvel événement',
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AddEditEventScreen(),
-              ),
-            );
+            context.push('/add-edit-event');
           },
         ),
       if (canEditMaintenance)
         SpeedDialChild(
           child: const Icon(Icons.warning_amber_outlined, color: Colors.white),
-          backgroundColor: Colors.red,
+          backgroundColor: dc.dangerColor,
           label: 'Signaler problème',
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
           onTap: () {
@@ -117,7 +113,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : const AsyncValue.loading();
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
@@ -143,24 +138,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade100,
+                        color: dc.dangerBgColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.red.shade300),
+                        border: Border.all(color: dc.dangerColor.withValues(alpha: 0.5)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.warning_amber, color: Colors.red),
+                          Icon(Icons.warning_amber, color: dc.dangerColor),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               '⚠️ $overdueCount maintenance(s) en retard',
-                              style: const TextStyle(
-                                color: Colors.red,
+                              style: TextStyle(
+                                color: dc.dangerColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          const Icon(Icons.chevron_right, color: Colors.red),
+                          Icon(Icons.chevron_right, color: dc.dangerColor),
                         ],
                       ),
                     ),
@@ -263,9 +258,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : SpeedDial(
         icon: Icons.add,
         activeIcon: Icons.close,
-        backgroundColor: const Color(0xFF003580),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
-        activeBackgroundColor: Colors.red,
+        activeBackgroundColor: dc.dangerColor,
         activeForegroundColor: Colors.white,
         elevation: 8.0,
         shape: const CircleBorder(),
@@ -285,16 +280,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.dashboard_rounded,
-                  color: Color(0xFF003580),
+                  color: Theme.of(context).colorScheme.primary,
                 ),
                 onPressed: () {
                   // Already on Home
                 },
               ),
               IconButton(
-                icon: Icon(Icons.stadium_rounded, color: Colors.grey.shade400),
+                icon: Icon(Icons.stadium_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onPressed: () {
                   if (_courtsKey.currentContext != null) {
                     Scrollable.ensureVisible(
@@ -310,14 +305,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               IconButton(
                 icon: Icon(
                   Icons.calendar_today_rounded,
-                  color: Colors.grey.shade400,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 onPressed: () {
                   context.push('/calendar'); // ✅ navigation calendar
                 },
               ),
               IconButton(
-                icon: Icon(Icons.settings_rounded, color: Colors.grey.shade400),
+                icon: Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 onPressed: () {
                   context.push('/settings');
                 },

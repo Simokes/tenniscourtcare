@@ -8,6 +8,7 @@ import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
 import './maintenance_history_screen.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class MaintenanceScreen extends ConsumerStatefulWidget {
   const MaintenanceScreen({super.key});
@@ -54,7 +55,7 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        const Color(0xFFE0E0E0), // Light grey or theme color
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                         Theme.of(context).scaffoldBackgroundColor,
                       ],
                     ),
@@ -114,6 +115,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dc = Theme.of(context).extension<DashboardColors>()!;
     final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
 
@@ -155,21 +157,21 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
         final now = DateTime.now();
         final isOverdue = maintenanceEnd.isBefore(now);
 
-        final color = isOverdue ? Colors.red.shade100 : Colors.white;
-        final iconColor = isOverdue ? Colors.red : Colors.orangeAccent;
+        final color = isOverdue ? dc.dangerBgColor : Theme.of(context).colorScheme.surface;
+        final iconColor = isOverdue ? dc.dangerColor : dc.warningColor;
         final icon = isOverdue ? Icons.warning_amber : Icons.schedule;
 
         return Dismissible(
           key: ValueKey(maintenance.id ?? maintenance.date),
           direction: DismissDirection.horizontal,
           secondaryBackground: Container(
-            color: Colors.red,
+            color: dc.dangerColor,
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             child: const Icon(Icons.delete, color: Colors.white),
           ),
           background: Container(
-            color: Colors.blue,
+            color: dc.maintenanceColor,
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: const Icon(Icons.edit_calendar, color: Colors.white),
@@ -222,7 +224,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: isOverdue ? Colors.red.shade200 : Colors.grey.shade200,
+                color: isOverdue ? dc.dangerColor.withValues(alpha: 0.4) : Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             child: ListTile(
@@ -241,7 +243,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: dc.dangerColor,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
@@ -260,7 +262,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.check_circle_outline),
-                color: Colors.green,
+                color: dc.successColor,
                 iconSize: 32,
                 tooltip: 'Marquer comme effectuée',
                 onPressed: () => showModalBottomSheet(
