@@ -13,8 +13,14 @@ class GroupedBarChart extends StatelessWidget {
       return const Center(child: Text('Aucune donnée'));
     }
 
+    final cs = Theme.of(context).colorScheme;
     return CustomPaint(
-      painter: _GroupedBarChartPainter(data: data, stacked: stacked),
+      painter: _GroupedBarChartPainter(
+        data: data,
+        stacked: stacked,
+        onSurface: cs.onSurface,
+        outlineVariant: cs.outlineVariant,
+      ),
       child: const SizedBox.expand(),
     );
   }
@@ -23,8 +29,15 @@ class GroupedBarChart extends StatelessWidget {
 class _GroupedBarChartPainter extends CustomPainter {
   final List<({int date, int manto, int sottomanto, int silice})> data;
   final bool stacked;
+  final Color onSurface;
+  final Color outlineVariant;
 
-  _GroupedBarChartPainter({required this.data, required this.stacked});
+  _GroupedBarChartPainter({
+    required this.data,
+    required this.stacked,
+    required this.onSurface,
+    required this.outlineVariant,
+  });
 
   static const double _padding = 40.0;
   static const double _barGroupSpacing = 20.0;
@@ -149,7 +162,7 @@ class _GroupedBarChartPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: dateLabel,
-          style: const TextStyle(fontSize: 10, color: Colors.black87),
+          style: TextStyle(fontSize: 10, color: onSurface),
         ),
         textDirection: TextDirection.ltr,
       );
@@ -171,7 +184,7 @@ class _GroupedBarChartPainter extends CustomPainter {
     double chartHeight,
   ) {
     final paint = Paint()
-      ..color = Colors.black87
+      ..color = onSurface
       ..strokeWidth = 2;
 
     // Axe Y (vertical, gauche)
@@ -197,7 +210,7 @@ class _GroupedBarChartPainter extends CustomPainter {
     double maxValue,
   ) {
     final paint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.3)
+      ..color = outlineVariant.withValues(alpha: 0.5)
       ..strokeWidth = 1;
 
     // 5 lignes de grille horizontales
@@ -214,7 +227,7 @@ class _GroupedBarChartPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: value.toInt().toString(),
-          style: const TextStyle(fontSize: 10, color: Colors.black87),
+          style: TextStyle(fontSize: 10, color: onSurface),
         ),
         textDirection: TextDirection.ltr,
       );
@@ -240,7 +253,7 @@ class _GroupedBarChartPainter extends CustomPainter {
 
     // Bordure
     final borderPaint = Paint()
-      ..color = Colors.black87
+      ..color = onSurface
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
     canvas.drawRect(rect, borderPaint);
@@ -265,7 +278,7 @@ class _GroupedBarChartPainter extends CustomPainter {
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
-          style: const TextStyle(fontSize: 12, color: Colors.black87),
+          style: TextStyle(fontSize: 12, color: onSurface),
         ),
         textDirection: TextDirection.ltr,
       );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeStatCard extends StatelessWidget {
@@ -22,28 +24,30 @@ class HomeStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
 
     // Calcul de l'état d'alerte : si isAlert=true et valeur > 0
     final val = valueAsync.asData?.value ?? 0;
     final hasActiveAlert = isAlert && val > 0;
 
     // Couleurs dynamiques
-    final effectiveColor = hasActiveAlert ? Colors.red : color;
+    final effectiveColor = hasActiveAlert ? (dc?.dangerColor ?? Colors.red) : color;
 
     // BgColor
     Color bgColor;
     if (hasActiveAlert) {
       bgColor = isDark
-          ? Colors.red.withValues(alpha: 0.15)
-          : Colors.red.shade50;
+          ? (dc?.dangerBgColor.withValues(alpha: 0.8) ?? Colors.red.withValues(alpha: 0.15))
+          : (dc?.dangerBgColor ?? Colors.red.shade50);
     } else {
       bgColor =
           Theme.of(context).cardTheme.color ??
-          (isDark ? const Color(0xFF1E1E1E) : Colors.white);
+          (isDark ? cs.surfaceContainer : cs.surface);
     }
 
     final iconColor = hasActiveAlert
-        ? (isDark ? Colors.red.shade300 : Colors.red)
+        ? (dc?.dangerColor ?? Colors.red)
         : color;
 
     return Card(
@@ -84,17 +88,15 @@ class HomeStatCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: hasActiveAlert
                             ? (isDark
-                                  ? Colors.red.withValues(alpha: 0.2)
-                                  : Colors.white)
+                                  ? (dc?.dangerColor.withValues(alpha: 0.2) ?? Colors.red.withValues(alpha: 0.2))
+                                  : cs.surface)
                             : (isDark
-                                  ? Colors.grey.withValues(alpha: 0.2)
-                                  : Colors.grey.shade100),
+                                  ? cs.onSurface.withValues(alpha: 0.15)
+                                  : cs.surfaceContainerHighest),
                         borderRadius: BorderRadius.circular(12),
                         border: hasActiveAlert
                             ? Border.all(
-                                color: isDark
-                                    ? Colors.red.shade900
-                                    : Colors.red.shade200,
+                                color: dc?.dangerColor ?? Colors.red,
                               )
                             : null,
                       ),
@@ -103,9 +105,7 @@ class HomeStatCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: hasActiveAlert
-                              ? (isDark
-                                    ? Colors.red.shade200
-                                    : Colors.red.shade700)
+                              ? (dc?.dangerColor ?? Colors.red)
                               : Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                       ),
@@ -125,8 +125,8 @@ class HomeStatCard extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: hasActiveAlert
-                      ? (isDark ? Colors.red.shade200 : Colors.red.shade900)
-                      : (isDark ? Colors.grey.shade300 : Colors.grey.shade800),
+                      ? (dc?.dangerColor ?? Colors.red)
+                      : cs.onSurface,
                   fontSize: 13,
                 ),
               ),

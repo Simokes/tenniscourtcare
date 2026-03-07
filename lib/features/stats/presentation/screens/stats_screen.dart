@@ -24,9 +24,10 @@ class StatsScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Premium Gradient logic for AppBar
+    final cs = Theme.of(context).colorScheme;
     final gradientColors = isDark
-        ? [const Color(0xFF1A1A1A), const Color(0xFF2C2C2C)]
-        : [Colors.blue.shade800, Colors.blue.shade500];
+        ? [cs.surface, cs.surfaceContainerHighest]
+        : [cs.primary, cs.primaryContainer];
 
     return Scaffold(
       // backgroundColor: handled by Theme
@@ -105,11 +106,11 @@ class StatsScreen extends ConsumerWidget {
                         data: Theme.of(context).copyWith(
                           colorScheme: isDark
                               ? ColorScheme.dark(
-                                  primary: Colors.blue.shade300,
-                                  onPrimary: Colors.black,
+                                  primary: cs.primary,
+                                  onPrimary: cs.onPrimary,
                                 )
                               : ColorScheme.light(
-                                  primary: Colors.blue.shade800,
+                                  primary: cs.primary,
                                 ),
                         ),
                         child: child!,
@@ -163,8 +164,8 @@ class StatsScreen extends ConsumerWidget {
                 boxShadow: [
                   BoxShadow(
                     color: isDark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.grey.withValues(alpha: 0.1),
+                        ? cs.onSurface.withValues(alpha: 0.15)
+                        : cs.onSurface.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -197,8 +198,8 @@ class StatsScreen extends ConsumerWidget {
                 boxShadow: [
                   BoxShadow(
                     color: isDark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.grey.withValues(alpha: 0.1),
+                        ? cs.onSurface.withValues(alpha: 0.15)
+                        : cs.onSurface.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
