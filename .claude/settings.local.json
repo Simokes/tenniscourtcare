@@ -13,7 +13,11 @@
       "Bash(gh pr:*)",
       "Bash(git remote:*)",
       "Bash(gh issue create --repo Simokes/tenniscourtcare --title \"refactor: Phase 3 - Coherence UI finale \\(Weather + Calendar + Stats + Admin\\)\" --body-file \"C:/Users/planc/AppData/Local/Temp/phase3_body.md\")",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(jules new:*)",
+      "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Local\\\\Temp\\\\jules_task.txt\":*)",
+      "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Local\\\\Temp\\\\jules_4a.txt\":*)",
+      "Bash(jules:*)"
     ]
   }
 }

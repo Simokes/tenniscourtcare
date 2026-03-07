@@ -314,6 +314,66 @@ Utiliser un fichier temp pour éviter les erreurs d'échappement bash (backticks
 4. Suivi : https://jules.google.com/session/[SESSION_ID]
 ```
 
+### Règles Opérationnelles Parallèles — Leçons Apprises
+
+**Syntaxe correcte jules new :**
+
+```bash
+# CORRECT — prompt passé via stdin
+cat "C:\Users\planc\AppData\Local\Temp\jules_4a.txt" | jules new
+
+# INCORRECT — flag --title inexistant
+cat file.txt | jules new --title "Phase 4A"   # ❌ "unknown flag: --title"
+
+# INCORRECT — prompt en argument inline multi-ligne
+jules new "$(cat file.txt)"                   # ❌ risque d'échappement bash
+```
+
+**Lancement en parallèle — problème auto-update Jules :**
+
+Jules tente une auto-update à chaque démarrage en écrivant dans un répertoire temp commun.
+Lancer plusieurs instances simultanément avec `& wait` provoque des conflits ENOENT sur le fichier `.tar.gz`.
+
+```bash
+# INCORRECT — provoque des crashs ENOENT
+cat jules_4a.txt | jules new &
+cat jules_4b.txt | jules new &
+wait                                          # ❌ conflit auto-update inter-process
+
+# CORRECT — lancer séquentiellement, une session après l'autre
+cat jules_4a.txt | jules new                  # attendre le "Session is created."
+cat jules_4b.txt | jules new                  # puis lancer la suivante
+cat jules_4c.txt | jules new
+# etc.
+```
+
+Même si les phases sont parallèles (fichiers disjoints), les sessions Jules doivent être
+**créées séquentiellement** via CLI. Les sessions s'exécutent ensuite en parallèle côté serveur Jules.
+
+**Création des fichiers temp sous bash (Windows) :**
+
+```bash
+# CORRECT — bash sur Windows
+touch "C:\Users\planc\AppData\Local\Temp\jules_4a.txt"
+
+# INCORRECT — syntaxe Windows CMD, invalide sous bash
+type nul > jules_4a.txt                       # ❌ "type: nul: not found"
+```
+
+Préférer l'outil Write de Claude directement (crée le fichier sans passer par bash).
+Si le fichier existe déjà, le lire avec Read avant d'utiliser Write.
+
+**Résumé du workflow optimal pour N phases parallèles :**
+
+```
+1. Écrire N fichiers temp simultanément (Write en parallèle — OK, pas de conflit)
+2. Lancer jules new séquentiellement — attendre "Session is created." entre chaque
+3. Récupérer les N Session IDs
+4. Les N sessions s'exécutent en parallèle côté Jules
+5. Reviewer les PRs au fur et à mesure qu'elles arrivent
+6. Merger dans n'importe quel ordre (phases indépendantes)
+```
+
 ---
 
 ## 4. Workflow d'Implémentation Feature
