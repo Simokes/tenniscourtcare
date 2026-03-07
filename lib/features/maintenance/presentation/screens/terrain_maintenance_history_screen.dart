@@ -7,6 +7,7 @@ import '../widgets/add_maintenance_sheet.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   final Terrain terrain;
@@ -15,6 +16,8 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final maintenancesAsync = ref.watch(
       maintenancesByTerrainProvider(terrain.id),
     );
@@ -59,19 +62,19 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: Card(
-                    color: Colors.orange.shade50,
+                    color: dc?.warningBgColor ?? Colors.orange.shade50,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.orange.shade200),
+                      side: BorderSide(color: (dc?.warningColor ?? Colors.orange).withValues(alpha: 0.4)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListTile(
-                      leading: const Icon(Icons.schedule, color: Colors.orange),
-                      title: const Text(
+                      leading: Icon(Icons.schedule, color: dc?.warningColor ?? Colors.orange),
+                      title: Text(
                         'Prochaine maintenance prévue',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+                          color: dc?.warningColor ?? Colors.orange,
                         ),
                       ),
                       subtitle: Text(
@@ -129,17 +132,17 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                         children: [
                           _buildKPIChip(
                             icon: Icons.build,
-                            color: Colors.blueGrey,
+                            color: cs.onSurfaceVariant,
                             label: '$totalCount total',
                           ),
                           _buildKPIChip(
                             icon: Icons.check_circle,
-                            color: Colors.green,
+                            color: dc?.successColor ?? Colors.green,
                             label: '$monthCount ce mois',
                           ),
                           _buildKPIChip(
                             icon: Icons.inventory_2,
-                            color: Colors.brown,
+                            color: dc?.maintenanceColor ?? Colors.brown,
                             label: '$monthSacs sacs ce mois',
                           ),
                         ],
@@ -185,7 +188,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                     key: Key('maintenance_${maintenance.id}'),
                     direction: DismissDirection.endToStart,
                     background: Container(
-                      color: Colors.redAccent,
+                      color: dc?.dangerColor ?? Colors.red,
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 20.0),
                       child: const Icon(Icons.delete, color: Colors.white),
@@ -252,7 +255,7 @@ class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
                       elevation: 0, // Flat look for list items
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                          color: Colors.grey.withValues(alpha: 0.2),
+                          color: cs.outlineVariant.withValues(alpha: 0.5),
                         ),
                         borderRadius: BorderRadius.circular(8),
                       ),

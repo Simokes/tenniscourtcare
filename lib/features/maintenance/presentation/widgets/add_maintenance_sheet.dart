@@ -20,6 +20,7 @@ import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 import '../../../../domain/enums/maintenance_duration.dart';
 import '../../../admin/providers/club_info_provider.dart';
 import '../../../terrain/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain? terrain;
@@ -184,7 +185,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
+            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),
@@ -199,7 +200,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }
@@ -329,13 +330,15 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     // Determine current terrain properties based on selection
     final isTerreBattue = _selectedTerrain?.type == TerrainType.terreBattue;
     final isSynthetique = _selectedTerrain?.type == TerrainType.synthetique;
@@ -398,9 +401,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                     if (widget.existingMaintenance?.firebaseId != null &&
                         !widget.forceCompleteMode)
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.delete_outline,
-                          color: Colors.red,
+                          color: dc?.dangerColor ?? Colors.red,
                         ),
                         onPressed: _delete,
                       ),
@@ -534,9 +537,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                   padding: const EdgeInsets.all(12),
                                   child: Row(
                                     children: [
-                                      const Icon(
+                                      Icon(
                                         Icons.access_time,
-                                        color: Colors.blueGrey,
+                                        color: cs.onSurfaceVariant,
                                       ),
                                       const SizedBox(width: 12),
                                       Column(
@@ -549,7 +552,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                                 .textTheme
                                                 .labelSmall
                                                 ?.copyWith(
-                                                  color: Colors.grey.shade600,
+                                                  color: cs.onSurfaceVariant,
                                                 ),
                                           ),
                                           const SizedBox(height: 4),
@@ -562,10 +565,10 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                         ],
                                       ),
                                       const Spacer(),
-                                      const Icon(
+                                      Icon(
                                         Icons.arrow_forward_ios,
                                         size: 16,
-                                        color: Colors.grey,
+                                        color: cs.onSurfaceVariant,
                                       ),
                                     ],
                                   ),
@@ -604,9 +607,9 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                 padding: const EdgeInsets.all(12),
                                 child: Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.calendar_month,
-                                      color: Colors.blueGrey,
+                                      color: cs.onSurfaceVariant,
                                     ),
                                     const SizedBox(width: 12),
                                     Column(
@@ -619,7 +622,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                               .textTheme
                                               .labelSmall
                                               ?.copyWith(
-                                                color: Colors.grey.shade600,
+                                                color: cs.onSurfaceVariant,
                                               ),
                                         ),
                                         const SizedBox(height: 4),
@@ -632,10 +635,10 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                       ],
                                     ),
                                     const Spacer(),
-                                    const Icon(
+                                    Icon(
                                       Icons.arrow_forward_ios,
                                       size: 16,
-                                      color: Colors.grey,
+                                      color: cs.onSurfaceVariant,
                                     ),
                                   ],
                                 ),
@@ -790,7 +793,7 @@ class _AddMaintenanceSheetState extends ConsumerState<AddMaintenanceSheet> {
                                       setState(() => _imagePath = null),
                                   icon: Icon(
                                     Icons.remove_circle,
-                                    color: Theme.of(context).colorScheme.error,
+                                    color: dc?.dangerColor ?? Colors.red,
                                   ),
                                   style: IconButton.styleFrom(
                                     backgroundColor: Theme.of(

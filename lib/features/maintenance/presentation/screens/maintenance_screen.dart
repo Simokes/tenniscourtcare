@@ -115,7 +115,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final dc = Theme.of(context).extension<DashboardColors>()!;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
     final terrainsAsync = ref.watch(terrainsProvider);
 
@@ -157,21 +157,21 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
         final now = DateTime.now();
         final isOverdue = maintenanceEnd.isBefore(now);
 
-        final color = isOverdue ? dc.dangerBgColor : Theme.of(context).colorScheme.surface;
-        final iconColor = isOverdue ? dc.dangerColor : dc.warningColor;
+        final color = isOverdue ? (dc?.dangerBgColor ?? Colors.red.shade50) : Theme.of(context).colorScheme.surface;
+        final iconColor = isOverdue ? (dc?.dangerColor ?? Colors.red) : (dc?.warningColor ?? Colors.orange);
         final icon = isOverdue ? Icons.warning_amber : Icons.schedule;
 
         return Dismissible(
           key: ValueKey(maintenance.id ?? maintenance.date),
           direction: DismissDirection.horizontal,
           secondaryBackground: Container(
-            color: dc.dangerColor,
+            color: dc?.dangerColor ?? Colors.red,
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             child: const Icon(Icons.delete, color: Colors.white),
           ),
           background: Container(
-            color: dc.maintenanceColor,
+            color: dc?.maintenanceColor ?? Colors.brown,
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 20),
             child: const Icon(Icons.edit_calendar, color: Colors.white),
@@ -193,7 +193,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
                     ),
                     FilledButton(
                       style: FilledButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: dc?.dangerColor ?? Colors.red,
                       ),
                       onPressed: () => Navigator.pop(ctx, true),
                       child: const Text('Supprimer'),
@@ -224,7 +224,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
               side: BorderSide(
-                color: isOverdue ? dc.dangerColor.withValues(alpha: 0.4) : Theme.of(context).colorScheme.outlineVariant,
+                color: isOverdue ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.4) : Theme.of(context).colorScheme.outlineVariant,
               ),
             ),
             child: ListTile(
@@ -243,7 +243,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: dc.dangerColor,
+                        color: dc?.dangerColor ?? Colors.red,
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: const Text(
@@ -262,7 +262,7 @@ class _UpcomingMaintenancesTab extends ConsumerWidget {
               ),
               trailing: IconButton(
                 icon: const Icon(Icons.check_circle_outline),
-                color: dc.successColor,
+                color: dc?.successColor ?? Colors.green,
                 iconSize: 32,
                 tooltip: 'Marquer comme effectuée',
                 onPressed: () => showModalBottomSheet(

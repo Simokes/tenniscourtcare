@@ -8,6 +8,7 @@ import '../../../../domain/entities/terrain.dart';
 import '../../../terrain/providers/terrain_provider.dart';
 import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class MaintenanceHistoryScreen extends ConsumerStatefulWidget {
   const MaintenanceHistoryScreen({super.key});
@@ -26,6 +27,8 @@ class _MaintenanceHistoryScreenState
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final terrainsAsync = ref.watch(terrainsProvider);
     final maintenancesAsync = ref.watch(maintenancesProvider);
     final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
@@ -41,6 +44,8 @@ class _MaintenanceHistoryScreenState
               child: _buildKPIRow(
                 maintenancesAsync.valueOrNull ?? [],
                 plannedMaintenancesAsync.valueOrNull ?? [],
+                cs,
+                dc,
               ),
             ),
           ),
@@ -82,7 +87,7 @@ class _MaintenanceHistoryScreenState
                   ),
 
                   const SizedBox(width: 20),
-                  Container(width: 1, height: 24, color: Colors.grey.shade300),
+                  Container(width: 1, height: 24, color: cs.outlineVariant),
                   const SizedBox(width: 20),
 
                   // Type Filter (Dropdown)
@@ -106,7 +111,7 @@ class _MaintenanceHistoryScreenState
                   ),
 
                   const SizedBox(width: 20),
-                  Container(width: 1, height: 24, color: Colors.grey.shade300),
+                  Container(width: 1, height: 24, color: cs.outlineVariant),
                   const SizedBox(width: 20),
 
                   // Status Filter
@@ -198,6 +203,8 @@ class _MaintenanceHistoryScreenState
   Widget _buildKPIRow(
     List<Maintenance> allMaintenances,
     List<Maintenance> plannedMaintenances,
+    ColorScheme cs,
+    DashboardColors? dc,
   ) {
     final doneCount = allMaintenances.where((m) => !m.isPlanned).length;
     final plannedCount = plannedMaintenances.length;
@@ -208,17 +215,17 @@ class _MaintenanceHistoryScreenState
       children: [
         _buildKPIChip(
           icon: Icons.build,
-          color: Colors.blueGrey,
+          color: cs.onSurfaceVariant,
           label: '$totalCount total',
         ),
         _buildKPIChip(
           icon: Icons.check_circle,
-          color: Colors.green,
+          color: dc?.successColor ?? Colors.green,
           label: '$doneCount effectuées',
         ),
         _buildKPIChip(
           icon: Icons.calendar_today,
-          color: Colors.orange,
+          color: dc?.warningColor ?? Colors.orange,
           label: '$plannedCount planifiées',
         ),
       ],
@@ -275,6 +282,8 @@ class _TerrainHistoryTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final allDone =
         ref.watch(maintenancesGroupedByTerrainProvider)[terrain.id] ?? [];
     final allPlanned = ref.watch(
@@ -364,7 +373,7 @@ class _TerrainHistoryTile extends ConsumerWidget {
             ),
             title: Text(
               terrain.nom,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Wrap(
               spacing: 8,
@@ -372,15 +381,15 @@ class _TerrainHistoryTile extends ConsumerWidget {
               children: [
                 Text(
                   '✅ $filteredDoneCount effectuées',
-                  style: TextStyle(color: Colors.green.shade700, fontSize: 12),
+                  style: TextStyle(color: dc?.successColor ?? Colors.green, fontSize: 12),
                 ),
                 Text(
                   '📅 $plannedCount planifiées',
-                  style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                  style: TextStyle(color: dc?.warningColor ?? Colors.orange, fontSize: 12),
                 ),
                 Text(
                   '🕒 Dernière: $formattedLastDate',
-                  style: const TextStyle(fontSize: 12),
+                  style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -406,13 +415,13 @@ class _TerrainHistoryTile extends ConsumerWidget {
           AnimatedCrossFade(
             firstChild: const SizedBox(width: double.infinity),
             secondChild: filteredMaintenances.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(16.0),
+                ? Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Text(
                       'Aucune maintenance pour cette période',
                       style: TextStyle(
                         fontStyle: FontStyle.italic,
-                        color: Colors.grey,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   )
@@ -449,6 +458,8 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final dc = Theme.of(context).extension<DashboardColors>();
     final date = DateTime.fromMillisecondsSinceEpoch(maintenance.date);
     final formattedDate = DateFormat('dd MMM yyyy', 'fr_FR').format(date);
     final isPlanned = maintenance.isPlanned;
@@ -457,7 +468,7 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       elevation: 0,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Colors.grey.shade200),
+        side: BorderSide(color: cs.outlineVariant),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Padding(
@@ -472,13 +483,13 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     children: [
                       Icon(
                         isPlanned ? Icons.schedule : Icons.check_circle,
-                        color: isPlanned ? Colors.orange : Colors.green,
+                        color: isPlanned ? (dc?.warningColor ?? Colors.orange) : (dc?.successColor ?? Colors.green),
                         size: 16,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         maintenance.type,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       if (maintenance.imagePath != null) ...[
                         const SizedBox(width: 4),
@@ -550,30 +561,30 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline,
                     size: 20,
-                    color: Colors.red,
+                    color: dc?.dangerColor ?? Colors.red,
                   ),
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Confirmer la suppression'),
-                        content: const Text(
+                        title: Text('Confirmer la suppression'),
+                        content: Text(
                           'Voulez-vous vraiment supprimer cette maintenance ?',
                         ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(false),
-                            child: const Text('Annuler'),
+                            child: Text('Annuler'),
                           ),
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(true),
                             style: TextButton.styleFrom(
-                              foregroundColor: Colors.red,
+                              foregroundColor: dc?.dangerColor ?? Colors.red,
                             ),
-                            child: const Text('Supprimer'),
+                            child: Text('Supprimer'),
                           ),
                         ],
                       ),
