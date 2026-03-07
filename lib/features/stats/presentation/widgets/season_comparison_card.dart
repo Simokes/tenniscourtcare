@@ -62,8 +62,8 @@ class SeasonComparisonCard extends ConsumerWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15)
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -94,7 +94,7 @@ class SeasonComparisonCard extends ConsumerWidget {
                 barTouchData: BarTouchData(
                   touchTooltipData: BarTouchTooltipData(
                     getTooltipColor: (group) =>
-                        Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                        Colors.blueGrey.withValues(alpha: 0.8),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       final String yearLabel = rodIndex == 0
                           ? '${state.yearN - 1}'

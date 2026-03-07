@@ -80,7 +80,7 @@ class _SacksLineChartState extends State<SacksLineChart> {
             ),
             borderData: FlBorderData(
               show: true,
-              border: Border.all(color: Theme.of(context).colorScheme.outline),
+              border: Border.all(color: const Color(0xff37434d)),
             ),
             minX: 0,
             maxX: (data.length - 1).toDouble(),
@@ -139,7 +139,7 @@ class _SacksLineChartState extends State<SacksLineChart> {
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
                 getTooltipColor: (touchedSpot) =>
-                    Theme.of(context).colorScheme.surfaceContainerHigh.withValues(alpha: 0.9),
+                    Colors.blueGrey.withValues(alpha: 0.8),
                 getTooltipItems: (List<LineBarSpot> touchedBarSpots) {
                   return touchedBarSpots.map((barSpot) {
                     final flSpot = barSpot;
@@ -188,10 +188,10 @@ class _SacksLineChartState extends State<SacksLineChart> {
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
-    final style = TextStyle(
+    const style = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: 10,
-      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      color: Colors.grey,
     );
     return Text(
       value.toInt().toString(),
