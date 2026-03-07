@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../terrain/providers/terrain_provider.dart';
 import '../../../../../domain/entities/terrain.dart';
@@ -77,12 +78,12 @@ class TerrainManagementSection extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
                           onPressed: () =>
                               _showEditTerrainDialog(context, ref, terrain),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
+                          icon: Icon(Icons.delete, color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -94,7 +95,7 @@ class TerrainManagementSection extends ConsumerWidget {
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(ctx),
-                                    child: const Text('Annuler'),
+                                    child: Text('Annuler'),
                                   ),
                                   TextButton(
                                     onPressed: () {
@@ -107,9 +108,9 @@ class TerrainManagementSection extends ConsumerWidget {
                                             .deleteTerrain(terrain.firebaseId!);
                                       }
                                     },
-                                    child: const Text(
+                                    child: Text(
                                       'Supprimer',
-                                      style: TextStyle(color: Colors.red),
+                                      style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                                     ),
                                   ),
                                 ],
@@ -125,7 +126,7 @@ class TerrainManagementSection extends ConsumerWidget {
             },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) =>
-                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+                Text('Erreur: $err', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),
@@ -184,7 +185,7 @@ class TerrainManagementSection extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text('Annuler'),
           ),
           TextButton(
             onPressed: () {
@@ -279,7 +280,7 @@ class TerrainManagementSection extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Annuler'),
+            child: Text('Annuler'),
           ),
           TextButton(
             onPressed: () {

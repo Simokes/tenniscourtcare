@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../providers/user_providers.dart';
 import '../../../../auth/providers/auth_providers.dart';
@@ -39,13 +40,13 @@ class UserManagementSection extends ConsumerWidget {
               margin: const EdgeInsets.only(top: 8),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.orange.withValues(alpha: 0.2),
+                color: (Theme.of(context).extension<DashboardColors>()?.warningBgColor ?? Colors.orange.shade50).withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange),
+                border: Border.all(color: Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                  Icon(Icons.warning_amber_rounded, color: Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange),
                   const SizedBox(width: 8),
                   Text(
                     '$pendingCount inscription(s) en attente',
@@ -146,9 +147,9 @@ class UserManagementSection extends ConsumerWidget {
                                               user.firebaseId,
                                             );
                                       },
-                                      child: const Text(
+                                      child: Text(
                                         'Supprimer',
-                                        style: TextStyle(color: Colors.red),
+                                        style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                                       ),
                                     ),
                                   ],
@@ -183,9 +184,9 @@ class UserManagementSection extends ConsumerWidget {
                                             )
                                             .rejectUser(user.firebaseId!);
                                       },
-                                      child: const Text(
+                                      child: Text(
                                         'Refuser',
-                                        style: TextStyle(color: Colors.red),
+                                        style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                                       ),
                                     ),
                                   ],
@@ -220,20 +221,20 @@ class UserManagementSection extends ConsumerWidget {
                             if (user.status == UserStatus.inactive &&
                                 user.firebaseId != null) {
                               items.add(
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'approve',
                                   child: Text(
                                     'Approuver',
-                                    style: TextStyle(color: Colors.green),
+                                    style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green),
                                   ),
                                 ),
                               );
                               items.add(
-                                const PopupMenuItem(
+                                PopupMenuItem(
                                   value: 'reject',
                                   child: Text(
                                     'Refuser',
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                                   ),
                                 ),
                               );
@@ -241,11 +242,11 @@ class UserManagementSection extends ConsumerWidget {
                             }
 
                             items.add(
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
                                 child: Text(
                                   'Supprimer',
-                                  style: TextStyle(color: Colors.red),
+                                  style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
                                 ),
                               ),
                             );
@@ -262,7 +263,7 @@ class UserManagementSection extends ConsumerWidget {
             ),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (err, stack) =>
-                Text('Erreur: $err', style: const TextStyle(color: Colors.red)),
+                Text('Erreur: $err', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/event_provider.dart';
@@ -178,7 +177,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
+            child: const Text('Supprimer', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -212,7 +211,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
     final terrainsAsync = ref.watch(terrainsProvider);
 
     return Scaffold(
-
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
           widget.eventToEdit == null
@@ -225,7 +224,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         actions: [
           if (widget.eventToEdit != null)
             IconButton(
-              icon: Icon(Icons.delete_outline, color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
               onPressed: _delete,
             ),
         ],
@@ -285,7 +284,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        Icon(Icons.arrow_forward, color: Colors.grey.shade400),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildDateTimeTile(
@@ -375,9 +374,9 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                     terrainsAsync.when(
                       data: (terrains) {
                         if (terrains.isEmpty) {
-                          return Text(
+                          return const Text(
                             'Aucun terrain configuré.',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            style: TextStyle(color: Colors.grey),
                           );
                         }
                         return Wrap(
@@ -410,7 +409,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                                 side: BorderSide(
                                   color: isSelected
                                       ? Colors.transparent
-                                      : Theme.of(context).colorScheme.outlineVariant,
+                                      : Colors.grey.shade300,
                                 ),
                               ),
                             );
@@ -456,14 +455,14 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               label,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
             const SizedBox(height: 4),
             Text(
@@ -472,7 +471,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
             ),
             Text(
               dateFormat.format(dateTime),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12),
+              style: TextStyle(color: Colors.grey.shade800, fontSize: 12),
             ),
           ],
         ),

@@ -7,7 +7,13 @@
       "Read(//c/Users/planc/Documents/CourtCare/tenniscourtcare/**)",
       "Bash(done)",
       "Bash(python:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(dir:*)",
+      "Bash(cmd:*)",
+      "Bash(gh pr:*)",
+      "Bash(git remote:*)",
+      "Bash(gh issue create --repo Simokes/tenniscourtcare --title \"refactor: Phase 3 - Coherence UI finale \\(Weather + Calendar + Stats + Admin\\)\" --body-file \"C:/Users/planc/AppData/Local/Temp/phase3_body.md\")",
+      "Bash(gh api:*)"
     ]
   }
 }
