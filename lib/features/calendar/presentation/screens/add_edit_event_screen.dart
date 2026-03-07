@@ -178,7 +178,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()!.dangerColor)),
+            child: Text('Supprimer', style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red)),
           ),
         ],
       ),
@@ -225,7 +225,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
         actions: [
           if (widget.eventToEdit != null)
             IconButton(
-              icon: Icon(Icons.delete_outline, color: Theme.of(context).extension<DashboardColors>()!.dangerColor),
+              icon: Icon(Icons.delete_outline, color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
               onPressed: _delete,
             ),
         ],

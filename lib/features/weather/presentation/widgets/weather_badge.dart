@@ -19,13 +19,13 @@ class WeatherBadge extends StatelessWidget {
 
     if (frozen) {
       text = 'Terrain gelé';
-      color = Theme.of(context).extension<DashboardColors>()!.maintenanceColor;
+      color = Theme.of(context).extension<DashboardColors>()?.maintenanceColor ?? Colors.blue;
     } else if (unplayable) {
       text = 'Terrain impraticable';
-      color = Theme.of(context).extension<DashboardColors>()!.warningColor;
+      color = Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange;
     } else {
       text = 'Terrain praticable';
-      color = Theme.of(context).extension<DashboardColors>()!.successColor;
+      color = Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green;
     }
 
     return Chip(

@@ -412,12 +412,12 @@ class _ForecastListItem extends StatelessWidget {
 
     Color labelColor;
     if (forecastLabel.startsWith('Éviter')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()!.dangerColor;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red;
     } else if (forecastLabel.startsWith('Prudence') ||
         forecastLabel.startsWith('Conditions dégradées')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()!.warningColor;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange;
     } else {
-      labelColor = Theme.of(context).extension<DashboardColors>()!.successColor;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green;
     }
 
     // Icon and background color based on weather
@@ -433,7 +433,7 @@ class _ForecastListItem extends StatelessWidget {
       iconBgColor = Colors.blue.shade50;
     } else {
       iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
-      iconBgColor = Colors.grey.shade100;
+      iconBgColor = Theme.of(context).colorScheme.surfaceContainerHighest;
     }
 
     return Container(

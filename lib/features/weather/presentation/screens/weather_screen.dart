@@ -5,7 +5,6 @@ import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
 import '../widgets/weather_widgets.dart';
 import 'package:tenniscourtcare/core/theme/app_theme.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 
 class WeatherScreen extends ConsumerWidget {
   final String titre;
@@ -20,10 +19,6 @@ class WeatherScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final weatherAsync = ref.watch(weatherForClubProvider(terrainType));
-
-    // We get colors matching the design's tailwind config
-
-
 
     return Scaffold(
 
@@ -115,7 +110,7 @@ class WeatherScreen extends ConsumerWidget {
             child: Text(
               'Impossible de charger la météo.\nVérifiez votre connexion ou les coordonnées du club.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).extension<DashboardColors>()!.dangerColor),
+              style: TextStyle(color: Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red),
             ),
           ),
         ),
