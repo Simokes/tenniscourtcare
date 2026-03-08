@@ -125,6 +125,35 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
     }
   }
 
+  Future<void> updateDisplayName(String name) async {
+    try {
+      await _repo.updateDisplayName(name);
+      final current = state.value;
+      if (current?.user != null) {
+        state = AsyncValue.data(AuthState(
+          user: current!.user!.copyWith(name: name),
+          isSetupRequired: current.isSetupRequired,
+        ));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _repo.changePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> signOut() async {
     // ✅ Stop FirebaseCacheService
     final cacheService = ref.read(firebaseCacheServiceProvider);

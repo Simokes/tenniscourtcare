@@ -4,21 +4,36 @@ import '../../../../domain/entities/user_entity.dart';
 
 class SectionHeader extends StatelessWidget {
   final String title;
+  final Color? color;
 
-  const SectionHeader({super.key, required this.title});
+  const SectionHeader({super.key, required this.title, this.color});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.secondary,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-          letterSpacing: 1.2,
-        ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 16,
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: color ?? cs.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: color ?? cs.onSurface,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -57,15 +72,23 @@ class SettingsContainer extends StatelessWidget {
 
 class ProfileCard extends StatelessWidget {
   final UserEntity? user;
-  final VoidCallback? onEdit;
+  final VoidCallback? onEditProfile;
 
-  const ProfileCard({super.key, this.user, this.onEdit});
+  const ProfileCard({super.key, this.user, this.onEditProfile});
+
+  String _initials(String name) {
+    final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) return parts.first[0].toUpperCase();
+    return (parts.first[0] + parts.last[0]).toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final cs = colorScheme;
+    final cs = theme.colorScheme;
+    final name = user?.name ?? 'Utilisateur';
+    final initials = _initials(name);
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -84,74 +107,33 @@ class ProfileCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Stack(
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.surfaceContainerHighest,
-                  border: Border.all(
-                    color: theme.scaffoldBackgroundColor,
-                    width: 4,
-                  ),
-                  image: user?.avatarUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(user!.avatarUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: user?.avatarUrl == null
-                    ? Icon(
-                        Icons.person,
-                        size: 48,
-                        color: colorScheme.onSurfaceVariant,
-                      )
-                    : null,
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: cs.primaryContainer,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initials,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: cs.onPrimaryContainer,
               ),
-              if (onEdit != null)
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: onEdit,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: colorScheme.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: theme.cardColor, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: cs.onSurface.withValues(alpha: 0.15),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.edit,
-                        size: 16,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
           const SizedBox(height: 16),
           Text(
-            user?.name ?? 'Utilisateur',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            name,
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
-            user?.role.label ?? 'Rôle inconnu',
+            user?.role.label ?? 'Role inconnu',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.primary,
+              color: cs.primary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -160,6 +142,15 @@ class ProfileCard extends StatelessWidget {
             user?.email ?? '',
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+            ),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton.icon(
+            onPressed: onEditProfile,
+            icon: const Icon(Icons.edit, size: 16),
+            label: const Text('Modifier le profil'),
+            style: OutlinedButton.styleFrom(
+              visualDensity: VisualDensity.compact,
             ),
           ),
         ],

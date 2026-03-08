@@ -59,6 +59,15 @@ abstract class AuthRepository {
   /// Met à jour le mot de passe d'un utilisateur (reset).
   Future<void> updateUserPassword(int userId, String newPassword);
 
+  /// Met a jour le nom d'affichage de l'utilisateur connecte.
+  Future<void> updateDisplayName(String name);
+
+  /// Change le mot de passe de l'utilisateur connecte (avec re-authentification Firebase).
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
+
   /// Récupère la liste de tous les utilisateurs.
   Future<List<UserEntity>> getAllUsers();
   Future<void> deleteUserAndData(int localId, String? firebaseId);

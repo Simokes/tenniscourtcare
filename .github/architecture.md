@@ -539,6 +539,40 @@ Supprime lors de la refonte v2 :
 - _UpcomingMaintenancesTab (remplace par le nouveau layout)
 FAB conserve : FloatingActionButton.extended (icon: add, label: "Nouvelle maintenance")
 
+### 3.4.3 Settings Feature - SettingsScreen Layout
+
+Le SettingsScreen apres la refonte v2 (2026-03) utilise un layout scroll unique
+sans sections GPS ni Notifications (supprimees car placeholder).
+
+Layout SettingsScreen (SingleChildScrollView, ordre des sections) :
+1. ProfileCard avec avatar initiales (pas de photo), bouton "Modifier le profil"
+2. Section "Preferences" : Mode sombre uniquement (Langue et GPS supprimes)
+3. Section "Administration" (conditionnel hasPermissionProvider(canAccessAdminDashboard)) :
+   - Banniere utilisateurs en attente si pendingCount > 0
+   - Tile "Tableau de bord admin" -> /admin
+   - Tile "Utilisateurs en attente" -> /admin/pending-users (Badge pendingCount)
+   - Tile "Journal de securite" -> /security-log
+4. Section "Securite" : Tile "Changer le mot de passe" -> ChangePasswordSheet
+5. LogoutButton
+6. Footer version (conserve)
+
+Widgets prives dans settings_components.dart :
+- ProfileCard v2 : avatar initiales colore (primaryContainer), bouton "Modifier le profil"
+- SectionHeader v2 : barre 3px verticale + titre uppercase (style coherent avec maintenance screen)
+- SettingsContainer, PreferenceTile, SwitchTile, LogoutButton : conserves
+
+Nouveaux fichiers crees :
+- lib/features/settings/presentation/widgets/profile_edit_sheet.dart
+- lib/features/settings/presentation/widgets/change_password_sheet.dart
+
+Supprime lors de la refonte v2 :
+- Tile GPS (redondant avec adresse club via Nominatim)
+- Tile Langue (placeholder uniquement)
+- Section Notifications entiere (valeurs dummy, non implemente)
+- Tile Exporter les donnees (renvoie vers Stats screen, pas pertinent ici)
+- Tile Reinitialiser les donnees (dangereux sans logique reelle)
+- role == Role.admin check (remplace par hasPermissionProvider)
+
 **Rules:**
 - Feature code is self-contained.
 - `presentation/` folder contains UI logic specific to the feature.

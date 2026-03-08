@@ -585,4 +585,21 @@ class AuthRepositoryImpl implements AuthRepository {
     // Local-only implementation
     await _db.deleteUser(localId);
   }
+
+  @override
+  Future<void> updateDisplayName(String name) async {
+    throw UnimplementedError(
+      'Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository',
+    );
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    throw UnimplementedError(
+      'Not implemented for AuthRepositoryImpl - Use FirebaseAuthRepository',
+    );
+  }
 }
