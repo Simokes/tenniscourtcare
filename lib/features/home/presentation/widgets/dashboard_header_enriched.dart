@@ -67,9 +67,7 @@ class DashboardHeaderEnriched extends ConsumerWidget {
                         if (weather == null) return const SizedBox.shrink();
 
                         final temp = weather.context.snapshot.temperature.round();
-                        final descriptionCourte = _getShortDescription(
-                          weather.context.snapshot.weatherCode,
-                        );
+                        final descriptionCourte = weather.conditionLabel;
 
                         return Text(
                           '$temp°C - $descriptionCourte',
@@ -99,12 +97,7 @@ class DashboardHeaderEnriched extends ConsumerWidget {
           padding: const EdgeInsets.only(right: 16.0),
           child: InkWell(
             onTap: () {
-              try {
-                context.push('/settings');
-              } catch (e) {
-                debugPrint('Failed to navigate to settings: $e');
-                rethrow;
-              }
+              context.push('/settings');
             },
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -120,16 +113,5 @@ class DashboardHeaderEnriched extends ConsumerWidget {
         ),
       ],
     );
-  }
-
-  String _getShortDescription(int code) {
-    if (code == 0) return 'Ensoleille';
-    if (code >= 1 && code <= 3) return 'Peu nuageux';
-    if (code >= 45 && code <= 48) return 'Brouillard';
-    if (code >= 51 && code <= 67) return 'Pluie';
-    if (code >= 71 && code <= 77) return 'Neige';
-    if (code >= 80 && code <= 82) return 'Averses';
-    if (code >= 95 && code <= 99) return 'Orage';
-    return 'Variable';
   }
 }

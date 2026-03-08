@@ -35,12 +35,7 @@ class KpiStrip extends ConsumerWidget {
             child: todayMaintenanceAsync.when(
               data: (val) => GestureDetector(
                 onTap: () {
-                  try {
-                    context.go('/maintenance');
-                  } catch (e) {
-                    debugPrint('Failed to navigate to maintenance: $e');
-                    rethrow;
-                  }
+                  context.go('/maintenance');
                 },
                 child: _KpiChip(
                   icon: Icons.construction,
@@ -62,12 +57,7 @@ class KpiStrip extends ConsumerWidget {
           Expanded(
             child: GestureDetector(
               onTap: () {
-                try {
-                  context.go('/stock');
-                } catch (e) {
-                  debugPrint('Failed to navigate to stock: $e');
-                  rethrow;
-                }
+                context.go('/stock');
               },
               child: _KpiChip(
                 icon: Icons.inventory_2,

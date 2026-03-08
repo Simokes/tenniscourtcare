@@ -39,12 +39,7 @@ class AlertStrip extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         if (overdueCount > 0) {
-          try {
-            context.go('/maintenance');
-          } catch (e) {
-            debugPrint('Failed to navigate to maintenance: $e');
-            rethrow;
-          }
+          context.go('/maintenance');
         }
       },
       child: Container(
