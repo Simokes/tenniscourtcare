@@ -148,9 +148,11 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
                 }
 
                 overdueItems.sort((a, b) {
-                  final aEnd = DateTime.fromMillisecondsSinceEpoch(a.date)
+                  final aDate = DateTime.fromMillisecondsSinceEpoch(a.date);
+                  final aEnd = DateTime(aDate.year, aDate.month, aDate.day, a.startHour)
                       .add(Duration(minutes: a.durationMinutes));
-                  final bEnd = DateTime.fromMillisecondsSinceEpoch(b.date)
+                  final bDate = DateTime.fromMillisecondsSinceEpoch(b.date);
+                  final bEnd = DateTime(bDate.year, bDate.month, bDate.day, b.startHour)
                       .add(Duration(minutes: b.durationMinutes));
                   return aEnd.compareTo(bEnd);
                 });
@@ -233,7 +235,8 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
                           // Essayer GoRouter en premier, fallback sur Navigator
                           try {
                             context.go('/maintenance/history');
-                          } catch (_) {
+                          } catch (e) {
+                            debugPrint('Route /maintenance/history non trouvée, fallback Navigator: $e');
                             Navigator.push(
                               context,
                               MaterialPageRoute(
