@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
+import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
+import 'package:tenniscourtcare/shared/widgets/common/sync_status_indicator.dart';
+
+/// Header du dashboard avec meteo compacte integree inline.
+/// Remplace DashboardHeader en ajoutant la temperature et description meteo.
+class DashboardHeaderEnriched extends ConsumerWidget {
+  const DashboardHeaderEnriched({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final terrainsAsync = ref.watch(terrainsProvider);
+    final terrains = terrainsAsync.valueOrNull ?? const [];
+
+    AsyncValue<WeatherComputed?> weatherAsync = const AsyncValue.loading();
+    if (terrains.isNotEmpty) {
+      weatherAsync = ref.watch(weatherForClubProvider(terrains.first.type));
+    }
+
+    return SliverAppBar(
+      pinned: true,
+      backgroundColor: cs.surface.withValues(alpha: 0.95),
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1.0),
+        child: Container(color: cs.surfaceContainerHighest, height: 1.0),
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: cs.primary, // Primary
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.sports_tennis,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'CourtCare',
+                      style: GoogleFonts.inter(
+                        color: cs.primary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        height: 1.0,
+                      ),
+                    ),
+                    const Spacer(),
+                    weatherAsync.when(
+                      data: (weather) {
+                        if (weather == null) return const SizedBox.shrink();
+
+                        final temp = weather.context.snapshot.temperature.round();
+                        final descriptionCourte = _getShortDescription(
+                          weather.context.snapshot.weatherCode,
+                        );
+
+                        return Text(
+                          '$temp°C - $descriptionCourte',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        );
+                      },
+                      loading: () => const SizedBox.shrink(),
+                      error: (err, _) {
+                        debugPrint('Error loading weather inline: $err');
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                const ConnectionStatusIndicator(mode: SyncIndicatorMode.compact),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: InkWell(
+            onTap: () {
+              try {
+                context.push('/settings');
+              } catch (e) {
+                debugPrint('Failed to navigate to settings: $e');
+                rethrow;
+              }
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: cs.outlineVariant),
+              ),
+              child: Icon(Icons.person, color: cs.primary),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getShortDescription(int code) {
+    if (code == 0) return 'Ensoleille';
+    if (code >= 1 && code <= 3) return 'Peu nuageux';
+    if (code >= 45 && code <= 48) return 'Brouillard';
+    if (code >= 51 && code <= 67) return 'Pluie';
+    if (code >= 71 && code <= 77) return 'Neige';
+    if (code >= 80 && code <= 82) return 'Averses';
+    if (code >= 95 && code <= 99) return 'Orage';
+    return 'Variable';
+  }
+}

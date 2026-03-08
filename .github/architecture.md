@@ -481,6 +481,36 @@ features/
     └── providers/
 ```
 
+### 3.4.1 Home Feature - Dashboard Layout
+
+Le dashboard home est l apres la refonte v2 (2026-03). Il est optimise pour les agents de terrain.
+
+Layout HomeScreen (CustomScrollView, ordre des slivers) :
+1. DashboardHeaderEnriched (SliverAppBar, pinned) - header + meteo inline
+2. AlertStrip - bandeau alertes fusionne (overdue maintenances + offline)
+3. KpiStrip - 3 indicateurs inline 48px (courts, maintenances, stock)
+4. Bandeau evenement en cours (conditionnel, inline)
+5. Section header "Courts"
+6. CourtListSliver - liste des courts avec actions directes
+7. ProchainsCreneaux - 2 prochains creneaux du jour
+8. StockAlertCard - alerte stock (conditionnel)
+
+Widgets home/ supprimes lors de la refonte v2 :
+- DashboardHeader remplace par DashboardHeaderEnriched
+- StatsCarousel remplace par KpiStrip
+- CurrentEventsBanner integre inline dans home_screen
+- DayTimeline supprime (redondant)
+- UpcomingEventsList deplace vers CalendarScreen
+- SpeedDial remplace par FloatingActionButton.extended contextuel
+
+Widgets home/ actifs apres refonte v2 :
+- DashboardHeaderEnriched : SliverAppBar + meteo compacte depuis weatherForClubProvider
+- AlertStrip : bandeau unique (overdueCountProvider + connectivite)
+- KpiStrip : chips inline (operationalTerrainsStatsProvider, todayMaintenanceCountProvider, lowStockCountProvider)
+- ProchainsCreneaux : max 2 items (todayPlannedMaintenancesProvider + todayUpcomingEventsProvider)
+- CourtListSliver : liste courts avec actions (inchange)
+- StockAlertCard : alerte stock conditionnelle (inchangee)
+
 **Rules:**
 - Feature code is self-contained.
 - `presentation/` folder contains UI logic specific to the feature.
