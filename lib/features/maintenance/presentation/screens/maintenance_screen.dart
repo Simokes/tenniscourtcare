@@ -8,7 +8,7 @@ import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
 import './maintenance_history_screen.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class MaintenanceScreen extends ConsumerStatefulWidget {
   const MaintenanceScreen({super.key});

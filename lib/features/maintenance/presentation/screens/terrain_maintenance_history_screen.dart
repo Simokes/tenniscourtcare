@@ -7,7 +7,7 @@ import '../widgets/add_maintenance_sheet.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class TerrainMaintenanceHistoryScreen extends ConsumerWidget {
   final Terrain terrain;

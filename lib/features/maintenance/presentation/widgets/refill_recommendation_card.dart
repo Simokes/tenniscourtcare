@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/refill_recommendation.dart';
 import '../../../inventory/providers/stock_provider.dart';
 import '../../../../shared/widgets/premium/premium_card.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class RefillRecommendationCard extends ConsumerWidget {
   final RefillRecommendation recommendation;

@@ -8,7 +8,7 @@ import '../../../../domain/entities/terrain.dart';
 import '../../../terrain/providers/terrain_provider.dart';
 import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class MaintenanceHistoryScreen extends ConsumerStatefulWidget {
   const MaintenanceHistoryScreen({super.key});

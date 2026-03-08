@@ -20,7 +20,7 @@ import '../../../../shared/widgets/common/image_viewer_dialog.dart';
 import '../../../../domain/enums/maintenance_duration.dart';
 import '../../../admin/providers/club_info_provider.dart';
 import '../../../terrain/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class AddMaintenanceSheet extends ConsumerStatefulWidget {
   final Terrain? terrain;
