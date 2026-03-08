@@ -64,7 +64,7 @@ class WeatherScreen extends ConsumerWidget {
           if (data == null) {
             return Center(
               child: Padding(
-                padding: EdgeInsets.all(16.0),
+                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   "Configurez l'adresse du club",
                   textAlign: TextAlign.center,
