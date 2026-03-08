@@ -1,5 +1,3 @@
-import 'package:tenniscourtcare/features/weather/providers/weather_for_club_provider.dart';
-
 import 'package:tenniscourtcare/domain/enums/permission.dart';
 import 'package:tenniscourtcare/domain/logic/permission_resolver.dart';
 import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
@@ -7,24 +5,17 @@ import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
-import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../widgets/dashboard_header.dart';
-import '../widgets/stats_carousel.dart';
-import 'package:tenniscourtcare/features/weather/presentation/widgets/weather_card.dart';
-import '../widgets/upcoming_events_list.dart';
-import '../widgets/current_events_banner.dart';
-import '../widgets/day_timeline.dart';
+import '../widgets/dashboard_header_enriched.dart';
+import '../widgets/alert_strip.dart';
+import '../widgets/kpi_strip.dart';
+import '../widgets/prochains_creneaux.dart';
 import '../widgets/stock_alert_card.dart';
 import '../widgets/court_list_sliver.dart';
-import '../../../../shared/widgets/common/offline_warning_banner.dart';
-import 'package:tenniscourtcare/features/maintenance/providers/maintenance_provider.dart';
 import 'package:tenniscourtcare/features/maintenance/providers/maintenance_scheduler_provider.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
-import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
+import 'package:tenniscourtcare/features/home/providers/dashboard_providers.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -46,7 +37,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dc = Theme.of(context).extension<DashboardColors>()!;
 
     // 1. Lire le rôle courant
     final user = ref.watch(currentUserProvider);
@@ -56,15 +46,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final canManageReservations = userRole != null &&
         PermissionResolver.hasPermission(userRole, Permission.canManageReservations);
 
-    // 2. Construire la liste conditionnellement
-    final speedDialChildren = <SpeedDialChild>[
-      if (canEditMaintenance)
-        SpeedDialChild(
-          child: const Icon(Icons.build_outlined, color: Colors.white),
-          backgroundColor: dc.warningColor,
-          label: 'Nouvelle maintenance',
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          onTap: () {
+    FloatingActionButton? fab;
+    if (user != null) {
+      if (canEditMaintenance) {
+        fab = FloatingActionButton(
+          onPressed: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -72,93 +58,72 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               builder: (_) => const AddMaintenanceSheet(),
             );
           },
-        ),
-      if (canManageReservations)
-        SpeedDialChild(
-          child: const Icon(Icons.event_outlined, color: Colors.white),
-          backgroundColor: dc.maintenanceColor,
-          label: 'Nouvel événement',
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          onTap: () {
+          tooltip: 'Maintenance',
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
+        );
+      } else if (canManageReservations) {
+        fab = FloatingActionButton(
+          onPressed: () {
             context.push('/add-edit-event');
           },
-        ),
-      if (canEditMaintenance)
-        SpeedDialChild(
-          child: const Icon(Icons.warning_amber_outlined, color: Colors.white),
-          backgroundColor: dc.dangerColor,
-          label: 'Signaler problème',
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => const AddMaintenanceSheet(urgentMode: true),
-            );
-          },
-        ),
-    ];
+          tooltip: 'Événement',
+          backgroundColor: cs.primary,
+          foregroundColor: cs.onPrimary,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
+        );
+      }
+    }
 
     // Activer le scheduler en gardant le timer actif tant que cet écran est affiché
     ref.watch(maintenanceSchedulerProvider);
-
-    // Providers
-    final terrainsAsync = ref.watch(terrainsProvider);
-    final terrains = terrainsAsync.valueOrNull ?? const <Terrain>[];
-    final TerrainType? terrainType = terrains.isNotEmpty
-        ? terrains.first.type
-        : null;
-    final weatherAsync = terrainType != null
-        ? ref.watch(weatherForClubProvider(terrainType))
-        : const AsyncValue.loading();
 
     return Scaffold(
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // 1. Sticky Header
-          const DashboardHeader(),
+          // 1. Sticky Header Enriched
+          const DashboardHeaderEnriched(),
 
-          // 1.4 Offline Warning Banner
+          // 2. Alert Strip
           const SliverToBoxAdapter(
-            child: OfflineWarningBanner(),
+            child: AlertStrip(),
           ),
 
-          // 1.5 Overdue Maintenance Alert
+          // 3. KPI Strip
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8),
+              child: KpiStrip(),
+            ),
+          ),
+
+          // 4. Current Events Bandeau
           SliverToBoxAdapter(
             child: Consumer(
-              builder: (context, ref, child) {
-                final overdueCount = ref.watch(overdueCountProvider);
-                if (overdueCount == 0) return const SizedBox.shrink();
-
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: InkWell(
-                    onTap: () => context.push('/maintenance'),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: dc.dangerBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: dc.dangerColor.withValues(alpha: 0.5)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.warning_amber, color: dc.dangerColor),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              '⚠️ $overdueCount maintenance(s) en retard',
-                              style: TextStyle(
-                                color: dc.dangerColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Icon(Icons.chevron_right, color: dc.dangerColor),
-                        ],
-                      ),
+              builder: (context, ref, _) {
+                final events = ref.watch(currentEventsProvider);
+                if (events.isEmpty) return const SizedBox.shrink();
+                final event = events.first;
+                return Container(
+                  height: 52,
+                  color: Color(event.color).withValues(alpha: 0.85),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.radio_button_checked, size: 14, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(
+                          'EN COURS  ${event.title}',
+                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -166,24 +131,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 1.6 Current Events Banner
-          const SliverToBoxAdapter(
-            child: CurrentEventsBanner(),
-          ),
-
-          // 1.7 Day Timeline
-          const SliverToBoxAdapter(
-            child: DayTimeline(),
-          ),
-
-          // 2. Stats Carousel
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: StatsCarousel(),
-            ),
-          ),
-          // 3. Court Availability Header
+          // 5. Court Availability Header
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -204,69 +152,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
 
-          // 4. Court List (Sliver)
+          // 6. Court List (Sliver)
           const CourtListSliver(),
 
-          // 5. Weather Card
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: weatherAsync.when(
-                data: (weatherData) => WeatherCard(
-                  weather: weatherData?.context.snapshot,
-                  precip24h: weatherData?.context.precipitationLast24h, // ✅
-                  frozen: weatherData?.frozen, // ✅
-                  unplayable: weatherData?.unplayable, // ✅
-                  onRefresh: () =>
-                      ref.refresh(weatherForClubProvider(terrainType!)),
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => const Center(child: Text('Erreur météo')),
-              ),
-            ),
-          ),
-
-          // 6. Upcoming Events
+          // 7. Prochains Creneaux
           const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 24),
-              child: UpcomingEventsList(),
-            ),
+            child: ProchainsCreneaux(),
           ),
 
-          // 7. Stock Alert (Conditional)
+          // 8. Stock Alert (Conditional)
           const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 24),
-              child: StockAlertCard(),
-            ),
+            child: StockAlertCard(),
           ),
 
-
-
-
-
-
-
-
-
-
-
+          // 9. Bottom Padding
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 80),
+          ),
         ],
       ),
-      floatingActionButton: speedDialChildren.isEmpty
-          ? null
-          : SpeedDial(
-        icon: Icons.add,
-        activeIcon: Icons.close,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Colors.white,
-        activeBackgroundColor: dc.dangerColor,
-        activeForegroundColor: Colors.white,
-        elevation: 8.0,
-        shape: const CircleBorder(),
-        children: speedDialChildren,
-      ),
+      floatingActionButton: fab,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
