@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/app_settings_provider.dart';
 import '../../../auth/providers/auth_providers.dart';
+import '../../../admin/providers/permission_provider.dart';
 import '../widgets/settings_components.dart';
-import '../../../../domain/enums/role.dart';
+import '../widgets/profile_edit_sheet.dart';
+import '../widgets/change_password_sheet.dart';
+import '../../../../domain/enums/permission.dart';
 
+/// Ecran des parametres de l'application.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -13,14 +17,16 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider);
     final settingsAsync = ref.watch(appSettingsProvider);
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final cs = theme.colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isAdmin = ref.watch(
+      hasPermissionProvider(Permission.canAccessAdminDashboard),
+    );
+    final pendingCount = ref.watch(pendingCountProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Paramètres',
+          'Parametres',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -28,7 +34,7 @@ class SettingsScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.canPop() ? context.pop() : context.go('/'),
         ),
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
       ),
@@ -36,174 +42,158 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Section
+            // --- SECTION PROFIL ---
             ProfileCard(
               user: currentUser,
-              onEdit: () {
-                // Placeholder for edit profile functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Édition du profil à venir')),
-                );
-              },
+              onEditProfile:
+                  () => showModalBottomSheet(
+                    context: context,
+                    useSafeArea: true,
+                    isScrollControlled: true,
+                    showDragHandle: true,
+                    builder: (_) => const ProfileEditSheet(),
+                  ),
             ),
 
-            // Preferences Section
-            const SectionHeader(title: 'Préférences'),
+            // --- SECTION PREFERENCES ---
+            const SectionHeader(title: 'Preferences'),
             SettingsContainer(
               children: [
-                PreferenceTile(
-                  icon: Icons.language,
-                  title: 'Langue',
-                  subtitle: 'Français',
-                  onTap: () {}, // Visual only
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Français',
-                        style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
+                settingsAsync.when(
+                  data:
+                      (settings) => SwitchTile(
+                        icon: isDark ? Icons.dark_mode : Icons.light_mode,
+                        title: 'Mode sombre',
+                        value: settings.themeMode == ThemeMode.dark,
+                        onChanged: (value) {
+                          ref
+                              .read(appSettingsProvider.notifier)
+                              .setThemeMode(
+                                value ? ThemeMode.dark : ThemeMode.light,
+                              );
+                        },
                       ),
-                      Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
-                    ],
-                  ),
-                ),
-                const Divider(height: 1, indent: 56),
-                settingsAsync.when(
-                  data: (settings) => SwitchTile(
-                    icon: isDark ? Icons.dark_mode : Icons.light_mode,
-                    title: 'Mode sombre',
-                    value: settings.themeMode == ThemeMode.dark,
-                    onChanged: (value) {
-                      ref
-                          .read(appSettingsProvider.notifier)
-                          .setThemeMode(
-                            value ? ThemeMode.dark : ThemeMode.light,
-                          );
-                    },
-                  ),
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (_, _) => const SizedBox.shrink(),
-                ),
-                const Divider(height: 1, indent: 56),
-                settingsAsync.when(
-                  data: (settings) {
-                    final loc = settings.location;
-                    final hasCoords = loc != null;
-                    return PreferenceTile(
-                      icon: Icons.location_on,
-                      title: 'Coordonnées GPS',
-                      subtitle: hasCoords
-                          ? '${loc.latitude.toStringAsFixed(4)}, ${loc.longitude.toStringAsFixed(4)}'
-                          : 'Non définies',
-                      onTap: () {
-                        context.push('/edit-coords');
-                      },
-                    );
-                  },
-                  loading: () => const SizedBox.shrink(),
+                  loading:
+                      () => const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                   error: (_, _) => const SizedBox.shrink(),
                 ),
               ],
             ),
 
-            // Notifications Section
-            const SectionHeader(title: 'Notifications'),
-            SettingsContainer(
-              children: [
-                SwitchTile(
-                  icon: Icons.notifications,
-                  title: 'Notifications Push',
-                  subtitle: 'Réservations et mises à jour',
-                  value: true, // Dummy value
-                  onChanged: (v) {},
-                ),
-                const Divider(height: 1, indent: 56),
-                SwitchTile(
-                  icon: Icons.mail,
-                  title: 'Mises à jour par e-mail',
-                  subtitle: 'Rapports mensuels et actualités',
-                  value: false, // Dummy value
-                  onChanged: (v) {},
-                ),
-              ],
-            ),
-
-            // Administration Section (Admin Only)
-            if (currentUser?.role == Role.admin) ...[
+            // --- SECTION ADMINISTRATION (admin uniquement) ---
+            if (isAdmin) ...[
               const SectionHeader(title: 'Administration'),
+              if (pendingCount > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.people,
+                          size: 18,
+                          color:
+                              Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            '$pendingCount utilisateur(s) en attente d\'approbation',
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               SettingsContainer(
                 children: [
                   PreferenceTile(
                     icon: Icons.admin_panel_settings,
                     title: 'Tableau de bord admin',
-                    subtitle: 'Gérer terrains, utilisateurs et club',
+                    subtitle: 'Vue globale et gestion',
                     onTap: () => context.push('/admin'),
-                    trailing: ref.watch(pendingCountProvider) > 0
-                        ? Badge(
-                            label: Text('${ref.watch(pendingCountProvider)}'),
-                          )
-                        : null,
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  PreferenceTile(
+                    icon: Icons.people,
+                    title: 'Utilisateurs en attente',
+                    subtitle: 'Approuver ou refuser les demandes',
+                    onTap: () => context.push('/admin/pending-users'),
+                    trailing:
+                        pendingCount > 0
+                            ? Badge(label: Text('$pendingCount'))
+                            : Icon(
+                              Icons.chevron_right,
+                              color:
+                                  Theme.of(context).iconTheme.color
+                                      ?.withValues(alpha: 0.3),
+                            ),
                   ),
                   const Divider(height: 1, indent: 56),
                   PreferenceTile(
                     icon: Icons.security,
-                    title: 'Journal de sécurité',
+                    title: 'Journal de securite',
                     subtitle: 'Audit des connexions',
-                    onTap: () {
-                      context.push('/security-log');
-                    },
+                    onTap: () => context.push('/security-log'),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
             ],
 
-            // Security & Data Section
-            const SectionHeader(title: 'Sécurité'),
+            // --- SECTION SECURITE ---
+            const SectionHeader(title: 'Securite'),
             SettingsContainer(
               children: [
                 PreferenceTile(
                   icon: Icons.lock,
                   title: 'Changer le mot de passe',
-                  onTap: () {
-                    // Placeholder
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Changement de mot de passe à venir'),
+                  onTap:
+                      () => showModalBottomSheet(
+                        context: context,
+                        useSafeArea: true,
+                        isScrollControlled: true,
+                        showDragHandle: true,
+                        builder: (_) => const ChangePasswordSheet(),
                       ),
-                    );
-                  },
                 ),
-                const Divider(height: 1, indent: 56),
-                PreferenceTile(
-                  icon: Icons.file_download,
-                  title: 'Exporter les données',
-                  subtitle: 'Format CSV',
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Allez dans l\'écran Statistiques pour exporter',
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const Divider(height: 1, indent: 56),
-                PreferenceTile(
-                  icon: Icons.delete_forever,
-                  title: 'Réinitialiser les données',
-                  iconColor: cs.error,
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        title: const Text('Attention'),
+              ],
+            ),
+
+            // --- DECONNEXION ---
+            LogoutButton(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder:
+                      (ctx) => AlertDialog(
+                        title: const Text('Deconnexion'),
                         content: const Text(
-                          'Voulez-vous vraiment tout effacer ? Cette action est irréversible.',
+                          'Voulez-vous vraiment vous deconnecter ?',
                         ),
                         actions: [
                           TextButton(
@@ -213,64 +203,33 @@ class SettingsScreen extends ConsumerWidget {
                           TextButton(
                             onPressed: () {
                               Navigator.pop(ctx);
-                              // Implement reset logic if needed
+                              ref.read(authStateProvider.notifier).signOut();
                             },
-                            child: Text(
-                              'Effacer',
-                              style: TextStyle(color: cs.error),
-                            ),
+                            child: const Text('Se deconnecter'),
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
-              ],
-            ),
-
-            // Logout Button
-            const SizedBox(height: 16),
-            LogoutButton(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Déconnexion'),
-                    content: const Text(
-                      'Voulez-vous vraiment vous déconnecter ?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('Annuler'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          ref.read(authStateProvider.notifier).signOut();
-                        },
-                        child: const Text('Se déconnecter'),
-                      ),
-                    ],
-                  ),
                 );
               },
             ),
 
-            const SizedBox(height: 32),
+            // --- FOOTER ---
+            const SizedBox(height: 16),
             Center(
               child: Column(
                 children: [
                   Icon(
                     Icons.sports_tennis,
                     size: 32,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(
+                      alpha: 0.2,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Tennis Court Care v1.0.0',
                     style: TextStyle(
-                      color: theme.textTheme.bodySmall?.color,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
                       fontSize: 12,
                     ),
                   ),

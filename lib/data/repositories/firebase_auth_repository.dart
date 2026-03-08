@@ -415,6 +415,43 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> updateDisplayName(String name) async {
+    try {
+      final fUser = _auth.currentUser;
+      if (fUser == null) throw const UnauthorizedException();
+      await fUser.updateDisplayName(name);
+      await _firestore.collection('users').doc(fUser.uid).update({'name': name});
+      await (_db.update(_db.users)
+            ..where((u) => u.firestoreUid.equals(fUser.uid)))
+          .write(UsersCompanion(
+            name: drift.Value(name),
+            updatedAt: drift.Value(DateTime.now()),
+          ));
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final fUser = _auth.currentUser;
+      if (fUser == null || fUser.email == null) throw const UnauthorizedException();
+      final credential = firebase.EmailAuthProvider.credential(
+        email: fUser.email!,
+        password: currentPassword,
+      );
+      await fUser.reauthenticateWithCredential(credential);
+      await fUser.updatePassword(newPassword);
+    } catch (e) {
+      throw _mapFirebaseException(e);
+    }
+  }
+
+  @override
   Future<List<UserEntity>> getAllUsers() {
     return _db.getAllUsers();
   }

@@ -87,6 +87,10 @@ class FakeAuthRepository implements AuthRepository {
   Future<bool> verifyOtp(String email, String code) async => false;
   @override
   Future<void> deleteUserAndData(int localId, String? firebaseId) async {}
+  @override
+  Future<void> updateDisplayName(String name) async {}
+  @override
+  Future<void> changePassword({required String currentPassword, required String newPassword}) async {}
 }
 
 // Manual Fake for AuditRepository
