@@ -28,20 +28,17 @@ class KpiStrip extends ConsumerWidget {
               icon: Icons.check_circle_outline,
               label: '${stats.playable}/${stats.total} courts',
               iconColor: Theme.of(context).colorScheme.primary,
+              onTap: null,
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: todayMaintenanceAsync.when(
-              data: (val) => GestureDetector(
-                onTap: () {
-                  context.go('/maintenance');
-                },
-                child: _KpiChip(
-                  icon: Icons.construction,
-                  label: '$val maint.',
-                  iconColor: dc.maintenanceColor,
-                ),
+              data: (val) => _KpiChip(
+                icon: Icons.construction,
+                label: '$val maintenances',
+                iconColor: dc.maintenanceColor,
+                onTap: () => context.go('/maintenance'),
               ),
               loading: () => const _KpiChip(
                 icon: Icons.construction,
@@ -55,17 +52,13 @@ class KpiStrip extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: GestureDetector(
-              onTap: () {
-                context.go('/stock');
-              },
-              child: _KpiChip(
-                icon: Icons.inventory_2,
-                label: '$lowStockCount alerte(s)',
-                iconColor: lowStockCount > 0
-                    ? dc.dangerColor
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            child: _KpiChip(
+              icon: Icons.inventory_2,
+              label: '$lowStockCount alerte(s)',
+              iconColor: lowStockCount > 0
+                  ? dc.dangerColor
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              onTap: () => context.go('/stock'),
             ),
           ),
         ],
@@ -79,44 +72,50 @@ class _KpiChip extends StatelessWidget {
     required this.icon,
     required this.label,
     this.iconColor,
+    this.onTap,
   });
 
   final IconData icon;
   final String label;
   final Color? iconColor;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.transparent,
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: iconColor ?? cs.onSurfaceVariant,
-          ),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurfaceVariant,
-              ),
-              overflow: TextOverflow.ellipsis,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          border: Border.all(color: Theme.of(context).dividerColor),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: iconColor ?? cs.onSurfaceVariant,
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: cs.onSurfaceVariant,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

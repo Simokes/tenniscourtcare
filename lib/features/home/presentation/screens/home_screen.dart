@@ -5,7 +5,6 @@ import 'package:tenniscourtcare/features/auth/providers/auth_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../widgets/dashboard_header_enriched.dart';
 import '../widgets/alert_strip.dart';
@@ -49,7 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     FloatingActionButton? fab;
     if (user != null) {
       if (canEditMaintenance) {
-        fab = FloatingActionButton.extended(
+        fab = FloatingActionButton(
           onPressed: () {
             showModalBottomSheet(
               context: context,
@@ -58,20 +57,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               builder: (_) => const AddMaintenanceSheet(),
             );
           },
-          label: const Text('Maintenance'),
-          icon: const Icon(Icons.add),
+          tooltip: 'Nouvelle maintenance',
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
         );
       } else if (canManageReservations) {
-        fab = FloatingActionButton.extended(
+        fab = FloatingActionButton(
           onPressed: () {
             context.push('/add-edit-event');
           },
-          label: const Text('Événement'),
-          icon: const Icon(Icons.add),
+          tooltip: 'Nouvel événement',
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
         );
       }
     }
@@ -106,18 +107,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 final events = ref.watch(currentEventsProvider);
                 if (events.isEmpty) return const SizedBox.shrink();
                 final event = events.first;
+                final bgColor = Color(event.color).withValues(alpha: 0.9);
+                final luminance = Color(event.color).computeLuminance();
+                final textColor = luminance > 0.35 ? Colors.black87 : Colors.white;
                 return Container(
                   height: 52,
-                  color: Color(event.color).withValues(alpha: 0.85),
+                  color: bgColor,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        const Icon(Icons.radio_button_checked, size: 14, color: Colors.white),
+                        Icon(Icons.radio_button_checked, size: 14, color: textColor),
                         const SizedBox(width: 8),
                         Text(
                           'EN COURS  ${event.title}',
-                          style: const TextStyle(color: Colors.white, fontSize: 13),
+                          style: TextStyle(color: textColor, fontSize: 13),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -132,17 +136,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 5. Court Availability Header
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Container(
+                    width: 3,
+                    height: 14,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                   Text(
                     key: _courtsKey,
-                    'Disponibilité des courts',
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
+                    'DISPONIBILITÉ DES COURTS',
+                    style: TextStyle(
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: cs.onSurface,
+                      letterSpacing: 1.2,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],

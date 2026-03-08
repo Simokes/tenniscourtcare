@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:tenniscourtcare/features/home/providers/dashboard_providers.dart';
 
 class _CreneauItem {
@@ -96,31 +98,47 @@ class ProchainsCreneaux extends ConsumerWidget {
   Widget _buildItem(BuildContext context, _CreneauItem item) {
     final heure = item.startTime.hour.toString().padLeft(2, '0');
     final minute = item.startTime.minute.toString().padLeft(2, '0');
+    final dc = Theme.of(context).extension<DashboardColors>();
+    final cs = Theme.of(context).colorScheme;
+    final iconColor = item.isMaintenance
+        ? (dc?.maintenanceColor ?? cs.secondary)
+        : cs.secondary;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          item.isMaintenance ? Icons.construction : Icons.event,
-          size: 14,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '${heure}h$minute',
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
+    return InkWell(
+      onTap: () {
+        if (item.isMaintenance) {
+          context.go('/maintenance');
+        } else {
+          context.go('/calendar');
+        }
+      },
+      borderRadius: BorderRadius.circular(4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            item.isMaintenance ? Icons.construction : Icons.event,
+            size: 14,
+            color: iconColor,
           ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            item.title,
-            style: const TextStyle(fontSize: 12),
-            overflow: TextOverflow.ellipsis,
+          const SizedBox(width: 4),
+          Text(
+            '${heure}h$minute',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              item.title,
+              style: const TextStyle(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
