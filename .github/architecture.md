@@ -511,6 +511,34 @@ Widgets home/ actifs apres refonte v2 :
 - CourtListSliver : liste courts avec actions (inchange)
 - StockAlertCard : alerte stock conditionnelle (inchangee)
 
+### 3.4.2 Maintenance Feature - MaintenanceScreen Layout
+
+Le MaintenanceScreen apres la refonte v2 (2026-03) utilise un layout scroll unique
+sans tabs, avec hierarchie temporelle des maintenances planifiees.
+
+Layout MaintenanceScreen (CustomScrollView, ordre des slivers) :
+1. SliverAppBar compact (titre "Maintenances" + SyncIndicatorMode.compact)
+2. KpiStrip maintenance (3 chips : en retard / a venir / effectuees ce mois)
+3. Section "En retard" avec _MaintenanceActionCard (conditionnel, fond dangerColor)
+4. Section "Aujourd hui" avec _MaintenanceActionCard (boutons Completer + Reporter)
+5. Section "Cette semaine" avec _MaintenancePlannedCard (tap to edit)
+6. Section "Plus tard" avec _MaintenancePlannedCard (tap to edit)
+7. Etat vide si aucune maintenance planifiee
+8. Lien "Voir l historique" vers MaintenanceHistoryScreen
+9. SizedBox(height: 80) padding FAB
+
+Widgets prives dans maintenance_screen.dart :
+- _MaintenanceSectionHeader : titre de section + compteur + couleur optionnelle
+- _MaintenanceActionCard : card avec boutons Completer (forceCompleteMode) et Reporter (rescheduleMode)
+- _MaintenancePlannedCard : card compacte tap-to-edit (mode edition normale)
+
+Supprime lors de la refonte v2 :
+- TabController / SingleTickerProviderStateMixin
+- TabBar avec tabs "A venir" et "Historique"
+- _HistoryTab (renderait MaintenanceHistoryScreen en tant que tab)
+- _UpcomingMaintenancesTab (remplace par le nouveau layout)
+FAB conserve : FloatingActionButton.extended (icon: add, label: "Nouvelle maintenance")
+
 **Rules:**
 - Feature code is self-contained.
 - `presentation/` folder contains UI logic specific to the feature.
