@@ -25,7 +25,7 @@ class CourtListSliver extends ConsumerWidget {
         }
 
         return SliverPadding(
-          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 100),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               final terrain = terrains[index];

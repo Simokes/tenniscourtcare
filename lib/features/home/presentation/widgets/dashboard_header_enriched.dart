@@ -94,20 +94,21 @@ class DashboardHeaderEnriched extends ConsumerWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 16.0),
+          padding: const EdgeInsets.only(right: 8.0),
           child: InkWell(
             onTap: () {
               context.push('/settings');
             },
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(22),
             child: Container(
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: cs.outlineVariant),
               ),
-              child: Icon(Icons.person, color: cs.primary),
+              child: Icon(Icons.person, color: cs.primary, size: 22),
             ),
           ),
         ),
