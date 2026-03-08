@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/entities/refill_recommendation.dart';
 import '../../../inventory/providers/stock_provider.dart';
 import '../../../../shared/widgets/premium/premium_card.dart';
+import '../../../../core/theme/dashboard_theme_extension.dart';
 
 class RefillRecommendationCard extends ConsumerWidget {
   final RefillRecommendation recommendation;
@@ -12,6 +13,8 @@ class RefillRecommendationCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final dc = theme.extension<DashboardColors>();
 
     // Watch stock items
     final stockItemsAsync = ref.watch(stockItemsProvider);
@@ -41,12 +44,12 @@ class RefillRecommendationCard extends ConsumerWidget {
     final showRedAlert = recommendation.isCritical || isInsufficient;
 
     final accentColor = showRedAlert
-        ? Colors.red.shade700
-        : Colors.blueGrey.shade700;
+        ? dc?.dangerColor ?? Colors.red
+        : cs.onSurfaceVariant;
 
     final backgroundColor = showRedAlert
-        ? Colors.red.shade50
-        : Colors.blueGrey.shade50;
+        ? dc?.dangerBgColor ?? Colors.red.shade50
+        : cs.surfaceContainerHighest;
 
     return PremiumCard(
       color: backgroundColor,
@@ -80,7 +83,7 @@ class RefillRecommendationCard extends ConsumerWidget {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cs.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: accentColor.withValues(alpha: 0.3)),
                 ),
@@ -96,7 +99,7 @@ class RefillRecommendationCard extends ConsumerWidget {
                     Text(
                       'Sacs',
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.grey.shade700,
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -120,17 +123,17 @@ class RefillRecommendationCard extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.warning_amber_rounded,
-                              color: Colors.red,
+                              color: dc?.dangerColor ?? Colors.red,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 '⚠️ Stock insuffisant pour la recharge conseillée (Dispo: $availableManto)',
-                                style: const TextStyle(
-                                  color: Colors.red,
+                                style: TextStyle(
+                                  color: dc?.dangerColor ?? Colors.red,
                                   fontWeight: FontWeight.bold,
                                   fontSize:
                                       13, // Slightly larger for readability
@@ -191,6 +194,8 @@ class RefillRecommendationCard extends ConsumerWidget {
   }
 
   void _checkStock(BuildContext context, WidgetRef ref, int requiredBags) {
+    final theme = Theme.of(context);
+    final dc = theme.extension<DashboardColors>();
     // Lire la liste des items de stock de manière asynchrone sans watch
     ref.read(stockItemsProvider.future).then((items) {
       if (!context.mounted) return;
@@ -208,9 +213,9 @@ class RefillRecommendationCard extends ConsumerWidget {
 
       if (available == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Article 'Manto' introuvable dans le stock."),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content: const Text("Article 'Manto' introuvable dans le stock."),
+            backgroundColor: dc?.dangerColor ?? Colors.red,
           ),
         );
         return;
@@ -223,7 +228,7 @@ class RefillRecommendationCard extends ConsumerWidget {
           title: Text(missing > 0 ? 'Stock Insuffisant' : 'Stock Suffisant'),
           icon: Icon(
             missing > 0 ? Icons.warning_amber : Icons.check_circle_outline,
-            color: missing > 0 ? Colors.red : Colors.green,
+            color: missing > 0 ? (dc?.dangerColor ?? Colors.red) : (dc?.successColor ?? Colors.green),
             size: 48,
           ),
           content: Column(
@@ -236,16 +241,16 @@ class RefillRecommendationCard extends ConsumerWidget {
               if (missing > 0)
                 Text(
                   'Il manque $missing sacs pour suivre la recommandation.',
-                  style: const TextStyle(
-                    color: Colors.red,
+                  style: TextStyle(
+                    color: dc?.dangerColor ?? Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
                 )
               else
-                const Text(
+                Text(
                   'Le stock couvre la quantité recommandée.',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: dc?.successColor ?? Colors.green,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
