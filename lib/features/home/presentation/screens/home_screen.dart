@@ -49,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     FloatingActionButton? fab;
     if (user != null) {
       if (canEditMaintenance) {
-        fab = FloatingActionButton(
+        fab = FloatingActionButton.extended(
           onPressed: () {
             showModalBottomSheet(
               context: context,
@@ -58,22 +58,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               builder: (_) => const AddMaintenanceSheet(),
             );
           },
-          tooltip: 'Maintenance',
+          label: const Text('Maintenance'),
+          icon: const Icon(Icons.add),
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add),
         );
       } else if (canManageReservations) {
-        fab = FloatingActionButton(
+        fab = FloatingActionButton.extended(
           onPressed: () {
             context.push('/add-edit-event');
           },
-          tooltip: 'Événement',
+          label: const Text('Événement'),
+          icon: const Icon(Icons.add),
           backgroundColor: cs.primary,
           foregroundColor: cs.onPrimary,
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add),
         );
       }
     }
