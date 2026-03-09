@@ -57,6 +57,16 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
 
       final user = await _repo.getCurrentUser();
       state = AsyncValue.data(AuthState(user: user, isSetupRequired: false));
+
+      if (user != null) {
+        // ✅ Demarrage des listeners Firestore au restart (session restauree)
+        final cacheService = ref.read(firebaseCacheServiceProvider);
+        cacheService.startListening();
+        // ignore: deprecated_member_use
+        final connectivityStream = ref.read(isOnlineStatusProvider.stream);
+        cacheService.startConnectivityMonitoring(connectivityStream);
+        debugPrint('🔥 AuthNotifier: Cache listeners started (session restored)');
+      }
     } catch (e, st) {
       // ✅ Émettre error state pour que setupStatusProvider peut réagir
       state = AsyncValue.error(e, st);
@@ -111,6 +121,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<AuthState>> {
         cacheService.startListening();
 
         // ✅ Start connectivity monitoring for listener resilience
+        // ignore: deprecated_member_use
         final connectivityStream = ref.read(isOnlineStatusProvider.stream);
         cacheService.startConnectivityMonitoring(connectivityStream);
 
