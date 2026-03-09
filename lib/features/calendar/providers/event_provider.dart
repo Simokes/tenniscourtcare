@@ -52,7 +52,9 @@ class EventNotifier extends AsyncNotifier<void> {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(eventRepositoryProvider);
+      final db = ref.read(databaseProvider);
       await repo.updateEvent(event);
+      await db.upsertEvent(event.toCompanion());
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

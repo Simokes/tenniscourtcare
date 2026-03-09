@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -149,7 +150,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
       }
 
       if (mounted) {
-        Navigator.pop(context);
+        context.pop();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Événement enregistré')));
@@ -193,7 +194,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
             .read(eventNotifierProvider.notifier)
             .deleteEvent(eventFirebaseId);
         if (mounted) {
-          Navigator.pop(context);
+          context.pop();
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('Événement supprimé')));
