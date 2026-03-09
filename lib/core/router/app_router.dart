@@ -26,6 +26,7 @@ import '../../features/calendar/presentation/screens/add_edit_event_screen.dart'
 import '../../features/maintenance/presentation/screens/terrain_maintenance_history_screen.dart';
 import '../../domain/enums/role.dart';
 import '../../domain/entities/terrain.dart';
+import '../../domain/entities/app_event.dart';
 import './go_router_refresh_stream.dart';
 
 final goRouterProvider = Provider<GoRouter>((ref) {
@@ -163,7 +164,13 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/add-edit-event',
-        builder: (context, state) => const AddEditEventScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return AddEditEventScreen(
+            eventToEdit: extra?['eventToEdit'] as AppEvent?,
+            initialDate: extra?['initialDate'] as DateTime?,
+          );
+        },
       ),
       GoRoute(
         path: '/terrain/:id',

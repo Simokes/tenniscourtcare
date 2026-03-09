@@ -28,6 +28,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
   late DateTime _startTime;
   late DateTime _endTime;
   late int _selectedColor;
+  bool _isSaving = false;
   final List<int> _selectedTerrainIds = [];
 
   final List<Color> _availableColors = [
@@ -120,7 +121,7 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
+    setState(() => _isSaving = true);
     final currentUser = ref.read(currentUserProvider);
 
     final event = AppEvent(
@@ -159,6 +160,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
       }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -418,7 +421,12 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                         );
                       },
                       loading: () => const LinearProgressIndicator(),
-                      error: (err, _) => Text('Erreur: $err'),
+                      error: (err, _) => Text(
+                        'Erreur: $err',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -429,7 +437,8 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
                 width: double.infinity,
                 child: PremiumButton(
                   label: 'ENREGISTRER',
-                  onPressed: _save,
+                  onPressed: _isSaving ? null : _save,
+                  isLoading: _isSaving,
                   icon: Icons.check,
                 ),
               ),
@@ -463,16 +472,22 @@ class _AddEditEventScreenState extends ConsumerState<AddEditEventScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             const SizedBox(height: 4),
             Text(
               timeFormat.format(dateTime),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
               dateFormat.format(dateTime),
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 12),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
           ],
         ),
