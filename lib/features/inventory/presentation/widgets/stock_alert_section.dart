@@ -29,10 +29,9 @@ class StockAlertSection extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Alertes Critiques',
-                style: TextStyle(
-                  fontSize: 20,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
                 ),
@@ -103,6 +102,7 @@ class StockAlertSection extends ConsumerWidget {
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,
+                          useSafeArea: true,
                           builder: (_) => AddEditStockItemSheet(item: item),
                         );
                       },
@@ -114,16 +114,16 @@ class StockAlertSection extends ConsumerWidget {
                           horizontal: 12,
                           vertical: 0,
                         ),
-                        minimumSize: const Size(0, 32),
+                        minimumSize: const Size(0, 44),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Réapprovisionner',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),

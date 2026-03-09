@@ -49,8 +49,7 @@ class StockItemTile extends ConsumerWidget {
                 children: [
                   Text(
                     item.name,
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                       color: isLow ? (dc?.dangerColor ?? Colors.red) : cs.onSurface,
                     ),
@@ -58,8 +57,7 @@ class StockItemTile extends ConsumerWidget {
                   if (item.comment != null && item.comment!.isNotEmpty)
                     Text(
                       item.comment!,
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isLow
                             ? (dc?.dangerColor ?? Colors.red)
                             : cs.onSurfaceVariant,
@@ -70,8 +68,7 @@ class StockItemTile extends ConsumerWidget {
                   else if (isLow)
                     Text(
                       'Stock Critique',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                         fontStyle: FontStyle.italic,
                         color: dc?.dangerColor ?? Colors.red,
@@ -80,8 +77,7 @@ class StockItemTile extends ConsumerWidget {
                   else
                     Text(
                       item.category ?? 'Autre',
-                      style: TextStyle(
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
                     ),
@@ -92,7 +88,7 @@ class StockItemTile extends ConsumerWidget {
             // Quantity Input
             Container(
               width: 70,
-              height: 36,
+              height: 44,
               decoration: BoxDecoration(
                 color: cs.surface,
                 borderRadius: BorderRadius.circular(8),
@@ -111,7 +107,7 @@ class StockItemTile extends ConsumerWidget {
                       fontSize: 16,
                       color: isLow
                           ? (dc?.dangerColor ?? Colors.red)
-                          : Theme.of(context).primaryColor,
+                          : Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -129,6 +125,7 @@ class StockItemTile extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       builder: (_) => AddEditStockItemSheet(item: item),
     );
   }

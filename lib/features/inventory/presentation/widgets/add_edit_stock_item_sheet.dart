@@ -76,7 +76,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('✅ Article ajouté'),
+              content: const Text('Article ajouté'),
               backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
@@ -100,7 +100,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('✅ Article mis à jour'),
+              content: const Text('Article mis à jour'),
               backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
@@ -110,7 +110,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -152,7 +152,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('✅ Article supprimé'),
+              content: const Text('Article supprimé'),
               backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
             ),
           );
@@ -171,7 +171,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     } finally {
@@ -202,19 +202,6 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           ),
           child: Column(
             children: [
-              // Handle
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurface.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-
               // Header
               Padding(
                 padding: const EdgeInsets.symmetric(
@@ -383,11 +370,10 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                                     ),
                                   ),
                                 )
-                              : const Text(
+                              : Text(
                                   'Enregistrer',
-                                  style: TextStyle(
+                                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
                                   ),
                                 ),
                         ),
