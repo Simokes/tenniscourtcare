@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
+import '../../../data/database/app_database.dart';
 import '../../../data/repositories/stock_repository_impl.dart';
 import '../../../domain/entities/stock_item.dart';
 import '../../../data/mappers/stock_item_mapper.dart';
@@ -23,56 +25,6 @@ final stockItemsProvider = StreamProvider<List<StockItem>>((ref) {
 // Also keep an alias to `stockProvider` in case it is used directly elsewhere in unmodified places to avoid massive refactoring,
 // but based on instructions, we should rename or use it as is. We will alias it to `stockItemsProvider`.
 final stockProvider = stockItemsProvider;
-
-// ✅ ADD STOCK ITEM
-final addStockItemProvider = Provider<Future<String> Function(StockItem)>((
-  ref,
-) {
-  return (StockItem item) async {
-    try {
-      final repo = ref.read(stockRepositoryProvider);
-      final firebaseId = await repo.addStockItem(item);
-
-      debugPrint('✅ Item added');
-      return firebaseId;
-    } catch (e) {
-      debugPrint('❌ Error adding stock: $e');
-      rethrow;
-    }
-  };
-});
-
-// ✅ UPDATE STOCK ITEM
-final updateStockItemProvider = Provider<Future<void> Function(StockItem)>((
-  ref,
-) {
-  return (StockItem item) async {
-    try {
-      final repo = ref.read(stockRepositoryProvider);
-      await repo.updateStockItem(item);
-
-      debugPrint('✅ Item updated');
-    } catch (e) {
-      debugPrint('❌ Error updating stock: $e');
-      rethrow;
-    }
-  };
-});
-
-// ✅ DELETE STOCK ITEM
-final deleteStockItemProvider = Provider<Future<void> Function(String)>((ref) {
-  return (String firebaseId) async {
-    try {
-      final repo = ref.read(stockRepositoryProvider);
-      await repo.deleteStockItem(firebaseId);
-
-      debugPrint('✅ Item deleted');
-    } catch (e) {
-      debugPrint('❌ Error deleting stock: $e');
-      rethrow;
-    }
-  };
-});
 
 // --- Filters & Search ---
 
@@ -133,86 +85,73 @@ final filteredStockItemsProvider = Provider<List<StockItem>>((ref) {
 
 // --- StockNotifier ---
 
-class StockNotifier extends StateNotifier<AsyncValue<List<StockItem>>> {
-  final Ref ref;
+class StockNotifier extends AsyncNotifier<void> {
+  late StockRepository _repo;
+  late AppDatabase _db;
 
-  StockNotifier(this.ref) : super(const AsyncValue.loading()) {
-    _init();
+  @override
+  FutureOr<void> build() {
+    _repo = ref.watch(stockRepositoryProvider);
+    _db = ref.watch(databaseProvider);
   }
 
-  void _init() {
-    ref.listen(stockItemsProvider, (previous, next) {
-      state = next;
+  Future<void> addItem(StockItem item) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final firebaseId = await _repo.addStockItem(item);
+      await _db.upsertStockItem(
+        item.copyWith(firebaseId: firebaseId).toCompanion(),
+      );
+    });
+  }
+
+  Future<void> updateItem(StockItem item) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _repo.updateStockItem(item);
+    });
+  }
+
+  Future<void> deleteItem(String firebaseId) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _repo.deleteStockItem(firebaseId);
     });
   }
 
   Future<void> adjustQuantity(int itemId, int delta, {String? reason}) async {
-    try {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       final items = await ref.read(stockItemsProvider.future);
       final item = items.firstWhere((i) => i.id == itemId);
-
       final newQuantity = item.quantity + delta;
       if (newQuantity < 0) {
         throw Exception('Stock cannot be negative');
       }
-
-      final updated = item.copyWith(
-        quantity: newQuantity,
-        updatedAt: DateTime.now(),
+      await _repo.updateStockItem(
+        item.copyWith(quantity: newQuantity, updatedAt: DateTime.now()),
       );
-
-      await ref.read(updateStockItemProvider)(updated);
-    } catch (e) {
-      debugPrint('❌ Error adjusting quantity: $e');
-      rethrow;
-    }
+    });
   }
 
   Future<void> reorderItems(List<StockItem> items) async {
-    try {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       for (int i = 0; i < items.length; i++) {
         final item = items[i];
         if (item.sortOrder != i) {
-          final updated = item.copyWith(
-            sortOrder: i,
-            updatedAt: DateTime.now(),
+          await _repo.updateStockItem(
+            item.copyWith(sortOrder: i, updatedAt: DateTime.now()),
           );
-          await ref.read(updateStockItemProvider)(updated);
         }
       }
-    } catch (e) {
-      debugPrint('❌ Error reordering items: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> addItem(StockItem item) async {
-    try {
-      state = const AsyncValue.loading();
-      final firebaseId = await ref.read(addStockItemProvider)(item);
-      final db = ref.read(databaseProvider);
-
-      await db.upsertStockItem(
-        item.copyWith(firebaseId: firebaseId).toCompanion(),
-      );
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-    }
-  }
-
-  Future<void> updateItem(StockItem item) async {
-    await ref.read(updateStockItemProvider)(item);
-  }
-
-  Future<void> deleteItem(String firebaseId) async {
-    await ref.read(deleteStockItemProvider)(firebaseId);
+    });
   }
 }
 
-final stockNotifierProvider =
-    StateNotifierProvider<StockNotifier, AsyncValue<List<StockItem>>>((ref) {
-      return StockNotifier(ref);
-    });
+final stockNotifierProvider = AsyncNotifierProvider<StockNotifier, void>(
+  StockNotifier.new,
+);
 
 // --- Alert Providers ---
 
