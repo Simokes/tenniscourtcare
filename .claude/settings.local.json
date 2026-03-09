@@ -17,7 +17,11 @@
       "Bash(jules new:*)",
       "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Local\\\\Temp\\\\jules_task.txt\":*)",
       "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Local\\\\Temp\\\\jules_4a.txt\":*)",
-      "Bash(jules:*)"
+      "Bash(jules:*)",
+      "Bash(git checkout:*)",
+      "Bash(where jules:*)",
+      "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Roaming\\\\npm\\\\jules.cmd\" new:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
