@@ -21,11 +21,11 @@ class FirebaseCacheService {
   final List<StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
   _subscriptions = [];
 
-  bool _terrainsInitialSyncDone = false;
-  bool _maintenancesInitialSyncDone = false;
-  bool _stockInitialSyncDone = false;
-  bool _eventsInitialSyncDone = false;
-  bool _usersInitialSyncDone = false;
+  bool _stockServerSyncDone = false;
+  bool _terrainsServerSyncDone = false;
+  bool _maintenancesServerSyncDone = false;
+  bool _eventsServerSyncDone = false;
+  bool _usersServerSyncDone = false;
 
   bool _shouldListen = false;
   int _restartAttempts = 0;
@@ -49,7 +49,7 @@ class FirebaseCacheService {
   }
 
   void _scheduleRestart() {
-    if (!_shouldListen) return; // Arrêt volontaire → ne pas redémarrer
+    if (!_shouldListen) return;
     _restartTimer?.cancel();
     final delay = _nextRestartDelay;
     debugPrint(
@@ -71,7 +71,7 @@ class FirebaseCacheService {
     _connectivitySubscription = connectivityStream.listen((isOnline) {
       if (isOnline && _shouldListen && !isListening) {
         debugPrint('🌐 CacheService: Back online — restarting listeners');
-        _restartAttempts = 0; // Reset backoff on manual reconnect
+        _restartAttempts = 0;
         startListening();
       }
     });
@@ -85,11 +85,11 @@ class FirebaseCacheService {
     _shouldListen = true;
     _restartAttempts = 0;
     _restartTimer?.cancel();
-    _terrainsInitialSyncDone = false;
-    _maintenancesInitialSyncDone = false;
-    _stockInitialSyncDone = false;
-    _eventsInitialSyncDone = false;
-    _usersInitialSyncDone = false;
+    _stockServerSyncDone = false;
+    _terrainsServerSyncDone = false;
+    _maintenancesServerSyncDone = false;
+    _eventsServerSyncDone = false;
+    _usersServerSyncDone = false;
     _subscriptions.addAll([
       _listenStock(),
       _listenTerrains(),
@@ -115,8 +115,9 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
     return _fs.collection('stocks').snapshots().listen((snapshot) async {
-      if (!_stockInitialSyncDone) {
-        _stockInitialSyncDone = true;
+      // Orphan cleanup uniquement sur snapshot serveur (pas cache local Firestore)
+      if (!snapshot.metadata.isFromCache && !_stockServerSyncDone) {
+        _stockServerSyncDone = true;
         try {
           final activeIds = snapshot.docs.map((d) => d.id).toSet();
           await _db.deleteOrphanStockItems(activeIds);
@@ -129,7 +130,6 @@ class FirebaseCacheService {
         try {
           if (change.type == DocumentChangeType.added ||
               change.type == DocumentChangeType.modified) {
-            // ✅ pattern uniforme: id + data() — zéro cast
             final data = change.doc.data();
             if (data == null) continue;
             await _db.upsertStockItem(
@@ -152,8 +152,8 @@ class FirebaseCacheService {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenTerrains() {
     return _fs.collection('terrains').snapshots().listen(
       (snapshot) async {
-        if (!_terrainsInitialSyncDone) {
-          _terrainsInitialSyncDone = true;
+        if (!snapshot.metadata.isFromCache && !_terrainsServerSyncDone) {
+          _terrainsServerSyncDone = true;
           try {
             final activeIds = snapshot.docs.map((d) => d.id).toSet();
             await _db.deleteOrphanTerrains(activeIds);
@@ -166,7 +166,6 @@ class FirebaseCacheService {
           try {
             if (change.type == DocumentChangeType.added ||
                 change.type == DocumentChangeType.modified) {
-              // ✅ pattern uniforme: id + data() — zéro cast
               final data = change.doc.data();
               if (data == null) continue;
               await _db.upsertTerrain(
@@ -192,8 +191,8 @@ class FirebaseCacheService {
   _listenMaintenances() {
     return _fs.collection('maintenance').snapshots().listen(
       (snapshot) async {
-        if (!_maintenancesInitialSyncDone) {
-          _maintenancesInitialSyncDone = true;
+        if (!snapshot.metadata.isFromCache && !_maintenancesServerSyncDone) {
+          _maintenancesServerSyncDone = true;
           try {
             final activeIds = snapshot.docs.map((d) => d.id).toSet();
             await _db.deleteOrphanMaintenances(activeIds);
@@ -206,7 +205,6 @@ class FirebaseCacheService {
           try {
             if (change.type == DocumentChangeType.added ||
                 change.type == DocumentChangeType.modified) {
-              // ✅ déjà correct — garder le même pattern
               final data = change.doc.data();
               if (data == null) continue;
               await _db.upsertMaintenance(
@@ -232,8 +230,8 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenEvents() {
     return _fs.collection('events').snapshots().listen((snapshot) async {
-      if (!_eventsInitialSyncDone) {
-        _eventsInitialSyncDone = true;
+      if (!snapshot.metadata.isFromCache && !_eventsServerSyncDone) {
+        _eventsServerSyncDone = true;
         try {
           final activeIds = snapshot.docs.map((d) => d.id).toSet();
           await _db.deleteOrphanEvents(activeIds);
@@ -246,7 +244,6 @@ class FirebaseCacheService {
         try {
           if (change.type == DocumentChangeType.added ||
               change.type == DocumentChangeType.modified) {
-            // ✅ FIX: id + data() au lieu de cast QueryDocumentSnapshot
             final data = change.doc.data();
             if (data == null) continue;
             await _db.upsertEvent(EventMapper.toCompanion(change.doc.id, data));
@@ -266,8 +263,8 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenUsers() {
     return _fs.collection('users').snapshots().listen((snapshot) async {
-      if (!_usersInitialSyncDone) {
-        _usersInitialSyncDone = true;
+      if (!snapshot.metadata.isFromCache && !_usersServerSyncDone) {
+        _usersServerSyncDone = true;
         try {
           final activeUids = snapshot.docs.map((d) => d.id).toSet();
           await _db.deleteOrphanUsers(activeUids);

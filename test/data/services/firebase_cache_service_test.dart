@@ -23,6 +23,8 @@ class MockDocumentChange<T extends Object?> extends Mock
 class MockQueryDocumentSnapshot<T extends Object?> extends Mock
     implements QueryDocumentSnapshot<T> {}
 
+class MockSnapshotMetadata extends Mock implements SnapshotMetadata {}
+
 void main() {
   late MockAppDatabase mockDb;
   late MockFirebaseFirestore mockFs;
@@ -210,12 +212,17 @@ void main() {
       late MockQuerySnapshot<Map<String, dynamic>> mockSnapshot;
       late MockDocumentChange<Map<String, dynamic>> mockChange;
       late MockQueryDocumentSnapshot<Map<String, dynamic>> mockDoc;
+      late MockSnapshotMetadata mockMetadata;
 
       setUp(() {
         mockSnapshot = MockQuerySnapshot();
         mockChange = MockDocumentChange();
         mockDoc = MockQueryDocumentSnapshot();
+        mockMetadata = MockSnapshotMetadata();
 
+        when(() => mockMetadata.isFromCache).thenReturn(false);
+        when(() => mockSnapshot.metadata).thenReturn(mockMetadata);
+        when(() => mockSnapshot.docs).thenReturn([mockDoc]);
         when(() => mockSnapshot.docChanges).thenReturn([mockChange]);
         when(() => mockChange.doc).thenReturn(mockDoc);
         when(() => mockDoc.id).thenReturn('firebase_id_123');
@@ -232,6 +239,7 @@ void main() {
       test('upserts stock item on DocumentChangeType.added', () async {
         when(() => mockChange.type).thenReturn(DocumentChangeType.added);
         when(() => mockDb.upsertStockItem(any())).thenAnswer((_) async {});
+        when(() => mockDb.deleteOrphanStockItems(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
@@ -239,11 +247,13 @@ void main() {
         await Future.delayed(Duration.zero);
 
         verify(() => mockDb.upsertStockItem(any())).called(1);
+        verify(() => mockDb.deleteOrphanStockItems(any())).called(1);
       });
 
       test('upserts stock item on DocumentChangeType.modified', () async {
         when(() => mockChange.type).thenReturn(DocumentChangeType.modified);
         when(() => mockDb.upsertStockItem(any())).thenAnswer((_) async {});
+        when(() => mockDb.deleteOrphanStockItems(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
@@ -258,6 +268,7 @@ void main() {
         when(
           () => mockDb.deleteStockItemByFirebaseId(any()),
         ).thenAnswer((_) async {});
+        when(() => mockDb.deleteOrphanStockItems(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         stockStreamController.add(mockSnapshot);
@@ -274,6 +285,7 @@ void main() {
         when(
           () => mockDb.upsertStockItem(any()),
         ).thenThrow(Exception('DB Error'));
+        when(() => mockDb.deleteOrphanStockItems(any())).thenAnswer((_) async {});
 
         cacheService.startListening();
         expect(() {
