@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../../providers/event_provider.dart';
-import './add_edit_event_screen.dart';
 import '../../../../shared/widgets/premium/premium_card.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../../terrain/providers/terrain_provider.dart';
 import '../../../../domain/entities/app_event.dart';
 import '../../../../domain/entities/maintenance.dart';
 import '../../../../shared/widgets/common/sync_status_indicator.dart';
+import 'package:go_router/go_router.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -47,9 +47,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     return Scaffold(
 
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Calendrier',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -169,12 +169,11 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                formatButtonTextStyle: const TextStyle(fontSize: 12),
+                formatButtonTextStyle: Theme.of(context).textTheme.labelSmall ?? const TextStyle(fontSize: 12),
                 titleCentered: true,
-                titleTextStyle: const TextStyle(
-                  fontSize: 18,
+                titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                ),
+                ) ?? const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 leftChevronIcon: Icon(
                   Icons.chevron_left,
                   color: Theme.of(context).colorScheme.onSurface,
@@ -220,9 +219,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                         const SizedBox(height: 16),
                         Text(
                           'Aucun événement ce jour.',
-                          style: TextStyle(
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 16,
                           ),
                         ),
                       ],
@@ -242,27 +240,60 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Erreur: $err')),
+              loading: () => ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemCount: 3,
+                itemBuilder: (_, __) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Container(
+                    height: 88,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+              ),
+              error: (err, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Erreur de chargement',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$err',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.tonal(
+                      onPressed: () => ref.invalidate(calendarItemsProvider(_range)),
+                      child: const Text('Réessayer'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AddEditEventScreen(initialDate: _selectedDay),
-            ),
-          );
+          context.push('/add-edit-event', extra: {'initialDate': _selectedDay});
         },
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 4,
-        icon: const Icon(Icons.add),
-        label: const Text('Événement'),
+        shape: const CircleBorder(),
+        tooltip: 'Ajouter un événement',
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -284,14 +315,7 @@ class _CalendarItemCard extends ConsumerWidget {
       padding: EdgeInsets.zero,
       onTap: () async {
         if (!isMaintenance) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddEditEventScreen(
-                eventToEdit: item.originalObject as AppEvent,
-              ),
-            ),
-          );
+          context.push('/add-edit-event', extra: {'eventToEdit': item.originalObject as AppEvent});
         } else {
           // Fetch terrain and open maintenance sheet
           if (item.terrainId != null) {
@@ -303,7 +327,7 @@ class _CalendarItemCard extends ConsumerWidget {
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
+                  useSafeArea: true,
                   builder: (context) => AddMaintenanceSheet(
                     terrain: terrain,
                     existingMaintenance: item.originalObject as Maintenance,
@@ -314,7 +338,7 @@ class _CalendarItemCard extends ConsumerWidget {
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
-                  backgroundColor: Colors.transparent,
+                  useSafeArea: true,
                   builder: (context) => AddMaintenanceSheet(
                     terrain: terrain,
                     existingMaintenance: item.originalObject as Maintenance,
@@ -351,9 +375,8 @@ class _CalendarItemCard extends ConsumerWidget {
                         Expanded(
                           child: Text(
                             item.title,
-                            style: const TextStyle(
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -383,8 +406,7 @@ class _CalendarItemCard extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   item.isPlanned ? 'Prévue' : 'Réalisée',
-                                  style: TextStyle(
-                                    fontSize: 10,
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                                     color: item.color,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -401,8 +423,7 @@ class _CalendarItemCard extends ConsumerWidget {
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
                           item.description!,
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           maxLines: 2,
@@ -422,8 +443,7 @@ class _CalendarItemCard extends ConsumerWidget {
                           isLongEvent
                               ? 'Toute la journée'
                               : '${dateFormat.format(item.startTime)} - ${dateFormat.format(item.endTime)}',
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.w500,
                           ),
@@ -439,8 +459,7 @@ class _CalendarItemCard extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               item.location!,
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                               ),
