@@ -66,10 +66,11 @@ class _CategoryCard extends StatelessWidget {
       icon = Icons.category;
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Opacity(
-        opacity: enabled ? 1.0 : 0.5,
+    return Opacity(
+      opacity: enabled ? 1.0 : 0.5,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: 100,
