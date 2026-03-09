@@ -58,7 +58,7 @@ class KpiStrip extends ConsumerWidget {
               iconColor: lowStockCount > 0
                   ? dc.dangerColor
                   : Theme.of(context).colorScheme.onSurfaceVariant,
-              onTap: () => context.go('/stock'),
+              onTap: () => context.push('/stock'),
             ),
           ),
         ],

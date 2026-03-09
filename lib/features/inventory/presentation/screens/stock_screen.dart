@@ -22,14 +22,6 @@ class _StockScreenState extends ConsumerState<StockScreen> {
     final stockAsync = ref.watch(stockItemsProvider);
     final items = ref.watch(filteredStockItemsProvider);
 
-    ref.listen(stockItemsProvider, (_, next) {
-      next.whenData((items) {
-        debugPrint('📦 Total Drift rows: ${items.length}');
-        for (final i in items) {
-          debugPrint('  → ${i.name} | firebaseId: ${i.firebaseId}');
-        }
-      });
-    });
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -64,8 +56,34 @@ class _StockScreenState extends ConsumerState<StockScreen> {
             Expanded(
               child: stockAsync.when(
                 data: (_) => _buildStockList(items),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, s) => Center(child: Text('Erreur: $e')),
+                loading: () => ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  children: List.generate(3, (index) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      height: 72,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    );
+                  }),
+                ),
+                error: (e, s) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.cloud_off_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      const SizedBox(height: 12),
+                      Text('Impossible de charger le stock', style: Theme.of(context).textTheme.bodyMedium),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => ref.invalidate(stockItemsProvider),
+                        child: const Text('Réessayer'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
@@ -87,11 +105,11 @@ class _StockScreenState extends ConsumerState<StockScreen> {
               shape: const CircleBorder(),
             ),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
               'Inventaire',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Row(
@@ -121,6 +139,8 @@ class _StockScreenState extends ConsumerState<StockScreen> {
                 onPressed: () => showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
+                  useSafeArea: true,
+                  showDragHandle: true,
                   builder: (_) => const AddEditStockItemSheet(),
                 ),
                 icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary),
@@ -139,9 +159,33 @@ class _StockScreenState extends ConsumerState<StockScreen> {
   Widget _buildStockList(List<StockItem> items) {
     if (items.isEmpty) {
       return Center(
-        child: Text(
-          'Aucun article trouvé',
-          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.inventory_2_outlined, size: 56, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun article trouvé',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Ajoutez votre premier article',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              icon: const Icon(Icons.add),
+              label: const Text('Ajouter un article'),
+              onPressed: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                showDragHandle: true,
+                builder: (_) => const AddEditStockItemSheet(),
+              ),
+            ),
+          ],
         ),
       );
     }
