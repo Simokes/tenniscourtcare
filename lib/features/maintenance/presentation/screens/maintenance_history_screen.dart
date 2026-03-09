@@ -379,7 +379,12 @@ class _TerrainHistoryTile extends ConsumerWidget {
       }).length;
     }
 
-    final plannedCount = allPlanned.length; // Always total for planned
+    final plannedCount = startDate == null
+        ? allPlanned.length
+        : allPlanned.where((m) {
+            final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+            return !date.isBefore(startDate!);
+          }).length;
 
     DateTime? lastDoneDate;
     if (allDone.isNotEmpty) {
@@ -513,11 +518,11 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
     final isPlanned = maintenance.isPlanned;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: cs.outlineVariant),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
