@@ -84,6 +84,7 @@ content = content.replace('''  Widget _buildKPIRow(
       return true;
     }).length;
     
+
     final plannedCount = plannedMaintenances.where((m) {
       if (startDate != null) {
         final date = DateTime.fromMillisecondsSinceEpoch(m.date);

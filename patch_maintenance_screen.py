@@ -408,4 +408,3 @@ content = content.replace('''                    if (planned.isEmpty)
 
 with open('lib/features/maintenance/presentation/screens/maintenance_screen.dart', 'w') as f:
     f.write(content)
-

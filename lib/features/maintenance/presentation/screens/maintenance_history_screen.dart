@@ -230,7 +230,6 @@ class _MaintenanceHistoryScreenState
       }
       return true;
     }).length;
-    
     final plannedCount = plannedMaintenances.where((m) {
       if (startDate != null) {
         final date = DateTime.fromMillisecondsSinceEpoch(m.date);
@@ -381,7 +380,10 @@ class _TerrainHistoryTile extends ConsumerWidget {
 
     final plannedCount = startDate == null
         ? allPlanned.length
-        : allPlanned.where((m) => DateTime.fromMillisecondsSinceEpoch(m.date).isAfter(startDate!)).length;
+        : allPlanned.where((m) {
+            final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+            return !date.isBefore(startDate!);
+          }).length;
 
     DateTime? lastDoneDate;
     if (allDone.isNotEmpty) {
