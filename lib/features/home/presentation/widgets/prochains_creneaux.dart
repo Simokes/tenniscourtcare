@@ -107,7 +107,7 @@ class ProchainsCreneaux extends ConsumerWidget {
     return InkWell(
       onTap: () {
         if (item.isMaintenance) {
-          context.go('/maintenance');
+          context.push('/maintenance');
         } else {
           context.go('/calendar');
         }

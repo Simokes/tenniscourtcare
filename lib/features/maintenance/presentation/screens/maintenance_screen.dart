@@ -67,7 +67,9 @@ class _MaintenanceScreenState extends ConsumerState<MaintenanceScreen> {
                       bgColor: overdueCount > 0
                           ? dc?.dangerBgColor ?? Colors.red.withValues(alpha: 0.1)
                           : Colors.transparent,
-                      borderColor: colorScheme.outlineVariant,
+                      borderColor: overdueCount > 0
+                          ? (dc?.dangerColor ?? Colors.red).withValues(alpha: 0.4)
+                          : colorScheme.outlineVariant,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -448,6 +450,11 @@ class _MaintenanceActionCard extends ConsumerWidget {
               .read(maintenanceNotifierProvider.notifier)
               .deleteMaintenance(maintenance.firebaseId!);
         }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Maintenance supprimée')),
+          );
+        }
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -617,6 +624,11 @@ class _MaintenancePlannedCard extends ConsumerWidget {
           await ref
               .read(maintenanceNotifierProvider.notifier)
               .deleteMaintenance(maintenance.firebaseId!);
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Maintenance supprimée')),
+          );
         }
       },
       child: Card(
