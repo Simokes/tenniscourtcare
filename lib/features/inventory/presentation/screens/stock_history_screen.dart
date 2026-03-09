@@ -14,11 +14,16 @@ final stockHistoryProvider =
       return db.watchStockHistory(limit: 50); // Pagination could be added
     });
 
-class StockHistoryScreen extends ConsumerWidget {
+class StockHistoryScreen extends ConsumerStatefulWidget {
   const StockHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StockHistoryScreen> createState() => _StockHistoryScreenState();
+}
+
+class _StockHistoryScreenState extends ConsumerState<StockHistoryScreen> {
+  @override
+  Widget build(BuildContext context) {
     final historyAsync = ref.watch(stockHistoryProvider);
     final cs = Theme.of(context).colorScheme;
 
@@ -28,6 +33,8 @@ class StockHistoryScreen extends ConsumerWidget {
         centerTitle: true,
       ),
       floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
+        tooltip: 'État de synchronisation',
         onPressed: () => _showSyncDetails(context),
         child: const Icon(Icons.sync),
       ),
@@ -60,8 +67,34 @@ class StockHistoryScreen extends ConsumerWidget {
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Erreur: $err')),
+        loading: () => ListView(
+          padding: const EdgeInsets.all(16),
+          children: List.generate(3, (index) {
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              height: 80,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+            );
+          }),
+        ),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_off_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              const SizedBox(height: 12),
+              Text('Impossible de charger le journal', style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => ref.invalidate(stockHistoryProvider),
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -69,18 +102,20 @@ class StockHistoryScreen extends ConsumerWidget {
   void _showSyncDetails(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => const Padding(
-        padding: EdgeInsets.all(16.0),
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               'État de synchronisation',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
-            SizedBox(height: 16),
-            ConnectionStatusIndicator(mode: SyncIndicatorMode.detailed),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            const ConnectionStatusIndicator(mode: SyncIndicatorMode.detailed),
+            const SizedBox(height: 16),
           ],
         ),
       ),
