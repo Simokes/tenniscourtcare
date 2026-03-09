@@ -8,6 +8,7 @@ import '../../../domain/entities/maintenance.dart';
 import '../../../domain/models/repository_exception.dart';
 import '../../../domain/repositories/maintenance_repository.dart';
 import '../../../core/providers/core_providers.dart';
+import '../../../data/mappers/maintenance_mapper.dart';
 
 // Repository Provider
 import '../../terrain/providers/terrain_provider.dart';
@@ -126,9 +127,14 @@ class MaintenanceNotifier extends AsyncNotifier<void> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final repo = ref.read(maintenanceRepositoryProvider);
-      await repo.addMaintenance(
-        maintenance,
-      ); // ✅ repo gère déjà le upsert Drift
+      final db = ref.read(databaseProvider);
+      final firebaseId = await repo.addMaintenance(maintenance);
+      await db.upsertMaintenance(
+        MaintenanceMapper.toCompanion(
+          firebaseId,
+          MaintenanceMapper.toFirestore(maintenance),
+        ),
+      );
     });
   }
 

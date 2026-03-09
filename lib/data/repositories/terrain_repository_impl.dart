@@ -46,13 +46,6 @@ class TerrainRepositoryImpl implements TerrainRepository {
           .collection('terrains')
           .doc(terrain.firebaseId)
           .update(TerrainMapper.toFirestore(terrain));
-
-      await _db.upsertTerrain(
-        TerrainMapper.toCompanion(
-          terrain.firebaseId!,
-          TerrainMapper.toFirestore(terrain),
-        ),
-      );
     } on FirebaseException catch (e) {
       debugPrint('❌ TerrainRepository: Failed to update terrain: ${e.message}');
       throw RepositoryException(
