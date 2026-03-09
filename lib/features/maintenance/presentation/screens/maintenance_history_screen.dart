@@ -34,9 +34,26 @@ class _MaintenanceHistoryScreenState
     final plannedMaintenancesAsync = ref.watch(plannedMaintenancesProvider);
     final maintenanceTypes = ref.watch(maintenanceTypesProvider);
 
+    final now = DateTime.now();
+    DateTime? startDate;
+    if (_selectedPeriod == 'week') {
+      startDate = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfWeek(now));
+    } else if (_selectedPeriod == 'month') {
+      startDate = DateTime.fromMillisecondsSinceEpoch(DateUtils.startOfMonth(now));
+    } else if (_selectedPeriod == 'year') {
+      startDate = DateTime(now.year, 1, 1);
+    }
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
+          const SliverAppBar(
+            title: Text('Historique'),
+            floating: true,
+            snap: true,
+            elevation: 0,
+            surfaceTintColor: Colors.transparent,
+          ),
           // KPI Row
           SliverToBoxAdapter(
             child: Padding(
@@ -46,6 +63,7 @@ class _MaintenanceHistoryScreenState
                 plannedMaintenancesAsync.valueOrNull ?? [],
                 cs,
                 dc,
+                startDate,
               ),
             ),
           ),
@@ -91,23 +109,20 @@ class _MaintenanceHistoryScreenState
                   const SizedBox(width: 20),
 
                   // Type Filter (Dropdown)
-                  DropdownButton<String?>(
-                    value: _selectedType,
-                    hint: const Text('Tous types'),
-                    items: [
-                      const DropdownMenuItem<String?>(
-                        value: null,
-                        child: Text('Tous types'),
-                      ),
-                      ...maintenanceTypes.map(
-                        (type) => DropdownMenuItem<String?>(
-                          value: type,
-                          child: Text(type),
-                        ),
-                      ),
+                  DropdownMenu<String?>(
+                    initialSelection: _selectedType,
+                    hintText: 'Tous types',
+                    width: 140,
+                    inputDecorationTheme: InputDecorationTheme(
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    dropdownMenuEntries: [
+                      const DropdownMenuEntry<String?>(value: null, label: 'Tous types'),
+                      ...maintenanceTypes.map((type) => DropdownMenuEntry<String?>(value: type, label: type)),
                     ],
-                    onChanged: (val) => setState(() => _selectedType = val),
-                    underline: const SizedBox(),
+                    onSelected: (val) => setState(() => _selectedType = val),
                   ),
 
                   const SizedBox(width: 20),
@@ -205,9 +220,24 @@ class _MaintenanceHistoryScreenState
     List<Maintenance> plannedMaintenances,
     ColorScheme cs,
     DashboardColors? dc,
+    DateTime? startDate,
   ) {
-    final doneCount = allMaintenances.where((m) => !m.isPlanned).length;
-    final plannedCount = plannedMaintenances.length;
+    final doneCount = allMaintenances.where((m) {
+      if (m.isPlanned) return false;
+      if (startDate != null) {
+        final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+        if (date.isBefore(startDate)) return false;
+      }
+      return true;
+    }).length;
+    
+    final plannedCount = plannedMaintenances.where((m) {
+      if (startDate != null) {
+        final date = DateTime.fromMillisecondsSinceEpoch(m.date);
+        if (date.isBefore(startDate)) return false;
+      }
+      return true;
+    }).length;
     final totalCount = doneCount + plannedCount;
 
     return Row(
@@ -349,7 +379,9 @@ class _TerrainHistoryTile extends ConsumerWidget {
       }).length;
     }
 
-    final plannedCount = allPlanned.length; // Always total for planned
+    final plannedCount = startDate == null
+        ? allPlanned.length
+        : allPlanned.where((m) => DateTime.fromMillisecondsSinceEpoch(m.date).isAfter(startDate!)).length;
 
     DateTime? lastDoneDate;
     if (allDone.isNotEmpty) {
@@ -361,9 +393,9 @@ class _TerrainHistoryTile extends ConsumerWidget {
         : 'Aucune maintenance';
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Column(
         children: [
           ListTile(
@@ -373,23 +405,35 @@ class _TerrainHistoryTile extends ConsumerWidget {
             ),
             title: Text(
               terrain.nom,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             subtitle: Wrap(
-              spacing: 8,
+              spacing: 12,
               runSpacing: 4,
               children: [
-                Text(
-                  '✅ $filteredDoneCount effectuées',
-                  style: TextStyle(color: dc?.successColor ?? Colors.green, fontSize: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 14, color: dc?.successColor ?? Colors.green),
+                    const SizedBox(width: 4),
+                    Text('$filteredDoneCount effectuées', style: TextStyle(color: dc?.successColor ?? Colors.green, fontSize: 12)),
+                  ],
                 ),
-                Text(
-                  '📅 $plannedCount planifiées',
-                  style: TextStyle(color: dc?.warningColor ?? Colors.orange, fontSize: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.calendar_today_outlined, size: 14, color: dc?.warningColor ?? Colors.orange),
+                    const SizedBox(width: 4),
+                    Text('$plannedCount planifiées', style: TextStyle(color: dc?.warningColor ?? Colors.orange, fontSize: 12)),
+                  ],
                 ),
-                Text(
-                  '🕒 Dernière: $formattedLastDate',
-                  style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.access_time_outlined, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text('Dernière: $formattedLastDate', style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                  ],
                 ),
               ],
             ),
@@ -416,13 +460,19 @@ class _TerrainHistoryTile extends ConsumerWidget {
             firstChild: const SizedBox(width: double.infinity),
             secondChild: filteredMaintenances.isEmpty
                 ? Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Aucune maintenance pour cette période',
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: cs.onSurfaceVariant,
-                      ),
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                    child: Column(
+                      children: [
+                        Icon(Icons.inbox_outlined, size: 32, color: cs.onSurfaceVariant),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Aucune maintenance pour cette période',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontStyle: FontStyle.italic,
+                              ),
+                        ),
+                      ],
                     ),
                   )
                 : ListView.builder(
@@ -465,11 +515,11 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
     final isPlanned = maintenance.isPlanned;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       elevation: 0,
       shape: RoundedRectangleBorder(
         side: BorderSide(color: cs.outlineVariant),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -489,14 +539,14 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                       const SizedBox(width: 4),
                       Text(
                         maintenance.type,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
                       ),
                       if (maintenance.imagePath != null) ...[
                         const SizedBox(width: 4),
                         Icon(
                           Icons.image_outlined,
                           size: 14,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ],
                     ],
@@ -511,10 +561,7 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       maintenance.commentaire!,
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                        fontSize: 12,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -526,17 +573,17 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     children: [
                       if (maintenance.sacsMantoUtilises > 0)
                         _SacChip(
-                          'M: ${maintenance.sacsMantoUtilises}',
+                          'Manto: ${maintenance.sacsMantoUtilises}',
                           Colors.brown,
                         ),
                       if (maintenance.sacsSottomantoUtilises > 0)
                         _SacChip(
-                          'S: ${maintenance.sacsSottomantoUtilises}',
+                          'Sott.: ${maintenance.sacsSottomantoUtilises}',
                           Colors.blueGrey,
                         ),
                       if (maintenance.sacsSiliceUtilises > 0)
                         _SacChip(
-                          'Si: ${maintenance.sacsSiliceUtilises}',
+                          'Silice: ${maintenance.sacsSiliceUtilises}',
                           Colors.teal,
                         ),
                     ],
@@ -553,6 +600,8 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
+                      useSafeArea: true,
+                      showDragHandle: true,
                       builder: (_) => AddMaintenanceSheet(
                         terrain: terrain,
                         existingMaintenance: maintenance,
