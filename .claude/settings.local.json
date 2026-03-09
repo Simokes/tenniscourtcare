@@ -22,7 +22,8 @@
       "Bash(where jules:*)",
       "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Roaming\\\\npm\\\\jules.cmd\" new:*)",
       "Bash(git pull:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(flutter analyze:*)"
     ]
   }
 }
