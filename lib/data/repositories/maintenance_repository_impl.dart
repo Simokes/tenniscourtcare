@@ -31,10 +31,6 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           .collection('maintenance')
           .add(MaintenanceMapper.toFirestore(maintenance));
 
-      // ✅ FIX: Sauvegarder dans Drift immédiatement avec firebaseId
-      final maintenanceWithId = maintenance.copyWith(firebaseId: docRef.id);
-      await _db.upsertMaintenance(maintenanceWithId.toCompanion());
-
       if (!maintenance.isPlanned) {
         // Done immediately → terrain back to playable
         await _terrainRepository.updateTerrainStatus(
@@ -82,15 +78,32 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<void> deleteMaintenance(String firebaseId) async {
+    Maintenance? maintenance;
     try {
-      final maintenance = await _db.getMaintenanceByFirebaseId(firebaseId);
+      maintenance = await _db.getMaintenanceByFirebaseId(firebaseId);
+    } catch (e) {
+      debugPrint(
+        '⚠️ MaintenanceRepository: Could not fetch maintenance from Drift before delete: $e',
+      );
+    }
 
+    try {
       await _fs.collection('maintenance').doc(firebaseId).delete();
+    } on FirebaseException catch (e) {
+      debugPrint(
+        '❌ MaintenanceRepository: Failed to delete maintenance from Firestore: ${e.message}',
+      );
+      throw RepositoryException(
+        'Failed to delete maintenance: ${e.message}',
+        cause: e,
+      );
+    }
 
+    try {
       if (maintenance != null && !maintenance.isPlanned) {
         await _db.deleteMaintenanceWithStockRestoration(maintenance.id!);
       } else {
-        await _db.deleteMaintenanceByFirebaseId(firebaseId); // ✅ Drift immédiat
+        await _db.deleteMaintenanceByFirebaseId(firebaseId);
       }
 
       if (maintenance != null && maintenance.isPlanned) {
@@ -99,14 +112,11 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
           TerrainStatus.playable,
         );
       }
-    } on FirebaseException catch (e) {
+    } catch (e) {
       debugPrint(
-        '❌ MaintenanceRepository: Failed to delete maintenance: ${e.message}',
+        '❌ MaintenanceRepository: Error during Drift deletion or terrain status update: $e',
       );
-      throw RepositoryException(
-        'Failed to delete maintenance: ${e.message}',
-        cause: e,
-      );
+      rethrow;
     }
   }
 

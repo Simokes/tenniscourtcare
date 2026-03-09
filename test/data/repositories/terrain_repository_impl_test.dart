@@ -102,10 +102,9 @@ void main() {
     });
 
     group('updateTerrain', () {
-      test('writes to Firestore and Drift immediately', () async {
+      test('writes to Firestore only', () async {
         // Arrange
         when(() => mockDoc.update(any())).thenAnswer((_) async {});
-        when(() => mockDb.upsertTerrain(any())).thenAnswer((_) async => 1);
 
         final testTerrainWithId = TestData.testTerrain.copyWith(
           firebaseId: 'test_id',
@@ -117,7 +116,7 @@ void main() {
         // Assert
         verify(() => mockCollection.doc('test_id')).called(1);
         verify(() => mockDoc.update(any())).called(1);
-        verify(() => mockDb.upsertTerrain(any())).called(1);
+        verifyNever(() => mockDb.upsertTerrain(any()));
       });
 
       test('throws RepositoryException if firebaseId is null', () async {
