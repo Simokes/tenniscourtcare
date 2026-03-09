@@ -117,8 +117,9 @@ class FirebaseCacheService {
           } else if (change.type == DocumentChangeType.removed) {
             await _db.deleteStockItemByFirebaseId(change.doc.id);
           }
-        } catch (e) {
-          debugPrint('❌ CacheService: Error processing stock change: $e');
+        } catch (e, st) {
+          debugPrint('❌ CacheService: Error processing stock change: $e\n$st');
+          _scheduleRestart();
         }
       }
     }, onError: (e) {
@@ -143,8 +144,9 @@ class FirebaseCacheService {
             } else if (change.type == DocumentChangeType.removed) {
               await _db.deleteTerrainByFirebaseId(change.doc.id);
             }
-          } catch (e) {
-            debugPrint('❌ CacheService: Error processing terrains change: $e');
+          } catch (e, st) {
+            debugPrint('❌ CacheService: Error processing terrains change: $e\n$st');
+            _scheduleRestart();
           }
         }
       },
@@ -172,10 +174,11 @@ class FirebaseCacheService {
             } else if (change.type == DocumentChangeType.removed) {
               await _db.deleteMaintenanceByFirebaseId(change.doc.id);
             }
-          } catch (e) {
+          } catch (e, st) {
             debugPrint(
-              '❌ CacheService: Error processing maintenance change: $e',
+              '❌ CacheService: Error processing maintenance change: $e\n$st',
             );
+            _scheduleRestart();
           }
         }
       },
@@ -199,8 +202,9 @@ class FirebaseCacheService {
           } else if (change.type == DocumentChangeType.removed) {
             await _db.deleteEventByFirebaseId(change.doc.id);
           }
-        } catch (e) {
-          debugPrint('❌ CacheService: Error processing events change: $e');
+        } catch (e, st) {
+          debugPrint('❌ CacheService: Error processing events change: $e\n$st');
+          _scheduleRestart();
         }
       }
     }, onError: (e) {
@@ -251,8 +255,9 @@ class FirebaseCacheService {
           } else if (change.type == DocumentChangeType.removed) {
             await _db.deleteUserByFirebaseId(change.doc.id);
           }
-        } catch (e) {
-          debugPrint('❌ CacheService: Error processing users change: $e');
+        } catch (e, st) {
+          debugPrint('❌ CacheService: Error processing users change: $e\n$st');
+          _scheduleRestart();
         }
       }
     }, onError: (e) {
