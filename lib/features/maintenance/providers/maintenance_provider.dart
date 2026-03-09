@@ -12,14 +12,17 @@ import '../../../data/mappers/maintenance_mapper.dart';
 
 // Repository Provider
 import '../../terrain/providers/terrain_provider.dart';
+import '../../inventory/providers/stock_provider.dart';
 
 final maintenanceRepositoryProvider = Provider<MaintenanceRepository>((ref) {
   final db = ref.watch(databaseProvider);
   final terrainRepo = ref.watch(terrainRepositoryProvider);
+  final stockRepo = ref.watch(stockRepositoryProvider);
   return MaintenanceRepositoryImpl(
     db: db,
     fs: FirebaseFirestore.instance,
     terrainRepository: terrainRepo,
+    stockRepository: stockRepo,
   );
 });
 
