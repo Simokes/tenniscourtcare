@@ -38,7 +38,7 @@ class KpiStrip extends ConsumerWidget {
                 icon: Icons.construction,
                 label: '$val maintenances',
                 iconColor: dc.maintenanceColor,
-                onTap: () => context.go('/maintenance'),
+                onTap: () => context.push('/maintenance'),
               ),
               loading: () => const _KpiChip(
                 icon: Icons.construction,

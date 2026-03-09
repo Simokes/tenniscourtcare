@@ -41,7 +41,7 @@ class AlertStrip extends ConsumerWidget {
           ? Material(
               color: backgroundColor,
               child: InkWell(
-                onTap: overdueCount > 0 ? () => context.go('/maintenance') : null,
+                onTap: overdueCount > 0 ? () => context.push('/maintenance') : null,
                 child: SizedBox(
                   height: 44,
                   child: Padding(

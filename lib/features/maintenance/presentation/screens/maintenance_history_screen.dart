@@ -10,6 +10,10 @@ import '../../providers/maintenance_provider.dart';
 import '../widgets/add_maintenance_sheet.dart';
 import '../../../../core/theme/dashboard_theme_extension.dart';
 
+const Color _kMantoColor = Color(0xFF795548);
+const Color _kSottomantoColor = Color(0xFF607D8B);
+const Color _kSiliceColor = Color(0xFF009688);
+
 class MaintenanceHistoryScreen extends ConsumerStatefulWidget {
   const MaintenanceHistoryScreen({super.key});
 
@@ -159,11 +163,37 @@ class _MaintenanceHistoryScreenState
 
           // Terrain List
           terrainsAsync.when(
-            loading: () => const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+            loading: () => SliverToBoxAdapter(
+              child: Column(
+                children: List.generate(3, (index) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  );
+                }),
+              ),
             ),
-            error: (error, stack) => SliverFillRemaining(
-              child: Center(child: Text('Erreur: $error')),
+            error: (error, stack) => SliverToBoxAdapter(
+              child: Column(
+                children: [
+                  const SizedBox(height: 32),
+                  Icon(Icons.cloud_off_outlined, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const SizedBox(height: 12),
+                  Text('Impossible de charger les données', style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () {
+                      ref.invalidate(terrainsProvider);
+                      ref.invalidate(maintenancesProvider);
+                    },
+                    child: const Text('Réessayer'),
+                  ),
+                ],
+              ),
             ),
             data: (terrains) {
               if (terrains.isEmpty) {
@@ -576,17 +606,17 @@ class _MaintenanceHistoryItem extends ConsumerWidget {
                       if (maintenance.sacsMantoUtilises > 0)
                         _SacChip(
                           'Manto: ${maintenance.sacsMantoUtilises}',
-                          Colors.brown,
+                          _kMantoColor,
                         ),
                       if (maintenance.sacsSottomantoUtilises > 0)
                         _SacChip(
                           'Sott.: ${maintenance.sacsSottomantoUtilises}',
-                          Colors.blueGrey,
+                          _kSottomantoColor,
                         ),
                       if (maintenance.sacsSiliceUtilises > 0)
                         _SacChip(
                           'Silice: ${maintenance.sacsSiliceUtilises}',
-                          Colors.teal,
+                          _kSiliceColor,
                         ),
                     ],
                   ),
