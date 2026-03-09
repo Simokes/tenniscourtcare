@@ -197,7 +197,11 @@ class AppDatabase extends _$AppDatabase {
 
   /// Supprime les stocks dont le firebaseId n est pas dans [activeIds].
   Future<void> deleteOrphanStockItems(Set<String> activeIds) async {
-    if (activeIds.isEmpty) return;
+    if (activeIds.isEmpty) {
+      // Firebase n'a plus aucun item : supprimer tout ce qui a un firebaseId dans Drift
+      await (delete(stockItems)..where((t) => t.firebaseId.isNotNull())).go();
+      return;
+    }
     await (delete(stockItems)
       ..where(
         (t) => t.firebaseId.isNotNull() & t.firebaseId.isNotIn(activeIds.toList()),
