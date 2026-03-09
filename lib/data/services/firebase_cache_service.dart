@@ -21,6 +21,12 @@ class FirebaseCacheService {
   final List<StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
   _subscriptions = [];
 
+  bool _terrainsInitialSyncDone = false;
+  bool _maintenancesInitialSyncDone = false;
+  bool _stockInitialSyncDone = false;
+  bool _eventsInitialSyncDone = false;
+  bool _usersInitialSyncDone = false;
+
   bool _shouldListen = false;
   int _restartAttempts = 0;
   Timer? _restartTimer;
@@ -79,6 +85,11 @@ class FirebaseCacheService {
     _shouldListen = true;
     _restartAttempts = 0;
     _restartTimer?.cancel();
+    _terrainsInitialSyncDone = false;
+    _maintenancesInitialSyncDone = false;
+    _stockInitialSyncDone = false;
+    _eventsInitialSyncDone = false;
+    _usersInitialSyncDone = false;
     _subscriptions.addAll([
       _listenStock(),
       _listenTerrains(),
@@ -104,6 +115,16 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenStock() {
     return _fs.collection('stocks').snapshots().listen((snapshot) async {
+      if (!_stockInitialSyncDone) {
+        _stockInitialSyncDone = true;
+        try {
+          final activeIds = snapshot.docs.map((d) => d.id).toSet();
+          await _db.deleteOrphanStockItems(activeIds);
+          debugPrint('🧹 CacheService: Stock orphan cleanup done (${activeIds.length} active)');
+        } catch (e, st) {
+          debugPrint('⚠️ CacheService: Stock orphan cleanup failed: $e\n$st');
+        }
+      }
       for (final change in snapshot.docChanges) {
         try {
           if (change.type == DocumentChangeType.added ||
@@ -131,6 +152,16 @@ class FirebaseCacheService {
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenTerrains() {
     return _fs.collection('terrains').snapshots().listen(
       (snapshot) async {
+        if (!_terrainsInitialSyncDone) {
+          _terrainsInitialSyncDone = true;
+          try {
+            final activeIds = snapshot.docs.map((d) => d.id).toSet();
+            await _db.deleteOrphanTerrains(activeIds);
+            debugPrint('🧹 CacheService: Terrains orphan cleanup done (${activeIds.length} active)');
+          } catch (e, st) {
+            debugPrint('⚠️ CacheService: Terrains orphan cleanup failed: $e\n$st');
+          }
+        }
         for (final change in snapshot.docChanges) {
           try {
             if (change.type == DocumentChangeType.added ||
@@ -161,6 +192,16 @@ class FirebaseCacheService {
   _listenMaintenances() {
     return _fs.collection('maintenance').snapshots().listen(
       (snapshot) async {
+        if (!_maintenancesInitialSyncDone) {
+          _maintenancesInitialSyncDone = true;
+          try {
+            final activeIds = snapshot.docs.map((d) => d.id).toSet();
+            await _db.deleteOrphanMaintenances(activeIds);
+            debugPrint('🧹 CacheService: Maintenances orphan cleanup done (${activeIds.length} active)');
+          } catch (e, st) {
+            debugPrint('⚠️ CacheService: Maintenances orphan cleanup failed: $e\n$st');
+          }
+        }
         for (final change in snapshot.docChanges) {
           try {
             if (change.type == DocumentChangeType.added ||
@@ -191,6 +232,16 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenEvents() {
     return _fs.collection('events').snapshots().listen((snapshot) async {
+      if (!_eventsInitialSyncDone) {
+        _eventsInitialSyncDone = true;
+        try {
+          final activeIds = snapshot.docs.map((d) => d.id).toSet();
+          await _db.deleteOrphanEvents(activeIds);
+          debugPrint('🧹 CacheService: Events orphan cleanup done (${activeIds.length} active)');
+        } catch (e, st) {
+          debugPrint('⚠️ CacheService: Events orphan cleanup failed: $e\n$st');
+        }
+      }
       for (final change in snapshot.docChanges) {
         try {
           if (change.type == DocumentChangeType.added ||
@@ -215,6 +266,16 @@ class FirebaseCacheService {
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenUsers() {
     return _fs.collection('users').snapshots().listen((snapshot) async {
+      if (!_usersInitialSyncDone) {
+        _usersInitialSyncDone = true;
+        try {
+          final activeUids = snapshot.docs.map((d) => d.id).toSet();
+          await _db.deleteOrphanUsers(activeUids);
+          debugPrint('🧹 CacheService: Users orphan cleanup done (${activeUids.length} active)');
+        } catch (e, st) {
+          debugPrint('⚠️ CacheService: Users orphan cleanup failed: $e\n$st');
+        }
+      }
       for (final change in snapshot.docChanges) {
         try {
           if (change.type == DocumentChangeType.added ||

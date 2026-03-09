@@ -174,6 +174,57 @@ class AppDatabase extends _$AppDatabase {
     await (delete(users)..where((t) => t.firestoreUid.equals(firebaseId))).go();
   }
 
+  /// Supprime les terrains dont le firebaseId n est pas dans [activeIds].
+  /// Appele uniquement au premier snapshot Firestore pour nettoyer les entrees obsoletes.
+  Future<void> deleteOrphanTerrains(Set<String> activeIds) async {
+    if (activeIds.isEmpty) return;
+    await (delete(terrains)
+      ..where(
+        (t) => t.firebaseId.isNotNull() & t.firebaseId.isNotIn(activeIds.toList()),
+      ))
+        .go();
+  }
+
+  /// Supprime les maintenances dont le firebaseId n est pas dans [activeIds].
+  Future<void> deleteOrphanMaintenances(Set<String> activeIds) async {
+    if (activeIds.isEmpty) return;
+    await (delete(maintenances)
+      ..where(
+        (t) => t.firebaseId.isNotNull() & t.firebaseId.isNotIn(activeIds.toList()),
+      ))
+        .go();
+  }
+
+  /// Supprime les stocks dont le firebaseId n est pas dans [activeIds].
+  Future<void> deleteOrphanStockItems(Set<String> activeIds) async {
+    if (activeIds.isEmpty) return;
+    await (delete(stockItems)
+      ..where(
+        (t) => t.firebaseId.isNotNull() & t.firebaseId.isNotIn(activeIds.toList()),
+      ))
+        .go();
+  }
+
+  /// Supprime les evenements dont le firebaseId n est pas dans [activeIds].
+  Future<void> deleteOrphanEvents(Set<String> activeIds) async {
+    if (activeIds.isEmpty) return;
+    await (delete(events)
+      ..where(
+        (t) => t.firebaseId.isNotNull() & t.firebaseId.isNotIn(activeIds.toList()),
+      ))
+        .go();
+  }
+
+  /// Supprime les utilisateurs dont le firestoreUid n est pas dans [activeUids].
+  Future<void> deleteOrphanUsers(Set<String> activeUids) async {
+    if (activeUids.isEmpty) return;
+    await (delete(users)
+      ..where(
+        (u) => u.firestoreUid.isNotNull() & u.firestoreUid.isNotIn(activeUids.toList()),
+      ))
+        .go();
+  }
+
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
