@@ -25,6 +25,9 @@ class MockQueryDocumentSnapshot<T extends Object?> extends Mock
 
 class MockSnapshotMetadata extends Mock implements SnapshotMetadata {}
 
+class MockDocumentReference<T extends Object?> extends Mock
+    implements DocumentReference<T> {}
+
 void main() {
   late MockAppDatabase mockDb;
   late MockFirebaseFirestore mockFs;
@@ -298,6 +301,66 @@ void main() {
         expect(() {
           stockStreamController.addError(Exception('Stream Error'));
         }, returnsNormally);
+      });
+    });
+
+    group('_seedDefaultStockItems()', () {
+      late MockQuerySnapshot<Map<String, dynamic>> mockSnapshot;
+      late MockSnapshotMetadata mockMetadata;
+      late MockDocumentReference<Map<String, dynamic>> mockDocRef;
+
+      setUp(() {
+        mockSnapshot = MockQuerySnapshot();
+        mockMetadata = MockSnapshotMetadata();
+        mockDocRef = MockDocumentReference();
+
+        when(() => mockMetadata.isFromCache).thenReturn(false);
+        when(() => mockSnapshot.metadata).thenReturn(mockMetadata);
+        when(() => mockSnapshot.docChanges).thenReturn([]);
+        when(() => mockSnapshot.docs).thenReturn([]);
+        when(() => mockStockCollection.add(any())).thenAnswer((_) async => mockDocRef);
+        when(() => mockDb.deleteOrphanStockItems(any())).thenAnswer((_) async {});
+      });
+
+      test('seed les 3 articles systeme si la collection est vide', () async {
+        // Arrange
+        cacheService.startListening();
+
+        // Act
+        stockStreamController.add(mockSnapshot);
+        await Future.delayed(Duration.zero);
+
+        // Assert
+        verify(() => mockStockCollection.add(any())).called(3);
+      });
+
+      test('ne seed pas si la collection contient deja des documents', () async {
+        // Arrange
+        final mockDoc = MockQueryDocumentSnapshot<Map<String, dynamic>>();
+        when(() => mockDoc.id).thenReturn('existing_id');
+        when(() => mockSnapshot.docs).thenReturn([mockDoc]);
+        when(() => mockSnapshot.docChanges).thenReturn([]);
+        cacheService.startListening();
+
+        // Act
+        stockStreamController.add(mockSnapshot);
+        await Future.delayed(Duration.zero);
+
+        // Assert
+        verifyNever(() => mockStockCollection.add(any()));
+      });
+
+      test('ne seed pas sur un snapshot cache (isFromCache=true)', () async {
+        // Arrange
+        when(() => mockMetadata.isFromCache).thenReturn(true);
+        cacheService.startListening();
+
+        // Act
+        stockStreamController.add(mockSnapshot);
+        await Future.delayed(Duration.zero);
+
+        // Assert
+        verifyNever(() => mockStockCollection.add(any()));
       });
     });
   });
