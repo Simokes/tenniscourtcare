@@ -179,6 +179,28 @@ class $TerrainsTable extends Terrains
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _closureReasonMeta = const VerificationMeta(
+    'closureReason',
+  );
+  @override
+  late final GeneratedColumn<String> closureReason = GeneratedColumn<String>(
+    'closure_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closureUntilMeta = const VerificationMeta(
+    'closureUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closureUntil = GeneratedColumn<DateTime>(
+    'closure_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _imageUrlMeta = const VerificationMeta(
     'imageUrl',
   );
@@ -207,6 +229,8 @@ class $TerrainsTable extends Terrains
     createdBy,
     modifiedBy,
     syncedAt,
+    closureReason,
+    closureUntil,
     imageUrl,
   ];
   @override
@@ -319,6 +343,24 @@ class $TerrainsTable extends Terrains
         syncedAt.isAcceptableOrUnknown(data['synced_at']!, _syncedAtMeta),
       );
     }
+    if (data.containsKey('closure_reason')) {
+      context.handle(
+        _closureReasonMeta,
+        closureReason.isAcceptableOrUnknown(
+          data['closure_reason']!,
+          _closureReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('closure_until')) {
+      context.handle(
+        _closureUntilMeta,
+        closureUntil.isAcceptableOrUnknown(
+          data['closure_until']!,
+          _closureUntilMeta,
+        ),
+      );
+    }
     if (data.containsKey('image_url')) {
       context.handle(
         _imageUrlMeta,
@@ -394,6 +436,14 @@ class $TerrainsTable extends Terrains
         DriftSqlType.dateTime,
         data['${effectivePrefix}synced_at'],
       ),
+      closureReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}closure_reason'],
+      ),
+      closureUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closure_until'],
+      ),
       imageUrl: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}image_url'],
@@ -423,6 +473,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
   final String? createdBy;
   final String? modifiedBy;
   final DateTime? syncedAt;
+  final String? closureReason;
+  final DateTime? closureUntil;
   final String? imageUrl;
   const TerrainRow({
     required this.id,
@@ -440,6 +492,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     this.createdBy,
     this.modifiedBy,
     this.syncedAt,
+    this.closureReason,
+    this.closureUntil,
     this.imageUrl,
   });
   @override
@@ -475,6 +529,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     }
     if (!nullToAbsent || syncedAt != null) {
       map['synced_at'] = Variable<DateTime>(syncedAt);
+    }
+    if (!nullToAbsent || closureReason != null) {
+      map['closure_reason'] = Variable<String>(closureReason);
+    }
+    if (!nullToAbsent || closureUntil != null) {
+      map['closure_until'] = Variable<DateTime>(closureUntil);
     }
     if (!nullToAbsent || imageUrl != null) {
       map['image_url'] = Variable<String>(imageUrl);
@@ -515,6 +575,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       syncedAt: syncedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(syncedAt),
+      closureReason: closureReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closureReason),
+      closureUntil: closureUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closureUntil),
       imageUrl: imageUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(imageUrl),
@@ -542,6 +608,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       createdBy: serializer.fromJson<String?>(json['createdBy']),
       modifiedBy: serializer.fromJson<String?>(json['modifiedBy']),
       syncedAt: serializer.fromJson<DateTime?>(json['syncedAt']),
+      closureReason: serializer.fromJson<String?>(json['closureReason']),
+      closureUntil: serializer.fromJson<DateTime?>(json['closureUntil']),
       imageUrl: serializer.fromJson<String?>(json['imageUrl']),
     );
   }
@@ -564,6 +632,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
       'createdBy': serializer.toJson<String?>(createdBy),
       'modifiedBy': serializer.toJson<String?>(modifiedBy),
       'syncedAt': serializer.toJson<DateTime?>(syncedAt),
+      'closureReason': serializer.toJson<String?>(closureReason),
+      'closureUntil': serializer.toJson<DateTime?>(closureUntil),
       'imageUrl': serializer.toJson<String?>(imageUrl),
     };
   }
@@ -584,6 +654,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     Value<String?> createdBy = const Value.absent(),
     Value<String?> modifiedBy = const Value.absent(),
     Value<DateTime?> syncedAt = const Value.absent(),
+    Value<String?> closureReason = const Value.absent(),
+    Value<DateTime?> closureUntil = const Value.absent(),
     Value<String?> imageUrl = const Value.absent(),
   }) => TerrainRow(
     id: id ?? this.id,
@@ -601,6 +673,10 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
     modifiedBy: modifiedBy.present ? modifiedBy.value : this.modifiedBy,
     syncedAt: syncedAt.present ? syncedAt.value : this.syncedAt,
+    closureReason: closureReason.present
+        ? closureReason.value
+        : this.closureReason,
+    closureUntil: closureUntil.present ? closureUntil.value : this.closureUntil,
     imageUrl: imageUrl.present ? imageUrl.value : this.imageUrl,
   );
   TerrainRow copyWithCompanion(TerrainsCompanion data) {
@@ -626,6 +702,12 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ? data.modifiedBy.value
           : this.modifiedBy,
       syncedAt: data.syncedAt.present ? data.syncedAt.value : this.syncedAt,
+      closureReason: data.closureReason.present
+          ? data.closureReason.value
+          : this.closureReason,
+      closureUntil: data.closureUntil.present
+          ? data.closureUntil.value
+          : this.closureUntil,
       imageUrl: data.imageUrl.present ? data.imageUrl.value : this.imageUrl,
     );
   }
@@ -648,6 +730,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           ..write('createdBy: $createdBy, ')
           ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
+          ..write('closureReason: $closureReason, ')
+          ..write('closureUntil: $closureUntil, ')
           ..write('imageUrl: $imageUrl')
           ..write(')'))
         .toString();
@@ -670,6 +754,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
     createdBy,
     modifiedBy,
     syncedAt,
+    closureReason,
+    closureUntil,
     imageUrl,
   );
   @override
@@ -691,6 +777,8 @@ class TerrainRow extends DataClass implements Insertable<TerrainRow> {
           other.createdBy == this.createdBy &&
           other.modifiedBy == this.modifiedBy &&
           other.syncedAt == this.syncedAt &&
+          other.closureReason == this.closureReason &&
+          other.closureUntil == this.closureUntil &&
           other.imageUrl == this.imageUrl);
 }
 
@@ -710,6 +798,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
   final Value<String?> createdBy;
   final Value<String?> modifiedBy;
   final Value<DateTime?> syncedAt;
+  final Value<String?> closureReason;
+  final Value<DateTime?> closureUntil;
   final Value<String?> imageUrl;
   const TerrainsCompanion({
     this.id = const Value.absent(),
@@ -727,6 +817,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.createdBy = const Value.absent(),
     this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
+    this.closureReason = const Value.absent(),
+    this.closureUntil = const Value.absent(),
     this.imageUrl = const Value.absent(),
   });
   TerrainsCompanion.insert({
@@ -745,6 +837,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     this.createdBy = const Value.absent(),
     this.modifiedBy = const Value.absent(),
     this.syncedAt = const Value.absent(),
+    this.closureReason = const Value.absent(),
+    this.closureUntil = const Value.absent(),
     this.imageUrl = const Value.absent(),
   }) : nom = Value(nom),
        type = Value(type),
@@ -766,6 +860,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Expression<String>? createdBy,
     Expression<String>? modifiedBy,
     Expression<DateTime>? syncedAt,
+    Expression<String>? closureReason,
+    Expression<DateTime>? closureUntil,
     Expression<String>? imageUrl,
   }) {
     return RawValuesInsertable({
@@ -784,6 +880,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       if (createdBy != null) 'created_by': createdBy,
       if (modifiedBy != null) 'modified_by': modifiedBy,
       if (syncedAt != null) 'synced_at': syncedAt,
+      if (closureReason != null) 'closure_reason': closureReason,
+      if (closureUntil != null) 'closure_until': closureUntil,
       if (imageUrl != null) 'image_url': imageUrl,
     });
   }
@@ -804,6 +902,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     Value<String?>? createdBy,
     Value<String?>? modifiedBy,
     Value<DateTime?>? syncedAt,
+    Value<String?>? closureReason,
+    Value<DateTime?>? closureUntil,
     Value<String?>? imageUrl,
   }) {
     return TerrainsCompanion(
@@ -822,6 +922,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
       createdBy: createdBy ?? this.createdBy,
       modifiedBy: modifiedBy ?? this.modifiedBy,
       syncedAt: syncedAt ?? this.syncedAt,
+      closureReason: closureReason ?? this.closureReason,
+      closureUntil: closureUntil ?? this.closureUntil,
       imageUrl: imageUrl ?? this.imageUrl,
     );
   }
@@ -874,6 +976,12 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
     if (syncedAt.present) {
       map['synced_at'] = Variable<DateTime>(syncedAt.value);
     }
+    if (closureReason.present) {
+      map['closure_reason'] = Variable<String>(closureReason.value);
+    }
+    if (closureUntil.present) {
+      map['closure_until'] = Variable<DateTime>(closureUntil.value);
+    }
     if (imageUrl.present) {
       map['image_url'] = Variable<String>(imageUrl.value);
     }
@@ -898,6 +1006,8 @@ class TerrainsCompanion extends UpdateCompanion<TerrainRow> {
           ..write('createdBy: $createdBy, ')
           ..write('modifiedBy: $modifiedBy, ')
           ..write('syncedAt: $syncedAt, ')
+          ..write('closureReason: $closureReason, ')
+          ..write('closureUntil: $closureUntil, ')
           ..write('imageUrl: $imageUrl')
           ..write(')'))
         .toString();
@@ -7647,6 +7757,8 @@ typedef $$TerrainsTableCreateCompanionBuilder =
       Value<String?> createdBy,
       Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
+      Value<String?> closureReason,
+      Value<DateTime?> closureUntil,
       Value<String?> imageUrl,
     });
 typedef $$TerrainsTableUpdateCompanionBuilder =
@@ -7666,6 +7778,8 @@ typedef $$TerrainsTableUpdateCompanionBuilder =
       Value<String?> createdBy,
       Value<String?> modifiedBy,
       Value<DateTime?> syncedAt,
+      Value<String?> closureReason,
+      Value<DateTime?> closureUntil,
       Value<String?> imageUrl,
     });
 
@@ -7773,6 +7887,16 @@ class $$TerrainsTableFilterComposer
 
   ColumnFilters<DateTime> get syncedAt => $composableBuilder(
     column: $table.syncedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get closureReason => $composableBuilder(
+    column: $table.closureReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closureUntil => $composableBuilder(
+    column: $table.closureUntil,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7891,6 +8015,16 @@ class $$TerrainsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get closureReason => $composableBuilder(
+    column: $table.closureReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closureUntil => $composableBuilder(
+    column: $table.closureUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get imageUrl => $composableBuilder(
     column: $table.imageUrl,
     builder: (column) => ColumnOrderings(column),
@@ -7956,6 +8090,16 @@ class $$TerrainsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get syncedAt =>
       $composableBuilder(column: $table.syncedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get closureReason => $composableBuilder(
+    column: $table.closureReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get closureUntil => $composableBuilder(
+    column: $table.closureUntil,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get imageUrl =>
       $composableBuilder(column: $table.imageUrl, builder: (column) => column);
@@ -8029,6 +8173,8 @@ class $$TerrainsTableTableManager
                 Value<String?> createdBy = const Value.absent(),
                 Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> closureReason = const Value.absent(),
+                Value<DateTime?> closureUntil = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
               }) => TerrainsCompanion(
                 id: id,
@@ -8046,6 +8192,8 @@ class $$TerrainsTableTableManager
                 createdBy: createdBy,
                 modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
+                closureReason: closureReason,
+                closureUntil: closureUntil,
                 imageUrl: imageUrl,
               ),
           createCompanionCallback:
@@ -8065,6 +8213,8 @@ class $$TerrainsTableTableManager
                 Value<String?> createdBy = const Value.absent(),
                 Value<String?> modifiedBy = const Value.absent(),
                 Value<DateTime?> syncedAt = const Value.absent(),
+                Value<String?> closureReason = const Value.absent(),
+                Value<DateTime?> closureUntil = const Value.absent(),
                 Value<String?> imageUrl = const Value.absent(),
               }) => TerrainsCompanion.insert(
                 id: id,
@@ -8082,6 +8232,8 @@ class $$TerrainsTableTableManager
                 createdBy: createdBy,
                 modifiedBy: modifiedBy,
                 syncedAt: syncedAt,
+                closureReason: closureReason,
+                closureUntil: closureUntil,
                 imageUrl: imageUrl,
               ),
           withReferenceMapper: (p0) => p0
