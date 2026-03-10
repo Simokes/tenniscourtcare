@@ -17,6 +17,17 @@ enum TerrainType {
         return 'Dur';
     }
   }
+
+  IconData get icon {
+    switch (this) {
+      case TerrainType.terreBattue:
+        return Icons.grass;
+      case TerrainType.synthetique:
+        return Icons.grid_4x4;
+      case TerrainType.dur:
+        return Icons.crop_square;
+    }
+  }
 }
 
 enum TerrainStatus {
@@ -65,6 +76,34 @@ enum TerrainStatus {
   }
 }
 
+enum TerrainClosureReason {
+  rain,
+  frost,
+  other;
+
+  String get displayName {
+    switch (this) {
+      case TerrainClosureReason.rain:
+        return 'Pluie';
+      case TerrainClosureReason.frost:
+        return 'Gele';
+      case TerrainClosureReason.other:
+        return 'Autre';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case TerrainClosureReason.rain:
+        return Icons.water_drop;
+      case TerrainClosureReason.frost:
+        return Icons.ac_unit;
+      case TerrainClosureReason.other:
+        return Icons.block;
+    }
+  }
+}
+
 class Terrain {
   final int id;
   final String nom;
@@ -75,6 +114,8 @@ class Terrain {
   final double? latitude;
   final double? longitude;
   final String? photoUrl;
+  final String? closureReason;
+  final DateTime? closureUntil;
 
   // Sync fields
   final DateTime createdAt;
@@ -91,6 +132,8 @@ class Terrain {
     this.latitude,
     this.longitude,
     this.photoUrl,
+    this.closureReason,
+    this.closureUntil,
     DateTime? createdAt,
     DateTime? updatedAt,
     this.firebaseId,
@@ -102,6 +145,10 @@ class Terrain {
   // Computed property for backwards compatibility / utility
   bool get isUnderMaintenance => status == TerrainStatus.maintenance;
 
+  /// Vrai si le terrain est ferme par un agent (indisponible ou gele).
+  bool get isClosed =>
+      status == TerrainStatus.unavailable || status == TerrainStatus.frozen;
+
   Terrain copyWith({
     int? id,
     String? nom,
@@ -110,6 +157,8 @@ class Terrain {
     double? latitude,
     double? longitude,
     String? photoUrl,
+    String? closureReason,
+    DateTime? closureUntil,
     DateTime? createdAt,
     DateTime? updatedAt,
     String? firebaseId,
@@ -124,6 +173,8 @@ class Terrain {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       photoUrl: photoUrl ?? this.photoUrl,
+      closureReason: closureReason ?? this.closureReason,
+      closureUntil: closureUntil ?? this.closureUntil,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       firebaseId: firebaseId ?? this.firebaseId,
@@ -144,6 +195,8 @@ class Terrain {
           latitude == other.latitude &&
           longitude == other.longitude &&
           photoUrl == other.photoUrl &&
+          closureReason == other.closureReason &&
+          closureUntil == other.closureUntil &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           firebaseId == other.firebaseId &&
@@ -159,6 +212,8 @@ class Terrain {
       latitude.hashCode ^
       longitude.hashCode ^
       photoUrl.hashCode ^
+      closureReason.hashCode ^
+      closureUntil.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       firebaseId.hashCode ^
@@ -167,5 +222,5 @@ class Terrain {
 
   @override
   String toString() =>
-      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+      'Terrain(id: $id, nom: $nom, type: $type, status: $status, lat: $latitude, lon: $longitude, photoUrl: $photoUrl, createdAt: $createdAt, updatedAt: $updatedAt, closureReason: $closureReason, closureUntil: $closureUntil)';
 }
