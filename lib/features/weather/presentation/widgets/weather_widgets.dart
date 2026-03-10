@@ -6,6 +6,26 @@ import 'package:tenniscourtcare/domain/entities/daily_forecast.dart';
 import 'package:tenniscourtcare/domain/entities/weather_snapshot.dart';
 import 'package:tenniscourtcare/domain/services/weather_rules.dart';
 
+// Source unique pour les icônes météo — évite la duplication entre widgets
+IconData _weatherIcon(int code) {
+  if (code == 0) return Icons.wb_sunny;
+  if (code < 3) return Icons.wb_cloudy;
+  if (code < 50) return Icons.foggy;
+  if (code < 70) return Icons.water_drop;
+  if (code < 80) return Icons.ac_unit;
+  return Icons.thunderstorm;
+}
+
+// Source unique pour les labels météo
+String _weatherConditionLabel(int code) {
+  if (code == 0) return 'Ciel dégagé';
+  if (code < 3) return 'Partiellement nuageux';
+  if (code < 50) return 'Brouillard';
+  if (code < 70) return 'Pluie';
+  if (code < 80) return 'Neige';
+  return 'Orage';
+}
+
 class CurrentWeatherCard extends StatelessWidget {
   final WeatherSnapshot weather;
   final double precipitationLast24h;
@@ -30,11 +50,8 @@ class CurrentWeatherCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String conditionStr = _getWeatherConditionString(weather.weatherCode);
-
-    // Colored border if bad conditions
-    final bool hasBadConditions = frozen || unplayable || windyStrong;
-    final Color borderColor = hasBadConditions
+    final hasBadConditions = frozen || unplayable || windyStrong;
+    final borderColor = hasBadConditions
         ? conditionColor
         : Theme.of(context).colorScheme.outlineVariant;
 
@@ -57,75 +74,58 @@ class CurrentWeatherCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header Image Section
+          // Header gradient dynamique — pas de dépendance réseau, pas de ville hardcodée
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            child: Stack(
-              children: [
-                SizedBox(
-                  height: 190,
-                  width: double.infinity,
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?q=80&w=2942&auto=format&fit=crop',
-                    fit: BoxFit.cover,
-                  ),
+            child: Container(
+              height: 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryDark,
+                    conditionColor.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryDark.withValues(alpha: 0.8),
-                          Colors.transparent,
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 16,
-                  left: 16,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _getWeatherIcon(weather.weatherCode),
-                            color: Colors.yellow.shade400,
-                            size: 36,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${weather.temperature.round()}°C',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 40,
-                              fontWeight: FontWeight.bold,
-                              height: 1,
-                            ),
-                          ),
-                        ],
+                      Icon(
+                        _weatherIcon(weather.weatherCode),
+                        color: Colors.yellow.shade300,
+                        size: 36,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(width: 8),
                       Text(
-                        '$conditionStr • Los Angeles, CA',
-                        style: const TextStyle(
+                        '${weather.temperature.round()}°C',
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
+                          height: 1,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text(
+                    _weatherConditionLabel(weather.weatherCode),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-
           // Details Section
           Padding(
             padding: const EdgeInsets.all(20),
@@ -134,12 +134,10 @@ class CurrentWeatherCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Conditions Actuelles',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Container(
@@ -157,9 +155,8 @@ class CurrentWeatherCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             conditionLabel.toUpperCase(),
-                            style: TextStyle(
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: conditionColor,
-                              fontSize: 10,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
                             ),
@@ -215,24 +212,6 @@ class CurrentWeatherCard extends StatelessWidget {
       ),
     );
   }
-
-  String _getWeatherConditionString(int code) {
-    if (code == 0) return 'Ciel dégagé';
-    if (code < 3) return 'Partiellement nuageux';
-    if (code < 50) return 'Brouillard';
-    if (code < 70) return 'Pluie';
-    if (code < 80) return 'Neige';
-    return 'Orage';
-  }
-
-  IconData _getWeatherIcon(int code) {
-    if (code == 0) return Icons.wb_sunny;
-    if (code < 3) return Icons.wb_cloudy;
-    if (code < 50) return Icons.foggy;
-    if (code < 70) return Icons.grain;
-    if (code < 80) return Icons.ac_unit;
-    return Icons.thunderstorm;
-  }
 }
 
 class RainHistoryChart extends StatelessWidget {
@@ -247,9 +226,6 @@ class RainHistoryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Generate bars to match the design. If we have actual data, map it to bar heights.
-    // The max height of the container is 96 (h-24 in tailwind).
-    // Let's find the max precipitation to scale the bars.
     final double maxPrecip = dailyPrecipitation.isEmpty
         ? 1.0
         : dailyPrecipitation.reduce((a, b) => a > b ? a : b);
@@ -275,18 +251,19 @@ class RainHistoryChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'HISTORIQUE DES PLUIES (30 JOURS)',
-                style: TextStyle(
-                  fontSize: 12,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryDark,
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: 0.5,
                 ),
               ),
               Text(
                 'Total: ${totalPrecipitation.round()}mm',
-                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -297,31 +274,21 @@ class RainHistoryChart extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(30, (index) {
-                // If we don't have exactly 30 days of data, pad with 0s.
-                // Assuming dailyPrecipitation is ordered chronologically (oldest to newest).
                 final int dataIndex = dailyPrecipitation.length - 30 + index;
                 final double precip =
                     dataIndex >= 0 && dataIndex < dailyPrecipitation.length
-                    ? dailyPrecipitation[dataIndex]
-                    : 0.0;
-
-                // For a purely visual match to the mockup when data might be zero right now,
-                // we can just draw what the API gives us. But let's actually map it properly.
-                // Minimum bar height is 10% for tiny amounts, else scale it.
-                // If it's exactly 0, give it a tiny height and lighter color.
+                        ? dailyPrecipitation[dataIndex]
+                        : 0.0;
 
                 double pct = precip / effectiveMax;
                 final bool isSignificant = precip > 0.5;
 
-                // The design uses blue-500 for significant, slate-200 for none/low.
                 final Color barColor = isSignificant
-                    ? const Color(
-                        0xFF00419A,
-                      ) // navy-500 equivalent in the design
-                    : Colors.blue.shade100.withValues(alpha: 0.5);
+                    ? AppColors.primary
+                    : AppColors.infoBg;
 
                 if (!isSignificant && pct < 0.1) {
-                  pct = 0.1; // tiny bump for visual
+                  pct = 0.1;
                 }
 
                 return Expanded(
@@ -365,12 +332,10 @@ class ForecastSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Prévisions sur 7 jours',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryDark,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 12),
@@ -397,7 +362,7 @@ class _ForecastListItem extends StatelessWidget {
     if (date.year == now.year &&
         date.month == now.month &&
         date.day == now.day) {
-      dayLabel = 'Aujourd\'hui';
+      dayLabel = "Aujourd'hui";
     } else if (date.year == now.year &&
         date.month == now.month &&
         date.day == now.day + 1) {
@@ -412,25 +377,23 @@ class _ForecastListItem extends StatelessWidget {
 
     Color labelColor;
     if (forecastLabel.startsWith('Éviter')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.dangerColor ?? Colors.red;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.dangerColor ?? AppColors.danger;
     } else if (forecastLabel.startsWith('Prudence') ||
         forecastLabel.startsWith('Conditions dégradées')) {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.warningColor ?? Colors.orange;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.warningColor ?? AppColors.warning;
     } else {
-      labelColor = Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green;
+      labelColor = Theme.of(context).extension<DashboardColors>()?.successColor ?? AppColors.success;
     }
 
-    // Icon and background color based on weather
-    final IconData weatherIcon = _getWeatherIcon(forecast.weatherCode);
-    Color iconColor;
-    Color iconBgColor;
+    final Color iconColor;
+    final Color iconBgColor;
 
     if (forecast.weatherCode == 0 || forecast.weatherCode == 1) {
-      iconColor = Colors.orange.shade500;
-      iconBgColor = Colors.orange.shade50;
+      iconColor = AppColors.warning;
+      iconBgColor = AppColors.warningBg;
     } else if (forecast.weatherCode < 50) {
-      iconColor = Colors.blue.shade500;
-      iconBgColor = Colors.blue.shade50;
+      iconColor = AppColors.info;
+      iconBgColor = AppColors.infoBg;
     } else {
       iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
       iconBgColor = Theme.of(context).colorScheme.surfaceContainerHighest;
@@ -466,7 +429,7 @@ class _ForecastListItem extends StatelessWidget {
                       color: iconBgColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(weatherIcon, color: iconColor),
+                    child: Icon(_weatherIcon(forecast.weatherCode), color: iconColor),
                   ),
                   const SizedBox(width: 16),
                   Column(
@@ -474,18 +437,15 @@ class _ForecastListItem extends StatelessWidget {
                     children: [
                       Text(
                         dayLabel,
-                        style: const TextStyle(
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: AppColors.primaryDark,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '↑${forecast.tempMax.round()}° ↓${forecast.tempMin.round()}°',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -498,11 +458,11 @@ class _ForecastListItem extends StatelessWidget {
                   if (forecast.precipitationSum > 0)
                     Row(
                       children: [
-                        const Text('💧 '),
+                        const Icon(Icons.water_drop, size: 14, color: AppColors.info),
+                        const SizedBox(width: 4),
                         Text(
                           '${forecast.precipitationSum.toStringAsFixed(1)} mm',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.w500,
                           ),
@@ -510,15 +470,18 @@ class _ForecastListItem extends StatelessWidget {
                       ],
                     ),
                   if (forecast.windSpeed >= 25) ...[
-                    if (forecast.precipitationSum > 0)
-                      const SizedBox(height: 4),
+                    if (forecast.precipitationSum > 0) const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Text('💨 '),
+                        Icon(
+                          Icons.air,
+                          size: 14,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
                         Text(
                           '${forecast.windSpeed.round()} km/h',
-                          style: TextStyle(
-                            fontSize: 13,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.w500,
                           ),
@@ -533,24 +496,14 @@ class _ForecastListItem extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             forecastLabel,
-            style: TextStyle(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
               color: labelColor,
             ),
           ),
         ],
       ),
     );
-  }
-
-  IconData _getWeatherIcon(int code) {
-    if (code == 0) return Icons.wb_sunny;
-    if (code < 3) return Icons.cloud;
-    if (code < 50) return Icons.cloud;
-    if (code < 70) return Icons.water_drop;
-    if (code < 80) return Icons.ac_unit;
-    return Icons.thunderstorm;
   }
 }
 
@@ -578,9 +531,8 @@ class _WeatherDetailItem extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: TextStyle(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.5,
               ),
@@ -595,16 +547,17 @@ class _WeatherDetailItem extends StatelessWidget {
           children: [
             Text(
               value,
-              style: const TextStyle(
-                color: AppColors.primaryDark,
-                fontSize: 20,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: 4),
             Text(
               unit,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
