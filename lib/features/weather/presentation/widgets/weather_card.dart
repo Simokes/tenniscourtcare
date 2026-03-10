@@ -75,8 +75,6 @@ class WeatherCard extends StatelessWidget {
                 onPressed: onRefresh,
                 icon: const Icon(Icons.refresh, size: 20),
                 tooltip: 'Actualiser',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
               ),
             ],
           ),
@@ -146,7 +144,12 @@ class _WeatherItem extends StatelessWidget {
       children: [
         Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
@@ -163,7 +166,12 @@ class _WeatherDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
       ],
     );
