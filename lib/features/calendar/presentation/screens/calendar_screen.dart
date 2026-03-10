@@ -243,7 +243,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
               loading: () => ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 itemCount: 3,
-                itemBuilder: (_, __) => Padding(
+                itemBuilder: (_, _) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Container(
                     height: 88,
