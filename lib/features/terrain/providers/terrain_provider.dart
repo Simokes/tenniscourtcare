@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../domain/enums/role.dart';
+import '../../auth/providers/auth_providers.dart';
 import '../../../data/database/app_database.dart';
 import '../../../data/repositories/terrain_repository_impl.dart';
 import '../../../domain/entities/terrain.dart';
@@ -108,6 +111,73 @@ class TerrainNotifier extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  /// Ferme un terrain avec une raison et une duree estimee optionnelle.
+  /// Mappe frost -> TerrainStatus.frozen, rain/other -> TerrainStatus.unavailable.
+  Future<void> closeTerrain({
+    required Terrain terrain,
+    required TerrainClosureReason reason,
+    DateTime? closureUntil,
+  }) async {
+    try {
+      if (terrain.firebaseId == null) {
+        throw const RepositoryException(
+          'Cannot close terrain without a firebaseId',
+        );
+      }
+      state = const AsyncValue.loading();
+      final newStatus = reason == TerrainClosureReason.frost
+          ? TerrainStatus.frozen
+          : TerrainStatus.unavailable;
+      final updated = terrain.copyWith(
+        status: newStatus,
+        closureReason: reason.name,
+        closureUntil: closureUntil,
+        updatedAt: DateTime.now(),
+      );
+      await _repo.updateTerrain(updated);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      debugPrint('closeTerrain error: $e');
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
+
+  /// Reouvre un terrain : status -> playable, efface closureReason et closureUntil.
+  /// Reconstruit l'entite explicitement car copyWith ne peut pas forcer null sur un champ nullable.
+  Future<void> openTerrain(Terrain terrain) async {
+    try {
+      if (terrain.firebaseId == null) {
+        throw const RepositoryException(
+          'Cannot open terrain without a firebaseId',
+        );
+      }
+      state = const AsyncValue.loading();
+      final updated = Terrain(
+        id: terrain.id,
+        nom: terrain.nom,
+        type: terrain.type,
+        status: TerrainStatus.playable,
+        latitude: terrain.latitude,
+        longitude: terrain.longitude,
+        photoUrl: terrain.photoUrl,
+        createdAt: terrain.createdAt,
+        updatedAt: DateTime.now(),
+        firebaseId: terrain.firebaseId,
+        createdBy: terrain.createdBy,
+        modifiedBy: terrain.modifiedBy,
+        closureReason: null,
+        closureUntil: null,
+      );
+      await _repo.updateTerrain(updated);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      debugPrint('openTerrain error: $e');
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 }
 
 final terrainNotifierProvider = AsyncNotifierProvider<TerrainNotifier, void>(
@@ -134,3 +204,10 @@ final updateTerrainStatusProvider =
         }
       };
     });
+
+/// Vrai si l'utilisateur connecte peut fermer/ouvrir un terrain (admin ou agent).
+final canManageTerrainStatusProvider = Provider<bool>((ref) {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return false;
+  return user.role == Role.admin || user.role == Role.agent;
+});

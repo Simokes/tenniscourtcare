@@ -380,6 +380,7 @@ Max queue size:   1000 items (breach → user notification + oldest purged)
 ### 8.1 Current Version: v23
 
 ### Changelog
+- **v24:** Terrains — colonnes closureReason (TEXT nullable) et closureUntil (DATETIME nullable). Permet la fermeture manuelle par un agent depuis le dashboard (raison + duree estimee).
 - **v23:** Performance : index non-unique sur firebaseId (maintenances, terrains, stock_items, events) et firestoreUid (users). Accélère tous les upserts FirebaseCacheService.
 - **v22:** Suppression SyncQueue table, syncStatus columns, pendingSync columns, lastSyncedAt columns. Firebase devient source de vérité.
 - **v20:** users.status (active|inactive|rejected), users.approvedAt, users.approvedBy.
