@@ -11,6 +11,7 @@ class MockAppDatabase extends Mock implements AppDatabase {}
 
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
+// ignore: subtype_of_sealed_class
 class MockCollectionReference<T extends Object?> extends Mock
     implements CollectionReference<T> {}
 
@@ -20,11 +21,13 @@ class MockQuerySnapshot<T extends Object?> extends Mock
 class MockDocumentChange<T extends Object?> extends Mock
     implements DocumentChange<T> {}
 
+// ignore: subtype_of_sealed_class
 class MockQueryDocumentSnapshot<T extends Object?> extends Mock
     implements QueryDocumentSnapshot<T> {}
 
 class MockSnapshotMetadata extends Mock implements SnapshotMetadata {}
 
+// ignore: subtype_of_sealed_class
 class MockDocumentReference<T extends Object?> extends Mock
     implements DocumentReference<T> {}
 
