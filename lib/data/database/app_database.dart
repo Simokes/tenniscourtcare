@@ -232,7 +232,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
   @override
-  int get schemaVersion => 23; // v23: firebaseId indexes
+  int get schemaVersion => 24; // v24: closureReason et closureUntil sur terrains
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -425,6 +425,10 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_users_firestore_uid ON users(firestore_uid);',
         );
+      }
+      if (from < 24) {
+        await m.addColumn(terrains, terrains.closureReason);
+        await m.addColumn(terrains, terrains.closureUntil);
       }
     },
     // ✅ FIX CRITIQUE: beforeOpen vérifie l'intégrité au démarrage

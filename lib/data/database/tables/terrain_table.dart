@@ -27,6 +27,8 @@ class Terrains extends Table {
   TextColumn get modifiedBy => text().nullable()();
 
   DateTimeColumn get syncedAt => dateTime().nullable()();
+  TextColumn get closureReason => text().nullable()();
+  DateTimeColumn get closureUntil => dateTime().nullable()();
   TextColumn get imageUrl => text().nullable()();
 
   @override

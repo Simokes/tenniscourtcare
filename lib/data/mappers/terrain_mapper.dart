@@ -67,6 +67,8 @@ class TerrainMapper {
       firebaseId: driftEntity.firebaseId,
       createdBy: driftEntity.createdBy,
       modifiedBy: driftEntity.modifiedBy,
+      closureReason: driftEntity.closureReason,
+      closureUntil: driftEntity.closureUntil,
     );
   }
 
@@ -83,6 +85,8 @@ class TerrainMapper {
       'updatedAt': item.updatedAt.toIso8601String(),
       'createdBy': item.createdBy,
       'modifiedBy': item.modifiedBy,
+      'closureReason': item.closureReason,
+      'closureUntil': item.closureUntil?.toIso8601String(),
       'firebaseId': item.firebaseId,
     };
   }
@@ -125,6 +129,15 @@ class TerrainMapper {
           ? drift.Value((data['pricePerHour'] as num).toDouble())
           : const drift.Value.absent(),
       available: drift.Value(data['available'] as bool? ?? true),
+      closureReason: data['closureReason'] != null
+          ? drift.Value(data['closureReason'] as String)
+          : const drift.Value.absent(),
+      closureUntil: data['closureUntil'] != null
+          ? drift.Value(
+              DateTime.tryParse(data['closureUntil'] as String) ??
+                  DateTime.now(),
+            )
+          : const drift.Value.absent(),
     );
   }
 }
@@ -164,6 +177,12 @@ extension TerrainMapperX on Terrain {
       remoteId: firebaseId == null
           ? const drift.Value.absent()
           : drift.Value(firebaseId),
+      closureReason: closureReason == null
+          ? const drift.Value.absent()
+          : drift.Value(closureReason),
+      closureUntil: closureUntil == null
+          ? const drift.Value.absent()
+          : drift.Value(closureUntil),
     );
   }
 }
