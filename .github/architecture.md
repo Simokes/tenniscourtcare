@@ -508,7 +508,7 @@ Widgets home/ actifs apres refonte v2 :
 - AlertStrip : bandeau unique (overdueCountProvider + connectivite)
 - KpiStrip : chips inline (operationalTerrainsStatsProvider, todayMaintenanceCountProvider, lowStockCountProvider)
 - ProchainsCreneaux : max 2 items (todayPlannedMaintenancesProvider + todayUpcomingEventsProvider)
-- CourtListSliver : liste courts avec actions (inchange)
+- CourtListSliver : liste courts avec actions. Action fermer/rouvrir terrain (agent/admin) via TerrainClosureSheet. Raison de fermeture : pluie, gele, autre. Duree estimee optionnelle (1h, 2h, Matinee, Apres-midi, Journee, Indefinie). Status et raison affiches sur la card.
 - StockAlertCard : alerte stock conditionnelle (inchangee)
 
 ### 3.4.2 Maintenance Feature - MaintenanceScreen Layout

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tenniscourtcare/core/theme/dashboard_theme_extension.dart';
 import '../../../maintenance/presentation/widgets/add_maintenance_sheet.dart';
 import '../../providers/dashboard_providers.dart';
+import 'terrain_closure_sheet.dart';
 
 class CourtListSliver extends ConsumerWidget {
   const CourtListSliver({super.key});
@@ -45,6 +46,7 @@ class CourtListSliver extends ConsumerWidget {
   Widget _buildCourtItem(BuildContext context, WidgetRef ref, Terrain terrain) {
     final cs = Theme.of(context).colorScheme;
     final dc = Theme.of(context).extension<DashboardColors>();
+    final canManage = ref.watch(canManageTerrainStatusProvider);
 
     final currentEvents = ref.watch(currentEventsProvider);
     final todayMaintenances = ref.watch(todayPlannedMaintenancesProvider);
@@ -65,10 +67,13 @@ class CourtListSliver extends ConsumerWidget {
 
     Widget? actionWidget;
 
-    if (terrain.status == TerrainStatus.maintenance && todayTerrainMaintenances.isNotEmpty) {
+    // Action : completer maintenance si terrain en maintenance avec maintenance du jour
+    if (terrain.status == TerrainStatus.maintenance &&
+        todayTerrainMaintenances.isNotEmpty) {
       final m = todayTerrainMaintenances.first;
       actionWidget = IconButton(
-        icon: Icon(Icons.check_circle_outline, color: dc?.successColor ?? Colors.green),
+        icon: Icon(Icons.check_circle_outline,
+            color: dc?.successColor ?? Colors.green),
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -82,6 +87,37 @@ class CourtListSliver extends ConsumerWidget {
           );
         },
       );
+    }
+
+    // Action : fermer ou rouvrir (agent/admin uniquement, hors maintenance)
+    if (canManage && terrain.status != TerrainStatus.maintenance) {
+      if (terrain.isClosed) {
+        actionWidget = IconButton(
+          icon: Icon(Icons.lock_open,
+              color: dc?.successColor ?? Colors.green, size: 22),
+          tooltip: 'Rouvrir le terrain',
+          onPressed: () {
+            ref
+                .read(terrainNotifierProvider.notifier)
+                .openTerrain(terrain);
+          },
+        );
+      } else if (terrain.status == TerrainStatus.playable) {
+        actionWidget = IconButton(
+          icon: Icon(Icons.lock_outline,
+              color: dc?.dangerColor ?? Colors.red, size: 22),
+          tooltip: 'Fermer le terrain',
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) =>
+                  TerrainClosureSheet(terrain: terrain),
+            );
+          },
+        );
+      }
     }
 
     return Container(
@@ -127,7 +163,7 @@ class CourtListSliver extends ConsumerWidget {
                   : null,
             ),
             child: terrain.photoUrl == null
-                ? Icon(Icons.sports_tennis, color: cs.onSurfaceVariant)
+                ? Icon(terrain.type.icon, color: cs.onSurfaceVariant)
                 : null,
           ),
           const SizedBox(width: 16),
@@ -136,7 +172,7 @@ class CourtListSliver extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${terrain.nom} • ${terrain.type.name}',
+                  terrain.nom,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
@@ -154,7 +190,7 @@ class CourtListSliver extends ConsumerWidget {
               ],
             ),
           ),
-          ?actionWidget,
+          if (actionWidget != null) actionWidget,
           IconButton(
             icon: Icon(Icons.add, size: 20, color: cs.onSurfaceVariant),
             tooltip: 'Maintenance urgente',
@@ -232,17 +268,49 @@ class _CourtStatusDisplay {
       );
     }
     if (terrain.status == TerrainStatus.frozen) {
-      return _CourtStatusDisplay(color: cs.secondary, subtitle: 'Gelé');
+      final reasonLabel = terrain.closureReason != null
+          ? _closureReasonLabel(terrain.closureReason!)
+          : 'Gele';
+      final untilLabel = _formatClosureUntil(terrain.closureUntil, context);
+      final subtitle =
+          untilLabel != null ? '$reasonLabel · $untilLabel' : reasonLabel;
+      return _CourtStatusDisplay(color: cs.secondary, subtitle: subtitle);
     }
     if (terrain.status == TerrainStatus.unavailable) {
+      final reasonLabel = terrain.closureReason != null
+          ? _closureReasonLabel(terrain.closureReason!)
+          : 'Ferme';
+      final untilLabel = _formatClosureUntil(terrain.closureUntil, context);
+      final subtitle =
+          untilLabel != null ? '$reasonLabel · $untilLabel' : reasonLabel;
       return _CourtStatusDisplay(
         color: dc?.dangerColor ?? Colors.red,
-        subtitle: 'Indisponible',
+        subtitle: subtitle,
       );
     }
     return _CourtStatusDisplay(
       color: cs.outlineVariant,
       subtitle: 'Disponible',
     );
+  }
+
+  static String _closureReasonLabel(String reasonName) {
+    try {
+      return TerrainClosureReason.values.byName(reasonName).displayName;
+    } catch (_) {
+      return 'Ferme';
+    }
+  }
+
+  static String? _formatClosureUntil(
+      DateTime? closureUntil, BuildContext context) {
+    if (closureUntil == null) return null;
+    final now = DateTime.now();
+    final isToday = closureUntil.year == now.year &&
+        closureUntil.month == now.month &&
+        closureUntil.day == now.day;
+    final timeStr =
+        TimeOfDay.fromDateTime(closureUntil).format(context);
+    return isToday ? 'jusqu\'a $timeStr' : 'jusqu\'a demain $timeStr';
   }
 }
