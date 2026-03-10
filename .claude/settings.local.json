@@ -23,7 +23,8 @@
       "Bash(\"C:\\\\Users\\\\planc\\\\AppData\\\\Roaming\\\\npm\\\\jules.cmd\" new:*)",
       "Bash(git pull:*)",
       "Bash(python3:*)",
-      "Bash(flutter analyze:*)"
+      "Bash(flutter analyze:*)",
+      "Bash(cd \"C:\\\\Users\\\\planc\\\\Documents\\\\CourtCare\\\\tenniscourtcare\" && flutter --version 2>&1 | head -3 && cat pubspec.yaml | grep \"sdk:\")"
     ]
   }
 }

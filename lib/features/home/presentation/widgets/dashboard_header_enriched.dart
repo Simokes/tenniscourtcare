@@ -67,13 +67,31 @@ class DashboardHeaderEnriched extends ConsumerWidget {
                         if (weather == null) return const SizedBox.shrink();
 
                         final temp = weather.context.snapshot.temperature.round();
-                        final descriptionCourte = weather.conditionLabel;
+                        final terrainType = terrains.isNotEmpty
+                            ? terrains.first.type
+                            : null;
 
-                        return Text(
-                          '$temp°C - $descriptionCourte',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: cs.onSurfaceVariant,
+                        return GestureDetector(
+                          onTap: terrainType != null
+                              ? () => context.push('/weather/${terrainType.name}')
+                              : null,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                weather.conditionIcon,
+                                size: 14,
+                                color: weather.conditionColor,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$temp°C',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },

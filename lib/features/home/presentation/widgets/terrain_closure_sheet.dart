@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tenniscourtcare/domain/entities/terrain.dart';
 import 'package:tenniscourtcare/features/terrain/providers/terrain_provider.dart';
 
@@ -43,7 +44,7 @@ class _TerrainClosureSheetState extends ConsumerState<TerrainClosureSheet> {
             reason: _selectedReason!,
             closureUntil: _computedClosureUntil,
           );
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,10 +61,13 @@ class _TerrainClosureSheetState extends ConsumerState<TerrainClosureSheet> {
     final cs = Theme.of(context).colorScheme;
     final tt = Theme.of(context).textTheme;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-        child: Column(
+    return Material(
+      color: cs.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -133,6 +137,7 @@ class _TerrainClosureSheetState extends ConsumerState<TerrainClosureSheet> {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

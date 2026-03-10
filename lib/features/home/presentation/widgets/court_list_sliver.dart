@@ -149,22 +149,39 @@ class CourtListSliver extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-              image: terrain.photoUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(terrain.photoUrl!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: terrain.photoUrl == null
-                ? Icon(terrain.type.icon, color: cs.onSurfaceVariant)
-                : null,
+          Stack(
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  image: terrain.photoUrl != null
+                      ? DecorationImage(
+                          image: NetworkImage(terrain.photoUrl!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: terrain.photoUrl == null
+                    ? Icon(terrain.type.icon, color: cs.onSurfaceVariant)
+                    : null,
+              ),
+              Positioned(
+                bottom: 2,
+                right: 2,
+                child: Container(
+                  width: 18,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  child: _StatusBadgeIcon(terrain: terrain, dc: dc),
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -312,5 +329,36 @@ class _CourtStatusDisplay {
     final timeStr =
         TimeOfDay.fromDateTime(closureUntil).format(context);
     return isToday ? 'jusqu\'a $timeStr' : 'jusqu\'a demain $timeStr';
+  }
+}
+
+class _StatusBadgeIcon extends StatelessWidget {
+  const _StatusBadgeIcon({required this.terrain, required this.dc});
+
+  final Terrain terrain;
+  final DashboardColors? dc;
+
+  @override
+  Widget build(BuildContext context) {
+    final (IconData icon, Color color) = switch (terrain.status) {
+      TerrainStatus.playable => (
+          Icons.check_circle,
+          dc?.successColor ?? Colors.green,
+        ),
+      TerrainStatus.maintenance => (
+          Icons.build_circle,
+          dc?.maintenanceColor ?? Colors.blue,
+        ),
+      TerrainStatus.frozen => (
+          Icons.cancel,
+          Theme.of(context).colorScheme.secondary,
+        ),
+      TerrainStatus.unavailable => (
+          Icons.cancel,
+          dc?.dangerColor ?? Colors.red,
+        ),
+    };
+
+    return Icon(icon, size: 16, color: color);
   }
 }
