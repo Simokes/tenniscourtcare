@@ -377,7 +377,7 @@ Max queue size:   1000 items (breach → user notification + oldest purged)
 
 ## 8. Database Schema Overview
 
-### 8.1 Current Version: v23
+### 8.1 Current Version: v24
 
 ### Changelog
 - **v24:** Terrains — colonnes closureReason (TEXT nullable) et closureUntil (DATETIME nullable). Permet la fermeture manuelle par un agent depuis le dashboard (raison + duree estimee).
