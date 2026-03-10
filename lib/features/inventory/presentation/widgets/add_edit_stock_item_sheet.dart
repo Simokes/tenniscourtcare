@@ -107,7 +107,8 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
           Navigator.pop(context);
         }
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in _deleteItem: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
@@ -143,32 +144,21 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
     setState(() => _isSaving = true);
 
     try {
-      if (widget.item?.firebaseId != null) {
-        // Delete from database
-        await ref
-            .read(stockNotifierProvider.notifier)
-            .deleteItem(widget.item!.firebaseId!);
+      await ref
+          .read(stockNotifierProvider.notifier)
+          .deleteItem(widget.item!);
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Article supprimé'),
-              backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
-            ),
-          );
-          Navigator.pop(context);
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Impossible de supprimer: firebaseId manquant.'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Article supprimé'),
+            backgroundColor: Theme.of(context).extension<DashboardColors>()?.successColor ?? Colors.green,
+          ),
+        );
+        Navigator.pop(context);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in _deleteItem: $e\n$st');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur: $e'), backgroundColor: Theme.of(context).colorScheme.error),
@@ -379,7 +369,7 @@ class _AddEditStockItemSheetState extends ConsumerState<AddEditStockItemSheet> {
                         ),
 
                         // ✅ DELETE BUTTON
-                        if (widget.item != null)
+                        if (widget.item != null && widget.item!.isCustom)
                           Padding(
                             padding: const EdgeInsets.only(top: 12),
                             child: OutlinedButton(
