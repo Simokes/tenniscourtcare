@@ -112,9 +112,16 @@ class StockNotifier extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> deleteItem(String firebaseId) async {
+  Future<void> deleteItem(StockItem item) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      if (!item.isCustom) {
+        throw StateError('Cet article système ne peut pas être supprimé.');
+      }
+      final firebaseId = item.firebaseId;
+      if (firebaseId == null) {
+        throw StateError('firebaseId manquant — synchronisation en cours.');
+      }
       await _repo.deleteStockItem(firebaseId);
     });
   }
