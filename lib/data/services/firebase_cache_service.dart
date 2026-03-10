@@ -125,6 +125,9 @@ class FirebaseCacheService {
         } catch (e, st) {
           debugPrint('⚠️ CacheService: Stock orphan cleanup failed: $e\n$st');
         }
+        if (snapshot.docs.isEmpty) {
+          await _seedDefaultStockItems();
+        }
       }
       for (final change in snapshot.docChanges) {
         try {
@@ -147,6 +150,44 @@ class FirebaseCacheService {
       debugPrint('❌ CacheService: Stock listener error: $e');
       _scheduleRestart();
     });
+  }
+
+  Future<void> _seedDefaultStockItems() async {
+    final now = DateTime.now().toIso8601String();
+    final items = [
+      {
+        'name': 'Manto',
+        'quantity': 0,
+        'unit': 'rouleau',
+        'isCustom': false,
+        'category': 'Matériaux',
+        'sortOrder': 0,
+      },
+      {
+        'name': 'Sottomanto',
+        'quantity': 0,
+        'unit': 'rouleau',
+        'isCustom': false,
+        'category': 'Matériaux',
+        'sortOrder': 1,
+      },
+      {
+        'name': 'Silice',
+        'quantity': 0,
+        'unit': 'sac',
+        'isCustom': false,
+        'category': 'Matériaux',
+        'sortOrder': 2,
+      },
+    ];
+    for (final item in items) {
+      try {
+        await _fs.collection('stocks').add({...item, 'createdAt': now, 'updatedAt': now});
+        debugPrint('🌱 CacheService: Seeded default stock item: ${item['name']}');
+      } catch (e, st) {
+        debugPrint('❌ CacheService: Failed to seed ${item['name']}: $e\n$st');
+      }
+    }
   }
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>> _listenTerrains() {
