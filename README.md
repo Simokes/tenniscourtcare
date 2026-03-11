@@ -1,3 +1,4 @@
+<!-- Dernière MAJ par Jules le 11/03/2026 -->
 # Court Care 🎾
 
 **Court Care** est une application Flutter moderne conçue pour simplifier la gestion et le suivi de la maintenance des courts de tennis. Elle permet aux responsables de clubs de suivre précisément l'utilisation des matériaux, d'analyser les statistiques de maintenance et d'anticiper les besoins en fonction de la météo.
