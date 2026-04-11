@@ -47,4 +47,4 @@ tests/firestore_rules/node_modules/
 tests/firestore_rules/coverage/
 test_output.txt
 
-.env.local
+courtcare-web/.env.local
