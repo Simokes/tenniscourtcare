@@ -1,0 +1,76 @@
+{
+  "skill_name": "jules-architect",
+  "project": "tenniscourtcare",
+  "evals": [
+    {
+      "id": 1,
+      "mode": "IMPLEMENT",
+      "scenario": "Nouveau champ DB + migration Drift",
+      "prompt": "Ajoute un champ 'surfaceType' (TEXT nullable) à la table terrains dans app_database.dart.",
+      "expected": [
+        "Lit app_database.dart avant de modifier",
+        "Incrémente la version du schéma",
+        "Ajoute la migration dans onUpgrade",
+        "Ajoute build_runner dans la vérification obligatoire du prompt",
+        "Classification [PARALLÈLE] si aucun autre fichier dépend du changement"
+      ]
+    },
+    {
+      "id": 2,
+      "mode": "IMPLEMENT",
+      "scenario": "Bug fix provider — flow WRITE incomplet",
+      "prompt": "updateEvent() dans event_provider.dart n'appelle pas db.upsertEvent() après repo.updateEvent().",
+      "expected": [
+        "Lit event_provider.dart avant de modifier",
+        "Prompt contient le bloc AVANT/APRES exact",
+        "Ne touche pas d'autres fichiers",
+        "Classification [PARALLÈLE]"
+      ]
+    },
+    {
+      "id": 3,
+      "mode": "IMPLEMENT",
+      "scenario": "Feature multi-fichiers indépendants",
+      "prompt": "Ajoute un badge 'Nouveau' sur CourtCard et un tooltip sur le FAB du dashboard.",
+      "expected": [
+        "2 sections dans le prompt (court_card.dart + home_screen.dart)",
+        "Classification [PARALLÈLE] pour les deux sections",
+        "Pas de lecture de fichiers hors scope"
+      ]
+    },
+    {
+      "id": 4,
+      "mode": "IMPLEMENT",
+      "scenario": "Feature séquentielle — phase 2 dépend du merge de phase 1",
+      "prompt": "Phase 1 : ajoute le champ 'priority' au schéma Drift. Phase 2 : affiche 'priority' dans MaintenanceCard.",
+      "expected": [
+        "Phase 1 classifiée [PARALLÈLE]",
+        "Phase 2 classifiée [SÉQUENTIEL après Ph_1]",
+        "Deux sections distinctes dans le prompt ou deux prompts séparés"
+      ]
+    },
+    {
+      "id": 5,
+      "mode": "REVIEW",
+      "scenario": "PR conforme",
+      "prompt": "La PR #120 ajoute updateTerrain() : Repository → Firestore → FirebaseCacheService → Drift. flutter analyze OK, flutter test OK.",
+      "expected": [
+        "Output: @jules — APPROUVÉ ✅",
+        "Pas de rapport de non-conformité"
+      ]
+    },
+    {
+      "id": 6,
+      "mode": "REVIEW",
+      "scenario": "PR avec violations architecture",
+      "prompt": "La PR #121 écrit directement dans Drift depuis le Repository sans passer par FirebaseCacheService, et utilise print() au lieu de debugPrint().",
+      "expected": [
+        "Output: @jules — RÉVISION REQUISE ❌",
+        "🔴 PROBLÈME 1 : écriture Drift directe",
+        "🔴 PROBLÈME 2 : print() interdit",
+        "Actions requises listées",
+        "Référence prompt_rules.md"
+      ]
+    }
+  ]
+}

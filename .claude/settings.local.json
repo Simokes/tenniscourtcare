@@ -24,7 +24,9 @@
       "Bash(git pull:*)",
       "Bash(python3:*)",
       "Bash(flutter analyze:*)",
-      "Bash(cd \"C:\\\\Users\\\\planc\\\\Documents\\\\CourtCare\\\\tenniscourtcare\" && flutter --version 2>&1 | head -3 && cat pubspec.yaml | grep \"sdk:\")"
+      "Bash(cd \"C:\\\\Users\\\\planc\\\\Documents\\\\CourtCare\\\\tenniscourtcare\" && flutter --version 2>&1 | head -3 && cat pubspec.yaml | grep \"sdk:\")",
+      "Read(//c/Users/planc/.claude/**)",
+      "Bash(cd \"C:/Users/planc/.claude\" && powershell Compress-Archive -Path \"jules-architect\" -DestinationPath \"C:/Users/planc/Desktop/jules-architect.zip\" -Force)"
     ]
   }
 }

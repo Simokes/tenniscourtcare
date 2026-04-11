@@ -1,0 +1,23 @@
+{
+  "source": "sources/github/Simokes/tenniscourtcare",
+  "branch": "master",
+  "stack": "flutter",
+  "lint_command": "flutter analyze",
+  "test_command": "flutter test",
+  "context_files": [
+    ".github/ai_rules.md",
+    ".github/architecture.md",
+    ".github/coding_rules.md",
+    ".github/project_summary.md"
+  ],
+  "forbidden_patterns": [
+    "print() → utiliser debugPrint()",
+    ".then() chains → async/await obligatoire",
+    "logique métier dans widget → providers uniquement",
+    "écriture Drift directe → passer par FirebaseCacheService",
+    "imports Flutter/Riverpod dans domain/",
+    "modifier *.g.dart → build_runner uniquement",
+    "paramètres positionnels dans APIs publiques → named parameters",
+    "force-unwrap (!) → safe cast avec ?? fallback"
+  ]
+}
