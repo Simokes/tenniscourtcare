@@ -46,3 +46,5 @@ app.*.map.json
 tests/firestore_rules/node_modules/
 tests/firestore_rules/coverage/
 test_output.txt
+
+.env.local
