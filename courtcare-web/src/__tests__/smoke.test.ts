@@ -12,9 +12,6 @@ import type { Terrain } from '@/domain/entities/terrain'
 
 // --- Maintenance selectors ---
 import {
-  getOverdueMaintenances,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getMaintenancesForToday,
 
   getUpcomingMaintenances,
 } from '@/core/selectors/maintenance.selectors'
