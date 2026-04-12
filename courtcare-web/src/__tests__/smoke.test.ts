@@ -12,7 +12,7 @@ import type { Terrain } from '@/domain/entities/terrain'
 
 // --- Maintenance selectors ---
 import {
-
+  getOverdueMaintenances,
   getUpcomingMaintenances,
 } from '@/core/selectors/maintenance.selectors'
 import type { Maintenance } from '@/domain/entities/maintenance'
