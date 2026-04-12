@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CourtCare Web
 
-## Getting Started
+Application web de gestion de club de tennis. Migration Next.js depuis Flutter.
 
-First, run the development server:
+## Stack technique
 
-```bash
+- Next.js 16 + React 19 + TypeScript
+- Firebase (Firestore, Auth)
+- Zustand (UI state)
+- TanStack Query v5
+- Tailwind CSS v4
+- Recharts (statistiques)
+- FullCalendar (calendrier evenements)
+- Zod + React Hook Form (validation)
+
+## Setup local
+
+### 1. Cloner le repo
+
+git clone https://github.com/Simokes/tenniscourtcare.git
+cd tenniscourtcare/courtcare-web
+
+### 2. Variables d'environnement
+
+cp .env.example .env.local
+# Remplir les valeurs Firebase dans .env.local
+
+### 3. Installer les dependances
+
+npm install
+
+### 4. Lancer en developpement
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+# Ouvrir http://localhost:3000
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Structure des dossiers
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+src/
+  app/          Pages Next.js (App Router)
+  components/   Composants partagés (AppLayout, AppSidebar)
+  core/
+    firebase/   Config client + admin
+    hooks/      Hooks React (useAuth, usePermission, feature hooks)
+    selectors/  Fonctions pures de selection/filtrage
+    stores/     Zustand stores (auth, ui, stats)
+    utils/      Logger, helpers
+  data/         Repositories Firestore + mappers
+  domain/       Entites TypeScript, enums, logique metier pure
+  features/     Hooks par feature (home, terrain, maintenance, stock...)
+  middleware.ts Verification JWT session
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Commandes
 
-## Learn More
+npm run dev      Serveur developpement
+npm run build    Build production
+npm run lint     Linter ESLint
+npm test         Tests unitaires (Vitest)
 
-To learn more about Next.js, take a look at the following resources:
+## Variables d'environnement
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Voir .env.example pour la liste complete des variables requises.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Les variables NEXT_PUBLIC_* sont exposees au navigateur.
+Les variables FIREBASE_ADMIN_* ne doivent JAMAIS etre exposees cote client.
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Le projet est configure pour Vercel (region cdg1 -- Paris).
+Ajouter toutes les variables de .env.example dans les settings Vercel.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deployer: git push sur master declenche un deploiement automatique via Vercel GitHub integration.
+
+## Firebase Security Rules
+
+Les regles Firestore sont dans firestore.rules a la racine du repo.
+Deployer avec: firebase deploy --only firestore:rules

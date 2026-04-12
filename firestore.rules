@@ -2,84 +2,62 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    function hasRole(role) {
-      return isAuthenticated() &&
-             request.auth.token.role == role;
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
     }
 
     function isAdmin() {
-      return hasRole('admin');
+      return isAuthenticated() && getUserRole() == 'admin';
     }
 
-    function isAgent() {
-      return hasRole('agent');
+    function isMember() {
+      return isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'agent' || getUserRole() == 'secretary');
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // USERS
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if false; // Cloud Functions only
-
-      // Update: Owner can update own profile except role/isActive
-      // Admin can update everything (including role/isActive)
-      allow update: if (isOwner(userId) &&
-                        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'isActive']))
-                    || isAdmin();
-
-      allow delete: if false;
-    }
-
-    // TERRAINS
+    // Terrains: admin write, membres read
     match /terrains/{terrainId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow read: if isMember();
+      allow write: if isAdmin();
     }
 
-    // RESERVATIONS
-    match /reservations/{resId} {
-      // Read: Owner, Admin, or same terrain (for availability check - simplified here)
-      allow read: if isOwner(resource.data.userId) || isAdmin();
-
-      // Create: Self or Admin (Cloud Function handles conflict detection)
-      allow create: if (request.auth.uid == request.resource.data.userId || isAdmin())
-                    && request.resource.data.status == 'pending'
-                    && request.resource.data.startTime < request.resource.data.endTime
-                    && request.resource.data.startTime > request.time
-                    && request.resource.data.terrainId != null;
-
-      // Update: Owner can cancel, Admin can do anything
-      allow update: if (isOwner(resource.data.userId) && request.resource.data.status == 'cancelled')
-                    || isAdmin();
-
-      // Delete: Admin only
+    // Maintenances: admin write, agent write, membres read
+    match /maintenances/{maintenanceId} {
+      allow read: if isMember();
+      allow create, update: if isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'agent');
       allow delete: if isAdmin();
     }
 
-    // STOCK - Sensitive info (prices, inventory levels)
-    match /stock/{itemId} {
-      allow read: if isAdmin();
-      allow create, update, delete: if isAdmin();
+    // Stocks: admin write, membres read
+    match /stocks/{stockId} {
+      allow read: if isMember();
+      allow write: if isAdmin();
     }
 
-    // MAINTENANCES
-    match /maintenances/{maintenanceId} {
-      allow read: if isAuthenticated();
-      allow create, update, delete: if isAdmin();
+    // Events (calendrier): admin write, membres read
+    match /events/{eventId} {
+      allow read: if isMember();
+      allow write: if isAdmin();
     }
 
-    // AUDIT LOGS - Immutable, System/Admin only
-    match /auditLogs/{logId} {
-      allow read: if isAdmin();
-      allow write: if false; // Cloud Functions via Admin SDK only
+    // Users: admin read/write, membre lit uniquement son propre doc
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ClubInfo: admin write, membres read
+    match /clubInfo/{docId} {
+      allow read: if isMember();
+      allow write: if isAdmin();
+    }
+
+    // Par defaut: aucun acces
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
