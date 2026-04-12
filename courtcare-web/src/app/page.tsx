@@ -4,54 +4,29 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { AppLayout } from '@/components/AppLayout'
 import { useAuth } from '@/core/hooks/useAuth'
-import { useFirestoreCollection } from '@/core/hooks/useFirestoreCollection'
-import { firestoreTerrainRepository } from '@/data/repositories/terrain.repository'
-import { firestoreMaintenanceRepository } from '@/data/repositories/maintenance.repository'
-import { firestoreAppEventRepository } from '@/data/repositories/app-event.repository'
-import { firestoreStockItemRepository } from '@/data/repositories/stock-item.repository'
+import { useDashboard } from '@/features/home/hooks/useDashboard'
 import { getPlayableTerrainCount } from '@/core/selectors/terrain.selectors'
 import { getMaintenancesForToday, getOverdueMaintenances } from '@/core/selectors/maintenance.selectors'
 import { getLowStockItems } from '@/core/selectors/stock.selectors'
+import { getCurrentEvents, getTodayEvents } from '@/core/selectors/app-event.selectors'
 import { terrainStatusDisplayNames, terrainStatusColors } from '@/domain/enums/terrain-status'
 import { terrainTypeDisplayNames } from '@/domain/enums/terrain-type'
 
 export default function DashboardPage() {
   const { user } = useAuth()
 
-  const { data: terrains, isLoading: loadingTerrains } = useFirestoreCollection(
-    firestoreTerrainRepository.subscribe
-  )
-  const { data: maintenances } = useFirestoreCollection(
-    firestoreMaintenanceRepository.subscribe
-  )
-  const { data: events } = useFirestoreCollection(
-    firestoreAppEventRepository.subscribe
-  )
-  const { data: stockItems } = useFirestoreCollection(
-    firestoreStockItemRepository.subscribe
-  )
+  const { terrains, maintenances, events, stockItems, isLoading: loadingTerrains } = useDashboard()
 
   const playableCount = useMemo(() => getPlayableTerrainCount(terrains), [terrains])
 
   const [now] = useState<number>(() => Date.now())
+  // Note: 'now' is evaluated only on component mount. The dashboard currently displays the
+  // state relative to this initial load time.
 
   const todayMaintenances = useMemo(() => getMaintenancesForToday(maintenances, now), [maintenances, now])
   const overdueMaintenances = useMemo(() => getOverdueMaintenances(maintenances, now), [maintenances, now])
-  const currentEvents = useMemo(() => {
-    const dNow = new Date(now)
-    return events.filter(e => new Date(e.startTime) <= dNow && new Date(e.endTime) >= dNow)
-  }, [events, now])
-  const todayEvents = useMemo(() => {
-    const today = new Date(now)
-    return events
-      .filter(e => {
-        const d = new Date(e.startTime)
-        return d.getFullYear() === today.getFullYear() &&
-               d.getMonth() === today.getMonth() &&
-               d.getDate() === today.getDate()
-      })
-      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-  }, [events, now])
+  const currentEvents = useMemo(() => getCurrentEvents(events, now), [events, now])
+  const todayEvents = useMemo(() => getTodayEvents(events, now), [events, now])
   const lowStock = useMemo(() => getLowStockItems(stockItems), [stockItems])
 
   const todayLabel = useMemo(() => format(new Date(now), "EEEE d MMMM yyyy", { locale: fr }), [now])
