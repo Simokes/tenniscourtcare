@@ -5,6 +5,7 @@ import { useFirestoreCollection } from '@/core/hooks/useFirestoreCollection'
 import { firestoreUserRepository } from '@/data/repositories/user.repository'
 import { User } from '@/domain/entities/user'
 import { UserStatus } from '@/domain/enums/user-status'
+import logger from '@/core/utils/logger'
 
 export function useAdmin(): {
   users: User[]
@@ -14,6 +15,7 @@ export function useAdmin(): {
   isLoading: boolean
   error: Error | null
 } {
+  logger.firestore('useAdmin', 'subscribe users')
   const { data: users, isLoading, error } = useFirestoreCollection(
     firestoreUserRepository.subscribe
   )

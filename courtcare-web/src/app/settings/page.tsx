@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'
+import { FirebaseError } from 'firebase/app'
 import { useMutation } from '@tanstack/react-query'
 import { auth, db } from '@/core/firebase/client'
 import { doc } from 'firebase/firestore'
@@ -67,13 +68,14 @@ export default function SettingsPage() {
         await reauthenticateWithCredential(currentUser, credential)
 
         await updatePassword(currentUser, newPassword)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        if (err.code === 'auth/requires-recent-login') {
-          throw new Error('Veuillez vous reconnecter pour changer de mot de passe.')
-        }
-        if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
-           throw new Error('Ancien mot de passe incorrect.')
+      } catch (err: unknown) {
+        if (err instanceof FirebaseError) {
+          if (err.code === 'auth/requires-recent-login') {
+            throw new Error('Veuillez vous reconnecter pour changer de mot de passe.')
+          }
+          if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password') {
+             throw new Error('Ancien mot de passe incorrect.')
+          }
         }
         throw err
       }
@@ -84,8 +86,7 @@ export default function SettingsPage() {
       setNewPassword('')
       setConfirmPassword('')
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (err: any) => {
+    onError: (err: Error | FirebaseError) => {
       setPasswordError(err.message || 'Erreur lors du changement de mot de passe.')
     }
   })

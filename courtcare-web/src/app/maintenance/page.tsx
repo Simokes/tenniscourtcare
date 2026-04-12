@@ -41,7 +41,6 @@ export default function MaintenancePage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<MaintenanceFormData>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(maintenanceSchema) as any,
     defaultValues: {
       startHour: 8,

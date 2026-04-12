@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useMutation } from '@tanstack/react-query'
-import { doc, updateDoc } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { db } from '@/core/firebase/client'
 import { AppLayout } from '@/components/AppLayout'
 import { useAdmin } from '@/features/admin/hooks/useAdmin'
 import { firestoreUserRepository } from '@/data/repositories/user.repository'
+import { firestoreClubInfoRepository } from '@/data/repositories/club-info.repository'
 import { Role, roleLabels } from '@/domain/enums/role'
 import { UserStatus } from '@/domain/enums/user-status'
 import { usePermission } from '@/core/hooks/usePermission'
@@ -14,6 +15,7 @@ import { Permission } from '@/domain/enums/permission'
 import { useAuthStore } from '@/core/stores/auth.store'
 import { useFirestoreDocument } from '@/core/hooks/useFirestoreDocument'
 import { ClubInfo } from '@/domain/entities/club-info'
+import { UpdateUserPayload } from '@/domain/entities/user'
 import logger from '@/core/utils/logger'
 import { z } from 'zod'
 import { useForm as useRHForm } from 'react-hook-form'
@@ -45,8 +47,7 @@ export default function AdminPage() {
   const { active, pending, rejected } = useAdmin()
 
   const updateUserMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ id, partial }: { id: string, partial: any }) => {
+    mutationFn: async ({ id, partial }: { id: string, partial: UpdateUserPayload }) => {
       await firestoreUserRepository.update(id, partial)
     },
     onSuccess: () => logger.info('Admin', 'Utilisateur mis à jour')
@@ -115,8 +116,11 @@ export default function AdminPage() {
 
   const updateClubInfoMutation = useMutation({
     mutationFn: async (data: ClubInfoFormValues) => {
-      const docRef = doc(db, 'clubInfo', 'main')
-      await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString(), updatedBy: user?.firebaseId })
+      await firestoreClubInfoRepository.update({
+        ...data,
+        updatedAt: new Date().toISOString(),
+        updatedBy: user?.firebaseId || null
+      })
     },
     onSuccess: () => logger.info('Admin', 'Club Info mis à jour')
   })
@@ -185,7 +189,7 @@ export default function AdminPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => u.firebaseId && updateUserMutation.mutate({ id: u.firebaseId, partial: { status: UserStatus.ACTIVE, approvedAt: new Date().toISOString(), approvedBy: user?.firebaseId } })}
+                          onClick={() => u.firebaseId && updateUserMutation.mutate({ id: u.firebaseId, partial: { status: UserStatus.ACTIVE, approvedAt: new Date(), approvedBy: user?.firebaseId } })}
                           className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                         >
                           Approuver
@@ -220,7 +224,7 @@ export default function AdminPage() {
 
                       <select
                         value={u.role}
-                        onChange={(e) => u.firebaseId && updateUserMutation.mutate({ id: u.firebaseId, partial: { role: e.target.value } })}
+                        onChange={(e) => u.firebaseId && updateUserMutation.mutate({ id: u.firebaseId, partial: { role: e.target.value as Role } })}
                         className="border rounded p-1"
                         disabled={u.firebaseId === user?.firebaseId} // Ne peut pas changer son propre rôle
                       >
