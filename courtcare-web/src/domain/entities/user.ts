@@ -18,3 +18,5 @@ export interface User {
   createdBy: string | null;
   modifiedBy: string | null;
 }
+
+export type UpdateUserPayload = Partial<Omit<User, 'firebaseId'>>;
