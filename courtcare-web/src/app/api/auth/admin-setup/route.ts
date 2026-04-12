@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { adminAuth, adminDb } from '@/core/firebase/admin'
-import { FieldValue } from 'firebase-admin/firestore'
+import { adminAuth, adminDb, FieldValue } from '@/core/firebase/admin'
 
 export async function POST(req: NextRequest) {
   const { name, email, password } = await req.json()
