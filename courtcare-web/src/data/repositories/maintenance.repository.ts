@@ -16,7 +16,7 @@ export interface MaintenanceRepository {
 export const firestoreMaintenanceRepository: MaintenanceRepository = {
   subscribe(callback) {
     logger.firestore('MaintenanceRepository', 'subscribe to maintenances');
-    return onSnapshot(collection(db, 'maintenances'), (snapshot) => {
+    return onSnapshot(collection(db, 'maintenance'), (snapshot) => {
       logger.firestore('MaintenanceRepository', `snapshot recu (${snapshot.size} items)`);
       const items = snapshot.docs.map(doc => firestoreToMaintenance(doc.id, doc.data()));
       callback(items);
@@ -28,7 +28,7 @@ export const firestoreMaintenanceRepository: MaintenanceRepository = {
   subscribeByTerrain(terrainId, callback) {
     logger.firestore('MaintenanceRepository', `subscribe to maintenances by terrain (${terrainId})`);
     const q = query(
-      collection(db, 'maintenances'),
+      collection(db, 'maintenance'),
       where('terrainId', '==', terrainId),
       orderBy('date', 'desc')
     );
@@ -43,7 +43,7 @@ export const firestoreMaintenanceRepository: MaintenanceRepository = {
 
   async getAll() {
     logger.firestore('MaintenanceRepository', 'getAll maintenances');
-    const snapshot = await getDocs(collection(db, 'maintenances'));
+    const snapshot = await getDocs(collection(db, 'maintenance'));
     return snapshot.docs.map(doc => firestoreToMaintenance(doc.id, doc.data()));
   },
 
@@ -57,7 +57,7 @@ export const firestoreMaintenanceRepository: MaintenanceRepository = {
       updatedAt: now,
     };
 
-    const docRef = await addDoc(collection(db, 'maintenances'), maintenanceToFirestore(maintenanceData));
+    const docRef = await addDoc(collection(db, 'maintenance'), maintenanceToFirestore(maintenanceData));
     await updateDoc(docRef, { firebaseId: docRef.id });
 
     return docRef.id;
@@ -65,7 +65,7 @@ export const firestoreMaintenanceRepository: MaintenanceRepository = {
 
   async update(firebaseId, partial) {
     logger.firestore('MaintenanceRepository', `update maintenance (${firebaseId})`);
-    const docRef = doc(db, 'maintenances', firebaseId);
+    const docRef = doc(db, 'maintenance', firebaseId);
 
     const updateData: Record<string, unknown> = {
       ...partial,
@@ -77,6 +77,6 @@ export const firestoreMaintenanceRepository: MaintenanceRepository = {
 
   async remove(firebaseId) {
     logger.firestore('MaintenanceRepository', `remove maintenance (${firebaseId})`);
-    await deleteDoc(doc(db, 'maintenances', firebaseId));
+    await deleteDoc(doc(db, 'maintenance', firebaseId));
   }
 };

@@ -25,7 +25,7 @@ service cloud.firestore {
     }
 
     // Maintenances: admin write, agent write, membres read
-    match /maintenances/{maintenanceId} {
+    match /maintenance/{maintenanceId} {
       allow read: if isMember();
       allow create, update: if isAuthenticated() && (getUserRole() == 'admin' || getUserRole() == 'agent');
       allow delete: if isAdmin();

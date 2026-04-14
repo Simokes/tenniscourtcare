@@ -1,0 +1,17 @@
+{
+  "feature": "courtcare-web migration",
+  "current_phase": "DONE",
+  "phases": [
+    "Ph12"
+  ],
+  "feature_branch": null,
+  "status": "MIGRATION_COMPLETE",
+  "session_id": "5715362727854008263",
+  "pr_branch": "ph12-polish-deploy-5715362727854008263",
+  "pr_number": 132,
+  "audit_file": null,
+  "review_attempts": 3,
+  "last_review_verdict": "PASS",
+  "last_review_score": 100,
+  "note": "Ph12 MERGED 2026-04-12. Migration Flutter → Web COMPLETE. Ph0-Ph12 toutes mergees. Build OK post-merge (vitest installe localement)."
+}

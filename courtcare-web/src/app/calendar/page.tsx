@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { format } from 'date-fns'
-import { fr } from 'date-fns/locale'
+import frLocale from '@fullcalendar/core/locales/fr'
 import { AppLayout } from '@/components/AppLayout'
 import { useCalendar } from '@/features/calendar/hooks/useCalendar'
 import { firestoreAppEventRepository } from '@/data/repositories/app-event.repository'
@@ -212,7 +212,7 @@ export default function CalendarPage() {
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
-            locale={fr}
+            locale={frLocale}
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',

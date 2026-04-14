@@ -7,7 +7,7 @@ import { getJwks } from "@/core/firebase/jwks-cache";
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
-const PUBLIC_PATHS = ["/login", "/admin-setup"];
+const PUBLIC_PATHS = ["/login", "/signup", "/admin-setup", "/access-denied"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname.startsWith(p));

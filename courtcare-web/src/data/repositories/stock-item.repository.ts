@@ -15,7 +15,7 @@ export interface StockItemRepository {
 export const firestoreStockItemRepository: StockItemRepository = {
   subscribe(callback) {
     logger.firestore('StockItemRepository', 'subscribe to stock items');
-    return onSnapshot(collection(db, 'stock'), (snapshot) => {
+    return onSnapshot(collection(db, 'stocks'), (snapshot) => {
       logger.firestore('StockItemRepository', `snapshot recu (${snapshot.size} items)`);
       const items = snapshot.docs.map(doc => firestoreToStockItem(doc.id, doc.data()));
       callback(items);
@@ -26,7 +26,7 @@ export const firestoreStockItemRepository: StockItemRepository = {
 
   async getAll() {
     logger.firestore('StockItemRepository', 'getAll stock items');
-    const snapshot = await getDocs(collection(db, 'stock'));
+    const snapshot = await getDocs(collection(db, 'stocks'));
     return snapshot.docs.map(doc => firestoreToStockItem(doc.id, doc.data()));
   },
 
@@ -40,7 +40,7 @@ export const firestoreStockItemRepository: StockItemRepository = {
       updatedAt: now,
     };
 
-    const docRef = await addDoc(collection(db, 'stock'), stockItemToFirestore(itemData));
+    const docRef = await addDoc(collection(db, 'stocks'), stockItemToFirestore(itemData));
     await updateDoc(docRef, { firebaseId: docRef.id });
 
     return docRef.id;

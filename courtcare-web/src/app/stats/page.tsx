@@ -139,7 +139,7 @@ export default function StatsPage() {
               </button>
               {terrains.map((t) => (
                 <button
-                  key={t.id}
+                  key={t.firebaseId ?? String(t.id)}
                   onClick={() => toggleTerrainId(t.id)}
                   className={`px-3 py-1.5 text-sm rounded-full border font-medium ${
                     selectedTerrainIds.includes(t.id)
@@ -201,7 +201,7 @@ export default function StatsPage() {
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Consommation dans le temps</h2>
                 {sacksSeries.length > 0 ? (
                   <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <LineChart data={sacksSeries} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
                         <XAxis dataKey="dateLabel" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
@@ -229,7 +229,7 @@ export default function StatsPage() {
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-6">Types de maintenance</h2>
                 {typeDistribution.length > 0 ? (
                   <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <BarChart data={typeDistribution} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" horizontal={true} vertical={false} />
                         <XAxis type="number" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
